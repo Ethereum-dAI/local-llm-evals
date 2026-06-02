@@ -1,0 +1,8 @@
+# Local design docs / specs (not tracked)
+/docs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.python-version
