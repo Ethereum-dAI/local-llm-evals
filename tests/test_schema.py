@@ -1,5 +1,5 @@
 import json
-from wallet_evals.schema import Case, ExpectedCall, ParsedToolCall, ParsedTurn
+from wallet_evals.schema import Case, Dataset, ExpectedCall, ParsedToolCall, ParsedTurn, PreviewContext, Previewable
 
 
 def test_case_parses_payload_with_nested_args():
@@ -64,3 +64,75 @@ def test_parsed_turn_round_trips():
         tool_calls=[ParsedToolCall(name="readTx", chainId="1", to="0xabc", value=None, function="balanceOf(address)", args=["0xdef"])],
     )
     assert turn.tool_calls[0].name == "readTx"
+
+
+def test_format_preview_renders_case_and_calls():
+    case = Case.model_validate(
+        {
+            "id": "swap-001",
+            "user_message": "swap 10 USDC for DAI",
+            "level": "payload",
+            "language": "english",
+            "category": "truePositiveSwap",
+            "protocol": "uniswap",
+            "difficulty": "medium",
+            "expected_calls": [
+                {
+                    "tool": "executeTx",
+                    "chainId": "1",
+                    "to": "0xToken",
+                    "value": "0",
+                    "function": "approve(address,uint256)",
+                    "args": ["0xRouter", "10000000"],
+                }
+            ],
+        }
+    )
+    text = case.format_preview()
+    assert "[swap-001]  level=payload  protocol=uniswap" in text
+    assert "user: swap 10 USDC for DAI" in text
+    assert "expected call #1: executeTx -> 0xToken" in text
+    assert "args=['0xRouter', '10000000']" in text
+
+
+def test_format_preview_renders_no_call():
+    case = Case.model_validate(
+        {
+            "id": "info-001",
+            "user_message": "What is ETH?",
+            "level": "intent",
+            "language": "english",
+            "category": "informational",
+            "protocol": "general",
+            "difficulty": "easy",
+            "expected_calls": [],
+        }
+    )
+    assert "expected: (no tool call)" in case.format_preview()
+
+
+def test_dataset_format_preview_includes_source_and_cases():
+    dataset = Dataset.model_validate({"cases": [{"id": "a", "user_message": "hi", "level": "intent", "language": "english", "category": "x", "protocol": "y", "difficulty": "easy"}]})
+    text = dataset.format_preview(PreviewContext(source="datasets/tiny.json"))
+    assert "DATASET: datasets/tiny.json  (1 cases)" in text
+    assert "[a]" in text
+
+
+def test_previewable_implementations():
+    call = ExpectedCall.model_validate({"tool": "executeTx", "chainId": "1", "to": "0xabc", "args": []})
+    case = Case.model_validate(
+        {
+            "id": "x",
+            "user_message": "hi",
+            "level": "intent",
+            "language": "english",
+            "category": "x",
+            "protocol": "y",
+            "difficulty": "easy",
+            "expected_calls": [{"tool": "executeTx", "chainId": "1", "to": "0xabc", "args": []}],
+        }
+    )
+    dataset = Dataset.model_validate({"cases": [case.model_dump()]})
+    for previewable in (call, case, dataset):
+        assert isinstance(previewable, Previewable)
+        assert previewable.format_preview()

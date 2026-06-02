@@ -7,6 +7,8 @@ transfer to production. The tool surface is the generic executeTx/readTx primiti
 """
 from __future__ import annotations
 
+import json
+
 _SYSTEM_NUDGE = (
     "When the user clearly expresses intent to perform an on-chain action (transfer, swap, "
     "etc.), you MUST call the corresponding tool with structured arguments instead of "
@@ -56,3 +58,19 @@ TOOLS = [
 
 def tool_names() -> list[str]:
     return [t["function"]["name"] for t in TOOLS]
+
+
+def format_preview_header() -> str:
+    sep = "=" * 72
+    lines = [
+        sep,
+        "SYSTEM PROMPT (sent with every case)",
+        sep,
+        SYSTEM_PROMPT,
+        "",
+        f"TOOLS offered to the model: {tool_names()}",
+        "(full JSON schemas:)",
+        json.dumps(TOOLS, indent=2),
+        "",
+    ]
+    return "\n".join(lines)
