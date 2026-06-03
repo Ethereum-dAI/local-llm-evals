@@ -1,0 +1,389 @@
+{
+  "schema": "evals-local-llm/cases/v1",
+  "cases": [
+    {
+      "id": "transfer-en-001",
+      "user_message": "Send 0.1 ETH to vitalik.eth",
+      "language": "english",
+      "category": "truePositiveTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+          "value": "100000000000000000",
+          "function": null,
+          "args": []
+        }
+      ]
+    },
+    {
+      "id": "transfer-en-002",
+      "user_message": "Please transfer 25 USDC to bob.eth",
+      "language": "english",
+      "category": "truePositiveTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "value": "0",
+          "function": "transfer(address,uint256)",
+          "args": [
+            "0x0000000000000000000000000000000000000B0B",
+            "25000000"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transfer-en-004",
+      "user_message": "Move 1.25 ETH to 0x1111111111111111111111111111111111111111",
+      "language": "english",
+      "category": "truePositiveTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0x1111111111111111111111111111111111111111",
+          "value": "1250000000000000000",
+          "function": null,
+          "args": []
+        }
+      ]
+    },
+    {
+      "id": "transfer-en-005",
+      "user_message": "Could you send 0.02 ETH over to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?",
+      "language": "english",
+      "category": "truePositiveTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+          "value": "20000000000000000",
+          "function": null,
+          "args": []
+        }
+      ]
+    },
+    {
+      "id": "transfer-en-007",
+      "user_message": "Transfer 100 WETH to bob.eth",
+      "language": "english",
+      "category": "truePositiveTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+          "value": "0",
+          "function": "transfer(address,uint256)",
+          "args": [
+            "0x0000000000000000000000000000000000000B0B",
+            "100000000000000000000"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transfer-en-008",
+      "user_message": "I want to send 3 USDC to 0x2222222222222222222222222222222222222222 now",
+      "language": "english",
+      "category": "truePositiveTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "value": "0",
+          "function": "transfer(address,uint256)",
+          "args": [
+            "0x2222222222222222222222222222222222222222",
+            "3000000"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "false-positive-001",
+      "user_message": "What is an Ethereum transfer?",
+      "language": "english",
+      "category": "falsePositiveExpected",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "false-positive-002",
+      "user_message": "Explain the difference between ETH and WETH",
+      "language": "english",
+      "category": "falsePositiveExpected",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "false-positive-003",
+      "user_message": "How much gas does a token swap usually cost?",
+      "language": "english",
+      "category": "falsePositiveExpected",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "false-positive-004",
+      "user_message": "Can you tell me what vitalik.eth means?",
+      "language": "english",
+      "category": "falsePositiveExpected",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "false-positive-005",
+      "user_message": "Show me an example of a swap command without running it",
+      "language": "english",
+      "category": "falsePositiveExpected",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "false-positive-006",
+      "user_message": "What address format does Ethereum use?",
+      "language": "english",
+      "category": "falsePositiveExpected",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "ambiguous-001",
+      "user_message": "Send ETH to bob.eth",
+      "language": "english",
+      "category": "ambiguous",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "ambiguous-002",
+      "user_message": "Swap USDC for ETH",
+      "language": "english",
+      "category": "ambiguous",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "ambiguous-003",
+      "user_message": "Send 0.3 ETH",
+      "language": "english",
+      "category": "ambiguous",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "intent",
+      "query_type": null,
+      "requires": [],
+      "expected_calls": []
+    },
+    {
+      "id": "transfer-it-001",
+      "user_message": "Invia 0.1 ETH a vitalik.eth",
+      "language": "italian",
+      "category": "multilingualTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+          "value": "100000000000000000",
+          "function": null,
+          "args": []
+        }
+      ]
+    },
+    {
+      "id": "transfer-it-002",
+      "user_message": "Manda 12 USDC a bob.eth",
+      "language": "italian",
+      "category": "multilingualTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "value": "0",
+          "function": "transfer(address,uint256)",
+          "args": [
+            "0x0000000000000000000000000000000000000B0B",
+            "12000000"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transfer-fr-001",
+      "user_message": "Envoie 0.05 ETH a 0x3333333333333333333333333333333333333333",
+      "language": "french",
+      "category": "multilingualTransfer",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0x3333333333333333333333333333333333333333",
+          "value": "50000000000000000",
+          "function": null,
+          "args": []
+        }
+      ]
+    },
+    {
+      "id": "slash-001",
+      "user_message": "/transfer 0.1 ETH to vitalik.eth",
+      "language": "english",
+      "category": "slashCommand",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+          "value": "100000000000000000",
+          "function": null,
+          "args": []
+        }
+      ]
+    },
+    {
+      "id": "slash-002",
+      "user_message": "/transfer to=bob.eth amount=3 token=USDC",
+      "language": "english",
+      "category": "slashCommand",
+      "protocol": "transfer",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "executeTx",
+          "chainId": "1",
+          "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "value": "0",
+          "function": "transfer(address,uint256)",
+          "args": [
+            "0x0000000000000000000000000000000000000B0B",
+            "3000000"
+          ]
+        }
+      ]
+    }
+  ]
+}
