@@ -7,8 +7,8 @@ def test_system_prompt_matches_production_prefix():
     assert "Never invent recipient addresses" in SYSTEM_PROMPT
 
 
-def test_tools_are_execute_and_read():
-    assert tool_names() == ["executeTx", "readTx"]
+def test_tools_are_execute_read_and_swap():
+    assert tool_names() == ["executeTx", "readTx", "swap"]
 
 
 def test_executeTx_schema_shape():

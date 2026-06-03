@@ -45,7 +45,20 @@ def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
         return False
     if expected.function != actual.function:
         return False
-    return _norm(expected.args) == _norm(actual.args)
+    if _norm(expected.args) != _norm(actual.args):
+        return False
+    # Swap intent fields (None on both sides for executeTx/readTx).
+    if _norm_scalar(expected.currencyIn) != _norm_scalar(actual.currencyIn):
+        return False
+    if _norm_scalar(expected.currencyOut) != _norm_scalar(actual.currencyOut):
+        return False
+    if _norm_scalar(expected.recipient) != _norm_scalar(actual.recipient):
+        return False
+    if expected.amountIn != actual.amountIn:
+        return False
+    if expected.amountOutMinimum != actual.amountOutMinimum:
+        return False
+    return True
 
 
 def score_case(case: Case, turn: ParsedTurn) -> int:

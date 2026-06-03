@@ -53,6 +53,25 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "swap",
+            "description": "Express a token swap as a high-level intent (routing-free). The wallet resolves pool/router and encoding.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "chainId": {"type": "string", "description": "EIP-155 chain id as a decimal string."},
+                    "currencyIn": {"type": "string", "description": "Address of the token being spent. Native ETH is the zero address 0x0000000000000000000000000000000000000000."},
+                    "currencyOut": {"type": "string", "description": "Address of the token being received. Native ETH is the zero address."},
+                    "amountIn": {"type": "string", "description": "Exact input amount in base units (decimal string)."},
+                    "amountOutMinimum": {"type": "string", "description": "Minimum acceptable output in base units; \"0\" if unspecified."},
+                    "recipient": {"type": "string", "description": "Recipient address; defaults to the user's own wallet."},
+                },
+                "required": ["chainId", "currencyIn", "currencyOut", "amountIn"],
+            },
+        },
+    },
 ]
 
 
