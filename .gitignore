@@ -1,6 +1,14 @@
 # Local design docs / specs (not tracked)
 /docs/
 
+# Secrets / local env
+.env
+.env.*
+
+# Eval run artifacts
+out.json
+*.out.json
+
 # Python
 __pycache__/
 *.py[cod]
