@@ -149,6 +149,106 @@
       ]
     },
     {
+      "id": "swap-en-001",
+      "user_message": "Swap 100 USDC for ETH",
+      "language": "english",
+      "category": "truePositiveSwap",
+      "protocol": "uniswap",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "swap",
+          "chainId": "1",
+          "currencyIn": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "currencyOut": "0x0000000000000000000000000000000000000000",
+          "amountIn": "100000000",
+          "amountOutMinimum": "0",
+          "recipient": "<wallet>"
+        }
+      ]
+    },
+    {
+      "id": "swap-en-002",
+      "user_message": "Convert 0.5 ETH to USDC",
+      "language": "english",
+      "category": "truePositiveSwap",
+      "protocol": "uniswap",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "swap",
+          "chainId": "1",
+          "currencyIn": "0x0000000000000000000000000000000000000000",
+          "currencyOut": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "amountIn": "500000000000000000",
+          "amountOutMinimum": "0",
+          "recipient": "<wallet>"
+        }
+      ]
+    },
+    {
+      "id": "swap-en-003",
+      "user_message": "Trade 250 DAI into WETH",
+      "language": "english",
+      "category": "truePositiveSwap",
+      "protocol": "uniswap",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "swap",
+          "chainId": "1",
+          "currencyIn": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "currencyOut": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+          "amountIn": "250000000000000000000",
+          "amountOutMinimum": "0",
+          "recipient": "<wallet>"
+        }
+      ]
+    },
+    {
+      "id": "swap-en-005",
+      "user_message": "Exchange 40 USDC into DAI",
+      "language": "english",
+      "category": "truePositiveSwap",
+      "protocol": "uniswap",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "swap",
+          "chainId": "1",
+          "currencyIn": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "currencyOut": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "amountIn": "40000000",
+          "amountOutMinimum": "0",
+          "recipient": "<wallet>"
+        }
+      ]
+    },
+    {
       "id": "false-positive-001",
       "user_message": "What is an Ethereum transfer?",
       "language": "english",
@@ -382,6 +482,31 @@
             "0x0000000000000000000000000000000000000B0B",
             "3000000"
           ]
+        }
+      ]
+    },
+    {
+      "id": "slash-003",
+      "user_message": "/swap 50 USDC to ETH",
+      "language": "english",
+      "category": "slashCommand",
+      "protocol": "uniswap",
+      "difficulty": "easy",
+      "notes": null,
+      "level": "payload",
+      "query_type": "one_shot",
+      "requires": [
+        "token_address_lookup"
+      ],
+      "expected_calls": [
+        {
+          "tool": "swap",
+          "chainId": "1",
+          "currencyIn": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "currencyOut": "0x0000000000000000000000000000000000000000",
+          "amountIn": "50000000",
+          "amountOutMinimum": "0",
+          "recipient": "<wallet>"
         }
       ]
     }

@@ -33,16 +33,56 @@ def _resolve_recipient(value: str) -> str | None:
     return None
 
 
-def _base_meta(raw: dict) -> dict:
+def _base_meta(raw: dict, protocol: str = "transfer") -> dict:
     return {
         "id": raw["id"],
         "user_message": raw["user_message"],
         "language": raw["language"],
         "category": raw["category"],
-        "protocol": "transfer",
+        "protocol": protocol,
         "difficulty": _DIFFICULTY,
         "notes": raw.get("notes"),
     }
+
+
+def _swap_currency(symbol: str) -> tuple[str, int] | None:
+    """Return (address, decimals) for a swap currency, or None if unknown.
+    Native ETH maps to the zero address (Uniswap v4 convention)."""
+    token = LOOKUP["tokens"].get(symbol)
+    if token is None:
+        return None
+    if token.get("native"):
+        return "0x0000000000000000000000000000000000000000", token["decimals"]
+    return token["address"], token["decimals"]
+
+
+def _convert_swap(raw: dict) -> tuple[dict | None, str | None]:
+    args = raw["expected_args"]
+    side = args.get("amount_side", {}).get("value", "input")
+    if side != "input":
+        return None, raw["id"]  # exact-output not supported in v1 -> manual
+    amount = args.get("amount", {}).get("value")
+    if amount is None or amount == "all":
+        return None, raw["id"]
+    in_sym = args.get("from_token", {}).get("value")
+    out_sym = args.get("to_token", {}).get("value")
+    cin = _swap_currency(in_sym) if in_sym else None
+    cout = _swap_currency(out_sym) if out_sym else None
+    if cin is None or cout is None:
+        return None, raw["id"]
+    in_addr, in_dec = cin
+    out_addr, _ = cout
+    call = {
+        "tool": "swap", "chainId": LOOKUP["chainId"],
+        "currencyIn": in_addr, "currencyOut": out_addr,
+        "amountIn": to_base_units(amount, in_dec),
+        "amountOutMinimum": "0", "recipient": "<wallet>",
+    }
+    case = _base_meta(raw, protocol="uniswap") | {
+        "level": "payload", "query_type": "one_shot",
+        "requires": ["token_address_lookup"], "expected_calls": [call],
+    }
+    return case, None
 
 
 def convert_case(raw: dict) -> tuple[dict | None, str | None]:
@@ -50,6 +90,9 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
     if raw.get("expected_tool") is None:
         case = _base_meta(raw) | {"level": "intent", "query_type": None, "requires": [], "expected_calls": []}
         return case, None
+
+    if raw["expected_tool"] == "swap":
+        return _convert_swap(raw)
 
     if raw["expected_tool"] != "transfer":
         return None, raw["id"]  # swaps -> manual

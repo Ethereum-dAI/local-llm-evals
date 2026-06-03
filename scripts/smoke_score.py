@@ -59,6 +59,11 @@ CANNED_RESPONSES: dict[str, tuple[list[dict] | None, str]] = {
         None,
         "An Ethereum transaction is a signed message that changes chain state.",
     ),
+    "tiny-swap-001": (
+        [_native("swap", chainId="1", currencyIn=USDC, currencyOut=DAI,
+                 amountIn="100000000", amountOutMinimum="0", recipient="<wallet>")],
+        "",
+    ),
 }
 
 

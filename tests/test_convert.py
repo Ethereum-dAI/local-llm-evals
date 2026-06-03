@@ -51,13 +51,57 @@ def test_convert_erc20_transfer():
     assert call["args"] == [LOOKUP["ens"]["vitalik.eth"], "100000000"]
 
 
-def test_swap_routed_to_manual():
+def test_incomplete_swap_routed_to_manual():
     raw = {"id": "swap-en-001", "user_message": "Swap 100 USDC for ETH", "category": "truePositiveSwap",
            "language": "english", "expected_tool": "swap",
            "expected_args": {"from_token": {"kind": "exact", "value": "USDC"}}, "notes": None}
     case, manual = convert_case(raw)
     assert case is None
     assert manual == "swap-en-001"
+
+
+def test_convert_swap_exact_in():
+    raw = {"id": "swap-en-001", "user_message": "Swap 100 USDC for DAI", "category": "truePositiveSwap",
+           "language": "english", "expected_tool": "swap",
+           "expected_args": {"from_token": {"kind": "exact", "value": "USDC"},
+                             "to_token": {"kind": "exact", "value": "DAI"},
+                             "amount": {"kind": "exact", "value": "100"},
+                             "amount_side": {"kind": "exact", "value": "input"}}, "notes": None}
+    case, manual = convert_case(raw)
+    assert manual is None
+    assert case["protocol"] == "uniswap"
+    call = case["expected_calls"][0]
+    assert call["tool"] == "swap"
+    assert call["currencyIn"] == LOOKUP["tokens"]["USDC"]["address"]
+    assert call["currencyOut"] == LOOKUP["tokens"]["DAI"]["address"]
+    assert call["amountIn"] == "100000000"
+    assert call["amountOutMinimum"] == "0"
+    assert call["recipient"] == "<wallet>"
+
+
+def test_convert_swap_native_eth_uses_zero_address():
+    raw = {"id": "swap-en-002", "user_message": "Swap 1 ETH for USDC", "category": "truePositiveSwap",
+           "language": "english", "expected_tool": "swap",
+           "expected_args": {"from_token": {"kind": "exact", "value": "ETH"},
+                             "to_token": {"kind": "exact", "value": "USDC"},
+                             "amount": {"kind": "exact", "value": "1"},
+                             "amount_side": {"kind": "exact", "value": "input"}}, "notes": None}
+    case, manual = convert_case(raw)
+    call = case["expected_calls"][0]
+    assert call["currencyIn"] == "0x0000000000000000000000000000000000000000"
+    assert call["amountIn"] == "1000000000000000000"
+
+
+def test_convert_swap_exact_output_to_manual():
+    raw = {"id": "swap-en-003", "user_message": "Buy 1 ETH with USDC", "category": "truePositiveSwap",
+           "language": "english", "expected_tool": "swap",
+           "expected_args": {"from_token": {"kind": "exact", "value": "USDC"},
+                             "to_token": {"kind": "exact", "value": "ETH"},
+                             "amount": {"kind": "exact", "value": "1"},
+                             "amount_side": {"kind": "exact", "value": "output"}}, "notes": None}
+    case, manual = convert_case(raw)
+    assert case is None
+    assert manual == "swap-en-003"
 
 
 def test_amount_all_routed_to_manual():

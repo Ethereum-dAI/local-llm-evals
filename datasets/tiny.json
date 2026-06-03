@@ -101,6 +101,21 @@
       "requires": [],
       "expected_calls": [],
       "notes": "Informational question, not an action: the model should make NO tool call."
+    },
+    {
+      "id": "tiny-swap-001",
+      "user_message": "Swap 100 USDC for DAI",
+      "level": "payload",
+      "language": "english",
+      "category": "truePositiveSwap",
+      "query_type": "one_shot",
+      "protocol": "uniswap",
+      "difficulty": "medium",
+      "requires": ["token_address_lookup"],
+      "expected_calls": [
+        {"tool": "swap", "chainId": "1", "currencyIn": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "currencyOut": "0x6B175474E89094C44Da98b954EedeAC495271d0F", "amountIn": "100000000", "amountOutMinimum": "0", "recipient": "<wallet>"}
+      ],
+      "notes": "Synthetic swap intent."
     }
   ]
 }
