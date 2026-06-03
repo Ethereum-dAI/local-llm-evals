@@ -1,0 +1,450 @@
+# Single source of truth for eval test cases (promptfoo-native).
+# Generated from the Swift recognition.json by scripts/convert_recognition.py.
+# Each test: vars.user_message (input) + metadata (gold expected_calls + slices).
+- vars:
+    user_message: Send 0.1 ETH to vitalik.eth
+  metadata:
+    id: transfer-en-001
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+- vars:
+    user_message: Please transfer 25 USDC to bob.eth
+  metadata:
+    id: transfer-en-002
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x0000000000000000000000000000000000000B0B'
+      - '25000000'
+- vars:
+    user_message: Move 1.25 ETH to 0x1111111111111111111111111111111111111111
+  metadata:
+    id: transfer-en-004
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x1111111111111111111111111111111111111111'
+      value: '1250000000000000000'
+      function: null
+      args: []
+- vars:
+    user_message: Could you send 0.02 ETH over to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?
+  metadata:
+    id: transfer-en-005
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '20000000000000000'
+      function: null
+      args: []
+- vars:
+    user_message: Transfer 100 WETH to bob.eth
+  metadata:
+    id: transfer-en-007
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x0000000000000000000000000000000000000B0B'
+      - '100000000000000000000'
+- vars:
+    user_message: I want to send 3 USDC to 0x2222222222222222222222222222222222222222
+      now
+  metadata:
+    id: transfer-en-008
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x2222222222222222222222222222222222222222'
+      - '3000000'
+- vars:
+    user_message: Swap 100 USDC for ETH
+  metadata:
+    id: swap-en-001
+    language: english
+    category: truePositiveSwap
+    protocol: uniswap
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+- vars:
+    user_message: Convert 0.5 ETH to USDC
+  metadata:
+    id: swap-en-002
+    language: english
+    category: truePositiveSwap
+    protocol: uniswap
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+- vars:
+    user_message: Trade 250 DAI into WETH
+  metadata:
+    id: swap-en-003
+    language: english
+    category: truePositiveSwap
+    protocol: uniswap
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '250000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+- vars:
+    user_message: Exchange 40 USDC into DAI
+  metadata:
+    id: swap-en-005
+    language: english
+    category: truePositiveSwap
+    protocol: uniswap
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+- vars:
+    user_message: What is an Ethereum transfer?
+  metadata:
+    id: false-positive-001
+    language: english
+    category: falsePositiveExpected
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: Explain the difference between ETH and WETH
+  metadata:
+    id: false-positive-002
+    language: english
+    category: falsePositiveExpected
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: How much gas does a token swap usually cost?
+  metadata:
+    id: false-positive-003
+    language: english
+    category: falsePositiveExpected
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: Can you tell me what vitalik.eth means?
+  metadata:
+    id: false-positive-004
+    language: english
+    category: falsePositiveExpected
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: Show me an example of a swap command without running it
+  metadata:
+    id: false-positive-005
+    language: english
+    category: falsePositiveExpected
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: What address format does Ethereum use?
+  metadata:
+    id: false-positive-006
+    language: english
+    category: falsePositiveExpected
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: Send ETH to bob.eth
+  metadata:
+    id: ambiguous-001
+    language: english
+    category: ambiguous
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: Swap USDC for ETH
+  metadata:
+    id: ambiguous-002
+    language: english
+    category: ambiguous
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: Send 0.3 ETH
+  metadata:
+    id: ambiguous-003
+    language: english
+    category: ambiguous
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: intent
+    query_type: null
+    requires: []
+    expected_calls: []
+- vars:
+    user_message: Invia 0.1 ETH a vitalik.eth
+  metadata:
+    id: transfer-it-001
+    language: italian
+    category: multilingualTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+- vars:
+    user_message: Manda 12 USDC a bob.eth
+  metadata:
+    id: transfer-it-002
+    language: italian
+    category: multilingualTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x0000000000000000000000000000000000000B0B'
+      - '12000000'
+- vars:
+    user_message: Envoie 0.05 ETH a 0x3333333333333333333333333333333333333333
+  metadata:
+    id: transfer-fr-001
+    language: french
+    category: multilingualTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x3333333333333333333333333333333333333333'
+      value: '50000000000000000'
+      function: null
+      args: []
+- vars:
+    user_message: /transfer 0.1 ETH to vitalik.eth
+  metadata:
+    id: slash-001
+    language: english
+    category: slashCommand
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+- vars:
+    user_message: /transfer to=bob.eth amount=3 token=USDC
+  metadata:
+    id: slash-002
+    language: english
+    category: slashCommand
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x0000000000000000000000000000000000000B0B'
+      - '3000000'
+- vars:
+    user_message: /swap 50 USDC to ETH
+  metadata:
+    id: slash-003
+    language: english
+    category: slashCommand
+    protocol: uniswap
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '50000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>

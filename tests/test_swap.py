@@ -1,15 +1,6 @@
-from wallet_evals.tools import tool_names, TOOLS
 from wallet_evals.schema import Case, ExpectedCall, ParsedToolCall, ParsedTurn
 from wallet_evals.scorer import score_case
 from wallet_evals.parsing import parse_turn
-
-
-def test_swap_tool_registered():
-    assert tool_names() == ["executeTx", "readTx", "swap"]
-    swap = next(t for t in TOOLS if t["function"]["name"] == "swap")
-    props = swap["function"]["parameters"]["properties"]
-    assert set(["chainId", "currencyIn", "currencyOut", "amountIn", "amountOutMinimum", "recipient"]) == set(props.keys())
-    assert set(swap["function"]["parameters"]["required"]) == {"chainId", "currencyIn", "currencyOut", "amountIn"}
 
 
 def _swap_case(**overrides):

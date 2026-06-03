@@ -1,8 +1,12 @@
-"""Convert the legacy recognition.json into the unified executeTx schema.
+"""Convert the legacy recognition.json into pf/tests.yaml.
 
-Mechanical cases only (transfers + no-call). Swaps, "all" amounts, and any
-unresolved ENS/token are routed to needs_manual for hand-authoring (later task).
-Resolution uses datasets/lookup.json and happens ONLY here, at authoring time.
+`pf/tests.yaml` is the single source of truth for test cases: a promptfoo-native
+list of tests, each `{vars: {user_message}, metadata: {gold + slices}}`. This
+script generates it from the Swift app's recognition.json so the dataset stays
+reproducible from the production source. Swaps become the synthetic `swap`
+intent; transfers/approvals become `executeTx`; ambiguous cases become no-call.
+Exact-output swaps, "all" amounts, and unresolved ENS/tokens are reported as
+needing manual authoring. Resolution uses datasets/lookup.json, here only.
 """
 from __future__ import annotations
 
@@ -10,6 +14,8 @@ import json
 import sys
 from decimal import Decimal
 from pathlib import Path
+
+import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 LOOKUP = json.loads((ROOT / "datasets" / "lookup.json").read_text())
@@ -129,11 +135,21 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
     return case, None
 
 
+def _to_promptfoo_test(case: dict) -> dict:
+    """Map a converted case dict to a promptfoo-native test.
+
+    The input is the prompt var; everything else (gold + slice fields) is
+    metadata the python assertion reads back via case_from_metadata.
+    """
+    metadata = {k: v for k, v in case.items() if k != "user_message"}
+    return {"vars": {"user_message": case["user_message"]}, "metadata": metadata}
+
+
 def main() -> None:
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else (
         ROOT.parent / "local-wallet-mac" / "wallet-macos" / "Sources" / "wallet-eval" / "Dataset" / "recognition.json"
     )
-    out = ROOT / "datasets" / "cases.json"
+    out = ROOT / "pf" / "tests.yaml"
     legacy = json.loads(src.read_text())
 
     converted: list[dict] = []
@@ -145,8 +161,13 @@ def main() -> None:
         else:
             converted.append(case)
 
-    payload = {"schema": "evals-local-llm/cases/v1", "cases": converted}
-    out.write_text(json.dumps(payload, indent=2) + "\n")
+    tests = [_to_promptfoo_test(c) for c in converted]
+    header = (
+        "# Single source of truth for eval test cases (promptfoo-native).\n"
+        "# Generated from the Swift recognition.json by scripts/convert_recognition.py.\n"
+        "# Each test: vars.user_message (input) + metadata (gold expected_calls + slices).\n"
+    )
+    out.write_text(header + yaml.safe_dump(tests, sort_keys=False, allow_unicode=True))
     print(f"Converted {len(converted)} cases -> {out}")
     print(f"Needs manual authoring ({len(needs_manual)}): {needs_manual}")
 
