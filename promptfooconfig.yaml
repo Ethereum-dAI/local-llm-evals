@@ -7,24 +7,15 @@ description: Local agent wallet — executeTx/readTx/swap intent eval
 prompts:
   - file://pf/prompt.json
 
-# Cheap OpenRouter models (small/local-proxy candidates first). Add/remove freely.
+# Two cheap OpenRouter models: gpt-4o-mini + Gemma 4 (closest hosted proxy to the
+# shipped on-device Gemma 4 E4B).
 providers:
   - id: openrouter:openai/gpt-4o-mini
     config:
       temperature: 0.2
       max_tokens: 512
       tools: file://pf/tools.json
-  - id: openrouter:google/gemini-flash-1.5
-    config:
-      temperature: 0.2
-      max_tokens: 512
-      tools: file://pf/tools.json
-  - id: openrouter:meta-llama/llama-3.1-8b-instruct
-    config:
-      temperature: 0.2
-      max_tokens: 512
-      tools: file://pf/tools.json
-  - id: openrouter:mistralai/mistral-7b-instruct
+  - id: openrouter:google/gemma-4-26b-a4b-it
     config:
       temperature: 0.2
       max_tokens: 512

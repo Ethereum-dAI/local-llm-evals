@@ -16,7 +16,7 @@ from typing import Any
 
 from wallet_evals.parsing import parse_turn
 from wallet_evals.promptfoo import case_from_metadata
-from wallet_evals.scorer import score_case
+from wallet_evals.scorer import explain_mismatch, score_case
 
 
 def _normalize_calls(obj: Any) -> list[dict]:
@@ -74,11 +74,10 @@ def get_assert(output: Any, context: dict) -> dict:
     case = case_from_metadata(metadata)
     turn = _model_turn(output, context)
     score = score_case(case, turn)
-    return {
-        "pass": bool(score),
-        "score": float(score),
-        "reason": (
-            f"{'match' if score else 'mismatch'}: model made {len(turn.tool_calls)} call(s), "
-            f"expected {len(case.expected_calls)}"
-        ),
-    }
+
+    reason = explain_mismatch(case, turn)
+    if not score and not turn.tool_calls and turn.content:
+        # No tool call (e.g. a clarifying question) — surface what the model said.
+        reason += f' | model said: "{turn.content.strip()[:200]}"'
+
+    return {"pass": bool(score), "score": float(score), "reason": reason}
