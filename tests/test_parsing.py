@@ -41,3 +41,21 @@ def test_malformed_args_json_falls_back_to_empty_list():
     native = [{"name": "executeTx", "arguments": '{"chainId":"1","to":"0xABC","args":"not-json"}'}]
     turn = parse_turn(content=None, native_tool_calls=native, raw_text="")
     assert turn.tool_calls[0].args == []
+
+
+def test_string_null_function_normalized_to_none():
+    native = [{"name": "executeTx", "arguments": '{"chainId":"1","to":"0xabc","value":"100","function":"null","args":[]}'}]
+    turn = parse_turn(content=None, native_tool_calls=native, raw_text="")
+    assert turn.tool_calls[0].function is None
+
+
+def test_empty_string_function_normalized_to_none():
+    native = [{"name": "executeTx", "arguments": '{"chainId":"1","to":"0xabc","value":"100","function":"","args":[]}'}]
+    turn = parse_turn(content=None, native_tool_calls=native, raw_text="")
+    assert turn.tool_calls[0].function is None
+
+
+def test_real_function_preserved():
+    native = [{"name": "executeTx", "arguments": '{"chainId":"1","to":"0xabc","function":"transfer(address,uint256)","args":["0xdef","1"]}'}]
+    turn = parse_turn(content=None, native_tool_calls=native, raw_text="")
+    assert turn.tool_calls[0].function == "transfer(address,uint256)"

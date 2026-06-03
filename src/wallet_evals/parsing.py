@@ -20,6 +20,16 @@ def _as_str(value: Any) -> str | None:
     return str(value)
 
 
+def _normalize_function(value: Any) -> str | None:
+    """A no-calldata call has function `null`. Some models emit the literal
+    string "null"/"none" or "" instead of JSON null — treat those as None so a
+    native transfer still matches the gold."""
+    s = _as_str(value)
+    if s is not None and s.strip().lower() in ("", "null", "none"):
+        return None
+    return s
+
+
 def _coerce_args(value: Any) -> list[Any]:
     """args may arrive as a real list (native) or a JSON-encoded string (DSL)."""
     if isinstance(value, list):
@@ -39,7 +49,7 @@ def _build_call(name: str, fields: dict[str, Any]) -> ParsedToolCall:
         chainId=_as_str(fields.get("chainId")),
         to=_as_str(fields.get("to")),
         value=_as_str(fields.get("value")),
-        function=_as_str(fields.get("function")),
+        function=_normalize_function(fields.get("function")),
         args=_coerce_args(fields.get("args")),
         currencyIn=_as_str(fields.get("currencyIn")),
         currencyOut=_as_str(fields.get("currencyOut")),
