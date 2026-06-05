@@ -34,6 +34,9 @@ class ExpectedCall(Previewable):
     tool: ToolName
     chainId: str
     to: str | None = None
+    # Alternate accepted forms of `to` (e.g. the unresolved ENS name when the
+    # wallet resolves it after the call). Matching either form scores correct.
+    to_aliases: list[str] = Field(default_factory=list)
     value: str = "0"
     function: str | None = None
     args: list[Any] = Field(default_factory=list)

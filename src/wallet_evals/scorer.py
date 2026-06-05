@@ -34,12 +34,19 @@ def _value_or_zero(v: str | None) -> str:
     return "0" if v is None else v
 
 
+def _to_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
+    """`to` matches the canonical value or any alias (e.g. an unresolved ENS
+    name the wallet would resolve after the call)."""
+    actual_to = _norm_scalar(actual.to)
+    return any(_norm_scalar(c) == actual_to for c in [expected.to, *expected.to_aliases])
+
+
 def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
     if expected.tool != actual.name:
         return False
     if expected.chainId != actual.chainId:
         return False
-    if _norm_scalar(expected.to) != _norm_scalar(actual.to):
+    if not _to_matches(expected, actual):
         return False
     if _value_or_zero(expected.value) != _value_or_zero(actual.value):
         return False
@@ -74,11 +81,12 @@ def score_case(case: Case, turn: ParsedTurn) -> int:
 
 
 # Field-level comparison (label, expected-value, actual-value), in the same order
-# _call_matches checks them. `to`/currencies/recipient compare under address norm.
+# _call_matches checks them. `to` is handled specially (alias-aware); all
+# other address/currency fields compare under address norm.
 _CALL_FIELDS = (
     ("tool", lambda e: e.tool, lambda a: a.name, lambda x: x),
     ("chainId", lambda e: e.chainId, lambda a: a.chainId, lambda x: x),
-    ("to", lambda e: e.to, lambda a: a.to, _norm_scalar),
+    # NOTE: `to` is intentionally absent here — emitted alias-aware in _call_field_diffs.
     ("value", lambda e: e.value, lambda a: a.value, lambda x: _value_or_zero(x)),
     ("function", lambda e: e.function, lambda a: a.function, lambda x: x),
     ("args", lambda e: e.args, lambda a: a.args, _norm),
@@ -96,6 +104,13 @@ def _call_field_diffs(expected: ExpectedCall, actual: ParsedToolCall) -> list[st
         ev, av = get_e(expected), get_a(actual)
         if norm(ev) != norm(av):
             diffs.append(f"{label}: expected {ev!r} got {av!r}")
+        if label == "chainId" and not _to_matches(expected, actual):
+            exp = (
+                expected.to
+                if not expected.to_aliases
+                else f"{expected.to} (or {'/'.join(expected.to_aliases)})"
+            )
+            diffs.append(f"to: expected {exp!r} got {actual.to!r}")
     return diffs
 
 

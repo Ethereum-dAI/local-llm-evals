@@ -78,3 +78,49 @@ def test_nested_tuple_args_compared_recursively():
         name="executeTx", chainId="1", to="0xr", value="0",
         function="exactInputSingle((address,address,uint24))", args=[["0xaaa", "0xbbb", "3000"]])])
     assert score_case(case, turn) == 1
+
+
+def test_ens_alias_in_to_matches():
+    case = _case([{"tool": "executeTx", "chainId": "1",
+                   "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                   "to_aliases": ["vitalik.eth"],
+                   "value": "100000000000000000", "function": None, "args": []}])
+    turn = ParsedTurn(tool_calls=[ParsedToolCall(
+        name="executeTx", chainId="1", to="vitalik.eth",
+        value="100000000000000000", function=None, args=[])])
+    assert score_case(case, turn) == 1
+
+
+def test_canonical_address_still_matches_when_aliases_present():
+    case = _case([{"tool": "executeTx", "chainId": "1",
+                   "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                   "to_aliases": ["vitalik.eth"],
+                   "value": "100000000000000000", "function": None, "args": []}])
+    turn = ParsedTurn(tool_calls=[ParsedToolCall(
+        name="executeTx", chainId="1", to="0xD8DA6BF26964AF9D7EED9E03E53415D37AA96045",
+        value="100000000000000000", function=None, args=[])])
+    assert score_case(case, turn) == 1
+
+
+def test_wrong_name_fails_despite_aliases():
+    case = _case([{"tool": "executeTx", "chainId": "1",
+                   "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                   "to_aliases": ["vitalik.eth"],
+                   "value": "100000000000000000", "function": None, "args": []}])
+    turn = ParsedTurn(tool_calls=[ParsedToolCall(
+        name="executeTx", chainId="1", to="bob.eth",
+        value="100000000000000000", function=None, args=[])])
+    assert score_case(case, turn) == 0
+
+
+def test_mismatch_reason_mentions_aliases():
+    from wallet_evals.scorer import explain_mismatch
+    case = _case([{"tool": "executeTx", "chainId": "1",
+                   "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                   "to_aliases": ["vitalik.eth"],
+                   "value": "100000000000000000", "function": None, "args": []}])
+    turn = ParsedTurn(tool_calls=[ParsedToolCall(
+        name="executeTx", chainId="1", to="bob.eth",
+        value="100000000000000000", function=None, args=[])])
+    reason = explain_mismatch(case, turn)
+    assert "vitalik.eth" in reason and "bob.eth" in reason
