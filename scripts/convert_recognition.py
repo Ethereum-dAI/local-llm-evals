@@ -20,7 +20,11 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 LOOKUP = json.loads((ROOT / "datasets" / "lookup.json").read_text())
 
-_DIFFICULTY = "easy"
+def _difficulty(raw: dict, protocol: str) -> str:
+    """Derived, not authored: swaps and non-English prompts are harder targets."""
+    if protocol == "uniswap" or raw["language"] != "english":
+        return "medium"
+    return "easy"
 
 
 def to_base_units(amount: str, decimals: int) -> str:
@@ -46,7 +50,7 @@ def _base_meta(raw: dict, protocol: str = "transfer") -> dict:
         "language": raw["language"],
         "category": raw["category"],
         "protocol": protocol,
-        "difficulty": _DIFFICULTY,
+        "difficulty": _difficulty(raw, protocol),
         "notes": raw.get("notes"),
     }
 
@@ -113,7 +117,8 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
     if token is None:
         return None, raw["id"]
 
-    recipient = _resolve_recipient(args["to"]["value"])
+    to_value = args["to"]["value"]
+    recipient = _resolve_recipient(to_value)
     if recipient is None:
         return None, raw["id"]
 
@@ -126,10 +131,18 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
                 "function": "transfer(address,uint256)",
                 "args": [recipient, to_base_units(amount, token["decimals"])]}
 
+    requires: list[str] = []
+    if to_value in LOOKUP["ens"]:
+        # Gold carries the resolved address, so passing demands ENS resolution —
+        # flag it so the report can slice this capability out.
+        requires.append("ens_resolution")
+    if not token.get("native"):
+        requires.append("token_address_lookup")
+
     case = _base_meta(raw) | {
         "level": "payload",
         "query_type": "one_shot",
-        "requires": ["token_address_lookup"] if not token.get("native") else [],
+        "requires": requires,
         "expected_calls": [call],
     }
     return case, None

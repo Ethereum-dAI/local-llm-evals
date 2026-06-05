@@ -50,6 +50,9 @@ Rebuilds `pf/tests.yaml` from the Swift `recognition.json`: transfers/approvals 
 mechanically (exact-output swaps, `"all"` amounts, unknown ENS/tokens) are
 reported as needing manual authoring.
 
+> Assumes the `local-wallet-mac` repo is checked out as a sibling directory
+> (`../local-wallet-mac`); pass an explicit path as the first argument otherwise.
+
 ## Test (offline, no API key)
 
 ```bash

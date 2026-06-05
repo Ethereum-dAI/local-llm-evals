@@ -4,7 +4,7 @@ from wallet_evals.promptfoo import load_cases
 from wallet_evals.schema import ParsedToolCall, ParsedTurn
 from wallet_evals.scorer import score_case
 
-TESTS = Path("pf/tests.yaml")
+TESTS = Path(__file__).resolve().parents[1] / "pf" / "tests.yaml"
 
 
 def _load() -> list:

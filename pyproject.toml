@@ -1,7 +1,7 @@
 [project]
 name = "evals-local-llm"
 version = "0.1.0"
-description = "LLM eval harness for the local agent wallet (executeTx/readTx payload generation)"
+description = "LLM eval harness for the local agent wallet (executeTx/readTx calls + synthetic swap intents, via promptfoo)"
 readme = "README.md"
 requires-python = ">=3.11.9"
 dependencies = [
