@@ -13,7 +13,8 @@ Design notes live under `docs/` (gitignored).
 | Path | Role |
 | --- | --- |
 | `pf/tests.yaml` | **single source of truth** for test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`) |
-| `pf/prompt.json` | system + user chat prompt sent to every model |
+| `pf/prompt.json` | static base of the system + user chat prompt |
+| `pf/prompt.py` | promptfoo prompt function: renders the base plus the known-token table from `datasets/lookup.json` |
 | `pf/tools.json` | the `executeTx` / `readTx` / `swap` tool schemas |
 | `pf/assert.py` | python assertion — reuses `score_case` against the gold in each test's metadata |
 | `promptfooconfig.yaml` | providers (cheap OpenRouter models), prompt, tools, assertion, tests |
