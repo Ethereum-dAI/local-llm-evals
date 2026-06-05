@@ -38,3 +38,19 @@ def test_every_case_self_scores_one():
 def test_has_swap_cases():
     swaps = [c for c in _load() if any(call.tool == "swap" for call in c.expected_calls)]
     assert len(swaps) >= 1
+
+
+def test_prompt_lists_every_lookup_token():
+    """The system prompt's token table must stay in sync with datasets/lookup.json."""
+    import json
+
+    root = Path(__file__).resolve().parents[1]
+    lookup = json.loads((root / "datasets" / "lookup.json").read_text())
+    system = json.loads((root / "pf" / "prompt.json").read_text())[0]["content"]
+    for symbol, token in lookup["tokens"].items():
+        assert symbol in system, f"{symbol} missing from system prompt"
+        assert f"{token['decimals']} decimals" in system, f"{symbol} decimals missing"
+        if token["native"]:
+            assert "0x0000000000000000000000000000000000000000" in system
+        else:
+            assert token["address"] in system, f"{symbol} address missing"
