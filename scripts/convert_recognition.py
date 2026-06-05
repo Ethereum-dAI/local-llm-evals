@@ -126,6 +126,9 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
     if token.get("native"):
         call = {"tool": "executeTx", "chainId": chain_id, "to": recipient,
                 "value": to_base_units(amount, token["decimals"]), "function": None, "args": []}
+        if to_value in LOOKUP["ens"]:
+            # The wallet resolves ENS post-call: the unresolved name is equally correct.
+            call["to_aliases"] = [to_value]
     else:
         call = {"tool": "executeTx", "chainId": chain_id, "to": token["address"], "value": "0",
                 "function": "transfer(address,uint256)",

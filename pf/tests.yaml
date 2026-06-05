@@ -21,6 +21,8 @@
       value: '100000000000000000'
       function: null
       args: []
+      to_aliases:
+      - vitalik.eth
 - vars:
     user_message: Move 1.25 ETH to 0x1111111111111111111111111111111111111111
   metadata:
@@ -303,6 +305,8 @@
       value: '100000000000000000'
       function: null
       args: []
+      to_aliases:
+      - vitalik.eth
 - vars:
     user_message: Envoie 0.05 ETH a 0x3333333333333333333333333333333333333333
   metadata:
@@ -342,6 +346,8 @@
       value: '100000000000000000'
       function: null
       args: []
+      to_aliases:
+      - vitalik.eth
 - vars:
     user_message: /swap 50 USDC to ETH
   metadata:
