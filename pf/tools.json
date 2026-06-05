@@ -47,7 +47,7 @@
           "currencyOut": { "type": "string", "description": "Address of the token being received. Native ETH is the zero address." },
           "amountIn": { "type": "string", "description": "Exact input amount in base units (decimal string)." },
           "amountOutMinimum": { "type": "string", "description": "Minimum acceptable output in base units. Use \"0\" if the user did not specify a minimum — never ask for one." },
-          "recipient": { "type": "string", "description": "Recipient address. Use the literal string \"<wallet>\" when the user means their own wallet." }
+          "recipient": { "type": "string", "description": "Recipient address. Use the literal string \"<wallet>\" when the user does not name a recipient." }
         },
         "required": ["chainId", "currencyIn", "currencyOut", "amountIn", "amountOutMinimum", "recipient"]
       }
