@@ -40,13 +40,16 @@ def test_has_swap_cases():
     assert len(swaps) >= 1
 
 
-def test_prompt_lists_every_lookup_token():
-    """The system prompt's token table must stay in sync with datasets/lookup.json."""
+def test_rendered_prompt_lists_every_lookup_token():
+    """The rendered system message must carry the datasets/lookup.json token table."""
     import json
+
+    from wallet_evals.prompt import build_messages
 
     root = Path(__file__).resolve().parents[1]
     lookup = json.loads((root / "datasets" / "lookup.json").read_text())
-    system = json.loads((root / "pf" / "prompt.json").read_text())[0]["content"]
+    messages = build_messages("Send 1 ETH to bob.eth")
+    system = messages[0]["content"]
     for symbol, token in lookup["tokens"].items():
         assert symbol in system, f"{symbol} missing from system prompt"
         assert f"{token['decimals']} decimals" in system, f"{symbol} decimals missing"
@@ -54,3 +57,11 @@ def test_prompt_lists_every_lookup_token():
             assert "0x0000000000000000000000000000000000000000" in system
         else:
             assert token["address"] in system, f"{symbol} address missing"
+
+
+def test_rendered_prompt_substitutes_user_message():
+    from wallet_evals.prompt import build_messages
+
+    messages = build_messages("Send 1 ETH to bob.eth")
+    assert messages[1] == {"role": "user", "content": "Send 1 ETH to bob.eth"}
+    assert "{{" not in messages[0]["content"]
