@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 _PREVIEW_WIDTH = 72
 
-ToolName = Literal["executeTx", "readTx"]
+ToolName = Literal["executeTx", "readTx", "swap"]
 
 
 class PreviewContext(BaseModel):
@@ -33,13 +33,26 @@ class ExpectedCall(Previewable):
 
     tool: ToolName
     chainId: str
-    to: str
+    to: str | None = None
     value: str = "0"
     function: str | None = None
     args: list[Any] = Field(default_factory=list)
+    # Swap intent fields (None for executeTx/readTx).
+    currencyIn: str | None = None
+    currencyOut: str | None = None
+    amountIn: str | None = None
+    amountOutMinimum: str | None = None
+    recipient: str | None = None
 
     def format_preview(self, ctx: PreviewContext | None = None) -> str:
         ctx = ctx or PreviewContext()
+        if self.tool == "swap":
+            lines = [
+                f"  expected call #{ctx.call_index + 1}: swap (chainId={self.chainId})",
+                f"      {self.currencyIn} -> {self.currencyOut}",
+                f"      amountIn={self.amountIn} amountOutMinimum={self.amountOutMinimum} recipient={self.recipient}",
+            ]
+            return "\n".join(lines)
         lines = [
             f"  expected call #{ctx.call_index + 1}: {self.tool} -> {self.to}",
             f"      chainId={self.chainId} value={self.value} function={self.function}",
@@ -87,6 +100,12 @@ class ParsedToolCall(BaseModel):
     value: str | None = None
     function: str | None = None
     args: list[Any] = Field(default_factory=list)
+    # Swap intent fields (None for executeTx/readTx).
+    currencyIn: str | None = None
+    currencyOut: str | None = None
+    amountIn: str | None = None
+    amountOutMinimum: str | None = None
+    recipient: str | None = None
 
 
 class ParsedTurn(BaseModel):
