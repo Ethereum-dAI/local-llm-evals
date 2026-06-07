@@ -7,6 +7,11 @@ reproducible from the production source. Swaps become the synthetic `swap`
 intent; transfers/approvals become `executeTx`; ambiguous cases become no-call.
 Exact-output swaps, "all" amounts, and unresolved ENS/tokens are reported as
 needing manual authoring. Resolution uses datasets/lookup.json, here only.
+
+Multi-turn / conversational cases (metadata.query_type == "multi_turn") cannot
+come from recognition.json — they are authored directly in pf/tests.yaml. To
+keep regeneration idempotent, those cases are read back from the existing
+tests.yaml and re-appended after the generated ones.
 """
 from __future__ import annotations
 
@@ -161,6 +166,18 @@ def _to_promptfoo_test(case: dict) -> dict:
     return {"vars": {"user_message": case["user_message"]}, "metadata": metadata}
 
 
+def _preserved_manual_tests(out: Path) -> list[dict]:
+    """Multi-turn cases authored directly in tests.yaml — carried across regens.
+
+    They aren't derivable from recognition.json (no conversation history there),
+    so read them back verbatim and re-append, keeping regeneration idempotent.
+    """
+    if not out.exists():
+        return []
+    existing = yaml.safe_load(out.read_text()) or []
+    return [t for t in existing if t.get("metadata", {}).get("query_type") == "multi_turn"]
+
+
 def main() -> None:
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else (
         ROOT.parent / "local-wallet-mac" / "wallet-macos" / "Sources" / "wallet-eval" / "Dataset" / "recognition.json"
@@ -178,6 +195,7 @@ def main() -> None:
             converted.append(case)
 
     tests = [_to_promptfoo_test(c) for c in converted]
+    tests.extend(_preserved_manual_tests(out))
     header = (
         "# Single source of truth for eval test cases (promptfoo-native).\n"
         "# Generated from the Swift recognition.json by scripts/convert_recognition.py.\n"

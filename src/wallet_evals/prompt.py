@@ -34,14 +34,27 @@ def render_token_table(lookup: dict) -> str:
     )
 
 
-def build_messages(user_message: str) -> list[dict]:
+def build_messages(
+    user_message: str, history: list[dict] | None = None
+) -> list[dict]:
     """The pf/prompt.json messages with the token table appended to the system
-    message and {{user_message}} substituted."""
+    message and {{user_message}} substituted.
+
+    `history` is an optional list of prior conversation turns ({role, content})
+    for multi-turn cases; they are spliced in just before the final user
+    message, so the model answers `user_message` with that context in view.
+    """
     messages = json.loads(_PROMPT.read_text())
     lookup = json.loads(_LOOKUP.read_text())
     rendered = []
     for message in messages:
-        content = message["content"].replace("{{user_message}}", user_message)
+        if message["role"] == "user":
+            for turn in history or []:
+                rendered.append({"role": turn["role"], "content": turn["content"]})
+            content = message["content"].replace("{{user_message}}", user_message)
+            rendered.append({"role": "user", "content": content})
+            continue
+        content = message["content"]
         if message["role"] == "system":
             content = f"{content} {render_token_table(lookup)}"
         rendered.append({"role": message["role"], "content": content})

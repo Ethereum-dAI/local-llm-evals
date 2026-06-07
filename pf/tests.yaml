@@ -369,3 +369,134 @@
       amountIn: '50000000'
       amountOutMinimum: '0'
       recipient: <wallet>
+- vars:
+    user_message: '0.5'
+    history:
+    - role: user
+      content: I want to swap some ETH for USDC
+    - role: assistant
+      content: How much ETH would you like to swap?
+  metadata:
+    id: convo-en-001
+    language: english
+    category: truePositiveSwap
+    protocol: uniswap
+    difficulty: medium
+    notes: Clarify-then-act; amount supplied in the follow-up turn.
+    level: payload
+    query_type: multi_turn
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+- vars:
+    user_message: '0.1'
+    history:
+    - role: user
+      content: Send ETH to vitalik.eth
+    - role: assistant
+      content: How much ETH would you like to send to vitalik.eth?
+  metadata:
+    id: convo-en-002
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: Clarify-then-act; amount supplied in the follow-up turn.
+    level: payload
+    query_type: multi_turn
+    requires:
+    - ens_resolution
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+      to_aliases:
+      - vitalik.eth
+- vars:
+    user_message: Actually, make it 0.25
+    history:
+    - role: user
+      content: Send 0.1 ETH to 0x1111111111111111111111111111111111111111
+    - role: assistant
+      content: Done — I've prepared a transfer of 0.1 ETH to 0x1111111111111111111111111111111111111111.
+  metadata:
+    id: convo-en-003
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: medium
+    notes: Context carry; recipient from a prior turn, amount corrected in the final
+      turn.
+    level: payload
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x1111111111111111111111111111111111111111'
+      value: '250000000000000000'
+      function: null
+      args: []
+- vars:
+    user_message: '0.2'
+    history:
+    - role: user
+      content: Invia ETH a vitalik.eth
+    - role: assistant
+      content: Quanti ETH vuoi inviare a vitalik.eth?
+  metadata:
+    id: convo-it-001
+    language: italian
+    category: multilingualTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: Clarify-then-act in Italian; amount supplied in the follow-up turn.
+    level: payload
+    query_type: multi_turn
+    requires:
+    - ens_resolution
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '200000000000000000'
+      function: null
+      args: []
+      to_aliases:
+      - vitalik.eth
+- vars:
+    user_message: '100'
+    history:
+    - role: user
+      content: Vorrei scambiare USDC per ETH
+    - role: assistant
+      content: Quanti USDC vuoi scambiare?
+  metadata:
+    id: convo-it-002
+    language: italian
+    category: truePositiveSwap
+    protocol: uniswap
+    difficulty: medium
+    notes: Clarify-then-act swap in Italian; amount supplied in the follow-up turn.
+    level: payload
+    query_type: multi_turn
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>

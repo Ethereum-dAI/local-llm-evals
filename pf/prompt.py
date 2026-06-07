@@ -12,4 +12,5 @@ from wallet_evals.prompt import build_messages
 
 
 def prompt(context: dict) -> str:
-    return json.dumps(build_messages(context["vars"]["user_message"]))
+    vars_ = context["vars"]
+    return json.dumps(build_messages(vars_["user_message"], vars_.get("history")))

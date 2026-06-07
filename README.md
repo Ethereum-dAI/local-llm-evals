@@ -12,7 +12,7 @@ Design notes live under `docs/` (gitignored).
 
 | Path | Role |
 | --- | --- |
-| `pf/tests.yaml` | **single source of truth** for test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`) |
+| `pf/tests.yaml` | **single source of truth** for test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`; multi-turn cases add `vars.history` of prior turns and `metadata.query_type: multi_turn`) |
 | `pf/prompt.json` | static base of the system + user chat prompt |
 | `pf/prompt.py` | promptfoo prompt function: renders the base plus the known-token table from `datasets/lookup.json` |
 | `pf/tools.json` | the `executeTx` / `readTx` / `swap` tool schemas |
@@ -49,7 +49,9 @@ uv run python scripts/convert_recognition.py
 Rebuilds `pf/tests.yaml` from the Swift `recognition.json`: transfers/approvals →
 `executeTx`, swaps → synthetic `swap`, ambiguous → no-call. Cases it can't resolve
 mechanically (exact-output swaps, `"all"` amounts, unknown ENS/tokens) are
-reported as needing manual authoring.
+reported as needing manual authoring. Multi-turn cases (`query_type:
+multi_turn`) are authored directly in `pf/tests.yaml` and carried across
+regenerations untouched.
 
 > Assumes the `local-wallet-mac` repo is checked out as a sibling directory
 > (`../local-wallet-mac`); pass an explicit path as the first argument otherwise.

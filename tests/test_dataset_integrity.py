@@ -65,3 +65,43 @@ def test_rendered_prompt_substitutes_user_message():
     messages = build_messages("Send 1 ETH to bob.eth")
     assert messages[1] == {"role": "user", "content": "Send 1 ETH to bob.eth"}
     assert "{{" not in messages[0]["content"]
+
+
+def test_history_is_spliced_before_final_user_message():
+    """Multi-turn: prior turns sit between the system message and the final user
+    turn, which must remain last so the model answers it in context."""
+    from wallet_evals.prompt import build_messages
+
+    history = [
+        {"role": "user", "content": "Send ETH to vitalik.eth"},
+        {"role": "assistant", "content": "How much?"},
+    ]
+    messages = build_messages("0.1", history)
+    assert messages[0]["role"] == "system"
+    assert [m["role"] for m in messages[1:]] == ["user", "assistant", "user"]
+    assert messages[1]["content"] == "Send ETH to vitalik.eth"
+    assert messages[-1] == {"role": "user", "content": "0.1"}
+
+
+def test_dataset_has_multi_turn_cases():
+    multi = [c for c in _load() if c.query_type == "multi_turn"]
+    assert len(multi) >= 1
+
+
+def test_multi_turn_cases_carry_valid_history():
+    """Every multi_turn test must define vars.history of {role, content} turns
+    ending on an assistant turn (the final user_message follows it)."""
+    import yaml
+
+    tests = yaml.safe_load(TESTS.read_text())
+    multi = [t for t in tests if t["metadata"].get("query_type") == "multi_turn"]
+    assert multi, "expected at least one multi_turn case"
+    for t in multi:
+        history = t["vars"].get("history")
+        assert history, f"{t['metadata']['id']} missing vars.history"
+        for turn in history:
+            assert turn["role"] in ("user", "assistant")
+            assert turn["content"]
+        assert history[-1]["role"] == "assistant", (
+            f"{t['metadata']['id']} history should end on an assistant turn"
+        )
