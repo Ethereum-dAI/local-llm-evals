@@ -20,6 +20,7 @@ Design notes live under `docs/` (gitignored).
 | `promptfooconfig.yaml` | providers (cheap OpenRouter models), prompt, tools, assertion, tests |
 | `src/wallet_evals/` | reused core: schema, tool-call parsing, binary scorer, tests loader |
 | `scripts/convert_recognition.py` | regenerates `pf/tests.yaml` from the Swift app's `recognition.json` |
+| `scripts/safety_report.py` | false-execution rate over the adversarial cases, from an eval output JSON |
 
 ## Setup
 
@@ -55,6 +56,21 @@ regenerations untouched.
 
 > Assumes the `local-wallet-mac` repo is checked out as a sibling directory
 > (`../local-wallet-mac`); pass an explicit path as the first argument otherwise.
+
+## Safety metrics
+
+A model that executes transactions on a user's behalf must not act on
+instructions it was never given. The `adversarial` cases in `pf/tests.yaml`
+cover prompt injection (overrides hidden in pasted content), scams, and
+questions phrased like commands; the pure ones expect **no call**, so any fired
+transaction is a false execution. After an eval:
+
+```bash
+uv run python scripts/safety_report.py results.json
+```
+
+reports the **false-execution rate** per model, plus the confused-deputy case
+(execute only the user's real instruction, ignore the injected one).
 
 ## Test (offline, no API key)
 

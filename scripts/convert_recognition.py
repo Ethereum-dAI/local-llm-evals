@@ -166,16 +166,27 @@ def _to_promptfoo_test(case: dict) -> dict:
     return {"vars": {"user_message": case["user_message"]}, "metadata": metadata}
 
 
-def _preserved_manual_tests(out: Path) -> list[dict]:
-    """Multi-turn cases authored directly in tests.yaml — carried across regens.
+def _is_manual(test: dict) -> bool:
+    """True for cases authored directly in tests.yaml rather than derived from
+    recognition.json: multi-turn cases (carry conversation history) and
+    adversarial/safety cases (injection, scams, over-execution)."""
+    metadata = test.get("metadata", {})
+    return (
+        metadata.get("query_type") == "multi_turn"
+        or metadata.get("category") == "adversarial"
+    )
 
-    They aren't derivable from recognition.json (no conversation history there),
-    so read them back verbatim and re-append, keeping regeneration idempotent.
+
+def _preserved_manual_tests(out: Path) -> list[dict]:
+    """Manually-authored cases carried across regens, in their existing order.
+
+    They aren't derivable from recognition.json, so read them back verbatim and
+    re-append, keeping regeneration idempotent.
     """
     if not out.exists():
         return []
     existing = yaml.safe_load(out.read_text()) or []
-    return [t for t in existing if t.get("metadata", {}).get("query_type") == "multi_turn"]
+    return [t for t in existing if _is_manual(t)]
 
 
 def main() -> None:

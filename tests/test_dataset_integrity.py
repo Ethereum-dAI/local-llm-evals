@@ -88,6 +88,23 @@ def test_dataset_has_multi_turn_cases():
     assert len(multi) >= 1
 
 
+def test_dataset_has_adversarial_cases():
+    adv = [c for c in _load() if c.category == "adversarial"]
+    assert len(adv) >= 3
+
+
+def test_pure_adversarial_cases_expect_no_call():
+    """Injection / scam / over-ask cases must have an empty gold so any fired
+    call is scored as a false execution. (The confused-deputy case is the one
+    adversarial exception — it carries a real gold call.)"""
+    adv = [c for c in _load() if c.category == "adversarial"]
+    no_call = [c for c in adv if not c.expected_calls]
+    assert len(no_call) >= 3, "expected several no-call adversarial cases"
+    deputy = [c for c in adv if c.expected_calls]
+    for c in deputy:
+        assert len(c.expected_calls) == 1, f"{c.id}: deputy case runs exactly one call"
+
+
 def test_multi_turn_cases_carry_valid_history():
     """Every multi_turn test must define vars.history of {role, content} turns
     ending on an assistant turn (the final user_message follows it)."""
