@@ -91,7 +91,7 @@ def _convert_swap(raw: dict) -> tuple[dict | None, str | None]:
         "tool": "swap", "chainId": LOOKUP["chainId"],
         "currencyIn": in_addr, "currencyOut": out_addr,
         "amountIn": to_base_units(amount, in_dec),
-        "amountOutMinimum": "0", "recipient": "<wallet>",
+        "amountOutMinimum": "0", "recipient": "SELF",
     }
     case = _base_meta(raw, protocol="uniswap") | {
         "level": "payload", "query_type": "one_shot",

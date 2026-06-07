@@ -76,7 +76,7 @@ def test_convert_swap_exact_in():
     assert call["currencyOut"] == LOOKUP["tokens"]["DAI"]["address"]
     assert call["amountIn"] == "100000000"
     assert call["amountOutMinimum"] == "0"
-    assert call["recipient"] == "<wallet>"
+    assert call["recipient"] == "SELF"
 
 
 def test_convert_swap_native_eth_uses_zero_address():
