@@ -219,3 +219,26 @@ def test_build_all_drops_self_swaps():
         calls = case["metadata"]["expected_calls"]
         for call in calls:
             assert call.get("currencyIn") != call.get("currencyOut")
+
+
+def test_load_cases_supports_messages(tmp_path):
+    import yaml
+    from wallet_evals.promptfoo import load_cases
+
+    doc = [{
+        "vars": {"messages": [
+            {"role": "user", "content": "Send 0.1 ETH"},
+            {"role": "assistant", "content": "Which address?"},
+            {"role": "user", "content": "to vitalik.eth"},
+        ]},
+        "metadata": {
+            "id": "gen-transfer-mt-0001", "level": "payload", "language": "english",
+            "category": "multiturn-recipient", "protocol": "transfer",
+            "difficulty": "easy", "expected_calls": [],
+        },
+    }]
+    p = tmp_path / "mt.yaml"
+    p.write_text(yaml.safe_dump(doc))
+    cases = load_cases(p)
+    assert len(cases) == 1
+    assert cases[0].user_message == "to vitalik.eth"  # last user turn
