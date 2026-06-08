@@ -197,3 +197,25 @@ def test_multiturn_has_no_user_message_var():
               "to_token": "ETH"}
     case = build_multiturn_case(intent, "to_token", random.Random(0), idx=1)
     assert "messages" in case["vars"] and "user_message" not in case["vars"]
+
+
+def test_build_all_is_deterministic():
+    import yaml
+    from scripts.generate_cases import build_all, SEEDS
+
+    seeds = yaml.safe_load(SEEDS.read_text())
+    a = build_all(seeds, random.Random(123))
+    b = build_all(seeds, random.Random(123))
+    assert a == b
+
+
+def test_build_all_drops_self_swaps():
+    import yaml
+    from scripts.generate_cases import build_all, SEEDS
+
+    seeds = yaml.safe_load(SEEDS.read_text())
+    cases = build_all(seeds, random.Random(1)).get("swap", [])
+    for case in cases:
+        calls = case["metadata"]["expected_calls"]
+        for call in calls:
+            assert call.get("currencyIn") != call.get("currencyOut")

@@ -1,0 +1,21 @@
+# Hand-authored structured intents. Params are literals, {vary: [...]} sets, or
+# the sentinel "random_address". Gold is computed from these; surfaces + noise
+# are generated. `ablate` lists fields eligible for negative + multi-turn cases.
+- action: transfer
+  amount: { vary: ["0.1", "1.25", "1000", "0.005"] }
+  token: ETH
+  recipient: { vary: ["vitalik.eth", "random_address"] }
+  ablate: ["recipient", "amount"]
+
+- action: transfer
+  amount: { vary: ["3", "250", "40"] }
+  token: { vary: ["USDC", "DAI"] }
+  recipient: { vary: ["vitalik.eth", "random_address"] }
+  ablate: ["recipient", "token"]
+
+# vary cross-product may include self-swaps (e.g. ETH->ETH); generate_cases drops them.
+- action: swap
+  amount: { vary: ["100", "0.5", "40"] }
+  from_token: { vary: ["USDC", "ETH"] }
+  to_token: { vary: ["ETH", "DAI", "WETH"] }
+  ablate: ["to_token", "amount"]

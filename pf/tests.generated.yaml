@@ -1,0 +1,4888 @@
+# Generated eval cases — DO NOT EDIT BY HAND.
+# Produced by scripts/generate_cases.py from datasets/seeds.yaml (seed 20260608).
+# Gold is computed from each seed intent; surfaces carry deterministic noise.
+- vars:
+    user_message: Please kindly Swap 100 ETH
+  metadata:
+    id: gen-swap-neg-0047
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - tone
+- vars:
+    user_message: Hey, Swap USDC for ETH if that's ok
+  metadata:
+    id: gen-swap-neg-0109
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - filler
+- vars:
+    user_message: Hey, swpa 100 UsDC if that's ok
+  metadata:
+    id: gen-swap-neg-0017
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: Swap 40 USDC for ETH
+  metadata:
+    id: gen-swap-pos-0101
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: lol ok Hey, Swap ETH for WEHT
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '100'
+  metadata:
+    id: gen-swap-mt-0050
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Exchange 40 USDC into DAI
+  metadata:
+    id: gen-swap-pos-0114
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - tone
+- vars:
+    user_message: Ugh, just Hey, trADe 40 ETh iNtO weTh whenever
+  metadata:
+    id: gen-swap-pos-0143
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: Quick one — exchANGE 40 UScD InTo eTh... if that's ok
+  metadata:
+    id: gen-swap-pos-0104
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Please kindly swaP 40 eth pelase whenever
+  metadata:
+    id: gen-swap-neg-0147
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Swap 100 UsDC
+  metadata:
+    id: gen-swap-neg-0007
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+- vars:
+    messages:
+    - role: user
+      content: Please kindly Hey, SWaP uSdc FoR WeTh! whenever
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '40'
+  metadata:
+    id: gen-swap-mt-0130
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: Please kindly TRADe 0.5 USDC iNTo dAi
+  metadata:
+    id: gen-swap-pos-0063
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: When you get a sec, swAp Sudc foR Dai thanks!
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '40'
+  metadata:
+    id: gen-swap-mt-0120
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: lol ok Exchange 100 ETH into DAI
+  metadata:
+    id: gen-swap-pos-0034
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - tone
+- vars:
+    user_message: Ugh, just /SWaP 0.5 ETh to DAi...
+  metadata:
+    id: gen-swap-pos-0085
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: lol ok Hey, SWap UsDc foR DaI
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '100'
+  metadata:
+    id: gen-swap-mt-0020
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: sedn 100 ETH to become DAI
+  metadata:
+    id: gen-swap-pos-0036
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: Hey, SWap 0.5 SudC fOr wETh... whenever
+  metadata:
+    id: gen-swap-pos-0071
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: wsAP eTh FOr dAi!!
+  metadata:
+    id: gen-swap-neg-0089
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+- vars:
+    user_message: When you get a sec, converT 40 USDc to DaI
+  metadata:
+    id: gen-swap-pos-0112
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+- vars:
+    user_message: SEdn 0.5 eTh to BecOME DaI
+  metadata:
+    id: gen-swap-pos-0086
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: Exchange 100 USDC into WETH!!
+  metadata:
+    id: gen-swap-pos-0024
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+- vars:
+    user_message: Hey, Cnovert 100 ETH to DAI! whenever
+  metadata:
+    id: gen-swap-pos-0032
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: lol ok Hey, Swap 0.5 ETH for DAI
+  metadata:
+    id: gen-swap-pos-0081
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: Hey, swpa 40 eTh!! if that's ok
+  metadata:
+    id: gen-swap-neg-0137
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: SWAp 40 sUDc fOr weTh...
+  metadata:
+    id: gen-swap-pos-0121
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: sWAP 40 EtH
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for DAI
+  metadata:
+    id: gen-swap-mt-0138
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: Please kindly Sawp USDC for WETH...
+  metadata:
+    id: gen-swap-neg-0079
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: lol ok Hey, esnd 40 ETH to become WETH whenever
+  metadata:
+    id: gen-swap-pos-0146
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: SWAp usdc For WehT
+  metadata:
+    id: gen-swap-neg-0029
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+- vars:
+    user_message: lol ok When you get a sec, Swap 0.5 ETH for WETH if that's ok
+  metadata:
+    id: gen-swap-pos-0091
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: oCnvert 0.5 ETH to DAI please
+  metadata:
+    id: gen-swap-pos-0082
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: lol ok Quick one — Exchange 40 ETH into DAI
+  metadata:
+    id: gen-swap-pos-0134
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: Swap 0.5 USDC
+  metadata:
+    id: gen-swap-neg-0067
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators: []
+- vars:
+    user_message: Please kindly /sWap 100 Eth tO dAI...
+  metadata:
+    id: gen-swap-pos-0035
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: lol ok /swap 0.5 USDC to DAI
+  metadata:
+    id: gen-swap-pos-0065
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - tone
+- vars:
+    user_message: Please kindly Hey, send 40 ETH to become DAI!! if that's ok
+  metadata:
+    id: gen-swap-pos-0136
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: coNEvRT 40 eTh TO WeTH please if that's ok
+  metadata:
+    id: gen-swap-pos-0142
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: sWap USDc FOR weTh!!
+  metadata:
+    id: gen-swap-neg-0129
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+- vars:
+    user_message: swAp ETh fOR Weht thanks!
+  metadata:
+    id: gen-swap-neg-0149
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: Ugh, just When you get a sec, /swap 0.5 UDSC to ETH
+  metadata:
+    id: gen-swap-pos-0055
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Ugh, just When you get a sec, Exchange 0.5 USDC into DAI thanks!
+  metadata:
+    id: gen-swap-pos-0064
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: send 40 USCD to become ETH
+  metadata:
+    id: gen-swap-pos-0106
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: Ugh, just /swap 40 ETH to DAI
+  metadata:
+    id: gen-swap-pos-0135
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Hey, Swap 0.5 ETH!! whenever
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for DAI
+  metadata:
+    id: gen-swap-mt-0088
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+- vars:
+    user_message: lol ok Hey, Swap 40 USDC
+  metadata:
+    id: gen-swap-neg-0107
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: Convert 40 ETH to DAI
+  metadata:
+    id: gen-swap-pos-0132
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators: []
+- vars:
+    user_message: Swap ETH for DAI
+  metadata:
+    id: gen-swap-neg-0139
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators: []
+- vars:
+    user_message: Please kindly Hey, SenD 100 eTH TO beoCMe WeTH thanks!
+  metadata:
+    id: gen-swap-pos-0046
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Quick one — CoNVeRt 0.5 usdc to Eth... whenever
+  metadata:
+    id: gen-swap-pos-0052
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - filler
+- vars:
+    user_message: sned 40 USDC to become WETH...
+  metadata:
+    id: gen-swap-pos-0126
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: Swap USDC for DAI
+  metadata:
+    id: gen-swap-neg-0019
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators: []
+- vars:
+    user_message: lol ok Quick one — Trade 100 USDC into ETH please thanks!
+  metadata:
+    id: gen-swap-pos-0003
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: Hey, Convert 100 USDC to ETH if that's ok
+  metadata:
+    id: gen-swap-pos-0002
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: Please kindly SwAP EtH fOr weTh
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '0.5'
+  metadata:
+    id: gen-swap-mt-0100
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: SwAP 40 usdc pleaes if that's ok
+  metadata:
+    id: gen-swap-neg-0117
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: trdaE 0.5 uSDC InTO eTh
+  metadata:
+    id: gen-swap-pos-0053
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Quick one — wSap ETH for DAI
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '40'
+  metadata:
+    id: gen-swap-mt-0140
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - filler
+- vars:
+    user_message: lol ok Exchange 0.5 ETH into WETH please
+  metadata:
+    id: gen-swap-pos-0094
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - tone
+- vars:
+    user_message: lol ok /sWAP 100 SuDc tO DAi
+  metadata:
+    id: gen-swap-pos-0015
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - tone
+- vars:
+    user_message: Swap 40 ETh FoR WeTh...
+  metadata:
+    id: gen-swap-pos-0141
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: When you get a sec, SwaP Usdc fOr ETh whenever
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '0.5'
+  metadata:
+    id: gen-swap-mt-0060
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: send 0.5 ETH to become WTEH
+  metadata:
+    id: gen-swap-pos-0096
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: Ugh, just Swap ETH for WETH please
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '40'
+  metadata:
+    id: gen-swap-mt-0150
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - tone
+- vars:
+    user_message: Ugh, just When you get a sec, ExcHanGe 40 eTh INtO WtEH whenever
+  metadata:
+    id: gen-swap-pos-0144
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Trade 40 USDC into WETH pleaes
+  metadata:
+    id: gen-swap-pos-0123
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: Hey, Swap ETH for DAI
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '100'
+  metadata:
+    id: gen-swap-mt-0040
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - filler
+- vars:
+    user_message: tRAed 100 uSdC intO DAi!
+  metadata:
+    id: gen-swap-pos-0013
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: lol ok seNd 100 sUdC to BeComE eth thanks!
+  metadata:
+    id: gen-swap-pos-0006
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Quick one — /swap 40 ETH to WETH please thanks!
+  metadata:
+    id: gen-swap-pos-0145
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+- vars:
+    user_message: lol ok Quick one — sWAP 100 uSdc FoR Dai if that's ok
+  metadata:
+    id: gen-swap-pos-0011
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: Please kindly Convret 100 ETH to WETH please
+  metadata:
+    id: gen-swap-pos-0042
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: /SWap 40 USdc TO Eth please
+  metadata:
+    id: gen-swap-pos-0105
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+- vars:
+    user_message: When you get a sec, EXChagnE 0.5 UsDC INTo ETh please if that's
+      ok
+  metadata:
+    id: gen-swap-pos-0054
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: Hey, SwAp 40 uSDc please if that's ok
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for WETH
+  metadata:
+    id: gen-swap-mt-0128
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - filler
+- vars:
+    user_message: SEND 100 udsc To BeCOMe DAI
+  metadata:
+    id: gen-swap-pos-0016
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+- vars:
+    user_message: Please kindly Trade 100 USCD into WETH
+  metadata:
+    id: gen-swap-pos-0023
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - tone
+- vars:
+    user_message: Hey, Swap ETH for WETH
+  metadata:
+    id: gen-swap-neg-0099
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: Swap 40 USDC!!
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for ETH
+  metadata:
+    id: gen-swap-mt-0108
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+- vars:
+    user_message: Quick one — /swap 100 USDC to WETH
+  metadata:
+    id: gen-swap-pos-0025
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: Hey, SWaP Eth fOr wETH please if that's ok
+  metadata:
+    id: gen-swap-neg-0049
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - filler
+- vars:
+    user_message: Traed 40 USDC into ETH please
+  metadata:
+    id: gen-swap-pos-0103
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: SWAP uDsc FOR Eth... if that's ok
+  metadata:
+    id: gen-swap-neg-0059
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: ExCHAnGe 100 eth iNTO WetH
+  metadata:
+    id: gen-swap-pos-0044
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: Quick one — wSap 0.5 ETH!!
+  metadata:
+    id: gen-swap-neg-0087
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Hey, ExChaNgE 40 UsDc iNto EWTH please if that's ok
+  metadata:
+    id: gen-swap-pos-0124
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: Quick one — SAwP USDC FOR wEtH
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '0.5'
+  metadata:
+    id: gen-swap-mt-0080
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: SWaP 100 USdC
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for WETH
+  metadata:
+    id: gen-swap-mt-0028
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+- vars:
+    user_message: Ugh, just Swap uscd for dai
+  metadata:
+    id: gen-swap-neg-0069
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - typos
+    - tone
+- vars:
+    user_message: Hey, Swap 0.5 usDc if that's ok
+  metadata:
+    id: gen-swap-neg-0077
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Please kindly SwAp uSdC For WEtH
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '100'
+  metadata:
+    id: gen-swap-mt-0030
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: sWAP 0.5 UDSc
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for WETH
+  metadata:
+    id: gen-swap-mt-0078
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+- vars:
+    user_message: Swap 40 usdC for DAI
+  metadata:
+    id: gen-swap-pos-0111
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+- vars:
+    user_message: Ugh, just Sawp 100 USDC for ETH
+  metadata:
+    id: gen-swap-pos-0001
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '100000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - tone
+- vars:
+    user_message: Swap 0.5 USDC lpease
+  metadata:
+    id: gen-swap-neg-0057
+    source: generated
+    language: english
+    category: ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - punctuation
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: Swpa 100 ETH
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for DAI
+  metadata:
+    id: gen-swap-mt-0038
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '100000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: lol ok CONvErt 0.5 EtH tO Weth
+  metadata:
+    id: gen-swap-pos-0092
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: lol ok swaP 0.5 UsdC please
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for ETH
+  metadata:
+    id: gen-swap-mt-0058
+    source: generated
+    language: english
+    category: multiturn-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0x0000000000000000000000000000000000000000'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - tone
+- vars:
+    user_message: When you get a sec, Traed 0.5 USDC into WETH whenever
+  metadata:
+    id: gen-swap-pos-0073
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      amountIn: '500000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Trade 40 ETH into DAI
+  metadata:
+    id: gen-swap-pos-0133
+    source: generated
+    language: english
+    category: generated-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      chainId: '1'
+      currencyIn: '0x0000000000000000000000000000000000000000'
+      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      amountIn: '40000000000000000000'
+      amountOutMinimum: '0'
+      recipient: <wallet>
+    notes: null
+    level: payload
+    mutators:
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Hey, SenD SOmE ETh tO 0x6eA55E10E568d36004aE05a75c7aA42B7b58Bd1D thanks!
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 1.25 ETH
+  metadata:
+    id: gen-transfer-mt-0044
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+- vars:
+    user_message: PLS snEd 1.25 ETH → 0x6eA55e10E568D36,004aE05a75C7Aa42b7B58Bd1D!
+  metadata:
+    id: gen-transfer-pos-0040
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: Send 250 USCD
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x4f89594187fafe75e56a5b2fb4d4cddcc6590611
+  metadata:
+    id: gen-transfer-mt-0152
+    source: generated
+    language: english
+    category: multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x4f89594187fafe75e56a5b2fb4d4cddcc6590611'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: Hey, eSNd 1,000 eTH... whenever
+  metadata:
+    id: gen-transfer-neg-0063
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: seNd 40 dAI! thanks!
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x4cc94350bbec50508299210340d7d98ad41c0431
+  metadata:
+    id: gen-transfer-mt-0218
+    source: generated
+    language: english
+    category: multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x4cc94350bbec50508299210340d7d98ad41c0431'
+      - '40000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: pls send 250 USDC → 0x4f89594187fafe75e56a5b2fb4d4cddcc6590611
+  metadata:
+    id: gen-transfer-pos-0150
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x4f89594187fafe75e56a5b2fb4d4cddcc6590611'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators: []
+- vars:
+    user_message: Ugh, just coUld you sEND 3 SUdC ovER tO vitAlik.Eth?
+  metadata:
+    id: gen-transfer-pos-0091
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - tone
+- vars:
+    user_message: Please kindly When you get a sec, i waNt TO sEnd 3 sUDC TO 0XF34C07c7fB3Bb3F1F6,836E278dd985,775fF0CBD1
+      NoW!!
+  metadata:
+    id: gen-transfer-pos-0105
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Quick one — Send 3 to vitalik.eth... thanks!
+    - role: assistant
+      content: Which token?
+    - role: user
+      content: in USDC
+  metadata:
+    id: gen-transfer-mt-0099
+    source: generated
+    language: english
+    category: multiturn-token
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: I want to send 0.1 ETH to vitalik.eth now...
+  metadata:
+    id: gen-transfer-pos-0006
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+- vars:
+    user_message: lol ok SeNd 3 DaI thanks!
+  metadata:
+    id: gen-transfer-neg-0118
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: /TranSfer 3 dai TO 0x36A756bC61258652708bB7f6f894eD2fD4485a5e
+  metadata:
+    id: gen-transfer-pos-0126
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x36a756bc61258652708bb7f6f894ed2fd4485a5e'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+- vars:
+    user_message: TArnsfer 250 UsdC To 0X4F89,594,187fafE75E56A5B2fb4d4CDDcC6,590,611
+  metadata:
+    id: gen-transfer-pos-0147
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x4f89594187fafe75e56a5b2fb4d4cddcc6590611'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: Hey, Could you sedn 1,000 ETH over to 0xbf9c5,024,244,342cbd3e2d6baa97d9e06f7e6a2a1?!!
+  metadata:
+    id: gen-transfer-pos-0058
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: pls send 250 DAI → 0x261f5cacb0d620b974849628c2131c3bd993ed56 if
+      that's ok
+  metadata:
+    id: gen-transfer-pos-0172
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x261f5cacb0d620b974849628c2131c3bd993ed56'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - filler
+- vars:
+    user_message: trANsFer 250 DaI to 0x261f5cacb0d620b974,849,628C2,131c3bd993ED56
+      plaese
+  metadata:
+    id: gen-transfer-pos-0169
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x261f5cacb0d620b974849628c2131c3bd993ed56'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: snEd 1.25 eTH to 0X6Ea55E10E568d36,004aE05a75C7AA42B7b58bd1d if
+      that's ok
+  metadata:
+    id: gen-transfer-pos-0034
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Send 250 USDC to vitalik.eth
+  metadata:
+    id: gen-transfer-pos-0133
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators: []
+- vars:
+    user_message: sEnd 40 daI thanks!
+  metadata:
+    id: gen-transfer-neg-0217
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: Ugh, just Tarnsfer 0.005 ETH to vitalik.eth!! if that's ok
+  metadata:
+    id: gen-transfer-pos-0070
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Quick one — Send 250 to vitalik.eth plaese
+  metadata:
+    id: gen-transfer-neg-0164
+    source: generated
+    language: english
+    category: ablation-token
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: When you get a sec, Send 40 to vitalik.eth... thanks!
+  metadata:
+    id: gen-transfer-neg-0186
+    source: generated
+    language: english
+    category: ablation-token
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - punctuation
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: EsNd SoMe eTH To Vitalik.EtH!! whenever
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 1.25 ETH
+  metadata:
+    id: gen-transfer-mt-0033
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: lol ok ESNd 3 daI
+  metadata:
+    id: gen-transfer-neg-0129
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: When you get a sec, esND 3 USDc thanks!
+  metadata:
+    id: gen-transfer-neg-0107
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: MOvE 250 USdc TO viTalik.eth
+  metadata:
+    id: gen-transfer-pos-0134
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+- vars:
+    user_message: When you get a sec, oCuld you send 3 DAI over to 0x36a756bc61258652708bb7f6f894ed2fd4485a5e?
+  metadata:
+    id: gen-transfer-pos-0124
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x36a756bc61258652708bb7f6f894ed2fd4485a5e'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - filler
+- vars:
+    user_message: pls sned 1,000 ETH → vitalik.eth
+  metadata:
+    id: gen-transfer-pos-0051
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: i want to sEdN 40 DaI To VITalIk.Eth NoW!
+  metadata:
+    id: gen-transfer-pos-0204
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '40000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: Please kindly Hey, sEnd 1.25 ETh... if that's ok
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to vitalik.eth
+  metadata:
+    id: gen-transfer-mt-0031
+    source: generated
+    language: english
+    category: multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: Ugh, just Quick one — I wnat to send 0.005 ETH to 0x10,584,749fec5f3c284b7,879a5b0bf996aa0c183a
+      now!! thanks!
+  metadata:
+    id: gen-transfer-pos-0083
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: PLs SEnD 0.1 etH → VitalIk.etH!!
+  metadata:
+    id: gen-transfer-pos-0007
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+- vars:
+    user_message: When you get a sec, COULD yoU sENd 250 USdC OVEr To vITaLIk.ETH?
+  metadata:
+    id: gen-transfer-pos-0135
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+- vars:
+    user_message: Hey, trAnsFEr 1.25 eth To 0X6ea55e10E568D36004AE05a75c7aA42B7B58Bd1D
+  metadata:
+    id: gen-transfer-pos-0037
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+- vars:
+    user_message: Quick one — eSnd 40 dAi... if that's ok
+  metadata:
+    id: gen-transfer-neg-0206
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Quick one — eSnd 40 DAI to vitalik.eth... if that's ok
+  metadata:
+    id: gen-transfer-pos-0199
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '40000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: lol ok Hey, Sedn 250 DAI to 0x261f5cacb0d620b974849628c2131c3bd993ed56
+      thanks!
+  metadata:
+    id: gen-transfer-pos-0166
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x261f5cacb0d620b974849628c2131c3bd993ed56'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Ugh, just /transfer 0.1 ETH to 0xbf5db41c1,449f836,317,920c72e63c48cb818eccf!!
+  metadata:
+    id: gen-transfer-pos-0016
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - tone
+- vars:
+    user_message: Ugh, just I want to send 250 DAI to vitalik.eth now!!
+  metadata:
+    id: gen-transfer-pos-0160
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - tone
+- vars:
+    user_message: /tRAnsFer 40 uSCD TO viTalIK.eTH...
+  metadata:
+    id: gen-transfer-pos-0181
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '40000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+- vars:
+    user_message: Ugh, just Hey, /transfer 0.005 ETH to 0x10,584,749fec5f3c284b7,879a5b0bf996aa0c183a!
+      thanks!
+  metadata:
+    id: gen-transfer-pos-0082
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Hey, mvOE 0.005 etH TO VItaLik.ETh
+  metadata:
+    id: gen-transfer-pos-0068
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: Trnasfer 250 DAI to vitalik.eth
+  metadata:
+    id: gen-transfer-pos-0158
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: could YOU sEND 1.25 etH ovrE to 0x6EA55e10e568D36004Ae05A75c7aA42b7b58BD1D?
+  metadata:
+    id: gen-transfer-pos-0036
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+- vars:
+    user_message: Please kindly Could you send 40 USDC over to 0x3cf45571e467971f283acb78ff40595e9823f006?
+  metadata:
+    id: gen-transfer-pos-0190
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x3cf45571e467971f283acb78ff40595e9823f006'
+      - '40000000'
+    notes: null
+    level: payload
+    mutators:
+    - tone
+- vars:
+    user_message: Pls sEnd 250 USdC → vITALIK.EtH
+  metadata:
+    id: gen-transfer-pos-0139
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: TraNsfeR 0.1 EtH TO vItAlIK.etH...
+  metadata:
+    id: gen-transfer-pos-0004
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+- vars:
+    user_message: Could you esnd 0.005 ETH over to vitalik.eth?
+  metadata:
+    id: gen-transfer-pos-0069
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - filler
+- vars:
+    user_message: When you get a sec, Transfer 250 USDC to vitalik.eth... whenever
+  metadata:
+    id: gen-transfer-pos-0136
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: Sedn 3 to 0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1
+    - role: assistant
+      content: Which token?
+    - role: user
+      content: in USDC
+  metadata:
+    id: gen-transfer-mt-0110
+    source: generated
+    language: english
+    category: multiturn-token
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: Please kindly Hey, /transfer 250 USDC to vitalik.eth whenever
+  metadata:
+    id: gen-transfer-pos-0137
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: Hey, senD 1.25 Eth! thanks!
+  metadata:
+    id: gen-transfer-neg-0041
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - filler
+- vars:
+    user_message: Send 1000 ETH to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1
+  metadata:
+    id: gen-transfer-pos-0056
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - filler
+- vars:
+    user_message: Quick one — SEDN 0.1 eth
+  metadata:
+    id: gen-transfer-neg-0019
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Ugh, just Hey, I want to sned 3 DAI to vitalik.eth now whenever
+  metadata:
+    id: gen-transfer-pos-0116
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: /transfer 1,000 ETH to 0xbf9c5,024,244,342cbd3e2d6baa97d9e06f7e6a2a1
+  metadata:
+    id: gen-transfer-pos-0060
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: When you get a sec, sEnD SmOe eTh tO viTALik.Eth whenever
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 0.005 ETH
+  metadata:
+    id: gen-transfer-mt-0077
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Send 250 USDC
+  metadata:
+    id: gen-transfer-neg-0140
+    source: generated
+    language: english
+    category: ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators: []
+- vars:
+    user_message: Ugh, just Quick one — PLs SENd 3 dAI → vITaLik.ETH pleaes thanks!
+  metadata:
+    id: gen-transfer-pos-0117
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Hey, eSnd 3 DAI to vitalik.eth
+  metadata:
+    id: gen-transfer-pos-0111
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - filler
+- vars:
+    user_message: Move 3 USDC to 0xf34c07c7fb3bb3f1f6,836e278dd985,775ff0cbd1...
+  metadata:
+    id: gen-transfer-pos-0101
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+- vars:
+    user_message: When you get a sec, Send 3 to vitalik.eth whenever
+  metadata:
+    id: gen-transfer-neg-0120
+    source: generated
+    language: english
+    category: ablation-token
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - filler
+- vars:
+    user_message: When you get a sec, Sedn 0.1 ETH to 0xbf5db41c1,449f836,317,920c72e63c48cb818eccf!!
+      whenever
+  metadata:
+    id: gen-transfer-pos-0012
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: lol ok Hey, Send some ETH to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1
+        thanks!
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 1000 ETH
+  metadata:
+    id: gen-transfer-mt-0066
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: Please kindly When you get a sec, mVoe 40 UsDc to 0X3cf45571e467971f283aCB78FF40595e9823F006
+  metadata:
+    id: gen-transfer-pos-0189
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x3cf45571e467971f283acb78ff40595e9823f006'
+      - '40000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Quick one — sNeD 3 daI
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x36a756bc61258652708bb7f6f894ed2fd4485a5e
+  metadata:
+    id: gen-transfer-mt-0130
+    source: generated
+    language: english
+    category: multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x36a756bc61258652708bb7f6f894ed2fd4485a5e'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: lol ok PLS eSNd 250 dAI → ViTalik.EtH!!
+  metadata:
+    id: gen-transfer-pos-0161
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: lol ok Hey, i WANt To SeNd 3 USDc to viTALik.ETh noW thanks!
+  metadata:
+    id: gen-transfer-pos-0094
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: pls sedn 1,000 ETH → 0xbf9c5,024,244,342cbd3e2d6baa97d9e06f7e6a2a1
+  metadata:
+    id: gen-transfer-pos-0062
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+- vars:
+    user_message: lol ok I want to send 40 USDC to 0x3cf45,571e467,971f283acb78ff40,595e9,823f006
+      now!!
+  metadata:
+    id: gen-transfer-pos-0193
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x3cf45571e467971f283acb78ff40595e9823f006'
+      - '40000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - tone
+- vars:
+    user_message: Ugh, just Could you send 0.005 ETH ovre to 0x10,584,749fec5f3c284b7,879a5b0bf996aa0c183a?!!
+  metadata:
+    id: gen-transfer-pos-0080
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Sedn 0.005 ETH
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a
+  metadata:
+    id: gen-transfer-mt-0086
+    source: generated
+    language: english
+    category: multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: Ugh, just COULD yOU send 3 USdC OevR tO 0XF34C07C7fb3bB3f1F6836e278dd985775fF0Cbd1?
+  metadata:
+    id: gen-transfer-pos-0102
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - tone
+- vars:
+    user_message: Ugh, just /trAnSfer 1,000 ETH To ViTALIK.ETh!!
+  metadata:
+    id: gen-transfer-pos-0049
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: Please kindly Quick one — Trnasfer 3 DAI to 0x36a756bc61,258,652,708bb7f6f894ed2fd4,485a5e
+      thanks!
+  metadata:
+    id: gen-transfer-pos-0125
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x36a756bc61258652708bb7f6f894ed2fd4485a5e'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Quick one — sNed 3 Dai whenever
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to vitalik.eth
+  metadata:
+    id: gen-transfer-mt-0119
+    source: generated
+    language: english
+    category: multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: Ugh, just tRAnsfer 1,000 etH TO VitALik.EtH if that's ok
+  metadata:
+    id: gen-transfer-pos-0048
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: I want to send 40 USDC to vitalik.eth now if that's ok
+  metadata:
+    id: gen-transfer-pos-0182
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '40000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+- vars:
+    user_message: Ugh, just When you get a sec, Send 0.1 ETH to vitalik.eth please
+  metadata:
+    id: gen-transfer-pos-0001
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: pls esnd 0.1 ETH → 0xbf5db41c1449f836317920c72e63c48cb818eccf
+  metadata:
+    id: gen-transfer-pos-0018
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - typos
+- vars:
+    user_message: Quick one — sned 250 Usdc TO 0X4F89594187FaFE75E56a5b2fb4d4cDDcc6590611
+      if that's ok
+  metadata:
+    id: gen-transfer-pos-0144
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x4f89594187fafe75e56a5b2fb4d4cddcc6590611'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: Ugh, just /TRaNsfER 250 dAi TO 0x261f5CacB0D620B974849628C2131C3Bd993ed56
+  metadata:
+    id: gen-transfer-pos-0170
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x261f5cacb0d620b974849628c2131c3bd993ed56'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: MOve 0.1 ETh To VItAlik.Eth!
+  metadata:
+    id: gen-transfer-pos-0002
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+- vars:
+    user_message: Please kindly /transfer 3 USCD to 0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1
+  metadata:
+    id: gen-transfer-pos-0104
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - tone
+- vars:
+    user_message: I wnaT TO sEnD 250 UsDC To 0x4F89,594,187FAfe75E56a5b2Fb4D4CddcC6,590,611
+      Now!!
+  metadata:
+    id: gen-transfer-pos-0149
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x4f89594187fafe75e56a5b2fb4d4cddcc6590611'
+      - '250000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Esnd sOMe Eth tO 0x10,584,749fEC5F3c284b7,879a5B0bF996aa0c183a! whenever
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 0.005 ETH
+  metadata:
+    id: gen-transfer-mt-0088
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
+      value: '5000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: SeND SoeM eTH TO 0Xbf9C5,024,244,342CBD3e2d6Baa97d9E06f7e6A2a1...
+  metadata:
+    id: gen-transfer-neg-0065
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+- vars:
+    user_message: Please kindly When you get a sec, cOulD you SNed 0.1 eTH over tO
+      vitAlIk.Eth?
+  metadata:
+    id: gen-transfer-pos-0003
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Ugh, just /trANSfER 250 daI tO VItAliK.ETh plaese
+  metadata:
+    id: gen-transfer-pos-0159
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '250000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: Ugh, just Quick one — omvE 1,000 ETH tO VITALik.EtH!! whenever
+  metadata:
+    id: gen-transfer-pos-0046
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Quick one — Sned 40 to vitalik.eth... thanks!
+    - role: assistant
+      content: Which token?
+    - role: user
+      content: in USDC
+  metadata:
+    id: gen-transfer-mt-0187
+    source: generated
+    language: english
+    category: multiturn-token
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '40000000'
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Please kindly mOVE 3 dAi tO 0X36A756bC61258652708bb7F6F894ED2FD4485a5E
+  metadata:
+    id: gen-transfer-pos-0123
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x36a756bc61258652708bb7f6f894ed2fd4485a5e'
+      - '3000000000000000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Sedn some ETH to 0xbf5db41c1449f836317920c72e63c48cb818eccf
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 0.1 ETH
+  metadata:
+    id: gen-transfer-mt-0022
+    source: generated
+    language: english
+    category: multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
+      value: '100000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - typos
+    - tone
+- vars:
+    user_message: Please kindly cOULD yOu seNd 40 UsdC oVer tO ViTALIk.Eth? whenever
+  metadata:
+    id: gen-transfer-pos-0179
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      - '40000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: Quick one — Sned 1,000 ETH to vitalik.eth thanks!
+  metadata:
+    id: gen-transfer-pos-0045
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1000000000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Send 40 DAI to 0x4cc94350bbec50508299210340d7d98ad41c0431
+  metadata:
+    id: gen-transfer-pos-0210
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0x4cc94350bbec50508299210340d7d98ad41c0431'
+      - '40000000000000000000'
+    notes: null
+    level: payload
+    mutators: []
+- vars:
+    user_message: When you get a sec, SeND 3 UDsC tO 0XF34C07C7fB3Bb3F1f6836E278dD985775FF0cbd1
+  metadata:
+    id: gen-transfer-pos-0100
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      value: '0'
+      function: transfer(address,uint256)
+      args:
+      - '0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1'
+      - '3000000'
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: Quick one — EsNd Some eth tO 0x6ea55e10e568d36004AE05a75c7Aa42b7b58BD1d
+  metadata:
+    id: gen-transfer-neg-0043
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: Hey, cOUlD yoU sEND 1.25 ETH OvEr tO viTalIK.Eth? please if that's
+      ok
+  metadata:
+    id: gen-transfer-pos-0025
+    source: generated
+    language: english
+    category: generated-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: executeTx
+      chainId: '1'
+      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+      value: '1250000000000000000'
+      function: null
+      args: []
+    notes: null
+    level: payload
+    mutators:
+    - case
+    - punctuation
+    - filler
+- vars:
+    user_message: When you get a sec, Send sOem eth tO 0Xbf5DB41C1,449F836,317,920C72E63c48cb818EcCf
+      please if that's ok
+  metadata:
+    id: gen-transfer-neg-0021
+    source: generated
+    language: english
+    category: ablation-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    level: intent
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
