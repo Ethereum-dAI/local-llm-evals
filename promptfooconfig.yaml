@@ -4,11 +4,13 @@
 # Requires OPENROUTER_API_KEY (loaded from .env).
 description: Local agent wallet — executeTx/readTx/swap intent eval
 
+# Rendered dynamically: base text from pf/prompt.json + the known-token table
+# from datasets/lookup.json (same single source the converter uses).
 prompts:
-  - file://pf/prompt.json
+  - file://pf/prompt.py:prompt
 
-# Two cheap OpenRouter models: gpt-4o-mini + Gemma 4 (closest hosted proxy to the
-# shipped on-device Gemma 4 E4B).
+# Cheap OpenRouter models: gpt-4o-mini + Gemma 4 (closest hosted proxy to the
+# shipped on-device Gemma 4 E4B) + Qwen 3.5 Flash.
 providers:
   - id: openrouter:openai/gpt-4o-mini
     config:
@@ -16,6 +18,11 @@ providers:
       max_tokens: 512
       tools: file://pf/tools.json
   - id: openrouter:google/gemma-4-26b-a4b-it
+    config:
+      temperature: 0.2
+      max_tokens: 512
+      tools: file://pf/tools.json
+  - id: openrouter:qwen/qwen3.5-flash-02-23
     config:
       temperature: 0.2
       max_tokens: 512

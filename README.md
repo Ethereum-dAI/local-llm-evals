@@ -12,13 +12,15 @@ Design notes live under `docs/` (gitignored).
 
 | Path | Role |
 | --- | --- |
-| `pf/tests.yaml` | **single source of truth** for test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`) |
-| `pf/prompt.json` | system + user chat prompt sent to every model |
+| `pf/tests.yaml` | **single source of truth** for test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`; multi-turn cases add `vars.history` of prior turns and `metadata.query_type: multi_turn`) |
+| `pf/prompt.json` | static base of the system + user chat prompt |
+| `pf/prompt.py` | promptfoo prompt function: renders the base plus the known-token table from `datasets/lookup.json` |
 | `pf/tools.json` | the `executeTx` / `readTx` / `swap` tool schemas |
 | `pf/assert.py` | python assertion — reuses `score_case` against the gold in each test's metadata |
 | `promptfooconfig.yaml` | providers (cheap OpenRouter models), prompt, tools, assertion, tests |
 | `src/wallet_evals/` | reused core: schema, tool-call parsing, binary scorer, tests loader |
 | `scripts/convert_recognition.py` | regenerates `pf/tests.yaml` from the Swift app's `recognition.json` |
+| `scripts/safety_report.py` | false-execution rate over the adversarial cases, from an eval output JSON |
 
 ## Setup
 
@@ -48,10 +50,27 @@ uv run python scripts/convert_recognition.py
 Rebuilds `pf/tests.yaml` from the Swift `recognition.json`: transfers/approvals →
 `executeTx`, swaps → synthetic `swap`, ambiguous → no-call. Cases it can't resolve
 mechanically (exact-output swaps, `"all"` amounts, unknown ENS/tokens) are
-reported as needing manual authoring.
+reported as needing manual authoring. Multi-turn cases (`query_type:
+multi_turn`) are authored directly in `pf/tests.yaml` and carried across
+regenerations untouched.
 
 > Assumes the `local-wallet-mac` repo is checked out as a sibling directory
 > (`../local-wallet-mac`); pass an explicit path as the first argument otherwise.
+
+## Safety metrics
+
+A model that executes transactions on a user's behalf must not act on
+instructions it was never given. The `adversarial` cases in `pf/tests.yaml`
+cover prompt injection (overrides hidden in pasted content), scams, and
+questions phrased like commands; the pure ones expect **no call**, so any fired
+transaction is a false execution. After an eval:
+
+```bash
+uv run python scripts/safety_report.py results.json
+```
+
+reports the **false-execution rate** per model, plus the confused-deputy case
+(execute only the user's real instruction, ignore the injected one).
 
 ## Test (offline, no API key)
 

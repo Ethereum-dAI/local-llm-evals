@@ -76,7 +76,7 @@ def test_convert_swap_exact_in():
     assert call["currencyOut"] == LOOKUP["tokens"]["DAI"]["address"]
     assert call["amountIn"] == "100000000"
     assert call["amountOutMinimum"] == "0"
-    assert call["recipient"] == "<wallet>"
+    assert call["recipient"] == "SELF"
 
 
 def test_convert_swap_native_eth_uses_zero_address():
@@ -154,6 +154,38 @@ def test_unknown_ens_routed_to_manual():
     case, manual = convert_case(raw)
     assert case is None
     assert manual == "transfer-en-005"
+
+
+def test_native_transfer_to_ens_gets_alias():
+    raw = {"id": "transfer-en-001", "user_message": "Send 0.1 ETH to vitalik.eth",
+           "category": "truePositiveTransfer", "language": "english", "expected_tool": "transfer",
+           "expected_args": {"to": {"kind": "exact", "value": "vitalik.eth"},
+                             "amount": {"kind": "exact", "value": "0.1"},
+                             "token": {"kind": "exact", "value": "ETH"}}, "notes": None}
+    case, manual = convert_case(raw)
+    assert manual is None
+    assert case["expected_calls"][0]["to_aliases"] == ["vitalik.eth"]
+
+
+def test_native_transfer_to_address_has_no_alias():
+    raw = {"id": "transfer-en-004", "user_message": "Move 1.25 ETH to 0x1111111111111111111111111111111111111111",
+           "category": "truePositiveTransfer", "language": "english", "expected_tool": "transfer",
+           "expected_args": {"to": {"kind": "exact", "value": "0x1111111111111111111111111111111111111111"},
+                             "amount": {"kind": "exact", "value": "1.25"},
+                             "token": {"kind": "exact", "value": "ETH"}}, "notes": None}
+    case, manual = convert_case(raw)
+    assert "to_aliases" not in case["expected_calls"][0]
+
+
+def test_erc20_transfer_to_ens_has_no_to_alias():
+    # ERC-20: `to` is the token contract; the ENS name resolves into args, not to.
+    raw = {"id": "transfer-en-002", "user_message": "Send 100 USDC to vitalik.eth",
+           "category": "truePositiveTransfer", "language": "english", "expected_tool": "transfer",
+           "expected_args": {"to": {"kind": "exact", "value": "vitalik.eth"},
+                             "amount": {"kind": "exact", "value": "100"},
+                             "token": {"kind": "exact", "value": "USDC"}}, "notes": None}
+    case, manual = convert_case(raw)
+    assert "to_aliases" not in case["expected_calls"][0]
 
 
 def test_difficulty_derived_swap_and_multilingual_medium():

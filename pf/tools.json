@@ -10,7 +10,7 @@
           "chainId": { "type": "string", "description": "EIP-155 chain id as a decimal string, e.g. \"1\" for Ethereum mainnet." },
           "to": { "type": "string", "description": "Target contract address (0x) the call is sent to. For an ERC-20 transfer/approve this is the token contract; for a native transfer this is the recipient." },
           "value": { "type": "string", "description": "Native value in wei as a decimal string. \"0\" for contract calls; the amount in wei for a native transfer." },
-          "function": { "type": ["string", "null"], "description": "Function signature being called, e.g. \"transfer(address,uint256)\". Null for a plain native transfer with no calldata." },
+          "function": { "type": "string", "description": "Function signature being called, e.g. \"transfer(address,uint256)\". Omit for a plain native transfer with no calldata." },
           "args": { "type": "array", "items": {}, "description": "Positional arguments matching the function signature, in order. Tuple parameters are nested arrays. Empty for a native transfer." }
         },
         "required": ["chainId", "to", "args"]
@@ -27,7 +27,7 @@
         "properties": {
           "chainId": { "type": "string", "description": "EIP-155 chain id as a decimal string, e.g. \"1\" for Ethereum mainnet." },
           "to": { "type": "string", "description": "Target contract address (0x) the call is sent to. For an ERC-20 transfer/approve this is the token contract; for a native transfer this is the recipient." },
-          "function": { "type": ["string", "null"], "description": "Function signature being called, e.g. \"transfer(address,uint256)\". Null for a plain native transfer with no calldata." },
+          "function": { "type": "string", "description": "Function signature being called, e.g. \"transfer(address,uint256)\". Omit for a plain native transfer with no calldata." },
           "args": { "type": "array", "items": {}, "description": "Positional arguments matching the function signature, in order. Tuple parameters are nested arrays. Empty for a native transfer." }
         },
         "required": ["chainId", "to", "args"]
@@ -46,10 +46,10 @@
           "currencyIn": { "type": "string", "description": "Address of the token being spent. Native ETH is the zero address 0x0000000000000000000000000000000000000000." },
           "currencyOut": { "type": "string", "description": "Address of the token being received. Native ETH is the zero address." },
           "amountIn": { "type": "string", "description": "Exact input amount in base units (decimal string)." },
-          "amountOutMinimum": { "type": "string", "description": "Minimum acceptable output in base units; \"0\" if unspecified." },
-          "recipient": { "type": "string", "description": "Recipient address; defaults to the user's own wallet." }
+          "amountOutMinimum": { "type": "string", "description": "Minimum acceptable output in base units. Use \"0\" if the user did not specify a minimum — never ask for one." },
+          "recipient": { "type": "string", "description": "Recipient address. Use the literal string \"SELF\" when the user does not name a recipient." }
         },
-        "required": ["chainId", "currencyIn", "currencyOut", "amountIn"]
+        "required": ["chainId", "currencyIn", "currencyOut", "amountIn", "amountOutMinimum", "recipient"]
       }
     }
   }

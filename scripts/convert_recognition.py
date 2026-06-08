@@ -7,6 +7,11 @@ reproducible from the production source. Swaps become the synthetic `swap`
 intent; transfers/approvals become `executeTx`; ambiguous cases become no-call.
 Exact-output swaps, "all" amounts, and unresolved ENS/tokens are reported as
 needing manual authoring. Resolution uses datasets/lookup.json, here only.
+
+Multi-turn / conversational cases (metadata.query_type == "multi_turn") cannot
+come from recognition.json — they are authored directly in pf/tests.yaml. To
+keep regeneration idempotent, those cases are read back from the existing
+tests.yaml and re-appended after the generated ones.
 """
 from __future__ import annotations
 
@@ -86,7 +91,7 @@ def _convert_swap(raw: dict) -> tuple[dict | None, str | None]:
         "tool": "swap", "chainId": LOOKUP["chainId"],
         "currencyIn": in_addr, "currencyOut": out_addr,
         "amountIn": to_base_units(amount, in_dec),
-        "amountOutMinimum": "0", "recipient": "<wallet>",
+        "amountOutMinimum": "0", "recipient": "SELF",
     }
     case = _base_meta(raw, protocol="uniswap") | {
         "level": "payload", "query_type": "one_shot",
@@ -126,6 +131,9 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
     if token.get("native"):
         call = {"tool": "executeTx", "chainId": chain_id, "to": recipient,
                 "value": to_base_units(amount, token["decimals"]), "function": None, "args": []}
+        if to_value in LOOKUP["ens"]:
+            # The wallet resolves ENS post-call: the unresolved name is equally correct.
+            call["to_aliases"] = [to_value]
     else:
         call = {"tool": "executeTx", "chainId": chain_id, "to": token["address"], "value": "0",
                 "function": "transfer(address,uint256)",
@@ -158,6 +166,29 @@ def _to_promptfoo_test(case: dict) -> dict:
     return {"vars": {"user_message": case["user_message"]}, "metadata": metadata}
 
 
+def _is_manual(test: dict) -> bool:
+    """True for cases authored directly in tests.yaml rather than derived from
+    recognition.json: multi-turn cases (carry conversation history) and
+    adversarial/safety cases (injection, scams, over-execution)."""
+    metadata = test.get("metadata", {})
+    return (
+        metadata.get("query_type") == "multi_turn"
+        or metadata.get("category") == "adversarial"
+    )
+
+
+def _preserved_manual_tests(out: Path) -> list[dict]:
+    """Manually-authored cases carried across regens, in their existing order.
+
+    They aren't derivable from recognition.json, so read them back verbatim and
+    re-append, keeping regeneration idempotent.
+    """
+    if not out.exists():
+        return []
+    existing = yaml.safe_load(out.read_text()) or []
+    return [t for t in existing if _is_manual(t)]
+
+
 def main() -> None:
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else (
         ROOT.parent / "local-wallet-mac" / "wallet-macos" / "Sources" / "wallet-eval" / "Dataset" / "recognition.json"
@@ -175,6 +206,7 @@ def main() -> None:
             converted.append(case)
 
     tests = [_to_promptfoo_test(c) for c in converted]
+    tests.extend(_preserved_manual_tests(out))
     header = (
         "# Single source of truth for eval test cases (promptfoo-native).\n"
         "# Generated from the Swift recognition.json by scripts/convert_recognition.py.\n"
