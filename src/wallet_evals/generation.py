@@ -196,3 +196,42 @@ def build_positive_case(intent: dict, template: str, rng: random.Random, idx: in
                         level="payload", query_type="one_shot",
                         mutators=labels, expected_calls=gold_calls(intent))
     return {"vars": {"user_message": surface}, "metadata": md}
+
+
+# Partial templates that OMIT one field (keyed by (action, missing_field)).
+ABLATION_TEMPLATES: dict[tuple[str, str], str] = {
+    ("transfer", "recipient"): "Send {amount} {token}",
+    ("transfer", "amount"): "Send some {token} to {recipient}",
+    ("transfer", "token"): "Send {amount} to {recipient}",
+    ("swap", "to_token"): "Swap {amount} {from_token}",
+    ("swap", "from_token"): "Swap {amount} for {to_token}",
+    ("swap", "amount"): "Swap {from_token} for {to_token}",
+}
+
+# Canned assistant clarification for the missing field (multi-turn turn 2).
+CLARIFICATIONS: dict[str, str] = {
+    "recipient": "Which address or ENS should I send it to?",
+    "amount": "How much would you like to send?",
+    "token": "Which token?",
+    "to_token": "Which token do you want to receive?",
+    "from_token": "Which token do you want to swap from?",
+}
+
+# Completing user fragment that supplies the missing field (multi-turn turn 3).
+COMPLETIONS: dict[tuple[str, str], str] = {
+    ("transfer", "recipient"): "to {recipient}",
+    ("transfer", "amount"): "{amount} {token}",
+    ("transfer", "token"): "in {token}",
+    ("swap", "to_token"): "for {to_token}",
+    ("swap", "from_token"): "from {from_token}",
+    ("swap", "amount"): "{amount}",
+}
+
+
+def build_negative_case(intent: dict, field: str, rng: random.Random, idx: int) -> dict:
+    """Drop `field` from the surface; expect no tool call (model should ask)."""
+    template = ABLATION_TEMPLATES[(intent["action"], field)]
+    surface, labels = apply_mutators(render_surface(template, intent), rng)
+    md = _base_metadata(intent, "neg", idx,
+                        level="intent", category=f"ablation-{field}", mutators=labels)
+    return {"vars": {"user_message": surface}, "metadata": md}

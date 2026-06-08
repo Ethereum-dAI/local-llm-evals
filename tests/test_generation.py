@@ -147,3 +147,29 @@ def test_build_positive_case_structure():
     assert md["protocol"] == "transfer"
     assert md["source"] == "generated"
     assert md["expected_calls"][0]["value"] == "100000000000000000"
+
+
+from wallet_evals.generation import (
+    ABLATION_TEMPLATES, CLARIFICATIONS, COMPLETIONS, build_negative_case,
+)
+
+
+def test_ablation_maps_cover_seed_fields():
+    for key in [("transfer", "recipient"), ("transfer", "amount"),
+                ("transfer", "token"), ("swap", "to_token"),
+                ("swap", "from_token"), ("swap", "amount")]:
+        assert key in ABLATION_TEMPLATES
+        assert key in COMPLETIONS
+    for field in ["recipient", "amount", "token", "to_token", "from_token"]:
+        assert field in CLARIFICATIONS
+
+
+def test_build_negative_case_omits_field_and_expects_no_call():
+    intent = {"action": "transfer", "amount": "0.1", "token": "ETH",
+              "recipient": "vitalik.eth"}
+    case = build_negative_case(intent, "recipient", random.Random(0), idx=2)
+    md = case["metadata"]
+    assert md["id"] == "gen-transfer-neg-0002"
+    assert md["level"] == "intent"
+    assert md["expected_calls"] == []
+    assert "vitalik.eth" not in case["vars"]["user_message"]  # recipient dropped
