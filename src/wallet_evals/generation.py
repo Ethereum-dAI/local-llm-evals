@@ -235,3 +235,23 @@ def build_negative_case(intent: dict, field: str, rng: random.Random, idx: int) 
     md = _base_metadata(intent, "neg", idx,
                         level="intent", category=f"ablation-{field}", mutators=labels)
     return {"vars": {"user_message": surface}, "metadata": md}
+
+
+def build_multiturn_case(intent: dict, field: str, rng: random.Random, idx: int) -> dict:
+    """Scripted convo: ablated turn 1, canned clarification, completing turn 3.
+
+    Gold = the full computed call. Only the model's final response is scored.
+    """
+    ablated_template = ABLATION_TEMPLATES[(intent["action"], field)]
+    turn1, labels = apply_mutators(render_surface(ablated_template, intent), rng)
+    completion = render_surface(COMPLETIONS[(intent["action"], field)], intent)
+    messages = [
+        {"role": "user", "content": turn1},
+        {"role": "assistant", "content": CLARIFICATIONS[field]},
+        {"role": "user", "content": completion},
+    ]
+    md = _base_metadata(intent, "mt", idx,
+                        level="payload", query_type="multi_turn",
+                        category=f"multiturn-{field}", mutators=labels,
+                        expected_calls=gold_calls(intent))
+    return {"vars": {"messages": messages}, "metadata": md}

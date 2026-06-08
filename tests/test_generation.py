@@ -173,3 +173,27 @@ def test_build_negative_case_omits_field_and_expects_no_call():
     assert md["level"] == "intent"
     assert md["expected_calls"] == []
     assert "vitalik.eth" not in case["vars"]["user_message"]  # recipient dropped
+
+
+from wallet_evals.generation import build_multiturn_case
+
+
+def test_build_multiturn_case_three_turns_and_full_gold():
+    intent = {"action": "transfer", "amount": "0.1", "token": "ETH",
+              "recipient": "vitalik.eth"}
+    case = build_multiturn_case(intent, "recipient", random.Random(0), idx=3)
+    msgs = case["vars"]["messages"]
+    assert [m["role"] for m in msgs] == ["user", "assistant", "user"]
+    assert msgs[1]["content"] == "Which address or ENS should I send it to?"
+    assert "vitalik.eth" in msgs[2]["content"]
+    md = case["metadata"]
+    assert md["id"] == "gen-transfer-mt-0003"
+    assert md["level"] == "payload"
+    assert md["expected_calls"][0]["value"] == "100000000000000000"  # full gold
+
+
+def test_multiturn_has_no_user_message_var():
+    intent = {"action": "swap", "amount": "100", "from_token": "USDC",
+              "to_token": "ETH"}
+    case = build_multiturn_case(intent, "to_token", random.Random(0), idx=1)
+    assert "messages" in case["vars"] and "user_message" not in case["vars"]
