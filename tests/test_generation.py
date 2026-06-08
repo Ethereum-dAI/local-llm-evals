@@ -75,3 +75,41 @@ def test_swap_wrong_verb_template_present():
 
 def test_template_banks_nonempty():
     assert len(TRANSFER_TEMPLATES) >= 4 and len(SWAP_TEMPLATES) >= 4
+
+
+from wallet_evals.generation import expand_vary
+
+
+def test_expand_literal_seed_is_single_intent():
+    seed = {"action": "transfer", "amount": "0.1", "token": "ETH",
+            "recipient": "vitalik.eth", "ablate": ["recipient"]}
+    out = expand_vary(seed, random.Random(0))
+    assert len(out) == 1
+    assert out[0]["amount"] == "0.1"
+    assert out[0]["ablate"] == ["recipient"]
+
+
+def test_expand_vary_cross_product():
+    seed = {"action": "transfer",
+            "amount": {"vary": ["0.1", "1000"]},
+            "token": {"vary": ["ETH", "USDC"]},
+            "recipient": "vitalik.eth"}
+    out = expand_vary(seed, random.Random(0))
+    assert len(out) == 4
+    amounts = sorted({i["amount"] for i in out})
+    assert amounts == ["0.1", "1000"]
+
+
+def test_expand_random_address_resolves_to_hex():
+    seed = {"action": "transfer", "amount": "0.1", "token": "ETH",
+            "recipient": {"vary": ["random_address"]}}
+    out = expand_vary(seed, random.Random(0))
+    assert out[0]["recipient"].startswith("0x") and len(out[0]["recipient"]) == 42
+
+
+def test_expand_vary_deterministic():
+    seed = {"action": "transfer", "amount": "0.1", "token": "ETH",
+            "recipient": {"vary": ["random_address", "vitalik.eth"]}}
+    a = expand_vary(seed, random.Random(4))
+    b = expand_vary(seed, random.Random(4))
+    assert a == b

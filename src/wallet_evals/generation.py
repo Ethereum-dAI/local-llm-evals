@@ -7,6 +7,7 @@ parsed from the rendered surface — so surface mutation is always safe.
 """
 from __future__ import annotations
 
+import itertools
 import random
 
 
@@ -104,3 +105,42 @@ SWAP_TEMPLATES: list[str] = [
 def render_surface(template: str, intent: dict) -> str:
     """Fill a template from an intent dict (missing keys are an authoring error)."""
     return template.format(**intent)
+
+
+# Param fields that participate in vary-expansion, per action.
+_VARY_FIELDS = {
+    "transfer": ("amount", "token", "recipient"),
+    "swap": ("amount", "from_token", "to_token"),
+}
+
+
+def _resolve_value(raw_value, rng: random.Random):
+    """Resolve one chosen param value, expanding the random_address sentinel."""
+    if raw_value == "random_address":
+        return random_address(rng)
+    return raw_value
+
+
+def expand_vary(seed: dict, rng: random.Random) -> list[dict]:
+    """Expand a seed's `{vary: [...]}` fields into concrete intent dicts.
+
+    Cross-product over all varied fields. `random_address` sentinels are drawn
+    per produced intent. Non-param keys (action, ablate) are copied through.
+    """
+    action = seed["action"]
+    fields = _VARY_FIELDS[action]
+    choices: list[list] = []
+    for field in fields:
+        spec = seed[field]
+        values = spec["vary"] if isinstance(spec, dict) and "vary" in spec else [spec]
+        choices.append(values)
+
+    intents: list[dict] = []
+    for combo in itertools.product(*choices):
+        intent = {"action": action}
+        for field, raw_value in zip(fields, combo):
+            intent[field] = _resolve_value(raw_value, rng)
+        if "ablate" in seed:
+            intent["ablate"] = list(seed["ablate"])
+        intents.append(intent)
+    return intents
