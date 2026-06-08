@@ -10,6 +10,10 @@ from __future__ import annotations
 import itertools
 import random
 
+from wallet_evals.intents import (
+    resolve_recipient, build_transfer_call, build_swap_call,
+)
+
 
 def random_address(rng: random.Random) -> str:
     """A realistic-looking lowercase 20-byte hex address from `rng`."""
@@ -144,3 +148,51 @@ def expand_vary(seed: dict, rng: random.Random) -> list[dict]:
             intent["ablate"] = list(seed["ablate"])
         intents.append(intent)
     return intents
+
+
+def gold_calls(intent: dict) -> list[dict]:
+    """Compute the gold expected_calls for a fully-specified concrete intent."""
+    if intent["action"] == "transfer":
+        recipient = resolve_recipient(intent["recipient"])
+        if recipient is None:
+            raise ValueError(f"unresolved recipient: {intent['recipient']!r}")
+        return [build_transfer_call(intent["amount"], intent["token"], recipient)]
+    if intent["action"] == "swap":
+        return [build_swap_call(intent["amount"], intent["from_token"], intent["to_token"])]
+    raise ValueError(f"unknown action: {intent['action']!r}")
+
+
+def _protocol(action: str) -> str:
+    return "uniswap" if action == "swap" else "transfer"
+
+
+def _difficulty(action: str) -> str:
+    # Mirrors the converter: swaps are medium, english transfers easy.
+    return "medium" if action == "swap" else "easy"
+
+
+def _base_metadata(intent: dict, kind: str, idx: int, **extra) -> dict:
+    action = intent["action"]
+    md = {
+        "id": f"gen-{action}-{kind}-{idx:04d}",
+        "source": "generated",
+        "language": "english",
+        "category": f"generated-{action}-{kind}",
+        "protocol": _protocol(action),
+        "difficulty": _difficulty(action),
+        "query_type": None,
+        "requires": [],
+        "expected_calls": [],
+        "notes": None,
+    }
+    md.update(extra)
+    return md
+
+
+def build_positive_case(intent: dict, template: str, rng: random.Random, idx: int) -> dict:
+    """A fully-specified intent rendered to a noisy surface; gold = computed call."""
+    surface, labels = apply_mutators(render_surface(template, intent), rng)
+    md = _base_metadata(intent, "pos", idx,
+                        level="payload", query_type="one_shot",
+                        mutators=labels, expected_calls=gold_calls(intent))
+    return {"vars": {"user_message": surface}, "metadata": md}

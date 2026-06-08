@@ -113,3 +113,37 @@ def test_expand_vary_deterministic():
     a = expand_vary(seed, random.Random(4))
     b = expand_vary(seed, random.Random(4))
     assert a == b
+
+
+from wallet_evals.generation import gold_calls, build_positive_case
+
+
+def test_gold_calls_transfer_resolves_ens():
+    intent = {"action": "transfer", "amount": "0.1", "token": "ETH",
+              "recipient": "vitalik.eth"}
+    calls = gold_calls(intent)
+    assert calls[0]["to"] == "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+    assert calls[0]["value"] == "100000000000000000"
+
+
+def test_gold_calls_swap():
+    intent = {"action": "swap", "amount": "100", "from_token": "USDC",
+              "to_token": "ETH"}
+    calls = gold_calls(intent)
+    assert calls[0]["tool"] == "swap"
+    assert calls[0]["amountIn"] == "100000000"
+
+
+def test_build_positive_case_structure():
+    intent = {"action": "transfer", "amount": "0.1", "token": "ETH",
+              "recipient": "vitalik.eth"}
+    case = build_positive_case(intent, "Send {amount} {token} to {recipient}",
+                               random.Random(0), idx=1)
+    assert "vars" in case and "metadata" in case
+    assert "user_message" in case["vars"]
+    md = case["metadata"]
+    assert md["id"] == "gen-transfer-pos-0001"
+    assert md["level"] == "payload"
+    assert md["protocol"] == "transfer"
+    assert md["source"] == "generated"
+    assert md["expected_calls"][0]["value"] == "100000000000000000"
