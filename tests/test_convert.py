@@ -1,4 +1,5 @@
-from scripts.convert_recognition import to_base_units, convert_case, LOOKUP
+from scripts.convert_recognition import convert_case, LOOKUP
+from wallet_evals.intents import to_base_units
 
 
 def test_to_base_units_eth():
