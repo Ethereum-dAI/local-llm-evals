@@ -79,3 +79,28 @@ def apply_mutators(text: str, rng: random.Random) -> tuple[str, list[str]]:
             text = fn(text, rng)
             labels.append(name)
     return text, labels
+
+
+TRANSFER_TEMPLATES: list[str] = [
+    "Send {amount} {token} to {recipient}",
+    "Move {amount} {token} to {recipient}",
+    "Could you send {amount} {token} over to {recipient}?",
+    "Transfer {amount} {token} to {recipient}",
+    "/transfer {amount} {token} to {recipient}",
+    "I want to send {amount} {token} to {recipient} now",
+    "pls send {amount} {token} → {recipient}",
+]
+
+SWAP_TEMPLATES: list[str] = [
+    "Swap {amount} {from_token} for {to_token}",
+    "Convert {amount} {from_token} to {to_token}",
+    "Trade {amount} {from_token} into {to_token}",
+    "Exchange {amount} {from_token} into {to_token}",
+    "/swap {amount} {from_token} to {to_token}",
+    "send {amount} {from_token} to become {to_token}",  # wrong-verb hard phrasing
+]
+
+
+def render_surface(template: str, intent: dict) -> str:
+    """Fill a template from an intent dict (missing keys are an authoring error)."""
+    return template.format(**intent)

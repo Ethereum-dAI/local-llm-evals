@@ -48,3 +48,30 @@ def test_apply_mutators_returns_text_and_labels():
 def test_apply_mutators_deterministic():
     assert apply_mutators("hello world", random.Random(9)) == \
            apply_mutators("hello world", random.Random(9))
+
+
+from wallet_evals.generation import (
+    TRANSFER_TEMPLATES, SWAP_TEMPLATES, render_surface,
+)
+
+
+def test_transfer_render():
+    intent = {"action": "transfer", "amount": "0.1", "token": "ETH",
+              "recipient": "vitalik.eth"}
+    out = render_surface("Send {amount} {token} to {recipient}", intent)
+    assert out == "Send 0.1 ETH to vitalik.eth"
+
+
+def test_swap_render():
+    intent = {"action": "swap", "amount": "100", "from_token": "USDC",
+              "to_token": "ETH"}
+    out = render_surface("Swap {amount} {from_token} for {to_token}", intent)
+    assert out == "Swap 100 USDC for ETH"
+
+
+def test_swap_wrong_verb_template_present():
+    assert any("become" in t for t in SWAP_TEMPLATES)  # Marcello's hard phrasing
+
+
+def test_template_banks_nonempty():
+    assert len(TRANSFER_TEMPLATES) >= 4 and len(SWAP_TEMPLATES) >= 4
