@@ -2434,7 +2434,7 @@
     - case
     - filler
 - vars:
-    user_message: PLS snEd 1.25 ETH → 0x6eA55e10E568D36,004aE05a75C7Aa42b7B58Bd1D!
+    user_message: PLS snEd 1.25 ETH → 0x6eA55e10E568D36004aE05a75C7Aa42b7B58Bd1D!
   metadata:
     id: gen-transfer-pos-0040
     source: generated
@@ -2590,7 +2590,7 @@
     - typos
     - tone
 - vars:
-    user_message: Please kindly When you get a sec, i waNt TO sEnd 3 sUDC TO 0XF34C07c7fB3Bb3F1F6,836E278dd985,775fF0CBD1
+    user_message: Please kindly When you get a sec, i waNt TO sEnd 3 sUDC TO 0XF34C07c7fB3Bb3F1F6836E278dd985775fF0CBD1
       NoW!!
   metadata:
     id: gen-transfer-pos-0105
@@ -2715,7 +2715,7 @@
     mutators:
     - case
 - vars:
-    user_message: TArnsfer 250 UsdC To 0X4F89,594,187fafE75E56A5B2fb4d4CDDcC6,590,611
+    user_message: TArnsfer 250 UsdC To 0X4F89594187fafE75E56A5B2fb4d4CDDcC6590611
   metadata:
     id: gen-transfer-pos-0147
     source: generated
@@ -2742,7 +2742,7 @@
     - typos
     - tone
 - vars:
-    user_message: Hey, Could you sedn 1,000 ETH over to 0xbf9c5,024,244,342cbd3e2d6baa97d9e06f7e6a2a1?!!
+    user_message: Hey, Could you sedn 1,000 ETH over to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1?!!
   metadata:
     id: gen-transfer-pos-0058
     source: generated
@@ -2792,8 +2792,7 @@
     mutators:
     - filler
 - vars:
-    user_message: trANsFer 250 DaI to 0x261f5cacb0d620b974,849,628C2,131c3bd993ED56
-      plaese
+    user_message: trANsFer 250 DaI to 0x261f5cacb0d620b974849628C2131c3bd993ED56 plaese
   metadata:
     id: gen-transfer-pos-0169
     source: generated
@@ -2820,8 +2819,8 @@
     - typos
     - tone
 - vars:
-    user_message: snEd 1.25 eTH to 0X6Ea55E10E568d36,004aE05a75C7AA42B7b58bd1d if
-      that's ok
+    user_message: snEd 1.25 eTH to 0X6Ea55E10E568d36004aE05a75C7AA42B7b58bd1d if that's
+      ok
   metadata:
     id: gen-transfer-pos-0034
     source: generated
@@ -3145,7 +3144,7 @@
     - filler
     - tone
 - vars:
-    user_message: Ugh, just Quick one — I wnat to send 0.005 ETH to 0x10,584,749fec5f3c284b7,879a5b0bf996aa0c183a
+    user_message: Ugh, just Quick one — I wnat to send 0.005 ETH to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a
       now!! thanks!
   metadata:
     id: gen-transfer-pos-0083
@@ -3314,7 +3313,7 @@
     - filler
     - tone
 - vars:
-    user_message: Ugh, just /transfer 0.1 ETH to 0xbf5db41c1,449f836,317,920c72e63c48cb818eccf!!
+    user_message: Ugh, just /transfer 0.1 ETH to 0xbf5db41c1449f836317920c72e63c48cb818eccf!!
   metadata:
     id: gen-transfer-pos-0016
     source: generated
@@ -3388,7 +3387,7 @@
     - punctuation
     - typos
 - vars:
-    user_message: Ugh, just Hey, /transfer 0.005 ETH to 0x10,584,749fec5f3c284b7,879a5b0bf996aa0c183a!
+    user_message: Ugh, just Hey, /transfer 0.005 ETH to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a!
       thanks!
   metadata:
     id: gen-transfer-pos-0082
@@ -3745,7 +3744,7 @@
     - filler
     - tone
 - vars:
-    user_message: /transfer 1,000 ETH to 0xbf9c5,024,244,342cbd3e2d6baa97d9e06f7e6a2a1
+    user_message: /transfer 1,000 ETH to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1
   metadata:
     id: gen-transfer-pos-0060
     source: generated
@@ -3868,7 +3867,7 @@
     - typos
     - filler
 - vars:
-    user_message: Move 3 USDC to 0xf34c07c7fb3bb3f1f6,836e278dd985,775ff0cbd1...
+    user_message: Move 3 USDC to 0xf34c07c7fb3bb3f1f6836e278dd985775ff0cbd1...
   metadata:
     id: gen-transfer-pos-0101
     source: generated
@@ -3908,7 +3907,7 @@
     mutators:
     - filler
 - vars:
-    user_message: When you get a sec, Sedn 0.1 ETH to 0xbf5db41c1,449f836,317,920c72e63c48cb818eccf!!
+    user_message: When you get a sec, Sedn 0.1 ETH to 0xbf5db41c1449f836317920c72e63c48cb818eccf!!
       whenever
   metadata:
     id: gen-transfer-pos-0012
@@ -4075,7 +4074,7 @@
     - filler
     - tone
 - vars:
-    user_message: pls sedn 1,000 ETH → 0xbf9c5,024,244,342cbd3e2d6baa97d9e06f7e6a2a1
+    user_message: pls sedn 1,000 ETH → 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1
   metadata:
     id: gen-transfer-pos-0062
     source: generated
@@ -4098,7 +4097,7 @@
     - punctuation
     - typos
 - vars:
-    user_message: lol ok I want to send 40 USDC to 0x3cf45,571e467,971f283acb78ff40,595e9,823f006
+    user_message: lol ok I want to send 40 USDC to 0x3cf45571e467971f283acb78ff40595e9823f006
       now!!
   metadata:
     id: gen-transfer-pos-0193
@@ -4124,7 +4123,7 @@
     - punctuation
     - tone
 - vars:
-    user_message: Ugh, just Could you send 0.005 ETH ovre to 0x10,584,749fec5f3c284b7,879a5b0bf996aa0c183a?!!
+    user_message: Ugh, just Could you send 0.005 ETH ovre to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a?!!
   metadata:
     id: gen-transfer-pos-0080
     source: generated
@@ -4227,7 +4226,7 @@
     - typos
     - tone
 - vars:
-    user_message: Please kindly Quick one — Trnasfer 3 DAI to 0x36a756bc61,258,652,708bb7f6f894ed2fd4,485a5e
+    user_message: Please kindly Quick one — Trnasfer 3 DAI to 0x36a756bc61258652708bb7f6f894ed2fd4485a5e
       thanks!
   metadata:
     id: gen-transfer-pos-0125
@@ -4483,7 +4482,7 @@
     - typos
     - tone
 - vars:
-    user_message: I wnaT TO sEnD 250 UsDC To 0x4F89,594,187FAfe75E56a5b2Fb4D4CddcC6,590,611
+    user_message: I wnaT TO sEnD 250 UsDC To 0x4F89594187FAfe75E56a5b2Fb4D4CddcC6590611
       Now!!
   metadata:
     id: gen-transfer-pos-0149
@@ -4513,7 +4512,7 @@
 - vars:
     messages:
     - role: user
-      content: Esnd sOMe Eth tO 0x10,584,749fEC5F3c284b7,879a5B0bF996aa0c183a! whenever
+      content: Esnd sOMe Eth tO 0x10584749fEC5F3c284b7879a5B0bF996aa0c183a! whenever
     - role: assistant
       content: How much would you like to send?
     - role: user
@@ -4542,7 +4541,7 @@
     - typos
     - filler
 - vars:
-    user_message: SeND SoeM eTH TO 0Xbf9C5,024,244,342CBD3e2d6Baa97d9E06f7e6A2a1...
+    user_message: SeND SoeM eTH TO 0Xbf9C5024244342CBD3e2d6Baa97d9E06f7e6A2a1...
   metadata:
     id: gen-transfer-neg-0065
     source: generated
@@ -4867,7 +4866,7 @@
     - punctuation
     - filler
 - vars:
-    user_message: When you get a sec, Send sOem eth tO 0Xbf5DB41C1,449F836,317,920C72E63c48cb818EcCf
+    user_message: When you get a sec, Send sOem eth tO 0Xbf5DB41C1449F836317920C72E63c48cb818EcCf
       please if that's ok
   metadata:
     id: gen-transfer-neg-0021

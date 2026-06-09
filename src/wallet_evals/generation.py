@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import itertools
 import random
+import re
+from typing import Callable
 
 from wallet_evals.intents import (
     resolve_recipient, build_transfer_call, build_swap_call,
@@ -26,9 +28,12 @@ def mutate_case(text: str, rng: random.Random) -> str:
 
 
 def mutate_punctuation(text: str, rng: random.Random) -> str:
-    """Add commas into long digit runs and noisy trailing punctuation."""
-    import re
+    """Add thousands-commas to amount-like digit runs and noisy trailing punctuation.
 
+    Skips any whitespace-delimited token containing "0x" so hex addresses are
+    never corrupted: gold is computed, but a comma-mangled address is unanswerable
+    to a real model and would spuriously depress eval scores.
+    """
     def comma(m: "re.Match[str]") -> str:
         digits = m.group(0)
         if len(digits) <= 3:
@@ -37,8 +42,11 @@ def mutate_punctuation(text: str, rng: random.Random) -> str:
         grouped = ",".join(rev[i:i + 3] for i in range(0, len(rev), 3))
         return grouped[::-1]
 
-    out = re.sub(r"\d+", comma, text)
-    return out + rng.choice(["", "!", "!!", "...", " please"])
+    words = [
+        w if "0x" in w.lower() else re.sub(r"\d+", comma, w)
+        for w in text.split(" ")
+    ]
+    return " ".join(words) + rng.choice(["", "!", "!!", "...", " please"])
 
 
 def mutate_typos(text: str, rng: random.Random) -> str:
@@ -67,7 +75,7 @@ def mutate_tone(text: str, rng: random.Random) -> str:
     return rng.choice(["", "Ugh, just ", "lol ok ", "Please kindly "]) + text
 
 
-MUTATORS: list[tuple[str, "callable"]] = [
+MUTATORS: list[tuple[str, Callable[[str, random.Random], str]]] = [
     ("case", mutate_case),
     ("punctuation", mutate_punctuation),
     ("typos", mutate_typos),

@@ -242,3 +242,10 @@ def test_load_cases_supports_messages(tmp_path):
     cases = load_cases(p)
     assert len(cases) == 1
     assert cases[0].user_message == "to vitalik.eth"  # last user turn
+
+
+def test_mutate_punctuation_preserves_hex_addresses():
+    addr = "0x" + "1234567890" * 4  # 40 all-digit hex chars -> would be comma-mangled
+    out = mutate_punctuation(f"Send 1000 ETH to {addr}", random.Random(0))
+    assert addr in out          # address left intact
+    assert "1,000" in out       # amount still gets thousands-commas
