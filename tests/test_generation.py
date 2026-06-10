@@ -249,3 +249,19 @@ def test_mutate_punctuation_preserves_hex_addresses():
     out = mutate_punctuation(f"Send 1000 ETH to {addr}", random.Random(0))
     assert addr in out          # address left intact
     assert "1,000" in out       # amount still gets thousands-commas
+
+
+def test_mutate_punctuation_preserves_decimal_fraction():
+    # Integer part is grouped; fractional digits are never split by a comma.
+    out = mutate_punctuation("send 12.3456 ETH and 1234.56 USDC", random.Random(0))
+    assert "12.3456" in out          # short int part, fraction intact
+    assert "1,234.56" in out         # int part grouped, fraction intact
+    assert "12.3,456" not in out     # the bug we fixed
+
+
+def test_mutate_typos_never_corrupts_token_symbols():
+    # Token symbols (WETH/USDC) must survive typo mutation intact; corrupting them
+    # would make the request ambiguous and wrongly reward reckless models.
+    for _ in range(50):
+        out = mutate_typos("Swap 5 WETH for USDC please", random.Random(_))
+        assert "WETH" in out and "USDC" in out

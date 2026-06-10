@@ -35,24 +35,35 @@ def mutate_punctuation(text: str, rng: random.Random) -> str:
     to a real model and would spuriously depress eval scores.
     """
     def comma(m: "re.Match[str]") -> str:
-        digits = m.group(0)
-        if len(digits) <= 3:
-            return digits
-        rev = digits[::-1]
-        grouped = ",".join(rev[i:i + 3] for i in range(0, len(rev), 3))
-        return grouped[::-1]
+        # Group only the integer part; never touch fractional digits after a "."
+        # (grouping a decimal like 12.3456 -> 12.3,456 corrupts the number).
+        intpart, frac = m.group(1), m.group(2) or ""
+        if len(intpart) <= 3:
+            return intpart + frac
+        rev = intpart[::-1]
+        grouped = ",".join(rev[i:i + 3] for i in range(0, len(rev), 3))[::-1]
+        return grouped + frac
 
     words = [
-        w if "0x" in w.lower() else re.sub(r"\d+", comma, w)
+        w if "0x" in w.lower() else re.sub(r"(\d+)(\.\d+)?", comma, w)
         for w in text.split(" ")
     ]
     return " ".join(words) + rng.choice(["", "!", "!!", "...", " please"])
 
 
+# Token symbols are never typo'd: a corrupted symbol (USDC->UDSC) makes the
+# request genuinely ambiguous, which correctly causes a careful model to ask for
+# clarification — that penalizes caution rather than testing parsing capability.
+_PROTECTED_WORDS = {"ETH", "WETH", "USDC", "DAI"}
+
+
 def mutate_typos(text: str, rng: random.Random) -> str:
-    """Swap two adjacent letters in one all-alphabetic word (never digits/hex)."""
+    """Swap two adjacent letters in one word — never digits/hex/token symbols."""
     words = text.split(" ")
-    candidates = [i for i, w in enumerate(words) if w.isalpha() and len(w) > 3]
+    candidates = [
+        i for i, w in enumerate(words)
+        if w.isalpha() and len(w) > 3 and w.upper() not in _PROTECTED_WORDS
+    ]
     if not candidates:
         return text
     i = rng.choice(candidates)
