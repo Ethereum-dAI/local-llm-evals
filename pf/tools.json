@@ -3,7 +3,7 @@
     "type": "function",
     "function": {
       "name": "executeTx",
-      "description": "Execute a single on-chain transaction (state-changing). Use one call per transaction; multi-step actions like a swap emit several calls in order (e.g. approve then the swap).",
+      "description": "Execute a single on-chain transaction (state-changing): a native ETH transfer or an ERC-20 transfer. One call per transaction. Do NOT use this for swaps — swaps use the dedicated swap tool and never need a separate approval here.",
       "parameters": {
         "type": "object",
         "properties": {
