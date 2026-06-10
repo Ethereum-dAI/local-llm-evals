@@ -124,6 +124,25 @@ SWAP_TEMPLATES: list[str] = [
     "send {amount} {from_token} to become {to_token}",  # wrong-verb hard phrasing
 ]
 
+# Narrative (verbose, indirect) full-intent templates — style="narrative". All
+# values are still present, but the intent is wrapped in conversational framing,
+# distractor context, oblique verbs, and pronouns. Tests intent extraction from
+# long prose rather than command parsing; gold is still computed from the intent.
+TRANSFER_NARRATIVE_TEMPLATES: list[str] = [
+    "It's been on my mind for a while — I really should get {amount} {token} over to {recipient}.",
+    "Hey, quick favour: {recipient} covered me last week, so please move {amount} {token} their way.",
+    "My {token} has just been sitting there doing nothing. Send {amount} of it to {recipient}, would you?",
+    "So {recipient} needs paying back — go ahead and send them {amount} {token} from my wallet.",
+    "I keep forgetting to do this: put {amount} {token} into {recipient} for me, thanks.",
+]
+SWAP_NARRATIVE_TEMPLATES: list[str] = [
+    "I see that {to_token} is doing great, I think I should get some. Please use {amount} of my {from_token} for it.",
+    "Honestly {from_token} has just been sitting in my wallet. Turn {amount} of it into {to_token} for me.",
+    "{to_token} looks strong lately — grab some with {amount} of my {from_token}.",
+    "I'm feeling bullish on {to_token}, so take {amount} {from_token} and get me into it.",
+    "Time to rebalance the portfolio: move {amount} {from_token} over into {to_token}.",
+]
+
 
 def render_surface(template: str, intent: dict) -> str:
     """Fill a template from an intent dict (missing keys are an authoring error)."""
@@ -208,11 +227,16 @@ def _base_metadata(intent: dict, kind: str, idx: int, **extra) -> dict:
     return md
 
 
-def build_positive_case(intent: dict, template: str, rng: random.Random, idx: int) -> dict:
-    """A fully-specified intent rendered to a noisy surface; gold = computed call."""
+def build_positive_case(intent: dict, template: str, rng: random.Random, idx: int,
+                        style: str = "direct") -> dict:
+    """A fully-specified intent rendered to a noisy surface; gold = computed call.
+
+    `style` records whether the template is a direct command or narrative/indirect
+    prose, so eval results can be sliced by phrasing style.
+    """
     surface, labels = apply_mutators(render_surface(template, intent), rng)
     md = _base_metadata(intent, "pos", idx,
-                        level="payload", query_type="one_shot",
+                        level="payload", query_type="one_shot", style=style,
                         mutators=labels, expected_calls=gold_calls(intent))
     return {"vars": {"user_message": surface}, "metadata": md}
 
@@ -246,22 +270,38 @@ COMPLETIONS: dict[tuple[str, str], str] = {
     ("swap", "amount"): "{amount}",
 }
 
+# Narrative (verbose, indirect) partial templates for multi-turn turn 1: each
+# wraps the request in prose AND omits one field, which the user supplies in
+# turn 3. Used only by the narrative-style multi-turn cases.
+NARRATIVE_ABLATION_TEMPLATES: dict[tuple[str, str], str] = {
+    ("transfer", "recipient"): "I've been meaning to send {amount} {token} to someone — let's get it done.",
+    ("transfer", "amount"): "I want to move some {token} over to {recipient} today.",
+    ("transfer", "token"): "Please send {amount} to {recipient} out of my wallet.",
+    ("swap", "to_token"): "I've got {amount} {from_token} just doing nothing — let's put it to work and swap it.",
+    ("swap", "from_token"): "I'd really like to pick up {amount} worth of {to_token}.",
+    ("swap", "amount"): "I'm bullish on {to_token}, so let's convert some of my {from_token} into it.",
+}
+
+_ABLATION_BANKS = {"direct": ABLATION_TEMPLATES, "narrative": NARRATIVE_ABLATION_TEMPLATES}
+
 
 def build_negative_case(intent: dict, field: str, rng: random.Random, idx: int) -> dict:
     """Drop `field` from the surface; expect no tool call (model should ask)."""
     template = ABLATION_TEMPLATES[(intent["action"], field)]
     surface, labels = apply_mutators(render_surface(template, intent), rng)
-    md = _base_metadata(intent, "neg", idx,
+    md = _base_metadata(intent, "neg", idx, style="direct",
                         level="intent", category=f"ablation-{field}", mutators=labels)
     return {"vars": {"user_message": surface}, "metadata": md}
 
 
-def build_multiturn_case(intent: dict, field: str, rng: random.Random, idx: int) -> dict:
+def build_multiturn_case(intent: dict, field: str, rng: random.Random, idx: int,
+                         style: str = "direct") -> dict:
     """Scripted convo: ablated turn 1, canned clarification, completing turn 3.
 
     Gold = the full computed call. Only the model's final response is scored.
+    `style` picks the direct or narrative partial template for turn 1.
     """
-    ablated_template = ABLATION_TEMPLATES[(intent["action"], field)]
+    ablated_template = _ABLATION_BANKS[style][(intent["action"], field)]
     turn1, labels = apply_mutators(render_surface(ablated_template, intent), rng)
     completion = render_surface(COMPLETIONS[(intent["action"], field)], intent)
     messages = [
@@ -270,7 +310,7 @@ def build_multiturn_case(intent: dict, field: str, rng: random.Random, idx: int)
         {"role": "user", "content": completion},
     ]
     md = _base_metadata(intent, "mt", idx,
-                        level="payload", query_type="multi_turn",
+                        level="payload", query_type="multi_turn", style=style,
                         category=f"multiturn-{field}", mutators=labels,
                         expected_calls=gold_calls(intent))
     return {"vars": {"messages": messages}, "metadata": md}

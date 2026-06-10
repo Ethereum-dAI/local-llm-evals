@@ -16,6 +16,7 @@ import yaml
 
 from wallet_evals.generation import (
     TRANSFER_TEMPLATES, SWAP_TEMPLATES,
+    TRANSFER_NARRATIVE_TEMPLATES, SWAP_NARRATIVE_TEMPLATES,
     expand_vary, build_positive_case, build_negative_case, build_multiturn_case,
 )
 
@@ -23,9 +24,13 @@ ROOT = Path(__file__).resolve().parent.parent
 SEEDS = ROOT / "datasets" / "seeds.yaml"
 OUT = ROOT / "pf" / "tests.generated.yaml"
 SEED = 20260608
-MAX_PER_ACTION = 100
+MAX_PER_ACTION = 150
 
 _TEMPLATES = {"transfer": TRANSFER_TEMPLATES, "swap": SWAP_TEMPLATES}
+_NARRATIVE_TEMPLATES = {
+    "transfer": TRANSFER_NARRATIVE_TEMPLATES,
+    "swap": SWAP_NARRATIVE_TEMPLATES,
+}
 
 
 def _valid_intent(intent: dict) -> bool:
@@ -49,11 +54,19 @@ def build_all(seeds: list[dict], rng: random.Random) -> dict[str, list[dict]]:
                 continue
             action = intent["action"]
             bucket = by_action.setdefault(action, [])
+            # Direct-style positives + (direct) negatives + direct multi-turn.
             for template in _TEMPLATES[action]:
                 bucket.append(build_positive_case(intent, template, rng, next_idx(action)))
             for field in intent.get("ablate", []):
                 bucket.append(build_negative_case(intent, field, rng, next_idx(action)))
                 bucket.append(build_multiturn_case(intent, field, rng, next_idx(action)))
+            # Narrative-style positives + narrative multi-turn (verbose/indirect).
+            for template in _NARRATIVE_TEMPLATES[action]:
+                bucket.append(build_positive_case(intent, template, rng, next_idx(action),
+                                                  style="narrative"))
+            for field in intent.get("ablate", []):
+                bucket.append(build_multiturn_case(intent, field, rng, next_idx(action),
+                                                   style="narrative"))
     return by_action
 
 

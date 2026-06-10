@@ -265,3 +265,38 @@ def test_mutate_typos_never_corrupts_token_symbols():
     for _ in range(50):
         out = mutate_typos("Swap 5 WETH for USDC please", random.Random(_))
         assert "WETH" in out and "USDC" in out
+
+
+def test_narrative_banks_present_and_use_placeholders():
+    from wallet_evals.generation import (
+        TRANSFER_NARRATIVE_TEMPLATES, SWAP_NARRATIVE_TEMPLATES,
+    )
+    assert len(TRANSFER_NARRATIVE_TEMPLATES) >= 3
+    assert len(SWAP_NARRATIVE_TEMPLATES) >= 3
+    # The colleague's motivating example is reproducible from a narrative template.
+    intent = {"action": "swap", "amount": "5", "from_token": "ETH", "to_token": "DAI"}
+    rendered = [render_surface(t, intent) for t in SWAP_NARRATIVE_TEMPLATES]
+    assert any("DAI is doing great" in r and "5 of my ETH" in r for r in rendered)
+
+
+def test_positive_case_records_style():
+    intent = {"action": "transfer", "amount": "0.1", "token": "ETH",
+              "recipient": "vitalik.eth"}
+    direct = build_positive_case(intent, "Send {amount} {token} to {recipient}",
+                                 random.Random(0), idx=1)
+    assert direct["metadata"]["style"] == "direct"
+    from wallet_evals.generation import SWAP_NARRATIVE_TEMPLATES
+    sw = {"action": "swap", "amount": "5", "from_token": "ETH", "to_token": "DAI"}
+    narr = build_positive_case(sw, SWAP_NARRATIVE_TEMPLATES[0], random.Random(0),
+                               idx=2, style="narrative")
+    assert narr["metadata"]["style"] == "narrative"
+    assert narr["metadata"]["expected_calls"][0]["tool"] == "swap"
+
+
+def test_narrative_multiturn_turn1_omits_field():
+    sw = {"action": "swap", "amount": "5", "from_token": "ETH", "to_token": "DAI"}
+    case = build_multiturn_case(sw, "to_token", random.Random(0), idx=1, style="narrative")
+    msgs = case["vars"]["messages"]
+    assert case["metadata"]["style"] == "narrative"
+    assert "DAI" not in msgs[0]["content"]      # to_token omitted in turn 1
+    assert "DAI" in msgs[2]["content"]          # supplied in the completing turn
