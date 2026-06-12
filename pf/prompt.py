@@ -57,9 +57,31 @@ SYSTEM = (
 )
 
 
+SAFE_REFERENCE = (
+    "Safe owner management. To add or remove a Safe signer, emit a single "
+    "executeTx whose `to` is your Safe's own address (a self-call), value \"0\":\n"
+    "- Add: function \"addOwnerWithThreshold(address,uint256)\", args [newOwner, newThreshold].\n"
+    "- Remove: function \"removeOwner(address,address,uint256)\", args [prevOwner, "
+    "owner, threshold]. `prevOwner` is the owner listed IMMEDIATELY BEFORE the one "
+    "being removed in the owners list below; if it is the first owner, use the "
+    "sentinel 0x0000000000000000000000000000000000000001. Keep the current "
+    "threshold unless the user asks to change it."
+)
+
+
+def _format_account_context(ac: dict) -> str:
+    owners = ", ".join(ac.get("owners", []))
+    return (f"ACCOUNT CONTEXT\nSafe: {ac['safe']}\n"
+            f"Owners (in order): {owners}\nCurrent threshold: {ac['threshold']}")
+
+
 def render(context: dict[str, Any]) -> list[dict[str, str]]:
     vars_ = context.get("vars", {}) if isinstance(context, dict) else {}
     chat: list[dict[str, str]] = [{"role": "system", "content": SYSTEM}]
+    account_context = vars_.get("account_context")
+    if account_context:
+        chat.append({"role": "system",
+                     "content": SAFE_REFERENCE + "\n\n" + _format_account_context(account_context)})
     messages = vars_.get("messages")
     if messages:
         chat.extend(messages)

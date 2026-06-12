@@ -17,3 +17,19 @@ def test_render_multi_turn():
     chat = render({"vars": {"messages": msgs}})
     assert chat[0]["role"] == "system"
     assert chat[1:] == msgs
+
+
+def test_render_without_account_context_unchanged():
+    chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth"}})
+    assert len(chat) == 2 and chat[0]["role"] == "system" and chat[1]["role"] == "user"
+
+
+def test_render_with_account_context_adds_safe_addendum():
+    ctx = {"safe": "0xSafe", "owners": ["0xA", "0xB"], "threshold": 2}
+    chat = render({"vars": {"user_message": "Remove signer 0xB from my Safe.",
+                            "account_context": ctx}})
+    assert [m["role"] for m in chat] == ["system", "system", "user"]
+    addendum = chat[1]["content"]
+    assert "addOwnerWithThreshold(address,uint256)" in addendum
+    assert "removeOwner(address,address,uint256)" in addendum
+    assert "0xSafe" in addendum and "0xA, 0xB" in addendum and "2" in addendum
