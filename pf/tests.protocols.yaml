@@ -1,0 +1,1260 @@
+# Generated protocol-transaction eval cases — DO NOT EDIT BY HAND.
+# Produced by scripts/generate_protocol_cases.py from datasets/protocols/*.fixtures.json (seed 20260611).
+# Gold is a generic executeTx computed from the decoded real transactions.
+- vars:
+    user_message: When you get a sec, Add 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb
+      as a signer on my Safe and set the thrsehold to 3.
+    account_context: &id001
+      safe: '0x36dB66903bCFb0BFAF5396daA68e65363EFb2Be8'
+      owners:
+      - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
+      - '0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86'
+      threshold: 2
+  metadata:
+    id: safe-add-0001
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - &id002
+      tool: executeTx
+      chainId: '1'
+      to: '0x36dB66903bCFb0BFAF5396daA68e65363EFb2Be8'
+      value: '0'
+      function: addOwnerWithThreshold(address,uint256)
+      args:
+      - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
+      - '3'
+    notes: null
+- vars:
+    user_message: Ugh, just AdD woner 0X8DBc9bA71c340f00518F29FAd98F5E9f7Fd1D5cB TO
+      tHE safE AnD reqUiRe 3 CONFiRmAtioNS.!!
+    account_context: *id001
+  metadata:
+    id: safe-add-0002
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id002
+    notes: null
+- vars:
+    user_message: /AddOWneR 0X8DBC9ba71C340F00518f29fAd98F5e9F7FD1d5Cb ThRsehOld 3!!
+    account_context: *id001
+  metadata:
+    id: safe-add-0003
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id002
+    notes: null
+- vars:
+    user_message: lol ok we'Ve gOt a nEW tEAmmAtE — PLEAsE aDD 0x8DbC9bA71C340f00518f29fad98f5e9f7fd1d5cb
+      TO The SAfe AND Bump COnFiRmAtiOSn tO 3. please
+    account_context: *id001
+  metadata:
+    id: safe-add-0004
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id002
+    notes: null
+- vars:
+    user_message: Quick one — 0x8dbC9bA71c340f00518f29Fad98f5e9F7Fd1D5CB iS joINinG
+      As A co-SIgnEr; ADd tHEm And seT thE aPPROval ThrEShold To 3.
+    account_context: *id001
+  metadata:
+    id: safe-add-0005
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - filler
+    - tone
+    expected_calls:
+    - *id002
+    notes: null
+- vars:
+    user_message: Add 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb as a signer on my
+      Sfae and set the threshold to 3.
+    account_context: &id003
+      safe: '0x6fc78dcc8A949d1530035bD577DCB21e9787100e'
+      owners:
+      - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
+      - '0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86'
+      threshold: 2
+  metadata:
+    id: safe-add-0006
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - typos
+    expected_calls:
+    - &id004
+      tool: executeTx
+      chainId: '1'
+      to: '0x6fc78dcc8A949d1530035bD577DCB21e9787100e'
+      value: '0'
+      function: addOwnerWithThreshold(address,uint256)
+      args:
+      - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
+      - '3'
+    notes: null
+- vars:
+    user_message: Hey, Add owner 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb to the
+      Safe and requier 3 confirmations. if that's ok
+    account_context: *id003
+  metadata:
+    id: safe-add-0007
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id004
+    notes: null
+- vars:
+    user_message: When you get a sec, /addowner 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb
+      threhsold 3!
+    account_context: *id003
+  metadata:
+    id: safe-add-0008
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    expected_calls:
+    - *id004
+    notes: null
+- vars:
+    user_message: Ugh, just We've got a new teammate — please add 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb
+      to the Sfae and bump confirmations to 3. please
+    account_context: *id003
+  metadata:
+    id: safe-add-0009
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id004
+    notes: null
+- vars:
+    user_message: 0x8Dbc9ba71c340f00518f29Fad98f5E9F7Fd1D5Cb iS joIninG aS A cO-SigneR;
+      ADd ThEM AND set the ApPrOvAl tHresholD tO 3.!!
+    account_context: *id003
+  metadata:
+    id: safe-add-0010
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    expected_calls:
+    - *id004
+    notes: null
+- vars:
+    user_message: add 0xc011F5503d270C89F358468B6dEe9B51ADeb5413 As a SiGNEr On MY
+      sAfe ANd sET ThE tHreSHOlD tO 2.
+    account_context: &id005
+      safe: '0x5F3783110E28A833f58B467de86a404864223C3a'
+      owners:
+      - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
+      threshold: 1
+  metadata:
+    id: safe-add-0011
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    expected_calls:
+    - &id006
+      tool: executeTx
+      chainId: '1'
+      to: '0x5F3783110E28A833f58B467de86a404864223C3a'
+      value: '0'
+      function: addOwnerWithThreshold(address,uint256)
+      args:
+      - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
+      - '2'
+    notes: null
+- vars:
+    user_message: Hey, aDd OwNer 0xc011f5503D270c89F358468b6deE9b51ADEb5413 TO thE
+      SafE anD requIRe 2 coNFIRmAtiONS. whenever
+    account_context: *id005
+  metadata:
+    id: safe-add-0012
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - *id006
+    notes: null
+- vars:
+    user_message: /aDdoWNeR 0Xc011F5503D270C89F358468B6deE9B51ADEb5413 ThReSOHLD 2!
+    account_context: *id005
+  metadata:
+    id: safe-add-0013
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    expected_calls:
+    - *id006
+    notes: null
+- vars:
+    user_message: Hey, we'vE got A NEw TEAmMAte — pleASE add 0XC011f5503D270c89f358468B6dee9B51aDEb5413
+      to thE SAfe And bumP CoNfirmatIOnS To 2. thanks!
+    account_context: *id005
+  metadata:
+    id: safe-add-0014
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - *id006
+    notes: null
+- vars:
+    user_message: Quick one — 0Xc011F5503D270c89f358468b6dee9b51aDEb5413 IS joinInG
+      as A Co-sIGNEr; aDd ThEm and sET The APProval ThresHolD TO 2. whenever
+    account_context: *id005
+  metadata:
+    id: safe-add-0015
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - *id006
+    notes: null
+- vars:
+    user_message: Please kindly Add 0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86 as
+      a signre on my Safe and set the threshold to 2. please
+    account_context: &id007
+      safe: '0xB7B271238831a3AcC2c450d2ac96E424D7cDAda7'
+      owners:
+      - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
+      threshold: 1
+  metadata:
+    id: safe-add-0016
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - &id008
+      tool: executeTx
+      chainId: '1'
+      to: '0xB7B271238831a3AcC2c450d2ac96E424D7cDAda7'
+      value: '0'
+      function: addOwnerWithThreshold(address,uint256)
+      args:
+      - '0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86'
+      - '2'
+    notes: null
+- vars:
+    user_message: Quick one — Add owner 0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86
+      to the Safe and require 2 confirmations.
+    account_context: *id007
+  metadata:
+    id: safe-add-0017
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - filler
+    expected_calls:
+    - *id008
+    notes: null
+- vars:
+    user_message: /aDDOWneR 0xE31Cb422d3c7B65EcBaE7131A4e9D0Cd369d5f86 ThresHOLD 2!
+    account_context: *id007
+  metadata:
+    id: safe-add-0018
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    expected_calls:
+    - *id008
+    notes: null
+- vars:
+    user_message: Please kindly We've got a new teammate — please add 0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86
+      to the Safe and bump confirmations to 2.!
+    account_context: *id007
+  metadata:
+    id: safe-add-0019
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - punctuation
+    - tone
+    expected_calls:
+    - *id008
+    notes: null
+- vars:
+    user_message: 0xe31cB422d3c7B65EcBaE7131A4E9D0cd369D5F86 iS JOININg aS a co-siGnER;
+      ADD ThEm anD set the apRPOvAl tHresHOLd tO 2.!!
+    account_context: *id007
+  metadata:
+    id: safe-add-0020
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - typos
+    expected_calls:
+    - *id008
+    notes: null
+- vars:
+    user_message: ADd 0X00c3aeD1d4DA64f5a822Eda97321bBBAE6b9974D aS a SiGneR On MY
+      saFe anD SEt The tHreSHoLd TO 3.!!
+    account_context: &id009
+      safe: '0x6fc78dcc8A949d1530035bD577DCB21e9787100e'
+      owners:
+      - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
+      - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
+      threshold: 2
+  metadata:
+    id: safe-add-0021
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    expected_calls:
+    - &id010
+      tool: executeTx
+      chainId: '1'
+      to: '0x6fc78dcc8A949d1530035bD577DCB21e9787100e'
+      value: '0'
+      function: addOwnerWithThreshold(address,uint256)
+      args:
+      - '0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D'
+      - '3'
+    notes: null
+- vars:
+    user_message: Quick one — adD OWner 0x00C3aeD1d4DA64f5a822edA97321bBBaE6B9974d
+      tO ThE SAfe and ReQIURE 3 coNfirmaTIOns. if that's ok
+    account_context: *id009
+  metadata:
+    id: safe-add-0022
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    expected_calls:
+    - *id010
+    notes: null
+- vars:
+    user_message: Quick one — /ADDowneR 0X00C3aEd1d4DA64F5A822EdA97321BBbaE6b9974D
+      threSHOld 3 thanks!
+    account_context: *id009
+  metadata:
+    id: safe-add-0023
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - *id010
+    notes: null
+- vars:
+    user_message: we'VE gOt A nEW teaMmaTe — pLeASE ADD 0X00c3AeD1D4Da64f5a822EDa97321bBBaE6b9974d
+      TO tHe sAfE aNd bUMp cNOfIrmaTiOns To 3.
+    account_context: *id009
+  metadata:
+    id: safe-add-0024
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - typos
+    expected_calls:
+    - *id010
+    notes: null
+- vars:
+    user_message: lol ok 0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D is joining as
+      a co-signer; add tehm and set the approval threshold to 3....
+    account_context: *id009
+  metadata:
+    id: safe-add-0025
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-add-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id010
+    notes: null
+- vars:
+    user_message: Quick one — Remove signer 0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295
+      from my Safe. if that's ok
+    account_context: &id011
+      safe: '0xA3C1F84fcBedc93aEc401120206b48BEa951D8d0'
+      owners:
+      - '0xfb505A2420a761e6E58EadBd6d668c85aE81c863'
+      - '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295'
+      threshold: 2
+  metadata:
+    id: safe-remove-0026
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - filler
+    - tone
+    expected_calls:
+    - &id012
+      tool: executeTx
+      chainId: '1'
+      to: '0xA3C1F84fcBedc93aEc401120206b48BEa951D8d0'
+      value: '0'
+      function: removeOwner(address,address,uint256)
+      args:
+      - '0xfb505A2420a761e6E58EadBd6d668c85aE81c863'
+      - '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295'
+      - '2'
+    notes: null
+- vars:
+    user_message: Please kindly tAkE 0xDD175ad35EC9FEA448ad639F4FF4BE58cACca295 OFF
+      tHE asfE owNers.!
+    account_context: *id011
+  metadata:
+    id: safe-remove-0027
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id012
+    notes: null
+- vars:
+    user_message: Please kindly /removeowner 0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295
+    account_context: *id011
+  metadata:
+    id: safe-remove-0028
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - tone
+    expected_calls:
+    - *id012
+    notes: null
+- vars:
+    user_message: 0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295 has left the team — please
+      atke them off the Safe.
+    account_context: *id011
+  metadata:
+    id: safe-remove-0029
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - typos
+    expected_calls:
+    - *id012
+    notes: null
+- vars:
+    user_message: Please kindly We're offboarding 0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295;
+      remove them from the Safe signers.
+    account_context: *id011
+  metadata:
+    id: safe-remove-0030
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - tone
+    expected_calls:
+    - *id012
+    notes: null
+- vars:
+    user_message: rEMoVe SIGner 0x54CB2Ec76400311Dc29C90D033080BC8Cbf03325 fRmO mY
+      saFE. whenever
+    account_context: &id013
+      safe: '0x2630d37C8d29eeE28283BD5223b072D19AB7295a'
+      owners:
+      - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
+      - '0x54Cb2eC76400311DC29c90D033080bc8cBF03325'
+      threshold: 1
+  metadata:
+    id: safe-remove-0031
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - &id014
+      tool: executeTx
+      chainId: '1'
+      to: '0x2630d37C8d29eeE28283BD5223b072D19AB7295a'
+      value: '0'
+      function: removeOwner(address,address,uint256)
+      args:
+      - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
+      - '0x54Cb2eC76400311DC29c90D033080bc8cBF03325'
+      - '1'
+    notes: null
+- vars:
+    user_message: lol ok Take 0x54Cb2eC76400311DC29c90D033080bc8cBF03325 off the Safe
+      owners.!
+    account_context: *id013
+  metadata:
+    id: safe-remove-0032
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - punctuation
+    - tone
+    expected_calls:
+    - *id014
+    notes: null
+- vars:
+    user_message: /remOVeOwneR 0x54cB2EC76400311DC29C90d033080Bc8cbf03325 whenever
+    account_context: *id013
+  metadata:
+    id: safe-remove-0033
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id014
+    notes: null
+- vars:
+    user_message: lol ok 0X54Cb2Ec76400311DC29c90d033080bC8cbF03325 HAS LEFt THe teAM
+      — pLEasE tAke THEm oFf ThE SaFE.
+    account_context: *id013
+  metadata:
+    id: safe-remove-0034
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - tone
+    expected_calls:
+    - *id014
+    notes: null
+- vars:
+    user_message: We're offboarding 0x54Cb2eC76400311DC29c90D033080bc8cBF03325; remove
+      tehm from the Safe signers. whenever
+    account_context: *id013
+  metadata:
+    id: safe-remove-0035
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - typos
+    - filler
+    expected_calls:
+    - *id014
+    notes: null
+- vars:
+    user_message: Quick one — REmoVe SIgnEr 0X934aF94DB21D1D24A7fAD1Ff6B1b02C3a894a909
+      FRoM my saFE. whenever
+    account_context: &id015
+      safe: '0x2630d37C8d29eeE28283BD5223b072D19AB7295a'
+      owners:
+      - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
+      - '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909'
+      threshold: 1
+  metadata:
+    id: safe-remove-0036
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - &id016
+      tool: executeTx
+      chainId: '1'
+      to: '0x2630d37C8d29eeE28283BD5223b072D19AB7295a'
+      value: '0'
+      function: removeOwner(address,address,uint256)
+      args:
+      - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
+      - '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909'
+      - '1'
+    notes: null
+- vars:
+    user_message: Please kindly ATKE 0x934af94DB21d1D24A7faD1ff6B1b02c3a894A909 ofF
+      thE sAFE OwneRS....
+    account_context: *id015
+  metadata:
+    id: safe-remove-0037
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id016
+    notes: null
+- vars:
+    user_message: Please kindly /removeowner 0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909
+    account_context: *id015
+  metadata:
+    id: safe-remove-0038
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - tone
+    expected_calls:
+    - *id016
+    notes: null
+- vars:
+    user_message: 0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909 has left the team — please
+      take thme off the Safe.
+    account_context: *id015
+  metadata:
+    id: safe-remove-0039
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - typos
+    - tone
+    expected_calls:
+    - *id016
+    notes: null
+- vars:
+    user_message: lol ok We're fofboarding 0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909;
+      remove them from the Safe signers.
+    account_context: *id015
+  metadata:
+    id: safe-remove-0040
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id016
+    notes: null
+- vars:
+    user_message: Hey, REmOve SINger 0x4c3c2B94093479DD6b37D64A97004fAB7f3f7bDe FRom
+      my sAfE.! thanks!
+    account_context: &id017
+      safe: '0x2630d37C8d29eeE28283BD5223b072D19AB7295a'
+      owners:
+      - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
+      - '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE'
+      threshold: 1
+  metadata:
+    id: safe-remove-0041
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - &id018
+      tool: executeTx
+      chainId: '1'
+      to: '0x2630d37C8d29eeE28283BD5223b072D19AB7295a'
+      value: '0'
+      function: removeOwner(address,address,uint256)
+      args:
+      - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
+      - '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE'
+      - '1'
+    notes: null
+- vars:
+    user_message: Ugh, just Quick one — takE 0x4c3c2b94093479dd6B37D64A97004FAb7F3F7BDe
+      OFf ThE SaFE oWNers. pelase thanks!
+    account_context: *id017
+  metadata:
+    id: safe-remove-0042
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id018
+    notes: null
+- vars:
+    user_message: Ugh, just /removeowner 0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE
+      thanks!
+    account_context: *id017
+  metadata:
+    id: safe-remove-0043
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - filler
+    - tone
+    expected_calls:
+    - *id018
+    notes: null
+- vars:
+    user_message: Please kindly 0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE has left
+      the team — please take them off the Safe. please
+    account_context: *id017
+  metadata:
+    id: safe-remove-0044
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - punctuation
+    - tone
+    expected_calls:
+    - *id018
+    notes: null
+- vars:
+    user_message: We're offboarding 0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE; remove
+      them from the Safe signers.!!
+    account_context: *id017
+  metadata:
+    id: safe-remove-0045
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - punctuation
+    expected_calls:
+    - *id018
+    notes: null
+- vars:
+    user_message: rEMoVe SigNeR 0X8c42138c925D1049eC6b29f1ECF817b1628e54Ba FROm My
+      SAfe. please
+    account_context: &id019
+      safe: '0x7be40A6B612acC1c1BD29aE126ABf3471361506d'
+      owners:
+      - '0x0D858351A5FB419C9A3760647900d2F7aD526c83'
+      - '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba'
+      - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
+      threshold: 3
+  metadata:
+    id: safe-remove-0046
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - tone
+    expected_calls:
+    - &id020
+      tool: executeTx
+      chainId: '1'
+      to: '0x7be40A6B612acC1c1BD29aE126ABf3471361506d'
+      value: '0'
+      function: removeOwner(address,address,uint256)
+      args:
+      - '0x0D858351A5FB419C9A3760647900d2F7aD526c83'
+      - '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba'
+      - '3'
+    notes: null
+- vars:
+    user_message: Take 0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba off the Sfae owners.!!
+      whenever
+    account_context: *id019
+  metadata:
+    id: safe-remove-0047
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    expected_calls:
+    - *id020
+    notes: null
+- vars:
+    user_message: /rEmovEOWNEr 0x8c42138c925d1049Ec6B29f1EcF817b1628E54bA
+    account_context: *id019
+  metadata:
+    id: safe-remove-0048
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - tone
+    expected_calls:
+    - *id020
+    notes: null
+- vars:
+    user_message: Please kindly 0x8c42138c925D1049ec6b29F1Ecf817b1628e54BA hAS left
+      tHe TEAm — pleAse TAke tHEm off tHE SafE....
+    account_context: *id019
+  metadata:
+    id: safe-remove-0049
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - tone
+    expected_calls:
+    - *id020
+    notes: null
+- vars:
+    user_message: Hey, we'RE oFFbOarDing 0x8c42138C925d1049eC6B29F1ECf817B1628E54ba;
+      Remove thEm From the sAfE SignERs. if that's ok
+    account_context: *id019
+  metadata:
+    id: safe-remove-0050
+    source: generated-protocol
+    protocol: safe
+    language: english
+    category: safe-remove-signer
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - safe_owner_state
+    style: narrative
+    mutators:
+    - case
+    - filler
+    - tone
+    expected_calls:
+    - *id020
+    notes: null

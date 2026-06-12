@@ -109,3 +109,8 @@ def test_remove_surface_has_owner_address():
     for c in cases:
         owner = c["metadata"]["expected_calls"][0]["args"][1]
         assert owner.lower() in c["vars"]["user_message"].lower()
+
+
+def test_generate_build_all_deterministic():
+    from scripts.generate_protocol_cases import build_all
+    assert build_all(random.Random(1)) == build_all(random.Random(1))
