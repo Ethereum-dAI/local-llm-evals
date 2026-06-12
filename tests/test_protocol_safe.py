@@ -79,3 +79,33 @@ def test_gold_call_remove():
         "tool": "executeTx", "chainId": "1", "to": "0xSafe", "value": "0",
         "function": "removeOwner(address,address,uint256)",
         "args": ["0xPrev", "0xGone", "2"]}
+
+
+def test_build_cases_structure_and_gold():
+    fx = json.loads(safe_mod.FIXTURES.read_text())
+    cases = safe_mod.build_cases(fx, random.Random(0))
+    assert len(cases) >= len(fx)
+    ids = [c["metadata"]["id"] for c in cases]
+    assert len(ids) == len(set(ids))
+    for c in cases:
+        md = c["metadata"]
+        assert md["protocol"] == "safe"
+        assert md["style"] in {"direct", "narrative"}
+        assert c["vars"]["account_context"]["safe"] == md["expected_calls"][0]["to"]
+        assert "user_message" in c["vars"]
+        fn = md["expected_calls"][0]["function"]
+        assert fn in ("addOwnerWithThreshold(address,uint256)",
+                      "removeOwner(address,address,uint256)")
+
+
+def test_build_cases_deterministic():
+    fx = json.loads(safe_mod.FIXTURES.read_text())
+    assert safe_mod.build_cases(fx, random.Random(7)) == safe_mod.build_cases(fx, random.Random(7))
+
+
+def test_remove_surface_has_owner_address():
+    fx = [f for f in json.loads(safe_mod.FIXTURES.read_text()) if f["op"] == "removeOwner"]
+    cases = safe_mod.build_cases(fx, random.Random(1))
+    for c in cases:
+        owner = c["metadata"]["expected_calls"][0]["args"][1]
+        assert owner.lower() in c["vars"]["user_message"].lower()

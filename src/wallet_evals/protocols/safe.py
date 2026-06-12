@@ -9,6 +9,8 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
+from wallet_evals.generation import apply_mutators
+
 NAME = "safe"
 FIXTURES = Path(__file__).resolve().parents[3] / "datasets" / "protocols" / "safe.fixtures.json"
 
@@ -72,7 +74,65 @@ def gold_call(fx: dict) -> dict:
     raise ValueError(f"unknown Safe op: {fx['op']!r}")
 
 
-def build_cases(fixtures, rng, start_idx: int = 1):
-    """Placeholder — implemented in a later task. Defined so the registry can
-    reference it via hasattr."""
-    raise NotImplementedError
+ADD_TEMPLATES = [
+    "Add {owner} as a signer on my Safe and set the threshold to {threshold}.",
+    "Add owner {owner} to the Safe and require {threshold} confirmations.",
+    "/addowner {owner} threshold {threshold}",
+]
+ADD_NARRATIVE = [
+    "We've got a new teammate — please add {owner} to the Safe and bump confirmations to {threshold}.",
+    "{owner} is joining as a co-signer; add them and set the approval threshold to {threshold}.",
+]
+REMOVE_TEMPLATES = [
+    "Remove signer {owner} from my Safe.",
+    "Take {owner} off the Safe owners.",
+    "/removeowner {owner}",
+]
+REMOVE_NARRATIVE = [
+    "{owner} has left the team — please take them off the Safe.",
+    "We're offboarding {owner}; remove them from the Safe signers.",
+]
+
+_TEMPLATES = {
+    "addOwnerWithThreshold": [("direct", ADD_TEMPLATES), ("narrative", ADD_NARRATIVE)],
+    "removeOwner": [("direct", REMOVE_TEMPLATES), ("narrative", REMOVE_NARRATIVE)],
+}
+_CATEGORY = {"addOwnerWithThreshold": "safe-add-signer", "removeOwner": "safe-remove-signer"}
+
+
+def _fill(template: str, fx: dict) -> str:
+    p = fx["params"]
+    return template.format(owner=p["owner"], threshold=p["threshold"])
+
+
+def build_cases(fixtures: list[dict], rng: random.Random, start_idx: int = 1) -> list[dict]:
+    """One case per (fixture, template); gold computed; account_context attached."""
+    cases: list[dict] = []
+    idx = start_idx
+    for fx in fixtures:
+        gold = gold_call(fx)
+        ctx = account_context(fx)
+        for style, templates in _TEMPLATES[fx["op"]]:
+            for template in templates:
+                surface, labels = apply_mutators(_fill(template, fx), rng)
+                short = "add" if fx["op"] == "addOwnerWithThreshold" else "remove"
+                cases.append({
+                    "vars": {"user_message": surface, "account_context": ctx},
+                    "metadata": {
+                        "id": f"safe-{short}-{idx:04d}",
+                        "source": "generated-protocol",
+                        "protocol": "safe",
+                        "language": "english",
+                        "category": _CATEGORY[fx["op"]],
+                        "difficulty": "hard",
+                        "level": "payload",
+                        "query_type": "one_shot",
+                        "requires": ["safe_owner_state"],
+                        "style": style,
+                        "mutators": labels,
+                        "expected_calls": [gold],
+                        "notes": None,
+                    },
+                })
+                idx += 1
+    return cases
