@@ -19,3 +19,45 @@ def test_fixtures_shape():
         assert f["params"]["threshold"] >= 1
         if f["op"] == "removeOwner":
             assert f["params"]["prevOwner"].startswith("0x")
+
+
+import random
+from wallet_evals.protocols import safe as safe_mod
+
+
+def test_registry_lists_safe():
+    from wallet_evals.protocols import PROTOCOL_MODULES
+    names = {m.NAME for m in PROTOCOL_MODULES}
+    assert "safe" in names
+    for m in PROTOCOL_MODULES:
+        assert hasattr(m, "FIXTURES") and hasattr(m, "build_cases")
+
+
+def test_derive_prev_owner_head_is_sentinel():
+    owners = ["0xAAd0000000000000000000000000000000000001",
+              "0xBb00000000000000000000000000000000000002"]
+    assert safe_mod.derive_prev_owner(owners, owners[0]) == safe_mod.SENTINEL_OWNERS
+    assert safe_mod.derive_prev_owner(owners, owners[1]) == owners[0]
+
+
+def test_derive_prev_owner_is_case_insensitive():
+    owners = ["0xAbCd000000000000000000000000000000000001",
+              "0xEf01000000000000000000000000000000000002"]
+    assert safe_mod.derive_prev_owner(owners, owners[1].lower()) == owners[0]
+
+
+def test_synth_owners_remove_is_self_consistent():
+    for fx in (f for f in json.loads(safe_mod.FIXTURES.read_text())
+               if f["op"] == "removeOwner"):
+        ctx = safe_mod.account_context(fx)
+        assert len(ctx["owners"]) >= fx["params"]["threshold"]
+        assert safe_mod.derive_prev_owner(ctx["owners"], fx["params"]["owner"]) \
+            == fx["params"]["prevOwner"]
+
+
+def test_synth_owners_add_excludes_new_owner():
+    fx = next(f for f in json.loads(safe_mod.FIXTURES.read_text())
+              if f["op"] == "addOwnerWithThreshold")
+    ctx = safe_mod.account_context(fx)
+    assert fx["params"]["owner"].lower() not in {o.lower() for o in ctx["owners"]}
+    assert ctx["threshold"] == max(1, fx["params"]["threshold"] - 1)
