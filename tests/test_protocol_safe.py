@@ -61,3 +61,21 @@ def test_synth_owners_add_excludes_new_owner():
     ctx = safe_mod.account_context(fx)
     assert fx["params"]["owner"].lower() not in {o.lower() for o in ctx["owners"]}
     assert ctx["threshold"] == max(1, fx["params"]["threshold"] - 1)
+
+
+def test_gold_call_add():
+    fx = {"op": "addOwnerWithThreshold", "chainId": "1", "safe": "0xSafe",
+          "params": {"owner": "0xNewOwner", "threshold": 3}}
+    assert safe_mod.gold_call(fx) == {
+        "tool": "executeTx", "chainId": "1", "to": "0xSafe", "value": "0",
+        "function": "addOwnerWithThreshold(address,uint256)",
+        "args": ["0xNewOwner", "3"]}
+
+
+def test_gold_call_remove():
+    fx = {"op": "removeOwner", "chainId": "1", "safe": "0xSafe",
+          "params": {"prevOwner": "0xPrev", "owner": "0xGone", "threshold": 2}}
+    assert safe_mod.gold_call(fx) == {
+        "tool": "executeTx", "chainId": "1", "to": "0xSafe", "value": "0",
+        "function": "removeOwner(address,address,uint256)",
+        "args": ["0xPrev", "0xGone", "2"]}

@@ -58,6 +58,20 @@ def account_context(fx: dict) -> dict:
     return {"safe": fx["safe"], "owners": synth_owners(fx), "threshold": threshold}
 
 
+def gold_call(fx: dict) -> dict:
+    """Generic executeTx gold for a Safe owner op (a self-call: to = the Safe)."""
+    safe = fx["safe"]
+    threshold = str(fx["params"]["threshold"])
+    base = {"tool": "executeTx", "chainId": fx["chainId"], "to": safe, "value": "0"}
+    if fx["op"] == "addOwnerWithThreshold":
+        return {**base, "function": "addOwnerWithThreshold(address,uint256)",
+                "args": [fx["params"]["owner"], threshold]}
+    if fx["op"] == "removeOwner":
+        return {**base, "function": "removeOwner(address,address,uint256)",
+                "args": [fx["params"]["prevOwner"], fx["params"]["owner"], threshold]}
+    raise ValueError(f"unknown Safe op: {fx['op']!r}")
+
+
 def build_cases(fixtures, rng, start_idx: int = 1):
     """Placeholder — implemented in a later task. Defined so the registry can
     reference it via hasattr."""
