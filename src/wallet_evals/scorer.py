@@ -34,6 +34,17 @@ def _value_or_zero(v: str | None) -> str:
     return "0" if v is None else v
 
 
+def _swap_recipient(name: str, v: str | None) -> str | None:
+    """A swap's recipient defaults to the user's own wallet ("<wallet>").
+    Omitting it is correct, so treat a missing recipient as that default."""
+    return "<wallet>" if (name == "swap" and v is None) else v
+
+
+def _swap_min_out(name: str, v: str | None) -> str | None:
+    """A swap's amountOutMinimum defaults to "0" when unspecified."""
+    return "0" if (name == "swap" and v is None) else v
+
+
 def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
     if expected.tool != actual.name:
         return False
@@ -52,11 +63,13 @@ def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
         return False
     if _norm_scalar(expected.currencyOut) != _norm_scalar(actual.currencyOut):
         return False
-    if _norm_scalar(expected.recipient) != _norm_scalar(actual.recipient):
+    if _norm_scalar(_swap_recipient(expected.tool, expected.recipient)) != \
+            _norm_scalar(_swap_recipient(actual.name, actual.recipient)):
         return False
     if expected.amountIn != actual.amountIn:
         return False
-    if expected.amountOutMinimum != actual.amountOutMinimum:
+    if _swap_min_out(expected.tool, expected.amountOutMinimum) != \
+            _swap_min_out(actual.name, actual.amountOutMinimum):
         return False
     return True
 
@@ -84,9 +97,11 @@ _CALL_FIELDS = (
     ("args", lambda e: e.args, lambda a: a.args, _norm),
     ("currencyIn", lambda e: e.currencyIn, lambda a: a.currencyIn, _norm_scalar),
     ("currencyOut", lambda e: e.currencyOut, lambda a: a.currencyOut, _norm_scalar),
-    ("recipient", lambda e: e.recipient, lambda a: a.recipient, _norm_scalar),
+    ("recipient", lambda e: _swap_recipient(e.tool, e.recipient),
+     lambda a: _swap_recipient(a.name, a.recipient), _norm_scalar),
     ("amountIn", lambda e: e.amountIn, lambda a: a.amountIn, lambda x: x),
-    ("amountOutMinimum", lambda e: e.amountOutMinimum, lambda a: a.amountOutMinimum, lambda x: x),
+    ("amountOutMinimum", lambda e: _swap_min_out(e.tool, e.amountOutMinimum),
+     lambda a: _swap_min_out(a.name, a.amountOutMinimum), lambda x: x),
 )
 
 

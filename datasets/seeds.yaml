@@ -1,0 +1,30 @@
+# Hand-authored structured intents. Params are literals, {vary: [...]} sets, or
+# the sentinel "random_address". Gold is computed from these; surfaces + noise
+# are generated. `ablate` lists fields eligible for negative + multi-turn cases.
+#
+# Amounts are deliberately arithmetic-heavy (large magnitudes, many significant
+# digits, sub-unit decimals): base-unit conversion is the main capability gap — a
+# strong model converts reliably, a weaker one miscounts zeros. Every amount stays
+# integral in base units for its token's decimals (ETH/WETH/DAI=18, USDC=6).
+# ETH (18 decimals): sub-unit and large-magnitude amounts. The decimal-shift is
+# the discriminator — keep one easy anchor ("0.1") so the test isn't uniformly brutal.
+- action: transfer
+  amount: { vary: ["0.000000001", "73.123456789", "9876543.21", "0.1", "1234.000000005"] }
+  token: ETH
+  recipient: { vary: ["vitalik.eth", "random_address"] }
+  ablate: ["recipient", "amount"]
+
+# USDC/DAI: amounts must be <=6 decimal places (USDC has 6 decimals) to stay integral.
+- action: transfer
+  amount: { vary: ["0.000001", "123456.789012", "0.07", "999999.99", "0.000007"] }
+  token: { vary: ["USDC", "DAI"] }
+  recipient: { vary: ["vitalik.eth", "random_address"] }
+  ablate: ["recipient", "token"]
+
+# Swap from_token is USDC (6 dp) or ETH (18 dp); amounts kept <=6 dp to stay integral.
+# vary cross-product may include self-swaps (e.g. ETH->ETH); generate_cases drops them.
+- action: swap
+  amount: { vary: ["0.000001", "987654.32", "0.000003", "12345.6", "0.05"] }
+  from_token: { vary: ["USDC", "ETH"] }
+  to_token: { vary: ["ETH", "DAI", "WETH"] }
+  ablate: ["to_token", "amount"]

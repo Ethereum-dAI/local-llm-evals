@@ -12,13 +12,17 @@ Design notes live under `docs/` (gitignored).
 
 | Path | Role |
 | --- | --- |
-| `pf/tests.yaml` | **single source of truth** for test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`) |
-| `pf/prompt.json` | system + user chat prompt sent to every model |
+| `datasets/seeds.yaml` | hand-authored structured intents for the generator |
+| `pf/tests.yaml` | curated recognition-derived test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`) |
+| `pf/tests.generated.yaml` | **generated** harder cases (noise, param diversity, ablation negatives, multi-turn) |
+| `pf/prompt.py` | chat builder: renders `messages` (multi-turn) or `user_message` |
 | `pf/tools.json` | the `executeTx` / `readTx` / `swap` tool schemas |
 | `pf/assert.py` | python assertion — reuses `score_case` against the gold in each test's metadata |
 | `promptfooconfig.yaml` | providers (cheap OpenRouter models), prompt, tools, assertion, tests |
 | `src/wallet_evals/` | reused core: schema, tool-call parsing, binary scorer, tests loader |
+| `src/wallet_evals/intents.py` | shared gold-builders (structured intent → `expected_calls`) |
 | `scripts/convert_recognition.py` | regenerates `pf/tests.yaml` from the Swift app's `recognition.json` |
+| `scripts/generate_cases.py` | regenerates `pf/tests.generated.yaml` from `datasets/seeds.yaml` |
 
 ## Setup
 
@@ -31,7 +35,13 @@ echo "OPENROUTER_API_KEY=sk-..." > .env   # loaded automatically by promptfoo
 ## Run the eval
 
 ```bash
+# Default: the generated dataset (pf/tests.generated.yaml)
 PROMPTFOO_PYTHON="$PWD/.venv/bin/python" npx promptfoo@latest eval
+
+# Curated recognition-derived set instead:
+EVAL_DATASET=pf/tests.yaml PROMPTFOO_PYTHON="$PWD/.venv/bin/python" \
+  npx promptfoo@latest eval
+
 npx promptfoo@latest view          # interactive results (filter/group by metadata)
 ```
 
@@ -52,6 +62,19 @@ reported as needing manual authoring.
 
 > Assumes the `local-wallet-mac` repo is checked out as a sibling directory
 > (`../local-wallet-mac`); pass an explicit path as the first argument otherwise.
+
+## Generate harder cases
+
+```bash
+uv run python scripts/generate_cases.py
+```
+
+Expands `datasets/seeds.yaml` (structured intents with `{vary: [...]}` params)
+into `pf/tests.generated.yaml`: many noisy surface phrasings per intent, diverse
+amounts/addresses, single-turn ablation negatives ("address is missing"), and
+scripted multi-turn cases. Gold is **computed** from each seed intent, so every
+generated case self-scores to 1 (`tests/test_generated_integrity.py`). Output is
+deterministic for a fixed seed.
 
 ## Test (offline, no API key)
 

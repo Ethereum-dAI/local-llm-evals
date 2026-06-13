@@ -78,3 +78,34 @@ def test_nested_tuple_args_compared_recursively():
         name="executeTx", chainId="1", to="0xr", value="0",
         function="exactInputSingle((address,address,uint24))", args=[["0xaaa", "0xbbb", "3000"]])])
     assert score_case(case, turn) == 1
+
+
+def _swap_case():
+    return _case([{"tool": "swap", "chainId": "1",
+                   "currencyIn": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                   "currencyOut": "0x0000000000000000000000000000000000000000",
+                   "amountIn": "100000000", "amountOutMinimum": "0",
+                   "recipient": "<wallet>"}])
+
+
+def test_swap_omitted_recipient_defaults_to_wallet():
+    # A model that omits recipient/amountOutMinimum is accepting the documented
+    # defaults (own wallet, 0) and must still score 1.
+    case = _swap_case()
+    turn = ParsedTurn(tool_calls=[ParsedToolCall(
+        name="swap", chainId="1",
+        currencyIn="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        currencyOut="0x0000000000000000000000000000000000000000",
+        amountIn="100000000", amountOutMinimum=None, recipient=None)])
+    assert score_case(case, turn) == 1
+
+
+def test_swap_wrong_explicit_recipient_still_fails():
+    case = _swap_case()
+    turn = ParsedTurn(tool_calls=[ParsedToolCall(
+        name="swap", chainId="1",
+        currencyIn="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        currencyOut="0x0000000000000000000000000000000000000000",
+        amountIn="100000000", amountOutMinimum="0",
+        recipient="0x1111111111111111111111111111111111111111")])
+    assert score_case(case, turn) == 0

@@ -12,35 +12,23 @@ from __future__ import annotations
 
 import json
 import sys
-from decimal import Decimal
 from pathlib import Path
 
 import yaml
 
+from wallet_evals.intents import (
+    LOOKUP, resolve_recipient, swap_currency,
+    build_transfer_call, build_swap_call,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
-LOOKUP = json.loads((ROOT / "datasets" / "lookup.json").read_text())
+
 
 def _difficulty(raw: dict, protocol: str) -> str:
     """Derived, not authored: swaps and non-English prompts are harder targets."""
     if protocol == "uniswap" or raw["language"] != "english":
         return "medium"
     return "easy"
-
-
-def to_base_units(amount: str, decimals: int) -> str:
-    """Convert a human decimal string to a base-unit integer string."""
-    scaled = Decimal(amount) * (Decimal(10) ** decimals)
-    if scaled != scaled.to_integral_value():
-        raise ValueError(f"amount {amount} has more precision than {decimals} decimals")
-    return str(int(scaled))
-
-
-def _resolve_recipient(value: str) -> str | None:
-    if value in LOOKUP["ens"]:
-        return LOOKUP["ens"][value]
-    if value.startswith("0x") and len(value) == 42:
-        return value
-    return None
 
 
 def _base_meta(raw: dict, protocol: str = "transfer") -> dict:
@@ -55,17 +43,6 @@ def _base_meta(raw: dict, protocol: str = "transfer") -> dict:
     }
 
 
-def _swap_currency(symbol: str) -> tuple[str, int] | None:
-    """Return (address, decimals) for a swap currency, or None if unknown.
-    Native ETH maps to the zero address (Uniswap v4 convention)."""
-    token = LOOKUP["tokens"].get(symbol)
-    if token is None:
-        return None
-    if token.get("native"):
-        return "0x0000000000000000000000000000000000000000", token["decimals"]
-    return token["address"], token["decimals"]
-
-
 def _convert_swap(raw: dict) -> tuple[dict | None, str | None]:
     args = raw["expected_args"]
     side = args.get("amount_side", {}).get("value", "input")
@@ -76,18 +53,11 @@ def _convert_swap(raw: dict) -> tuple[dict | None, str | None]:
         return None, raw["id"]
     in_sym = args.get("from_token", {}).get("value")
     out_sym = args.get("to_token", {}).get("value")
-    cin = _swap_currency(in_sym) if in_sym else None
-    cout = _swap_currency(out_sym) if out_sym else None
-    if cin is None or cout is None:
+    if not in_sym or not out_sym:
         return None, raw["id"]
-    in_addr, in_dec = cin
-    out_addr, _ = cout
-    call = {
-        "tool": "swap", "chainId": LOOKUP["chainId"],
-        "currencyIn": in_addr, "currencyOut": out_addr,
-        "amountIn": to_base_units(amount, in_dec),
-        "amountOutMinimum": "0", "recipient": "<wallet>",
-    }
+    if swap_currency(in_sym) is None or swap_currency(out_sym) is None:
+        return None, raw["id"]
+    call = build_swap_call(amount, in_sym, out_sym)
     case = _base_meta(raw, protocol="uniswap") | {
         "level": "payload", "query_type": "one_shot",
         "requires": ["token_address_lookup"], "expected_calls": [call],
@@ -118,18 +88,11 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
         return None, raw["id"]
 
     to_value = args["to"]["value"]
-    recipient = _resolve_recipient(to_value)
+    recipient = resolve_recipient(to_value)
     if recipient is None:
         return None, raw["id"]
 
-    chain_id = LOOKUP["chainId"]
-    if token.get("native"):
-        call = {"tool": "executeTx", "chainId": chain_id, "to": recipient,
-                "value": to_base_units(amount, token["decimals"]), "function": None, "args": []}
-    else:
-        call = {"tool": "executeTx", "chainId": chain_id, "to": token["address"], "value": "0",
-                "function": "transfer(address,uint256)",
-                "args": [recipient, to_base_units(amount, token["decimals"])]}
+    call = build_transfer_call(amount, token_sym, recipient)
 
     requires: list[str] = []
     if to_value in LOOKUP["ens"]:
