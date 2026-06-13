@@ -10,6 +10,7 @@ import random
 from pathlib import Path
 
 from wallet_evals.generation import apply_mutators
+from wallet_evals.intents import format_expected_summary
 
 NAME = "safe"
 FIXTURES = Path(__file__).resolve().parents[3] / "datasets" / "protocols" / "safe.fixtures.json"
@@ -124,7 +125,8 @@ def build_cases(fixtures: list[dict], rng: random.Random, start_idx: int = 1) ->
                 surface, labels = apply_mutators(_fill(template, fx), rng)
                 short = "add" if fx["op"] == "addOwnerWithThreshold" else "remove"
                 cases.append({
-                    "vars": {"user_message": surface, "account_context": ctx},
+                    "vars": {"user_message": surface, "account_context": ctx,
+                             "expected_summary": format_expected_summary([gold])},
                     "metadata": {
                         "id": f"safe-{short}-{idx:04d}",
                         "source": "generated-protocol",

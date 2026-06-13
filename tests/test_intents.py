@@ -59,3 +59,26 @@ def test_build_transfer_call_unknown_token_raises():
 def test_build_swap_call_unknown_currency_raises():
     with pytest.raises(ValueError):
         build_swap_call("1", "USDC", "NOPE")
+
+
+def test_format_expected_summary_variants():
+    from wallet_evals.intents import format_expected_summary
+    # no call
+    assert format_expected_summary([]) == "(no tool call)"
+    # native ETH transfer
+    s = format_expected_summary([{"tool": "executeTx", "chainId": "1",
+        "to": "0xRecip", "value": "100", "function": None, "args": []}])
+    assert "executeTx to 0xRecip" in s and "value=100" in s and "(native)" in s
+    # ERC-20 transfer
+    s = format_expected_summary([{"tool": "executeTx", "chainId": "1", "to": "0xToken",
+        "value": "0", "function": "transfer(address,uint256)", "args": ["0xR", "5"]}])
+    assert "transfer(address,uint256)" in s and "args=['0xR', '5']" in s
+    # swap
+    s = format_expected_summary([{"tool": "swap", "chainId": "1", "currencyIn": "0xA",
+        "currencyOut": "0xB", "amountIn": "7", "amountOutMinimum": "0", "recipient": "<wallet>"}])
+    assert "swap 0xA -> 0xB" in s and "amountIn=7" in s
+    # multi-call joins with " | "
+    s = format_expected_summary([
+        {"tool": "executeTx", "chainId": "1", "to": "0x1", "value": "1", "function": None, "args": []},
+        {"tool": "executeTx", "chainId": "1", "to": "0x2", "value": "2", "function": None, "args": []}])
+    assert " | " in s

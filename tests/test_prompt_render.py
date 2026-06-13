@@ -33,3 +33,10 @@ def test_render_with_account_context_adds_safe_addendum():
     assert "addOwnerWithThreshold(address,uint256)" in addendum
     assert "removeOwner(address,address,uint256)" in addendum
     assert "0xSafe" in addendum and "0xA, 0xB" in addendum and "2" in addendum
+
+
+def test_expected_summary_var_is_not_leaked_to_model():
+    # expected_summary is a viewer-only var; render must never put it in the chat.
+    chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth",
+                            "expected_summary": "executeTx to 0xSECRETGOLD (native)"}})
+    assert all("0xSECRETGOLD" not in m["content"] for m in chat)

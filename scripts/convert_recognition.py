@@ -18,7 +18,7 @@ import yaml
 
 from wallet_evals.intents import (
     LOOKUP, resolve_recipient, swap_currency,
-    build_transfer_call, build_swap_call,
+    build_transfer_call, build_swap_call, format_expected_summary,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -118,7 +118,9 @@ def _to_promptfoo_test(case: dict) -> dict:
     metadata the python assertion reads back via case_from_metadata.
     """
     metadata = {k: v for k, v in case.items() if k != "user_message"}
-    return {"vars": {"user_message": case["user_message"]}, "metadata": metadata}
+    return {"vars": {"user_message": case["user_message"],
+                     "expected_summary": format_expected_summary(case["expected_calls"])},
+            "metadata": metadata}
 
 
 def main() -> None:

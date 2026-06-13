@@ -9,6 +9,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.000003'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0214
     source: generated
@@ -39,6 +41,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.000003'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0180
     source: generated
@@ -65,6 +69,7 @@
     - filler
 - vars:
     user_message: sWAp 987,654.32 UsdC please thanks!
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0109
     source: generated
@@ -84,6 +89,8 @@
     - filler
 - vars:
     user_message: lol ok Quick one — /Swap 0.000003 EtH tO daI thanks!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0226
     source: generated
@@ -111,6 +118,8 @@
 - vars:
     user_message: Ugh, just i see ThAt Weth is DoiNg gReAt, i thInK i SHouLd gEt SOME.
       please uSE 0.05 Of my Eth FOR iT. please
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0419
     source: generated
@@ -143,6 +152,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.05'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0401
     source: generated
@@ -168,6 +179,8 @@
     - tone
 - vars:
     user_message: DAI looks strong lately — grab some with 12,345.6 of my USDC.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0285
     source: generated
@@ -194,6 +207,8 @@
 - vars:
     user_message: hONESTlY eth HAS JUST BeEn siTting IN My WaLLEt. TuRN 0.000001 of
       IT inoT DAI FOR ME.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0063
     source: generated
@@ -220,6 +235,8 @@
 - vars:
     user_message: Ugh, just i'm FeelnIG BulLIsh on daI, so tAke 0.000003 etH aNd geT
       me iNTO It.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0235
     source: generated
@@ -246,6 +263,8 @@
     - tone
 - vars:
     user_message: Quick one — /sWap 987654.32 USDC TO etH whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0090
     source: generated
@@ -278,6 +297,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.05'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0367
     source: generated
@@ -309,6 +330,8 @@
       content: How much would you like to send?
     - role: user
       content: '12345.6'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0299
     source: generated
@@ -342,6 +365,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.000001'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0034
     source: generated
@@ -367,6 +392,8 @@
     - tone
 - vars:
     user_message: TRaDe 0.000003 UsdC iTnO WeTh
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0207
     source: generated
@@ -392,6 +419,8 @@
     - typos
 - vars:
     user_message: Please kindly Swap 0.000001 ETH for DAI...
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0052
     source: generated
@@ -418,6 +447,8 @@
     - tone
 - vars:
     user_message: Please kindly When you get a sec, Convetr 12,345.6 USDC to ETH whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0257
     source: generated
@@ -451,6 +482,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for WETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0212
     source: generated
@@ -477,6 +510,8 @@
     - tone
 - vars:
     user_message: swaP 0.05 Eth fOr Dai!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0392
     source: generated
@@ -509,6 +544,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0033
     source: generated
@@ -537,6 +574,8 @@
 - vars:
     user_message: I'm feEIlNG BUllISH on weTH, SO TAkE 0.000003 EtH AnD Get mE INto
       It.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0252
     source: generated
@@ -568,6 +607,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0059
     source: generated
@@ -597,6 +638,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0399
     source: generated
@@ -625,6 +668,8 @@
 - vars:
     user_message: I'M fEelinG BULlisH ON dAI, so tAKe 987654.32 Eth aNd Get me INTo
       it.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0150
     source: generated
@@ -649,6 +694,7 @@
     - case
 - vars:
     user_message: When you get a sec, SwaP uSDc FOr dAI if that's ok
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0111
     source: generated
@@ -668,6 +714,7 @@
     - filler
 - vars:
     user_message: Ugh, just Sawp 0.05 ETH
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0398
     source: generated
@@ -686,6 +733,7 @@
     - tone
 - vars:
     user_message: Please kindly SWaP 12345.6 uSdc
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0296
     source: generated
@@ -705,6 +753,8 @@
     - tone
 - vars:
     user_message: Ugh, just exCHanGE 0.000003 UsDc iNto dAi!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0191
     source: generated
@@ -732,6 +782,8 @@
 - vars:
     user_message: When you get a sec, I'm feeling bullish on WETH, so atke 12345.6
       USDC and get me into it. if that's ok
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0303
     source: generated
@@ -757,6 +809,8 @@
     - filler
 - vars:
     user_message: /SwaP 987,654.32 ETH To weth pelase
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0158
     source: generated
@@ -790,6 +844,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for WETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0050
     source: generated
@@ -817,6 +873,8 @@
 - vars:
     user_message: 'Ugh, just TImE tO rebALaNce tHE PortFOlIO: MovE 12,345.6 usDc OveR
       inTO ETH....'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0270
     source: generated
@@ -843,6 +901,8 @@
     - tone
 - vars:
     user_message: send 12345.6 USDC to become DAI if that's ok
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0278
     source: generated
@@ -867,6 +927,8 @@
     - filler
 - vars:
     user_message: Ugh, just Hey, TraDe 12,345.6 Eth into WEth plaese
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0326
     source: generated
@@ -902,6 +964,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for WETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0220
     source: generated
@@ -928,6 +992,8 @@
     - filler
 - vars:
     user_message: Dai LoOKs STorNG laTelY — GRab sOmE WiTh 0.000003 OF MY ETH.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0234
     source: generated
@@ -953,6 +1019,7 @@
     - typos
 - vars:
     user_message: Ugh, just When you get a sec, SwAp 0.000001 eTH please
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0075
     source: generated
@@ -974,6 +1041,8 @@
 - vars:
     user_message: When you get a sec, Honestly USDC has just been sitting in my wallet.
       Turn 987,654.32 of it into WETH for me.... whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0131
     source: generated
@@ -1005,6 +1074,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.000001'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0051
     source: generated
@@ -1035,6 +1106,8 @@
       content: How much would you like to send?
     - role: user
       content: '987654.32'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0170
     source: generated
@@ -1062,6 +1135,8 @@
 - vars:
     user_message: Honestly USDC has just been sitting in my wallet. Turn 0.000003
       of it into ETH for me.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0182
     source: generated
@@ -1085,6 +1160,7 @@
     mutators: []
 - vars:
     user_message: Hey, SwAP 987654.32 USdc if that's ok
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0092
     source: generated
@@ -1110,6 +1186,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0067
     source: generated
@@ -1137,6 +1215,8 @@
     - tone
 - vars:
     user_message: Quick one — xEchange 0.000001 ETH into WETH if that's ok
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0072
     source: generated
@@ -1163,6 +1243,8 @@
 - vars:
     user_message: i'M feEilNG BULlISh ON ETh, SO TaKE 987,654.32 uSdc And GeT Me InTO
       It.!!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0099
     source: generated
@@ -1197,6 +1279,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0118
     source: generated
@@ -1223,6 +1307,7 @@
     - tone
 - vars:
     user_message: Ugh, just When you get a sec, Swap USDC for ETH whenever
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0009
     source: generated
@@ -1247,6 +1332,8 @@
       content: How much would you like to send?
     - role: user
       content: '987654.32'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0112
     source: generated
@@ -1280,6 +1367,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for WETH
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0246
     source: generated
@@ -1306,6 +1395,8 @@
     - typos
 - vars:
     user_message: lol ok Quick one — /swaP 0.000003 eth To wetH
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0243
     source: generated
@@ -1334,6 +1425,8 @@
 - vars:
     user_message: Honestly ETH has just been sitting in my wallet. Turn 0.05 of it
       into DAI for me. please
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0403
     source: generated
@@ -1359,6 +1452,8 @@
     - typos
 - vars:
     user_message: CONVERt 0.05 UsDc TO dai!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0359
     source: generated
@@ -1384,6 +1479,8 @@
     - punctuation
 - vars:
     user_message: Hey, exChaNGE 0.000001 etH iNTO DAI
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0055
     source: generated
@@ -1409,6 +1506,8 @@
     - filler
 - vars:
     user_message: When you get a sec, /swAP 0.000001 etH TO dAi!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0056
     source: generated
@@ -1442,6 +1541,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for ETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0093
     source: generated
@@ -1468,6 +1569,8 @@
 - vars:
     user_message: I see that DAI is doing great, I thnik I should get some. Please
       use 0.000001 of my USDC for it.!!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0028
     source: generated
@@ -1493,6 +1596,8 @@
     - typos
 - vars:
     user_message: lol ok /swap 987,654.32 ETH to DAI please
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0141
     source: generated
@@ -1519,6 +1624,8 @@
     - tone
 - vars:
     user_message: Ugh, just Quick one — Trade 0.000003 ETH into WETH thanks!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0241
     source: generated
@@ -1545,6 +1652,8 @@
     - tone
 - vars:
     user_message: Quick one — /swap 987654.32 USDC to DAI thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0107
     source: generated
@@ -1570,6 +1679,8 @@
     - filler
 - vars:
     user_message: 'tIme To REbALAnCE the PorTFoliO: MOVE 987654.32 etH OVer INto DaI.'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0151
     source: generated
@@ -1594,6 +1705,8 @@
     - case
 - vars:
     user_message: When you get a sec, trade 0.05 UsDc intO Eth whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0343
     source: generated
@@ -1619,6 +1732,8 @@
     - filler
 - vars:
     user_message: lol ok Trade 12,345.6 USDC into WETH...
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0292
     source: generated
@@ -1644,6 +1759,7 @@
     - tone
 - vars:
     user_message: Quick one — Sawp 0.000003 ETH!! if that's ok
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0228
     source: generated
@@ -1670,6 +1786,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.000003'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0238
     source: generated
@@ -1696,6 +1814,8 @@
     - filler
 - vars:
     user_message: SAwP 0.000001 uSDC FOr wEtH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0035
     source: generated
@@ -1721,6 +1841,8 @@
     - typos
 - vars:
     user_message: Swap 987,654.32 USDC for ETH!! thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0086
     source: generated
@@ -1748,6 +1870,8 @@
 - vars:
     user_message: lol ok i see thAt DAi is ODinG GREat, I THInk I ShOuLD get sOME.
       PLeASe USe 0.000001 Of My EtH fOR it. please
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0062
     source: generated
@@ -1775,6 +1899,8 @@
     - tone
 - vars:
     user_message: esnd 987654.32 USDC to become WETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0125
     source: generated
@@ -1799,6 +1925,8 @@
     - typos
 - vars:
     user_message: lol ok dAI lOOks strONG lATely — GraB sOMe wIth 0.000003 oF MY USDC.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0200
     source: generated
@@ -1831,6 +1959,8 @@
       content: How much would you like to send?
     - role: user
       content: '12345.6'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0306
     source: generated
@@ -1858,6 +1988,8 @@
 - vars:
     user_message: Ugh, just weth loOks STrOnG ltaely — gRaB SOMe WITH 987,654.32 Of
       MY Eth....
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0166
     source: generated
@@ -1886,6 +2018,8 @@
 - vars:
     user_message: Please kindly wEtH loOKs StROnG laetlY — GrAb SOmE wITH 0.05 oF
       mY uSDC.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0387
     source: generated
@@ -1912,6 +2046,7 @@
     - tone
 - vars:
     user_message: Hey, sWaP 12,345.6 etH! if that's ok
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0313
     source: generated
@@ -1932,6 +2067,8 @@
     - tone
 - vars:
     user_message: I'm feeling bullish on WETH, so take 0.05 USDC and get me into it.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0388
     source: generated
@@ -1957,6 +2094,8 @@
 - vars:
     user_message: i sEe ThAT daI iS doInG great, i tHiNk i sHOuld Get sOmE. PLeaSe
       UsE 0.000003 OF MY eth fOR IT.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0232
     source: generated
@@ -1981,6 +2120,8 @@
     - case
 - vars:
     user_message: sNed 0.000003 etH TO BEComE DaI...
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0227
     source: generated
@@ -2008,6 +2149,8 @@
     - tone
 - vars:
     user_message: cOnvEtR 0.000003 usDc To Dai please
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0189
     source: generated
@@ -2035,6 +2178,8 @@
 - vars:
     user_message: i sEe That WeTH is dOING GReAT, i tHink I ShOuld geT SomE. PLEAse
       UsE 0.000001 Of my USDc FOr IT.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0045
     source: generated
@@ -2059,6 +2204,8 @@
     - case
 - vars:
     user_message: lol ok /SwAp 0.05 USDc tO eth please
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0345
     source: generated
@@ -2085,6 +2232,8 @@
     - tone
 - vars:
     user_message: /swap 0.05 ETH to DAI
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0396
     source: generated
@@ -2109,6 +2258,7 @@
     - filler
 - vars:
     user_message: Swap 0.000001 USDC thanks!
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0007
     source: generated
@@ -2127,6 +2277,8 @@
 - vars:
     user_message: Hey, i'm FeELInG bUllIsH oN wetH, SO taKe 987,654.32 uSDC And Get
       mE INTo It.... whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0133
     source: generated
@@ -2159,6 +2311,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.000001'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0078
     source: generated
@@ -2190,6 +2344,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for ETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0101
     source: generated
@@ -2217,6 +2373,8 @@
     - tone
 - vars:
     user_message: lol ok /swap 0.000003 USDC to ETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0175
     source: generated
@@ -2243,6 +2401,8 @@
 - vars:
     user_message: I'm feeling bullish on ETH, so take 12,345.6 USDC and get me into
       it.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0269
     source: generated
@@ -2268,6 +2428,8 @@
 - vars:
     user_message: Please kindly Quick one — i'm feELiNg BUlLIsH oN WETH, sO tAKe 0.000001
       etH ANd GET me inTo IT. thanks!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0082
     source: generated
@@ -2294,6 +2456,8 @@
     - tone
 - vars:
     user_message: Quick one — Convert 12,345.6 USDC to WETH!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0291
     source: generated
@@ -2327,6 +2491,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.05'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0425
     source: generated
@@ -2360,6 +2526,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.05'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0374
     source: generated
@@ -2391,6 +2559,8 @@
       content: How much would you like to send?
     - role: user
       content: '987654.32'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0102
     source: generated
@@ -2418,6 +2588,8 @@
     - tone
 - vars:
     user_message: Ugh, just Quick one — SWAP 0.05 ETh for WetH
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0409
     source: generated
@@ -2445,6 +2617,8 @@
 - vars:
     user_message: Ugh, just Quick one — I see that WETH is doing great, I think I
       hsould get some. Please use 0.05 of my USDC for it. if that's ok
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0385
     source: generated
@@ -2477,6 +2651,8 @@
       content: How much would you like to send?
     - role: user
       content: '12345.6'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0333
     source: generated
@@ -2501,6 +2677,7 @@
     - case
 - vars:
     user_message: wSAP 12,345.6 ETh if that's ok
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0330
     source: generated
@@ -2522,6 +2699,8 @@
 - vars:
     user_message: lol ok I'M FEeLiNg BUllish ON DaI, so takE 12345.6 ETh aNd get me
       IntO IT.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=12345600000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0320
     source: generated
@@ -2547,6 +2726,8 @@
     - tone
 - vars:
     user_message: Please kindly eXcHANge 12,345.6 eTH inTO WeTh...
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0327
     source: generated
@@ -2574,6 +2755,8 @@
 - vars:
     user_message: Please kindly Honestly USDC has just been sitting in my wallet.
       Turn 0.05 of it into DAI for me.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0369
     source: generated
@@ -2599,6 +2782,8 @@
 - vars:
     user_message: Hey, DAI looks strong lately — grab some with 0.000001 of my USDC.
       whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0030
     source: generated
@@ -2630,6 +2815,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.05'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0384
     source: generated
@@ -2657,6 +2844,8 @@
 - vars:
     user_message: 'Time to rebalance the portfolio: move 987,654.32 USDC ovre into
       DAI.'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0117
     source: generated
@@ -2683,6 +2872,8 @@
 - vars:
     user_message: 'Time to rbealance the portfolio: move 0.05 ETH over into WETH.
       please'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0423
     source: generated
@@ -2708,6 +2899,7 @@
     - typos
 - vars:
     user_message: swAp 0.000003 uSDC thanks!
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0177
     source: generated
@@ -2726,6 +2918,8 @@
     - filler
 - vars:
     user_message: Please kindly Convert 0.000001 ETH to WETH
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0070
     source: generated
@@ -2751,6 +2945,8 @@
     - tone
 - vars:
     user_message: Hey, Exchagne 0.05 USDC into ETH thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0344
     source: generated
@@ -2783,6 +2979,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for WETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0305
     source: generated
@@ -2810,6 +3008,8 @@
     - tone
 - vars:
     user_message: SEnd 0.05 USdC tO becOME dAI
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0363
     source: generated
@@ -2835,6 +3035,8 @@
 - vars:
     user_message: Ugh, just Quick one — HoneStLy uSdc has jusT BeEn sittINg In My
       WaLlEt. TuRN 0.05 Of IT IntO eTh For mE. thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0352
     source: generated
@@ -2861,6 +3063,8 @@
     - tone
 - vars:
     user_message: SWaP 987654.32 ETh foR Dai
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0137
     source: generated
@@ -2886,6 +3090,8 @@
 - vars:
     user_message: lol ok Hey, i seE THAT DaI Is DOInG gReAt, i THiNK i SHoULD gEt
       SOMe. PleAsE USE 12,345.6 of MY usdC For IT. thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0283
     source: generated
@@ -2919,6 +3125,8 @@
       content: How much would you like to send?
     - role: user
       content: '987654.32'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0129
     source: generated
@@ -2946,6 +3154,8 @@
     - tone
 - vars:
     user_message: Please kindly eXchaNgE 987,654.32 EtH iNot dai thanks!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0140
     source: generated
@@ -2974,6 +3184,8 @@
     - tone
 - vars:
     user_message: sWap 0.05 uSdc foR DAI
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0358
     source: generated
@@ -2998,6 +3210,8 @@
     - case
 - vars:
     user_message: Please kindly Hey, seNd 0.000003 etH to BEcomE WEth thanks!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0244
     source: generated
@@ -3025,6 +3239,8 @@
 - vars:
     user_message: Ugh, just I see that WETH is doing great, I think I should get some.
       Please use 987654.32 of my USDC for it.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0130
     source: generated
@@ -3056,6 +3272,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for ETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0016
     source: generated
@@ -3081,6 +3299,8 @@
 - vars:
     user_message: HonEstLY uSdC Has JuSt BenE SItTINg IN mY waLlet. tURn 0.05 OF IT
       iNto WetH For Me. thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0386
     source: generated
@@ -3107,6 +3327,8 @@
     - filler
 - vars:
     user_message: Please kindly Quick one — Exchange 987654.32 USDC inot WETH whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0123
     source: generated
@@ -3134,6 +3356,8 @@
 - vars:
     user_message: Ugh, just eth LOoks sTRong LaTELY — grAB sOme with 0.000003 of my
       UsDC.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0183
     source: generated
@@ -3160,6 +3384,8 @@
 - vars:
     user_message: Please kindly Quick one — DAi LoOKS stRONg lATeLy — gRAb some WItH
       0.05 OF mY uSdc.!! thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0370
     source: generated
@@ -3194,6 +3420,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for ETH
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0356
     source: generated
@@ -3221,6 +3449,8 @@
 - vars:
     user_message: Honestly USDC has just been sitting in my wallet. Turn 0.000001
       of it into ETH for me.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0012
     source: generated
@@ -3245,6 +3475,8 @@
     - filler
 - vars:
     user_message: lol ok send 0.05 ETH to become WETH...
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0414
     source: generated
@@ -3270,6 +3502,8 @@
     - tone
 - vars:
     user_message: Ugh, just Hey, /swap 987,654.32 USDC to WETH... thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0124
     source: generated
@@ -3297,6 +3531,8 @@
     - tone
 - vars:
     user_message: Hey, EXchaNgE 0.05 uSDC nITO WEth... if that's ok
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0378
     source: generated
@@ -3324,6 +3560,8 @@
     - filler
 - vars:
     user_message: Covnert 0.05 USDC to ETH...
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0342
     source: generated
@@ -3350,6 +3588,8 @@
 - vars:
     user_message: Hey, dAi loOKS STronG laTeLY — GRaB SoME WItH 987,654.32 Of MY usDc.!!
       if that's ok
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0115
     source: generated
@@ -3377,6 +3617,8 @@
 - vars:
     user_message: 'When you get a sec, Time to rebalanec the portfolio: move 0.000003
       USDC over into DAI. thanks!'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0202
     source: generated
@@ -3403,6 +3645,8 @@
 - vars:
     user_message: Ugh, just I See THAt Dai IS DOinG grEAt, I THINk I ShOULd GEt sOMe.
       pleAse USe 987,654.32 of My uSdC for it.!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0113
     source: generated
@@ -3430,6 +3674,8 @@
 - vars:
     user_message: Please kindly When you get a sec, I'm fEeILNG bUlLisH On dAi, sO
       taKe 0.05 uSDC aND GEt me INto It. thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0371
     source: generated
@@ -3463,6 +3709,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0365
     source: generated
@@ -3495,6 +3743,8 @@
       content: How much would you like to send?
     - role: user
       content: '0.05'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
+      amountIn=50000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0350
     source: generated
@@ -3521,6 +3771,7 @@
     - tone
 - vars:
     user_message: Please kindly swAP USDc foR eTH...
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0264
     source: generated
@@ -3540,6 +3791,8 @@
     - tone
 - vars:
     user_message: WETH looks strong lately — grab soem with 12345.6 of my USDC.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0302
     source: generated
@@ -3564,6 +3817,8 @@
     - typos
 - vars:
     user_message: exChaNGe 0.000003 eTh INtO WEtH!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0242
     source: generated
@@ -3597,6 +3852,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for WETH
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0339
     source: generated
@@ -3631,6 +3888,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0237
     source: generated
@@ -3656,6 +3915,8 @@
     - filler
 - vars:
     user_message: WETH looks strong lately — grab some with 0.000003 of my ETH.!!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0251
     source: generated
@@ -3681,6 +3942,8 @@
     - typos
 - vars:
     user_message: Please kindly EXcHanGE 987654.32 USdC InTO DAi
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0106
     source: generated
@@ -3707,6 +3970,8 @@
 - vars:
     user_message: Ugh, just Hey, HoNEStYl USDC haS JuST been SitTiNg iN MY WallEt.
       tURN 0.000001 OF IT iNtO dAI FOr mE. if that's ok
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0029
     source: generated
@@ -3735,6 +4000,8 @@
 - vars:
     user_message: Quick one — I see thta WETH is doing great, I think I should get
       some. Please use 0.000001 of my ETH for it.! thanks!
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=1000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0079
     source: generated
@@ -3762,6 +4029,8 @@
 - vars:
     user_message: Honestly ETH has just been sitting in my wallet. Turn 12345.6 of
       it into WETH for me.
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0335
     source: generated
@@ -3785,6 +4054,8 @@
     mutators: []
 - vars:
     user_message: When you get a sec, CONEvRt 0.000001 USDc tO dai thanks!
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=1 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0019
     source: generated
@@ -3811,6 +4082,8 @@
     - filler
 - vars:
     user_message: 'TIME TO RebalaNce thE PORtfoLio: mOvE 12345.6 uSDC oVEr Into weTh.'
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0304
     source: generated
@@ -3843,6 +4116,8 @@
       content: Which token do you want to receive?
     - role: user
       content: for DAI
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=50000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0407
     source: generated
@@ -3876,6 +4151,8 @@
       content: How much would you like to send?
     - role: user
       content: '987654.32'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-mt-0163
     source: generated
@@ -3904,6 +4181,8 @@
 - vars:
     user_message: Hey, HonesTlY usDc hAs JusT bEeN sitTInG IN MY WAlLet. tURN 12345.6
       Of it InTO wEtH fOr ME.
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=12345600000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0301
     source: generated
@@ -3930,6 +4209,8 @@
     - filler
 - vars:
     user_message: Please kindly Swap 987654.32 USDC for WETH whenever
+    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+      amountIn=987654320000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0120
     source: generated
@@ -3955,6 +4236,8 @@
     - tone
 - vars:
     user_message: 'itme tO rebaLanCE The PortfOliO: moVe 0.000003 ETh ovER INto Dai.'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=3000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0236
     source: generated
@@ -3980,6 +4263,8 @@
     - typos
 - vars:
     user_message: 'Time to rebalance the portfolio: move 12345.6 ETH over into DAI.'
+    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
+      amountIn=12345600000000000000000 minOut=0 recipient=<wallet>
   metadata:
     id: gen-swap-pos-0321
     source: generated
@@ -4003,6 +4288,7 @@
     mutators: []
 - vars:
     user_message: Please kindly wSap 0.000003 USDC
+    expected_summary: (no tool call)
   metadata:
     id: gen-swap-neg-0211
     source: generated
@@ -4022,6 +4308,7 @@
     - tone
 - vars:
     user_message: lol ok SeDn 123456.789012 UsDc
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0260
     source: generated
@@ -4047,6 +4334,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000000000000000']
   metadata:
     id: gen-transfer-mt-0371
     source: generated
@@ -4076,6 +4365,8 @@
 - vars:
     user_message: When you get a sec, /transfer 9876543.21 ETH to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1
       if that's ok
+    expected_summary: executeTx to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1 value=9876543210000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0095
     source: generated
@@ -4100,6 +4391,8 @@
 - vars:
     user_message: Quick one — So 0x2f38e0f0284171f13a370c86deDb53D13c77262C NEEDS
       PayINg bAcK — go aHead AND SEnD tHem 999,999.99 DaI rFoM My wAllEt. please
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x2f38e0f0284171f13a370c86dedb53d13c77262c', '999999990000000000000000']
   metadata:
     id: gen-transfer-pos-0465
     source: generated
@@ -4129,6 +4422,8 @@
 - vars:
     user_message: Hey, My ETH has just bene sitting there doing nothing. Send 0.000000001
       of it to vitalik.eth, would you? thanks!
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0014
     source: generated
@@ -4159,6 +4454,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000']
   metadata:
     id: gen-transfer-mt-0342
     source: generated
@@ -4187,6 +4484,8 @@
 - vars:
     user_message: So vitalik.eth needs paying back — go ahead and send them 0.000007
       USDC from my wallet. please
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7']
   metadata:
     id: gen-transfer-pos-0483
     source: generated
@@ -4213,6 +4512,8 @@
 - vars:
     user_message: 'Quick one — Hey, quick favour: vitalik.eth covered me alst week,
       so please move 0.000001 DAI their way. if that''s ok'
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1000000000000']
   metadata:
     id: gen-transfer-pos-0229
     source: generated
@@ -4246,6 +4547,8 @@
       content: How much would you like to send?
     - role: user
       content: 0.000000001 ETH
+    expected_summary: executeTx to 0xbf5db41c1449f836317920c72e63c48cb818eccf value=1000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0029
     source: generated
@@ -4271,6 +4574,7 @@
     - tone
 - vars:
     user_message: lol ok Quick one — eSnd 73.123456789 ETH!! whenever
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0044
     source: generated
@@ -4292,6 +4596,8 @@
 - vars:
     user_message: Hey, MY USDc hAs juST eBen sITtINg tHerE DoING noTHINg. sEnD 0.07
       Of IT tO VITAlIK.eth, WoUld yOu? if that's ok
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000']
   metadata:
     id: gen-transfer-pos-0338
     source: generated
@@ -4327,6 +4633,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to vitalik.eth
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=9876543210000000000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0089
     source: generated
@@ -4353,6 +4661,8 @@
 - vars:
     user_message: 'HEy, qUiCK fAvOUR: 0X2f38E0F0284171f13a370c86DedB53D13c77262c CoVeRED
       me Last Week, so pLeASe MOve 999,999.99 dai THeir Way.!!'
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x2f38e0f0284171f13a370c86dedb53d13c77262c', '999999990000000000000000']
   metadata:
     id: gen-transfer-pos-0463
     source: generated
@@ -4379,6 +4689,7 @@
     - punctuation
 - vars:
     user_message: SENd 0.000007 TO 0xc18a871232447A61D5DA08dc753d61Bd38fcBb5d
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0532
     source: generated
@@ -4396,6 +4707,8 @@
     - case
 - vars:
     user_message: pls sedn 9,876,543.21 ETH → vitalik.eth...
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=9876543210000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0079
     source: generated
@@ -4427,6 +4740,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14', '999999990000']
   metadata:
     id: gen-transfer-mt-0425
     source: generated
@@ -4454,6 +4769,8 @@
     - filler
 - vars:
     user_message: Hey, pls send 0.1 ETH → vitalik.eth!!
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=100000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0115
     source: generated
@@ -4478,6 +4795,7 @@
     - filler
 - vars:
     user_message: Quick one — Send 999999.99 TO 0X2F38E0f0284171F13A370C86DedB53D13C77262c
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0460
     source: generated
@@ -4497,6 +4815,8 @@
 - vars:
     user_message: lol ok Quick one — COUlD YOu SENd 0.1 ETH over tO 0x10584749fEc5F3c284B7879a5b0bf996aA0C183A?!!
       whenever
+    expected_summary: executeTx to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a value=100000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0129
     source: generated
@@ -4523,6 +4843,8 @@
     - tone
 - vars:
     user_message: Ugh, just Move 9876543.21 ETH to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1
+    expected_summary: executeTx to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1 value=9876543210000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0092
     source: generated
@@ -4546,6 +4868,8 @@
     - tone
 - vars:
     user_message: lol ok coULD YoU senD 999,999.99 UsdC ovER To viTAlIk.eTh?... thanks!
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '999999990000']
   metadata:
     id: gen-transfer-pos-0399
     source: generated
@@ -4575,6 +4899,8 @@
 - vars:
     user_message: It's eBEN On MY MiNd FOr A wHIle — I rEaLLy SHOULD GeT 9876543.21
       eth OVEr tO 0XBf9c5024244342cBd3E2d6baa97d9E06F7E6A2A1.
+    expected_summary: executeTx to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1 value=9876543210000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0102
     source: generated
@@ -4601,6 +4927,8 @@
 - vars:
     user_message: 'i KEEP FOrgETTInG To dO this: PuT 999999.99 dAI inTO VItalIk.ETH
       For ME, tHaNKs. if that''s ok'
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '999999990000000000000000']
   metadata:
     id: gen-transfer-pos-0448
     source: generated
@@ -4628,6 +4956,8 @@
 - vars:
     user_message: 'Ugh, just HEY, QIucK FAVOur: 0X9dc58efe49B435C8ca7D3Ff56923B882deC601D8
       COVEreD me LASt WeeK, SO pLEase MOve 0.000007 usdc ThEiR Way....'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x9dc58efe49b435c8ca7d3ff56923b882dec601d8', '7']
   metadata:
     id: gen-transfer-pos-0499
     source: generated
@@ -4657,6 +4987,8 @@
 - vars:
     user_message: 'I kepe forgetting to do this: put 0.000001 USDC into 0x7e999616f080e14bcea39482e4517524e6658330
       for me, thanks.! thanks!'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x7e999616f080e14bcea39482e4517524e6658330', '1']
   metadata:
     id: gen-transfer-pos-0214
     source: generated
@@ -4684,6 +5016,8 @@
     - filler
 - vars:
     user_message: Send 0.07 USDC to vitalik.eth if that's ok
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000']
   metadata:
     id: gen-transfer-pos-0325
     source: generated
@@ -4710,6 +5044,8 @@
 - vars:
     user_message: Hey, Omve 0.07 DaI To 0xa68eBd84A09cC64e5e150e5Ea90CE4C383B8192d
       please
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xa68ebd84a09cc64e5e150e5ea90ce4c383b8192d', '70000000000000000']
   metadata:
     id: gen-transfer-pos-0380
     source: generated
@@ -4739,6 +5075,8 @@
 - vars:
     user_message: 'HEy, QIucK FAvOUr: 0X6eA55E10E568d36004aE05A75c7Aa42B7b58BD1d cOvEreD
       mE lAst wEEk, so plEaSe MOve 73.123456789 eTh tHEiR WaY.'
+    expected_summary: executeTx to 0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0067
     source: generated
@@ -4771,6 +5109,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '999999990000']
   metadata:
     id: gen-transfer-mt-0407
     source: generated
@@ -4803,6 +5143,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x2f38e0f0284171f13a370c86dedb53d13c77262c', '999999990000000000000000']
   metadata:
     id: gen-transfer-mt-0468
     source: generated
@@ -4831,6 +5173,8 @@
 - vars:
     user_message: i waNt to sEdn 123,456.789012 UsdC To VITaLIk.EtH NoW if that's
       ok
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012']
   metadata:
     id: gen-transfer-pos-0258
     source: generated
@@ -4860,6 +5204,8 @@
 - vars:
     user_message: It's been on my mind for a wihle — I really should get 0.000007
       USDC over to vitalik.eth....
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7']
   metadata:
     id: gen-transfer-pos-0480
     source: generated
@@ -4892,6 +5238,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012000000000000']
   metadata:
     id: gen-transfer-mt-0299
     source: generated
@@ -4925,6 +5273,8 @@
       content: How much would you like to send?
     - role: user
       content: 1234.000000005 ETH
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1234000000005000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0155
     source: generated
@@ -4950,6 +5300,8 @@
 - vars:
     user_message: Please kindly So vitalik.eth needs paying back — go ahead and send
       them 0.000000001 ETH from my wallet.
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0015
     source: generated
@@ -4974,6 +5326,8 @@
 - vars:
     user_message: It's been on my mind for a while — I really should get 123,456.789012
       DAI voer to vitalik.eth. please
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012000000000000']
   metadata:
     id: gen-transfer-pos-0300
     source: generated
@@ -5000,6 +5354,8 @@
     - typos
 - vars:
     user_message: Could you send 73.123456789 ETH oevr to 0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d?
+    expected_summary: executeTx to 0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0057
     source: generated
@@ -5024,6 +5380,8 @@
     - tone
 - vars:
     user_message: i wanT to sEnD 0.000000001 eTH TO vITalik.eth NoW...
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0006
     source: generated
@@ -5054,6 +5412,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000']
   metadata:
     id: gen-transfer-mt-0335
     source: generated
@@ -5082,6 +5442,8 @@
 - vars:
     user_message: So vitalik.eth needs paying back — go ahead and sned them 0.000007
       DAI from my wallet.
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7000000000000']
   metadata:
     id: gen-transfer-pos-0519
     source: generated
@@ -5114,6 +5476,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x6fd2bc3d9de4475b109b9ab508c24f15b483c684', '1000000000000']
   metadata:
     id: gen-transfer-mt-0252
     source: generated
@@ -5148,6 +5512,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to vitalik.eth
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7000000000000']
   metadata:
     id: gen-transfer-mt-0513
     source: generated
@@ -5174,6 +5540,8 @@
 - vars:
     user_message: 'I keep fogretting to do this: put 0.000007 USDC into vitalik.eth
       for me, thanks.'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7']
   metadata:
     id: gen-transfer-pos-0484
     source: generated
@@ -5199,6 +5567,8 @@
     - typos
 - vars:
     user_message: lol ok pls eSnD 0.1 ETH → 0X10584749FEC5F3c284B7879A5b0bF996Aa0c183a!!
+    expected_summary: executeTx to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a value=100000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0133
     source: generated
@@ -5225,6 +5595,8 @@
     - tone
 - vars:
     user_message: lol ok Hey, Sned 999999.99 USDC to 0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14', '999999990000']
   metadata:
     id: gen-transfer-pos-0415
     source: generated
@@ -5252,6 +5624,7 @@
     - tone
 - vars:
     user_message: When you get a sec, Send 123,456.789012 DAI please whenever
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0296
     source: generated
@@ -5272,6 +5645,8 @@
 - vars:
     user_message: 'Hey, qUiCk Favour: 0Xc18a871232447a61d5DA08DC753d61Bd38fcbB5d cOVerEd
       me laST WEEk, SO plEaSe move 0.000007 daI THeIR WAy.!!'
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xc18a871232447a61d5da08dc753d61bd38fcbb5d', '7000000000000']
   metadata:
     id: gen-transfer-pos-0535
     source: generated
@@ -5298,6 +5673,8 @@
     - punctuation
 - vars:
     user_message: I want to sedn 999999.99 USDC to vitalik.eth now
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '999999990000']
   metadata:
     id: gen-transfer-pos-0402
     source: generated
@@ -5324,6 +5701,8 @@
 - vars:
     user_message: Hey, my ETh hAS JuSt BeEN SiTTinG tHERe DOIng nothING. sENd 0.000000001
       oF iT TO 0xBF5dB41c1449F836317920c72E63C48cB818ecCf, WOuLD yOu?! thanks!
+    expected_summary: executeTx to 0xbf5db41c1449f836317920c72e63c48cb818eccf value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0032
     source: generated
@@ -5350,6 +5729,8 @@
 - vars:
     user_message: tRaNsfEr 0.000001 dAi to 0X6FD2bc3D9de4475B109B9ab508c24f15B483c684
       please
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x6fd2bc3d9de4475b109b9ab508c24f15b483c684', '1000000000000']
   metadata:
     id: gen-transfer-pos-0238
     source: generated
@@ -5382,6 +5763,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '999999990000000000000000']
   metadata:
     id: gen-transfer-mt-0443
     source: generated
@@ -5409,6 +5792,8 @@
 - vars:
     user_message: 'Please kindly hey, uQIck favOUr: VitALik.eTh CoverED mE lAsT WEeK,
       sO PleaSe MOve 73.123456789 eTH tHeIR WAY. if that''s ok'
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0049
     source: generated
@@ -5436,6 +5821,8 @@
 - vars:
     user_message: 'Ugh, just HeY, qUiCk faVouR: 0X34130Cff81E10d81dd0b252b3f33e87585eDD13c
       COVErED ME laSt WeeK, so PleASE OMve 0.07 uSDc THeiR wAY.'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x34130cff81e10d81dd0b252b3f33e87585edd13c', '70000']
   metadata:
     id: gen-transfer-pos-0355
     source: generated
@@ -5463,6 +5850,7 @@
     - tone
 - vars:
     user_message: lol ok When you get a sec, Sned 0.07 USDC
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0350
     source: generated
@@ -5483,6 +5871,8 @@
     - tone
 - vars:
     user_message: Please kindly Quick one — Send 123456.789012 USDC to vitalik.eth
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012']
   metadata:
     id: gen-transfer-pos-0253
     source: generated
@@ -5516,6 +5906,8 @@
       content: How much would you like to send?
     - role: user
       content: 0.000000001 ETH
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0018
     source: generated
@@ -5542,6 +5934,8 @@
 - vars:
     user_message: IT's BEEn ON mY MINd foR A WhIle — I reAlLy ShOuLd gEt 0.07 usDc
       ovER To 0X34130CfF81e10D81dd0B252B3f33e87585EdD13c.
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x34130cff81e10d81dd0b252b3f33e87585edd13c', '70000']
   metadata:
     id: gen-transfer-pos-0354
     source: generated
@@ -5567,6 +5961,8 @@
     - case
 - vars:
     user_message: Quick one — Transfer 1,234.000000005 ETH to vitalik.eth! whenever
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1234000000005000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0148
     source: generated
@@ -5591,6 +5987,8 @@
     - filler
 - vars:
     user_message: pls send 0.000007 DAI → 0xc18a871232447a61d5da08dc753d61bd38fcbb5d
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xc18a871232447a61d5da08dc753d61bd38fcbb5d', '7000000000000']
   metadata:
     id: gen-transfer-pos-0529
     source: generated
@@ -5615,6 +6013,7 @@
     mutators: []
 - vars:
     user_message: Ugh, just Sedn 9876543.21 ETH
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0098
     source: generated
@@ -5640,6 +6039,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x7e999616f080e14bcea39482e4517524e6658330', '1']
   metadata:
     id: gen-transfer-mt-0216
     source: generated
@@ -5665,6 +6066,8 @@
     - tone
 - vars:
     user_message: Ugh, just Move 0.000000001 ETH to 0xbf5db41c1449f836317920c72e63c48cb818eccf...
+    expected_summary: executeTx to 0xbf5db41c1449f836317920c72e63c48cb818eccf value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0020
     source: generated
@@ -5695,6 +6098,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to 0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14', '999999990000']
   metadata:
     id: gen-transfer-mt-0423
     source: generated
@@ -5722,6 +6127,7 @@
 - vars:
     user_message: Hey, Sedn some ETH to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a
       thanks!
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0136
     source: generated
@@ -5741,6 +6147,8 @@
 - vars:
     user_message: When you get a sec, It's been on my mind for a while — I raelly
       should get 0.07 DAI over to vitalik.eth. if that's ok
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000000000000000']
   metadata:
     id: gen-transfer-pos-0372
     source: generated
@@ -5768,6 +6176,8 @@
 - vars:
     user_message: so 0Xa68EBD84a09Cc64e5E150e5Ea90CE4C383b8192d NeEdS pAyiNG bACK
       — GO ahEaD aNd senD THeM 0.07 daI fRoM MY WALLet.
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xa68ebd84a09cc64e5e150e5ea90ce4c383b8192d', '70000000000000000']
   metadata:
     id: gen-transfer-pos-0393
     source: generated
@@ -5799,6 +6209,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to 0x435ecc924d64641c0fd43fd437696440bf23d76c
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x435ecc924d64641c0fd43fd437696440bf23d76c', '123456789012000000000000']
   metadata:
     id: gen-transfer-mt-0315
     source: generated
@@ -5830,6 +6242,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to vitalik.eth
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7']
   metadata:
     id: gen-transfer-mt-0477
     source: generated
@@ -5858,6 +6272,8 @@
 - vars:
     user_message: Quick one — /transFer 0.000000001 EtH To 0XBF5DB41c1449F836317920C72E63C48Cb818ecCf
       whenever
+    expected_summary: executeTx to 0xbf5db41c1449f836317920c72e63c48cb818eccf value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0023
     source: generated
@@ -5883,6 +6299,8 @@
 - vars:
     user_message: traNSFre 9876543.21 EtH TO 0xBF9c5024244342cbd3E2D6baa97D9E06F7E6a2A1
       if that's ok
+    expected_summary: executeTx to 0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1 value=9876543210000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0094
     source: generated
@@ -5914,6 +6332,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x34130cff81e10d81dd0b252b3f33e87585edd13c', '70000']
   metadata:
     id: gen-transfer-mt-0353
     source: generated
@@ -5939,6 +6359,8 @@
 - vars:
     user_message: Hey, TRAnsfER 123,456.789012 uSdc TO VITaLiK.eTh pleaes if that's
       ok
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012']
   metadata:
     id: gen-transfer-pos-0256
     source: generated
@@ -5967,6 +6389,8 @@
     - filler
 - vars:
     user_message: /TrANsfer 123456.789012 DaI to VitALIk.ETh
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012000000000000']
   metadata:
     id: gen-transfer-pos-0293
     source: generated
@@ -5994,6 +6418,8 @@
 - vars:
     user_message: lol ok Quick one — I wAtN TO Send 0.000001 DAi To 0X6fD2BC3D9dE4475B109B9ab508c24f15b483C684
       now if that's ok
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x6fd2bc3d9de4475b109b9ab508c24f15b483c684', '1000000000000']
   metadata:
     id: gen-transfer-pos-0240
     source: generated
@@ -6028,6 +6454,8 @@
       content: How much would you like to send?
     - role: user
       content: 9876543.21 ETH
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=9876543210000000000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0083
     source: generated
@@ -6061,6 +6489,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x435ecc924d64641c0fd43fd437696440bf23d76c', '123456789012000000000000']
   metadata:
     id: gen-transfer-mt-0317
     source: generated
@@ -6089,6 +6519,8 @@
 - vars:
     user_message: When you get a sec, It's been on my mind for a while — I really
       shuold get 0.000001 DAI over to vitalik.eth.!! whenever
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1000000000000']
   metadata:
     id: gen-transfer-pos-0228
     source: generated
@@ -6116,6 +6548,8 @@
     - filler
 - vars:
     user_message: Ugh, just /transfer 0.000001 DAI to vitalik.eth...
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1000000000000']
   metadata:
     id: gen-transfer-pos-0221
     source: generated
@@ -6143,6 +6577,8 @@
 - vars:
     user_message: tRanfser 0.000001 uSDc to 0X7E999616f080E14BCEA39482e4517524e6658330...
       thanks!
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x7e999616f080e14bcea39482e4517524e6658330', '1']
   metadata:
     id: gen-transfer-pos-0202
     source: generated
@@ -6172,6 +6608,8 @@
 - vars:
     user_message: Ugh, just When you get a sec, I want to esnd 123456.789012 DAI to
       0x435ecc924d64641c0fd43fd437696440bf23d76c now if that's ok
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x435ecc924d64641c0fd43fd437696440bf23d76c', '123456789012000000000000']
   metadata:
     id: gen-transfer-pos-0312
     source: generated
@@ -6199,6 +6637,8 @@
     - tone
 - vars:
     user_message: tRNaSFER 0.000007 USdC To 0X9DC58EfE49b435C8Ca7d3fF56923b882dec601d8!!
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x9dc58efe49b435c8ca7d3ff56923b882dec601d8', '7']
   metadata:
     id: gen-transfer-pos-0490
     source: generated
@@ -6226,6 +6666,7 @@
     - typos
 - vars:
     user_message: SENd 0.07 to vItAlIK.eTH!
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0370
     source: generated
@@ -6252,6 +6693,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to 0x6fd63be0c05a334a4332688a4c87a9828f9c3631
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x6fd63be0c05a334a4332688a4c87a9828f9c3631', '123456789012']
   metadata:
     id: gen-transfer-mt-0287
     source: generated
@@ -6277,6 +6720,8 @@
     - punctuation
 - vars:
     user_message: Ugh, just Send 73.123456789 ETH to vitalik.eth
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0037
     source: generated
@@ -6302,6 +6747,8 @@
 - vars:
     user_message: So 0x6fd2bc3d9de4475b109b9ab508c24f15b483c684 needs paying back
       — go ahead and send them 0.000001 DAI from my wallet....
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x6fd2bc3d9de4475b109b9ab508c24f15b483c684', '1000000000000']
   metadata:
     id: gen-transfer-pos-0249
     source: generated
@@ -6328,6 +6775,8 @@
 - vars:
     user_message: Ugh, just Hey, MY DaI hAS jusT beEN SIttiNg TheRE dOIGn nOtHIng.
       SeND 0.000007 oF iT TO VITAlIk.ETh, WOuld yOU?... thanks!
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7000000000000']
   metadata:
     id: gen-transfer-pos-0518
     source: generated
@@ -6364,6 +6813,8 @@
       content: How much would you like to send?
     - role: user
       content: 1234.000000005 ETH
+    expected_summary: executeTx to 0x9a6f73d7bc97f68f280d53bfd7136457c099ee54 value=1234000000005000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0180
     source: generated
@@ -6389,6 +6840,8 @@
 - vars:
     user_message: My DAI has just been sitting there diong nothing. Send 0.07 of it
       to vitalik.eth, would you?...
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000000000000000']
   metadata:
     id: gen-transfer-pos-0374
     source: generated
@@ -6416,6 +6869,8 @@
 - vars:
     user_message: 'Please kindly I ekep forgetting to do this: put 123456.789012 USDC
       into vitalik.eth for me, thanks. thanks!'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012']
   metadata:
     id: gen-transfer-pos-0268
     source: generated
@@ -6449,6 +6904,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012']
   metadata:
     id: gen-transfer-mt-0263
     source: generated
@@ -6475,6 +6932,8 @@
     - filler
 - vars:
     user_message: CoulD YoU seND 0.000007 dAI oVEr tO ViTAlIK.Eth?
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7000000000000']
   metadata:
     id: gen-transfer-pos-0507
     source: generated
@@ -6501,6 +6960,8 @@
 - vars:
     user_message: 'I keep FOrgetTiNg To do this: PUT 0.1 eTH inTO 0x10584749FeC5F3c284B7879a5b0Bf996aa0c183a
       FOr mE, thaNKs. if that''s ok'
+    expected_summary: executeTx to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a value=100000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0142
     source: generated
@@ -6527,6 +6988,8 @@
 - vars:
     user_message: 'I Keep FoRgETtiNG TO do tHis: PUT 123456.789012 dai ITnO vItAlik.etH
       fOr Me, ThANkS.'
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012000000000000']
   metadata:
     id: gen-transfer-pos-0304
     source: generated
@@ -6554,6 +7017,8 @@
     - tone
 - vars:
     user_message: coULd yOU SEnD 0.000001 DaI VoEr tO 0X6Fd2bc3d9dE4475B109B9Ab508C24F15b483c684?...
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x6fd2bc3d9de4475b109b9ab508c24f15b483c684', '1000000000000']
   metadata:
     id: gen-transfer-pos-0237
     source: generated
@@ -6582,6 +7047,8 @@
 - vars:
     user_message: When you get a sec, Trasnfer 0.07 DAI to vitalik.eth... if that's
       ok
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000000000000000']
   metadata:
     id: gen-transfer-pos-0364
     source: generated
@@ -6610,6 +7077,8 @@
 - vars:
     user_message: 'Quick one — I keep fogretting to do this: put 999999.99 USDC into
       vitalik.eth for me, thanks. if that''s ok'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '999999990000']
   metadata:
     id: gen-transfer-pos-0412
     source: generated
@@ -6636,6 +7105,8 @@
     - filler
 - vars:
     user_message: Send 0.07 DAI to 0xa68ebd84a09cc64e5e150e5ea90ce4c383b8192d
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xa68ebd84a09cc64e5e150e5ea90ce4c383b8192d', '70000000000000000']
   metadata:
     id: gen-transfer-pos-0379
     source: generated
@@ -6667,6 +7138,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to vitalik.eth
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000000000000000']
   metadata:
     id: gen-transfer-mt-0377
     source: generated
@@ -6692,6 +7165,7 @@
     - filler
 - vars:
     user_message: Ugh, just SEND 0.000007 to vItAlik.ETH pleaes
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0478
     source: generated
@@ -6712,6 +7186,8 @@
     - tone
 - vars:
     user_message: Ugh, just /transfer 123,456.789012 DAI to 0x435ecc924d64641c0fd43fd437696440bf23d76c!
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x435ecc924d64641c0fd43fd437696440bf23d76c', '123456789012000000000000']
   metadata:
     id: gen-transfer-pos-0311
     source: generated
@@ -6739,6 +7215,8 @@
 - vars:
     user_message: 'When you get a sec, I keep forgetting to do this: put 0.000001
       USDC inot vitalik.eth for me, thanks.'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1']
   metadata:
     id: gen-transfer-pos-0196
     source: generated
@@ -6766,6 +7244,8 @@
 - vars:
     user_message: Please kindly When you get a sec, /TRANsfER 0.1 ETh tO VItaLik.ETH
       thanks!
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=100000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0113
     source: generated
@@ -6792,6 +7272,8 @@
 - vars:
     user_message: lol ok When you get a sec, Tranfser 0.000001 USDC to vitalik.eth!!
       whenever
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1']
   metadata:
     id: gen-transfer-pos-0184
     source: generated
@@ -6820,6 +7302,7 @@
     - tone
 - vars:
     user_message: Ugh, just SEND 0.000001 usdc!
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0206
     source: generated
@@ -6839,6 +7322,8 @@
     - tone
 - vars:
     user_message: lol ok /traNSFer 999999.99 USDC To 0xbD7aa22d903ae226ecBFC5849Ad01a8696A95A14
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14', '999999990000']
   metadata:
     id: gen-transfer-pos-0419
     source: generated
@@ -6865,6 +7350,8 @@
     - tone
 - vars:
     user_message: Please kindly i waNT TO sENd 0.000007 DAI TO vItAliK.eTH NOw
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7000000000000']
   metadata:
     id: gen-transfer-pos-0510
     source: generated
@@ -6891,6 +7378,7 @@
     - tone
 - vars:
     user_message: eSnd some ETH to 0x9a6f73d7bc97f68f280d53bfd7136457c099ee54
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0172
     source: generated
@@ -6910,6 +7398,8 @@
 - vars:
     user_message: Hey, Could you send 0.000001 USDC over to 0x7e999616f080e14bcea39482e4517524e6658330?...
       if that's ok
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x7e999616f080e14bcea39482e4517524e6658330', '1']
   metadata:
     id: gen-transfer-pos-0201
     source: generated
@@ -6937,6 +7427,8 @@
 - vars:
     user_message: 'lol ok When you get a sec, I kepe forgetting to do this: put 0.07
       USDC into 0x34130cff81e10d81dd0b252b3f33e87585edd13c for me, thanks.!! thanks!'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x34130cff81e10d81dd0b252b3f33e87585edd13c', '70000']
   metadata:
     id: gen-transfer-pos-0358
     source: generated
@@ -6965,6 +7457,8 @@
     - tone
 - vars:
     user_message: Please kindly Quick one — pls sedn 0.000007 DAI → vitalik.eth!!
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7000000000000']
   metadata:
     id: gen-transfer-pos-0511
     source: generated
@@ -6994,6 +7488,8 @@
 - vars:
     user_message: Send 73.123456789 ETH to 0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d
       please
+    expected_summary: executeTx to 0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0055
     source: generated
@@ -7018,6 +7514,8 @@
 - vars:
     user_message: 'Ugh, just hEy, quIcK FavOUR: VItAlIK.eTH CoVEreD me lAsT weEk,
       sO plEaSe MOVe 0.07 USdC tHeiR WaY.!!'
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000']
   metadata:
     id: gen-transfer-pos-0337
     source: generated
@@ -7052,6 +7550,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to 0xbf5db41c1449f836317920c72e63c48cb818eccf
+    expected_summary: executeTx to 0xbf5db41c1449f836317920c72e63c48cb818eccf value=1000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0035
     source: generated
@@ -7074,6 +7574,7 @@
     mutators: []
 - vars:
     user_message: Hey, Send 0.000007 USDC whenever
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0494
     source: generated
@@ -7094,6 +7595,8 @@
 - vars:
     user_message: I AwNt To sEND 0.000007 dAI To 0Xc18A871232447a61D5Da08dc753D61Bd38FCbB5D
       NOw...
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xc18a871232447a61d5da08dc753d61bd38fcbb5d', '7000000000000']
   metadata:
     id: gen-transfer-pos-0528
     source: generated
@@ -7123,6 +7626,8 @@
 - vars:
     user_message: My DaI hAs JuST BEen sITTinG tEhRE dOing NOThing. seNd 0.07 Of it
       To 0Xa68EBd84A09cc64e5e150E5EA90cE4C383B8192D, wOuld YOu?!!
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xa68ebd84a09cc64e5e150e5ea90ce4c383b8192d', '70000000000000000']
   metadata:
     id: gen-transfer-pos-0392
     source: generated
@@ -7150,6 +7655,8 @@
     - typos
 - vars:
     user_message: Hey, traNSFRe 0.000007 dai TO viTALIk.ETH... thanks!
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '7000000000000']
   metadata:
     id: gen-transfer-pos-0508
     source: generated
@@ -7178,6 +7685,7 @@
     - filler
 - vars:
     user_message: Send 123,456.789012 to vitalik.eth!!
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0298
     source: generated
@@ -7202,6 +7710,8 @@
       content: Which token?
     - role: user
       content: in USDC
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14', '999999990000']
   metadata:
     id: gen-transfer-mt-0432
     source: generated
@@ -7228,6 +7738,8 @@
 - vars:
     user_message: 'lol ok Hey, quick favour: vitalik.eth coevred me last week, so
       please move 0.000000001 ETH their way....'
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0013
     source: generated
@@ -7254,6 +7766,8 @@
 - vars:
     user_message: 'Hey, hEY, qUIcK fAVOuR: VitALIK.Eth cOveReD mE lasT wEeK, SO PlEASE
       MOVe 0.1 eTH ThIer WAy.!! if that''s ok'
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=100000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0121
     source: generated
@@ -7280,6 +7794,8 @@
     - filler
 - vars:
     user_message: lol ok Hey, moeV 123456.789012 daI tO vItaLiK.ETH if that's ok
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '123456789012000000000000']
   metadata:
     id: gen-transfer-pos-0290
     source: generated
@@ -7310,6 +7826,8 @@
     user_message: sO 0X6fd63be0C05A334a4332688a4c87A9828F9c3631 NeEDS PAyIng BaCK
       — Go AheaD aND SEND them 123,456.789012 uSdC From my WaLleT. please if that's
       ok
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x6fd63be0c05a334a4332688a4c87a9828f9c3631', '123456789012']
   metadata:
     id: gen-transfer-pos-0285
     source: generated
@@ -7338,6 +7856,7 @@
     - filler
 - vars:
     user_message: Ugh, just Sned 0.07 USDC if that's ok
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0332
     source: generated
@@ -7357,6 +7876,7 @@
     - tone
 - vars:
     user_message: SeNd 999999.99 DAi
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0458
     source: generated
@@ -7374,6 +7894,8 @@
     - case
 - vars:
     user_message: Hey, I watn to send 73.123456789 ETH to vitalik.eth now! whenever
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0042
     source: generated
@@ -7401,6 +7923,7 @@
 - vars:
     user_message: Please kindly Send 123,456.789012 to 0x435ecc924d64641c0fd43fd437696440bf23d76c!!
       thanks!
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0316
     source: generated
@@ -7421,6 +7944,8 @@
 - vars:
     user_message: 'I keep forgetting to do this: put 123456.789012 DAI into 0x435ecc924d64641c0fd43fd437696440bf23d76c
       for me, thanks.'
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x435ecc924d64641c0fd43fd437696440bf23d76c', '123456789012000000000000']
   metadata:
     id: gen-transfer-pos-0322
     source: generated
@@ -7445,6 +7970,7 @@
     mutators: []
 - vars:
     user_message: Send 123,456.789012 to vitalik.eth! whenever
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0262
     source: generated
@@ -7464,6 +7990,8 @@
     - tone
 - vars:
     user_message: Trnasfer 999999.99 USDC to 0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xbd7aa22d903ae226ecbfc5849ad01a8696a95a14', '999999990000']
   metadata:
     id: gen-transfer-pos-0418
     source: generated
@@ -7495,6 +8023,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x2f38e0f0284171f13a370c86dedb53d13c77262c', '999999990000000000000000']
   metadata:
     id: gen-transfer-mt-0461
     source: generated
@@ -7523,6 +8053,8 @@
 - vars:
     user_message: 'lol ok i ekep fORgettinG To DO thiS: put 1,234.000000005 eTH IntO
       0X9a6f73D7bC97F68F280d53BfD7136457c099EE54 foR ME, THanKs.! whenever'
+    expected_summary: executeTx to 0x9a6f73d7bc97f68f280d53bfd7136457c099ee54 value=1234000000005000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0178
     source: generated
@@ -7550,6 +8082,8 @@
     - tone
 - vars:
     user_message: Could you send 0.000001 DAI over to vitalik.eth?
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1000000000000']
   metadata:
     id: gen-transfer-pos-0219
     source: generated
@@ -7580,6 +8114,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to vitalik.eth
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1000000000000']
   metadata:
     id: gen-transfer-mt-0233
     source: generated
@@ -7605,6 +8141,8 @@
     - typos
 - vars:
     user_message: When you get a sec, /tRAnsFEr 0.000000001 ETH TO VITAlIK.eth
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0005
     source: generated
@@ -7631,6 +8169,8 @@
 - vars:
     user_message: It's been on my mind for a while — I really should get 123,456.789012
       USDC over to 0x6fd63be0c05a334a4332688a4c87a9828f9c3631. please
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x6fd63be0c05a334a4332688a4c87a9828f9c3631', '123456789012']
   metadata:
     id: gen-transfer-pos-0282
     source: generated
@@ -7663,6 +8203,8 @@
       content: Which token?
     - role: user
       content: in DAI
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0x435ecc924d64641c0fd43fd437696440bf23d76c', '123456789012000000000000']
   metadata:
     id: gen-transfer-mt-0324
     source: generated
@@ -7689,6 +8231,7 @@
     - filler
 - vars:
     user_message: When you get a sec, SenD 0.000001 To 0X6fd2BC3d9dE4475b109b9aB508C24F15B483c684
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0244
     source: generated
@@ -7707,6 +8250,8 @@
     - filler
 - vars:
     user_message: sEnd 0.000001 Usdc to 0x7E999616F080e14BCEa39482E4517524E6658330
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x7e999616f080e14bcea39482e4517524e6658330', '1']
   metadata:
     id: gen-transfer-pos-0199
     source: generated
@@ -7739,6 +8284,8 @@
       content: How much would you like to send?
     - role: user
       content: 73.123456789 ETH
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0054
     source: generated
@@ -7763,6 +8310,8 @@
     - typos
 - vars:
     user_message: When you get a sec, I want to send 0.000001 DAI to vitalik.eth now
+    expected_summary: executeTx to 0x6B175474E89094C44Da98b954EedeAC495271d0F transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1000000000000']
   metadata:
     id: gen-transfer-pos-0222
     source: generated
@@ -7788,6 +8337,8 @@
     - filler
 - vars:
     user_message: /TraNsFER 0.000007 USDc to 0x9DC58efE49B435c8Ca7d3ff56923B882DeC601d8
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0x9dc58efe49b435c8ca7d3ff56923b882dec601d8', '7']
   metadata:
     id: gen-transfer-pos-0491
     source: generated
@@ -7813,6 +8364,8 @@
     - case
 - vars:
     user_message: Ugh, just mOvE 0.000001 usdC tO ViTAlIK.ETH please
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '1']
   metadata:
     id: gen-transfer-pos-0182
     source: generated
@@ -7846,6 +8399,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to vitalik.eth
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=73123456789000000000
+      (native)
   metadata:
     id: gen-transfer-mt-0045
     source: generated
@@ -7877,6 +8432,8 @@
       content: Which address or ENS should I send it to?
     - role: user
       content: to vitalik.eth
+    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
+      args=['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', '70000']
   metadata:
     id: gen-transfer-mt-0333
     source: generated
@@ -7906,6 +8463,8 @@
 - vars:
     user_message: Ugh, just My ETH has just been sitting there doing nothing. Send
       1234.000000005 of it to 0x9a6f73d7bc97f68f280d53bfd7136457c099ee54, would you?
+    expected_summary: executeTx to 0x9a6f73d7bc97f68f280d53bfd7136457c099ee54 value=1234000000005000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0176
     source: generated
@@ -7929,6 +8488,7 @@
     - tone
 - vars:
     user_message: SENd 0.000001 TO 0X7E999616f080e14BceA39482E4517524e6658330
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0208
     source: generated
@@ -7947,6 +8507,7 @@
     - punctuation
 - vars:
     user_message: Please kindly Quick one — SENd 0.07 Dai! whenever
+    expected_summary: (no tool call)
   metadata:
     id: gen-transfer-neg-0386
     source: generated
@@ -7967,6 +8528,8 @@
     - tone
 - vars:
     user_message: Move 1234.000000005 ETH to vitalik.eth
+    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=1234000000005000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0146
     source: generated
@@ -7990,6 +8553,8 @@
 - vars:
     user_message: It's been on my mind for a while — I really should get 0.1 ETH over
       to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a. thanks!
+    expected_summary: executeTx to 0x10584749fec5f3c284b7879a5b0bf996aa0c183a value=100000000000000000
+      (native)
   metadata:
     id: gen-transfer-pos-0138
     source: generated
