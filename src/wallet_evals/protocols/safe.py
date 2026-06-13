@@ -126,6 +126,7 @@ def build_cases(fixtures: list[dict], rng: random.Random, start_idx: int = 1) ->
                 short = "add" if fx["op"] == "addOwnerWithThreshold" else "remove"
                 cases.append({
                     "vars": {"user_message": surface, "account_context": ctx,
+                             "protocol": "safe",
                              "expected_summary": format_expected_summary([gold])},
                     "metadata": {
                         "id": f"safe-{short}-{idx:04d}",

@@ -69,6 +69,29 @@ SAFE_REFERENCE = (
 )
 
 
+AAVE_REFERENCE = (
+    "Aave v3 lending (Ethereum mainnet). For supply/withdraw/borrow/repay, emit a "
+    "single executeTx to the Aave v3 Pool "
+    "0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 (value \"0\"). Amounts are in base "
+    "units using the asset's decimals.\n"
+    "Assets (symbol -> address, decimals): "
+    "USDC 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 (6), "
+    "USDT 0xdAC17F958D2ee523a2206206994597C13D831ec7 (6), "
+    "DAI 0x6B175474E89094C44Da98b954EedeAC495271d0F (18), "
+    "WETH 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 (18), "
+    "WBTC 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599 (8).\n"
+    "Functions (exact arg order):\n"
+    "- supply(address,uint256,address,uint16) — asset, amount, onBehalfOf, referralCode\n"
+    "- withdraw(address,uint256,address) — asset, amount, to\n"
+    "- borrow(address,uint256,uint256,uint16,address) — asset, amount, interestRateMode, referralCode, onBehalfOf\n"
+    "- repay(address,uint256,uint256,address) — asset, amount, interestRateMode, onBehalfOf\n"
+    "Defaults: onBehalfOf and to are your own wallet — emit \"<wallet>\"; "
+    "referralCode is \"0\"; interestRateMode is \"2\" (variable)."
+)
+
+PROTOCOL_REFERENCES = {"safe": SAFE_REFERENCE, "aave": AAVE_REFERENCE}
+
+
 def _format_account_context(ac: dict) -> str:
     owners = ", ".join(ac.get("owners", []))
     return (f"ACCOUNT CONTEXT\nSafe: {ac['safe']}\n"
@@ -78,10 +101,15 @@ def _format_account_context(ac: dict) -> str:
 def render(context: dict[str, Any]) -> list[dict[str, str]]:
     vars_ = context.get("vars", {}) if isinstance(context, dict) else {}
     chat: list[dict[str, str]] = [{"role": "system", "content": SYSTEM}]
+    parts: list[str] = []
+    reference = PROTOCOL_REFERENCES.get(vars_.get("protocol"))
+    if reference:
+        parts.append(reference)
     account_context = vars_.get("account_context")
     if account_context:
-        chat.append({"role": "system",
-                     "content": SAFE_REFERENCE + "\n\n" + _format_account_context(account_context)})
+        parts.append(_format_account_context(account_context))
+    if parts:
+        chat.append({"role": "system", "content": "\n\n".join(parts)})
     messages = vars_.get("messages")
     if messages:
         chat.extend(messages)
