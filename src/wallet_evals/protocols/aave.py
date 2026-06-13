@@ -47,3 +47,77 @@ def gold_call(fx: dict) -> dict:
         return {**base, "function": "repay(address,uint256,uint256,address)",
                 "args": [asset, amount, str(fx["rate_mode"]), WALLET]}
     raise ValueError(f"unknown Aave op: {op!r}")
+
+
+TEMPLATES = {
+    "supply": [("direct", [
+        "Supply {amount} {asset} to Aave v3.",
+        "Deposit {amount} {asset} into Aave v3.",
+        "Lend {amount} {asset} on Aave v3.",
+    ]), ("narrative", [
+        "I'd like to put {amount} {asset} to work earning yield on Aave v3.",
+        "Let's deposit {amount} {asset} into Aave v3 so it earns interest.",
+    ])],
+    "withdraw": [("direct", [
+        "Withdraw {amount} {asset} from my Aave v3 supply position.",
+        "Redeem {amount} {asset} from Aave v3.",
+        "Pull {amount} {asset} out of Aave v3.",
+    ]), ("narrative", [
+        "I need {amount} {asset} back from my Aave v3 deposit, please.",
+        "Take {amount} {asset} out of what I lent on Aave v3.",
+    ])],
+    "borrow": [("direct", [
+        "Borrow {amount} {asset} from Aave v3.",
+        "Take out a loan of {amount} {asset} on Aave v3.",
+        "Draw {amount} {asset} of debt from Aave v3.",
+    ]), ("narrative", [
+        "I want to borrow against my collateral — pull {amount} {asset} from Aave v3.",
+        "Open a {amount} {asset} loan for me on Aave v3.",
+    ])],
+    "repay": [("direct", [
+        "Repay {amount} {asset} on my Aave v3 loan.",
+        "Pay back {amount} {asset} to Aave v3.",
+        "Settle {amount} {asset} of my Aave v3 debt.",
+    ]), ("narrative", [
+        "Let's pay down {amount} {asset} of what I owe on Aave v3.",
+        "I'd like to clear {amount} {asset} from my Aave v3 borrow.",
+    ])],
+}
+CATEGORY = {"supply": "aave-supply", "withdraw": "aave-withdraw",
+            "borrow": "aave-borrow", "repay": "aave-repay"}
+
+
+def _fill(template: str, fx: dict) -> str:
+    return template.format(amount=fx["amount_human"], asset=fx["asset"])
+
+
+def build_cases(fixtures: list[dict], rng: random.Random, start_idx: int = 1) -> list[dict]:
+    """One case per (fixture, template); gold computed; vars.protocol = 'aave'."""
+    cases: list[dict] = []
+    idx = start_idx
+    for fx in fixtures:
+        gold = gold_call(fx)
+        for style, templates in TEMPLATES[fx["op"]]:
+            for template in templates:
+                surface, labels = apply_mutators(_fill(template, fx), rng)
+                cases.append({
+                    "vars": {"user_message": surface, "protocol": "aave",
+                             "expected_summary": format_expected_summary([gold])},
+                    "metadata": {
+                        "id": f"aave-{fx['op']}-{idx:04d}",
+                        "source": "generated-protocol",
+                        "protocol": "aave",
+                        "language": "english",
+                        "category": CATEGORY[fx["op"]],
+                        "difficulty": "hard",
+                        "level": "payload",
+                        "query_type": "one_shot",
+                        "requires": ["aave_pool"],
+                        "style": style,
+                        "mutators": labels,
+                        "expected_calls": [gold],
+                        "notes": None,
+                    },
+                })
+                idx += 1
+    return cases

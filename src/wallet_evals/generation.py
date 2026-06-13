@@ -54,7 +54,7 @@ def mutate_punctuation(text: str, rng: random.Random) -> str:
 # Token symbols are never typo'd: a corrupted symbol (USDC->UDSC) makes the
 # request genuinely ambiguous, which correctly causes a careful model to ask for
 # clarification — that penalizes caution rather than testing parsing capability.
-_PROTECTED_WORDS = {"ETH", "WETH", "USDC", "DAI"}
+_PROTECTED_WORDS = {"ETH", "WETH", "USDC", "DAI", "USDT", "WBTC"}
 
 
 def mutate_typos(text: str, rng: random.Random) -> str:

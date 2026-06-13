@@ -53,3 +53,32 @@ def test_gold_call_repay():
     g = aave_mod.gold_call(fx)
     assert g["function"] == "repay(address,uint256,uint256,address)"
     assert g["args"] == ["0xdAC17F958D2ee523a2206206994597C13D831ec7", "50000000", "2", "<wallet>"]
+
+
+def test_build_cases_structure_and_gold():
+    fx = _fixtures()
+    cases = aave_mod.build_cases(fx, random.Random(0))
+    assert len(cases) >= len(fx)
+    ids = [c["metadata"]["id"] for c in cases]
+    assert len(ids) == len(set(ids))
+    for c in cases:
+        md = c["metadata"]
+        assert md["protocol"] == "aave"
+        assert c["vars"]["protocol"] == "aave"
+        assert md["style"] in {"direct", "narrative"}
+        assert "user_message" in c["vars"]
+        assert "account_context" not in c["vars"]
+        assert c["metadata"]["expected_calls"][0]["to"] == aave_mod.POOL
+        assert "expected_summary" in c["vars"]
+
+
+def test_build_cases_surface_has_asset():
+    fx = [f for f in _fixtures() if f["op"] == "supply"]
+    for c in aave_mod.build_cases(fx, random.Random(2)):
+        um = c["vars"]["user_message"].lower()
+        assert any(sym.lower() in um for sym in ("usdc", "weth", "dai", "wbtc", "usdt"))
+
+
+def test_build_cases_deterministic():
+    fx = _fixtures()
+    assert aave_mod.build_cases(fx, random.Random(7)) == aave_mod.build_cases(fx, random.Random(7))
