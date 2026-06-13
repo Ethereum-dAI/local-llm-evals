@@ -36,3 +36,13 @@ def test_every_protocol_gold_self_scores_one():
             for c in case.expected_calls
         ])
         assert score_case(case, turn) == 1, f"{case.id} not self-consistent"
+
+
+def test_has_aave_categories():
+    cats = {c.category for c in _load()}
+    assert {"aave-supply", "aave-withdraw", "aave-borrow", "aave-repay"} <= cats
+
+
+def test_has_both_protocols():
+    protos = {c.protocol for c in _load()}
+    assert "safe" in protos and "aave" in protos
