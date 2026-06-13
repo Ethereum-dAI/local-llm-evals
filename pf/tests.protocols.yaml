@@ -10,6 +10,7 @@
       - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
       - '0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86'
       threshold: 2
+    protocol: safe
     expected_summary: executeTx to 0x36dB66903bCFb0BFAF5396daA68e65363EFb2Be8 addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -43,6 +44,7 @@
     user_message: Ugh, just AdD woner 0X8DBc9bA71c340f00518F29FAd98F5E9f7Fd1D5cB TO
       tHE safE AnD reqUiRe 3 CONFiRmAtioNS.!!
     account_context: *id001
+    protocol: safe
     expected_summary: executeTx to 0x36dB66903bCFb0BFAF5396daA68e65363EFb2Be8 addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -68,6 +70,7 @@
 - vars:
     user_message: /AddOWneR 0X8DBC9ba71C340F00518f29fAd98F5e9F7FD1d5Cb ThRsehOld 3!!
     account_context: *id001
+    protocol: safe
     expected_summary: executeTx to 0x36dB66903bCFb0BFAF5396daA68e65363EFb2Be8 addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -95,6 +98,7 @@
     user_message: lol ok we'Ve gOt a nEW tEAmmAtE — PLEAsE aDD 0x8DbC9bA71C340f00518f29fad98f5e9f7fd1d5cb
       TO The SAfe AND Bump COnFiRmAtiOSn tO 3. please
     account_context: *id001
+    protocol: safe
     expected_summary: executeTx to 0x36dB66903bCFb0BFAF5396daA68e65363EFb2Be8 addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -121,6 +125,7 @@
     user_message: Quick one — 0x8dbC9bA71c340f00518f29Fad98f5e9F7Fd1D5CB iS joINinG
       As A co-SIgnEr; ADd tHEm And seT thE aPPROval ThrEShold To 3.
     account_context: *id001
+    protocol: safe
     expected_summary: executeTx to 0x36dB66903bCFb0BFAF5396daA68e65363EFb2Be8 addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -151,6 +156,7 @@
       - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
       - '0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86'
       threshold: 2
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -182,6 +188,7 @@
     user_message: Hey, Add owner 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb to the
       Safe and requier 3 confirmations. if that's ok
     account_context: *id003
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -207,6 +214,7 @@
     user_message: When you get a sec, /addowner 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb
       threhsold 3!
     account_context: *id003
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -232,6 +240,7 @@
     user_message: Ugh, just We've got a new teammate — please add 0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb
       to the Sfae and bump confirmations to 3. please
     account_context: *id003
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -257,6 +266,7 @@
     user_message: 0x8Dbc9ba71c340f00518f29Fad98f5E9F7Fd1D5Cb iS joIninG aS A cO-SigneR;
       ADd ThEM AND set the ApPrOvAl tHresholD tO 3.!!
     account_context: *id003
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb', '3']
   metadata:
@@ -285,6 +295,7 @@
       owners:
       - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
       threshold: 1
+    protocol: safe
     expected_summary: executeTx to 0x5F3783110E28A833f58B467de86a404864223C3a addOwnerWithThreshold(address,uint256)
       args=['0xc011F5503d270C89F358468b6Dee9b51adeb5413', '2']
   metadata:
@@ -316,6 +327,7 @@
     user_message: Hey, aDd OwNer 0xc011f5503D270c89F358468b6deE9b51ADEb5413 TO thE
       SafE anD requIRe 2 coNFIRmAtiONS. whenever
     account_context: *id005
+    protocol: safe
     expected_summary: executeTx to 0x5F3783110E28A833f58B467de86a404864223C3a addOwnerWithThreshold(address,uint256)
       args=['0xc011F5503d270C89F358468b6Dee9b51adeb5413', '2']
   metadata:
@@ -339,6 +351,7 @@
 - vars:
     user_message: /aDdoWNeR 0Xc011F5503D270C89F358468B6deE9B51ADEb5413 ThReSOHLD 2!
     account_context: *id005
+    protocol: safe
     expected_summary: executeTx to 0x5F3783110E28A833f58B467de86a404864223C3a addOwnerWithThreshold(address,uint256)
       args=['0xc011F5503d270C89F358468b6Dee9b51adeb5413', '2']
   metadata:
@@ -364,6 +377,7 @@
     user_message: Hey, we'vE got A NEw TEAmMAte — pleASE add 0XC011f5503D270c89f358468B6dee9B51aDEb5413
       to thE SAfe And bumP CoNfirmatIOnS To 2. thanks!
     account_context: *id005
+    protocol: safe
     expected_summary: executeTx to 0x5F3783110E28A833f58B467de86a404864223C3a addOwnerWithThreshold(address,uint256)
       args=['0xc011F5503d270C89F358468b6Dee9b51adeb5413', '2']
   metadata:
@@ -388,6 +402,7 @@
     user_message: Quick one — 0Xc011F5503D270c89f358468b6dee9b51aDEb5413 IS joinInG
       as A Co-sIGNEr; aDd ThEm and sET The APProval ThresHolD TO 2. whenever
     account_context: *id005
+    protocol: safe
     expected_summary: executeTx to 0x5F3783110E28A833f58B467de86a404864223C3a addOwnerWithThreshold(address,uint256)
       args=['0xc011F5503d270C89F358468b6Dee9b51adeb5413', '2']
   metadata:
@@ -416,6 +431,7 @@
       owners:
       - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
       threshold: 1
+    protocol: safe
     expected_summary: executeTx to 0xB7B271238831a3AcC2c450d2ac96E424D7cDAda7 addOwnerWithThreshold(address,uint256)
       args=['0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86', '2']
   metadata:
@@ -449,6 +465,7 @@
     user_message: Quick one — Add owner 0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86
       to the Safe and require 2 confirmations.
     account_context: *id007
+    protocol: safe
     expected_summary: executeTx to 0xB7B271238831a3AcC2c450d2ac96E424D7cDAda7 addOwnerWithThreshold(address,uint256)
       args=['0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86', '2']
   metadata:
@@ -471,6 +488,7 @@
 - vars:
     user_message: /aDDOWneR 0xE31Cb422d3c7B65EcBaE7131A4e9D0Cd369d5f86 ThresHOLD 2!
     account_context: *id007
+    protocol: safe
     expected_summary: executeTx to 0xB7B271238831a3AcC2c450d2ac96E424D7cDAda7 addOwnerWithThreshold(address,uint256)
       args=['0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86', '2']
   metadata:
@@ -495,6 +513,7 @@
     user_message: Please kindly We've got a new teammate — please add 0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86
       to the Safe and bump confirmations to 2.!
     account_context: *id007
+    protocol: safe
     expected_summary: executeTx to 0xB7B271238831a3AcC2c450d2ac96E424D7cDAda7 addOwnerWithThreshold(address,uint256)
       args=['0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86', '2']
   metadata:
@@ -519,6 +538,7 @@
     user_message: 0xe31cB422d3c7B65EcBaE7131A4E9D0cd369D5F86 iS JOININg aS a co-siGnER;
       ADD ThEm anD set the apRPOvAl tHresHOLd tO 2.!!
     account_context: *id007
+    protocol: safe
     expected_summary: executeTx to 0xB7B271238831a3AcC2c450d2ac96E424D7cDAda7 addOwnerWithThreshold(address,uint256)
       args=['0xE31CB422D3c7b65ecbAE7131a4e9d0Cd369D5f86', '2']
   metadata:
@@ -549,6 +569,7 @@
       - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
       - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
       threshold: 2
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D', '3']
   metadata:
@@ -581,6 +602,7 @@
     user_message: Quick one — adD OWner 0x00C3aeD1d4DA64f5a822edA97321bBBaE6B9974d
       tO ThE SAfe and ReQIURE 3 coNfirmaTIOns. if that's ok
     account_context: *id009
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D', '3']
   metadata:
@@ -606,6 +628,7 @@
     user_message: Quick one — /ADDowneR 0X00C3aEd1d4DA64F5A822EdA97321BBbaE6b9974D
       threSHOld 3 thanks!
     account_context: *id009
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D', '3']
   metadata:
@@ -630,6 +653,7 @@
     user_message: we'VE gOt A nEW teaMmaTe — pLeASE ADD 0X00c3AeD1D4Da64f5a822EDa97321bBBaE6b9974d
       TO tHe sAfE aNd bUMp cNOfIrmaTiOns To 3.
     account_context: *id009
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D', '3']
   metadata:
@@ -655,6 +679,7 @@
     user_message: lol ok 0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D is joining as
       a co-signer; add tehm and set the approval threshold to 3....
     account_context: *id009
+    protocol: safe
     expected_summary: executeTx to 0x6fc78dcc8A949d1530035bD577DCB21e9787100e addOwnerWithThreshold(address,uint256)
       args=['0x00C3aed1d4Da64f5A822eDA97321BBBaE6B9974D', '3']
   metadata:
@@ -686,6 +711,7 @@
       - '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295'
       - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
       threshold: 2
+    protocol: safe
     expected_summary: executeTx to 0xA3C1F84fcBedc93aEc401120206b48BEa951D8d0 removeOwner(address,address,uint256)
       args=['0xfb505A2420a761e6E58EadBd6d668c85aE81c863', '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295',
       '2']
@@ -720,6 +746,7 @@
     user_message: Please kindly tAkE 0xDD175ad35EC9FEA448ad639F4FF4BE58cACca295 OFF
       tHE asfE owNers.!
     account_context: *id011
+    protocol: safe
     expected_summary: executeTx to 0xA3C1F84fcBedc93aEc401120206b48BEa951D8d0 removeOwner(address,address,uint256)
       args=['0xfb505A2420a761e6E58EadBd6d668c85aE81c863', '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295',
       '2']
@@ -746,6 +773,7 @@
 - vars:
     user_message: Please kindly /removeowner 0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295
     account_context: *id011
+    protocol: safe
     expected_summary: executeTx to 0xA3C1F84fcBedc93aEc401120206b48BEa951D8d0 removeOwner(address,address,uint256)
       args=['0xfb505A2420a761e6E58EadBd6d668c85aE81c863', '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295',
       '2']
@@ -770,6 +798,7 @@
     user_message: 0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295 has left the team — please
       atke them off the Safe.
     account_context: *id011
+    protocol: safe
     expected_summary: executeTx to 0xA3C1F84fcBedc93aEc401120206b48BEa951D8d0 removeOwner(address,address,uint256)
       args=['0xfb505A2420a761e6E58EadBd6d668c85aE81c863', '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295',
       '2']
@@ -794,6 +823,7 @@
     user_message: Please kindly We're offboarding 0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295;
       remove them from the Safe signers.
     account_context: *id011
+    protocol: safe
     expected_summary: executeTx to 0xA3C1F84fcBedc93aEc401120206b48BEa951D8d0 removeOwner(address,address,uint256)
       args=['0xfb505A2420a761e6E58EadBd6d668c85aE81c863', '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295',
       '2']
@@ -823,6 +853,7 @@
       - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
       - '0x54Cb2eC76400311DC29c90D033080bc8cBF03325'
       threshold: 1
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x54Cb2eC76400311DC29c90D033080bc8cBF03325',
       '1']
@@ -859,6 +890,7 @@
     user_message: lol ok Take 0x54Cb2eC76400311DC29c90D033080bc8cBF03325 off the Safe
       owners.!
     account_context: *id013
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x54Cb2eC76400311DC29c90D033080bc8cBF03325',
       '1']
@@ -883,6 +915,7 @@
 - vars:
     user_message: /remOVeOwneR 0x54cB2EC76400311DC29C90d033080Bc8cbf03325 whenever
     account_context: *id013
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x54Cb2eC76400311DC29c90D033080bc8cBF03325',
       '1']
@@ -910,6 +943,7 @@
     user_message: lol ok 0X54Cb2Ec76400311DC29c90d033080bC8cbF03325 HAS LEFt THe teAM
       — pLEasE tAke THEm oFf ThE SaFE.
     account_context: *id013
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x54Cb2eC76400311DC29c90D033080bc8cBF03325',
       '1']
@@ -935,6 +969,7 @@
     user_message: We're offboarding 0x54Cb2eC76400311DC29c90D033080bc8cBF03325; remove
       tehm from the Safe signers. whenever
     account_context: *id013
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x54Cb2eC76400311DC29c90D033080bc8cBF03325',
       '1']
@@ -965,6 +1000,7 @@
       - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
       - '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909'
       threshold: 1
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909',
       '1']
@@ -999,6 +1035,7 @@
     user_message: Please kindly ATKE 0x934af94DB21d1D24A7faD1ff6B1b02c3a894A909 ofF
       thE sAFE OwneRS....
     account_context: *id015
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909',
       '1']
@@ -1025,6 +1062,7 @@
 - vars:
     user_message: Please kindly /removeowner 0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909
     account_context: *id015
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909',
       '1']
@@ -1049,6 +1087,7 @@
     user_message: 0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909 has left the team — please
       take thme off the Safe.
     account_context: *id015
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909',
       '1']
@@ -1074,6 +1113,7 @@
     user_message: lol ok We're fofboarding 0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909;
       remove them from the Safe signers.
     account_context: *id015
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x934Af94DB21d1D24a7faD1FF6B1B02c3a894A909',
       '1']
@@ -1105,6 +1145,7 @@
       - '0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0'
       - '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE'
       threshold: 1
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE',
       '1']
@@ -1142,6 +1183,7 @@
     user_message: Ugh, just Quick one — takE 0x4c3c2b94093479dd6B37D64A97004FAb7F3F7BDe
       OFf ThE SaFE oWNers. pelase thanks!
     account_context: *id017
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE',
       '1']
@@ -1170,6 +1212,7 @@
     user_message: Ugh, just /removeowner 0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE
       thanks!
     account_context: *id017
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE',
       '1']
@@ -1195,6 +1238,7 @@
     user_message: Please kindly 0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE has left
       the team — please take them off the Safe. please
     account_context: *id017
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE',
       '1']
@@ -1220,6 +1264,7 @@
     user_message: We're offboarding 0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE; remove
       them from the Safe signers.!!
     account_context: *id017
+    protocol: safe
     expected_summary: executeTx to 0x2630d37C8d29eeE28283BD5223b072D19AB7295a removeOwner(address,address,uint256)
       args=['0x07DFF52fb8B38E55E6eCb407913cd847396Af4f0', '0x4C3C2B94093479dD6B37d64a97004FaB7F3F7bdE',
       '1']
@@ -1251,6 +1296,7 @@
       - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
       - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
       threshold: 3
+    protocol: safe
     expected_summary: executeTx to 0x7be40A6B612acC1c1BD29aE126ABf3471361506d removeOwner(address,address,uint256)
       args=['0x0D858351A5FB419C9A3760647900d2F7aD526c83', '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba',
       '3']
@@ -1286,6 +1332,7 @@
     user_message: Take 0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba off the Sfae owners.!!
       whenever
     account_context: *id019
+    protocol: safe
     expected_summary: executeTx to 0x7be40A6B612acC1c1BD29aE126ABf3471361506d removeOwner(address,address,uint256)
       args=['0x0D858351A5FB419C9A3760647900d2F7aD526c83', '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba',
       '3']
@@ -1311,6 +1358,7 @@
 - vars:
     user_message: /rEmovEOWNEr 0x8c42138c925d1049Ec6B29f1EcF817b1628E54bA
     account_context: *id019
+    protocol: safe
     expected_summary: executeTx to 0x7be40A6B612acC1c1BD29aE126ABf3471361506d removeOwner(address,address,uint256)
       args=['0x0D858351A5FB419C9A3760647900d2F7aD526c83', '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba',
       '3']
@@ -1337,6 +1385,7 @@
     user_message: Please kindly 0x8c42138c925D1049ec6b29F1Ecf817b1628e54BA hAS left
       tHe TEAm — pleAse TAke tHEm off tHE SafE....
     account_context: *id019
+    protocol: safe
     expected_summary: executeTx to 0x7be40A6B612acC1c1BD29aE126ABf3471361506d removeOwner(address,address,uint256)
       args=['0x0D858351A5FB419C9A3760647900d2F7aD526c83', '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba',
       '3']
@@ -1363,6 +1412,7 @@
     user_message: Hey, we'RE oFFbOarDing 0x8c42138C925d1049eC6B29F1ECf817B1628E54ba;
       Remove thEm From the sAfE SignERs. if that's ok
     account_context: *id019
+    protocol: safe
     expected_summary: executeTx to 0x7be40A6B612acC1c1BD29aE126ABf3471361506d removeOwner(address,address,uint256)
       args=['0x0D858351A5FB419C9A3760647900d2F7aD526c83', '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba',
       '3']
@@ -1384,4 +1434,2366 @@
     - tone
     expected_calls:
     - *id020
+    notes: null
+- vars:
+    user_message: Ugh, just Supply 62 USDT to Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '62000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0001
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - tone
+    expected_calls:
+    - &id021
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: supply(address,uint256,address,uint16)
+      args:
+      - '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+      - '62000000'
+      - <wallet>
+      - '0'
+    notes: null
+- vars:
+    user_message: Please kindly dEposiT 62 Usdt InTO AavE V3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '62000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0002
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - tone
+    expected_calls:
+    - *id021
+    notes: null
+- vars:
+    user_message: Quick one — lEnd 62 USDT on aaVE v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '62000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0003
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - filler
+    expected_calls:
+    - *id021
+    notes: null
+- vars:
+    user_message: I'd like to put 62 USDT to work earning yield on Aave v3. please
+      thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '62000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0004
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    - filler
+    expected_calls:
+    - *id021
+    notes: null
+- vars:
+    user_message: Hey, Let's deposit 62 USDT into Aave v3 so it earns interest.!!
+      thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '62000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0005
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    - filler
+    expected_calls:
+    - *id021
+    notes: null
+- vars:
+    user_message: supplY 11.34 WEth to AavE v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '11340000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0006
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - &id022
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: supply(address,uint256,address,uint16)
+      args:
+      - '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      - '11340000000000000000'
+      - <wallet>
+      - '0'
+    notes: null
+- vars:
+    user_message: lol ok Depsoit 11.34 WETH into Aave v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '11340000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0007
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id022
+    notes: null
+- vars:
+    user_message: Please kindly leNd 11.34 WeTh ON AAVE V3. whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '11340000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0008
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - filler
+    - tone
+    expected_calls:
+    - *id022
+    notes: null
+- vars:
+    user_message: Ugh, just i'D liKE To pUT 11.34 WeTH TO woRK eARniNg yIElD oN AavE
+      V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '11340000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0009
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - tone
+    expected_calls:
+    - *id022
+    notes: null
+- vars:
+    user_message: Ugh, just Let's deposit 11.34 WETH into Aave v3 so it earns interest.
+      please thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '11340000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0010
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    - filler
+    - tone
+    expected_calls:
+    - *id022
+    notes: null
+- vars:
+    user_message: lol ok Supply 99,999 USDC to aAve v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '99999000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0011
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - &id023
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: supply(address,uint256,address,uint16)
+      args:
+      - '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      - '99999000000'
+      - <wallet>
+      - '0'
+    notes: null
+- vars:
+    user_message: DEPOSIt 99,999 USdc intO aavE v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '99999000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0012
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - tone
+    expected_calls:
+    - *id023
+    notes: null
+- vars:
+    user_message: Quick one — ledN 99,999 usDC on aave v3.!!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '99999000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0013
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    expected_calls:
+    - *id023
+    notes: null
+- vars:
+    user_message: Please kindly Quick one — I'd liek to put 99999 USDC to work earning
+      yield on Aave v3. if that's ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '99999000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0014
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id023
+    notes: null
+- vars:
+    user_message: lol ok let's deposiT 99,999 uSdc INto AAve v3 SO It eArNS iNtERESt.!!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '99999000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0015
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id023
+    notes: null
+- vars:
+    user_message: SuppLY 10 dAI tO AaVe V3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '10000000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0016
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    expected_calls:
+    - &id024
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: supply(address,uint256,address,uint16)
+      args:
+      - '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      - '10000000000000000000'
+      - <wallet>
+      - '0'
+    notes: null
+- vars:
+    user_message: dePOsIT 10 DAi iNTO AvaE V3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '10000000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0017
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    expected_calls:
+    - *id024
+    notes: null
+- vars:
+    user_message: When you get a sec, Lend 10 DAI on Aave v3. thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '10000000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0018
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - filler
+    expected_calls:
+    - *id024
+    notes: null
+- vars:
+    user_message: Ugh, just I'd like to put 10 DAI to work earning yield on Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '10000000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0019
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - tone
+    expected_calls:
+    - *id024
+    notes: null
+- vars:
+    user_message: lET'S DEPOSit 10 DAi INto AavE V3 sO iT EArns InTereST.!!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '10000000000000000000',
+      '<wallet>', '0']
+  metadata:
+    id: aave-supply-0020
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    expected_calls:
+    - *id024
+    notes: null
+- vars:
+    user_message: Please kindly Supply 2 WBTC to Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '200000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0021
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - tone
+    expected_calls:
+    - &id025
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: supply(address,uint256,address,uint16)
+      args:
+      - '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+      - '200000000'
+      - <wallet>
+      - '0'
+    notes: null
+- vars:
+    user_message: Deposit 2 WBTC itno Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '200000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0022
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - typos
+    - tone
+    expected_calls:
+    - *id025
+    notes: null
+- vars:
+    user_message: Lend 2 WBTC on Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '200000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0023
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    expected_calls:
+    - *id025
+    notes: null
+- vars:
+    user_message: Ugh, just I'd liek to put 2 WBTC to work earning yield on Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '200000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0024
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - typos
+    - tone
+    expected_calls:
+    - *id025
+    notes: null
+- vars:
+    user_message: Let's depsoit 2 WBTC into Aave v3 so it earns interest. if that's
+      ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 supply(address,uint256,address,uint16)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '200000000', '<wallet>',
+      '0']
+  metadata:
+    id: aave-supply-0025
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-supply
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - typos
+    - filler
+    expected_calls:
+    - *id025
+    notes: null
+- vars:
+    user_message: Quick one — WIThDraW 0.5 wbtc fROM MY AAvE v3 sUpPly PosITION.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0026
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - &id026
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: withdraw(address,uint256,address)
+      args:
+      - '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+      - '50000000'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: Ugh, just Quick one — Redeme 0.5 WBTC from Aave v3. whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0027
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id026
+    notes: null
+- vars:
+    user_message: lol ok PULl 0.5 wbTc oUT Of AAve v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0028
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - tone
+    expected_calls:
+    - *id026
+    notes: null
+- vars:
+    user_message: Please kindly When you get a sec, i neED 0.5 WBtc BACk FRoM My AaVE
+      V3 DEPOsIt, pLeaSe.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0029
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - filler
+    - tone
+    expected_calls:
+    - *id026
+    notes: null
+- vars:
+    user_message: Please kindly Quick one — aTke 0.5 WBTC out of what I lent on Aave
+      v3.!! whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0030
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id026
+    notes: null
+- vars:
+    user_message: Please kindly Quick one — WiTHDraW 50 USdt frOM My AaVE V3 sUPPlY
+      POSItIOn. thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0031
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - filler
+    - tone
+    expected_calls:
+    - &id027
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: withdraw(address,uint256,address)
+      args:
+      - '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+      - '50000000'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: lol ok Redeem 50 USDT from Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0032
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - tone
+    expected_calls:
+    - *id027
+    notes: null
+- vars:
+    user_message: PUlL 50 Usdt Out of aaVe V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0033
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - tone
+    expected_calls:
+    - *id027
+    notes: null
+- vars:
+    user_message: Quick one — I need 50 USDT back from my Avae v3 deposit, please.
+      please
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0034
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    expected_calls:
+    - *id027
+    notes: null
+- vars:
+    user_message: Take 50 USDT out of what I lent on Aave v3. please
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0035
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    expected_calls:
+    - *id027
+    notes: null
+- vars:
+    user_message: When you get a sec, wiTHDRAW 22 UsDC forM My AAVe v3 Supply POsiTIoN.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '22000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0036
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    expected_calls:
+    - &id028
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: withdraw(address,uint256,address)
+      args:
+      - '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      - '22000000'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: Ugh, just Quick one — Redeem 22 USDC frmo Aave v3.!! thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '22000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0037
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id028
+    notes: null
+- vars:
+    user_message: Ugh, just PlUl 22 USdC oUt Of AaVE v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '22000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0038
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id028
+    notes: null
+- vars:
+    user_message: Please kindly I ened 22 USDC back from my Aave v3 deposit, please.!!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '22000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0039
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id028
+    notes: null
+- vars:
+    user_message: Take 22 USDC out of what I lent on Aave v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '22000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0040
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    expected_calls:
+    - *id028
+    notes: null
+- vars:
+    user_message: Ugh, just Withrdaw 4 WETH from my Aave v3 supply position. thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '4000000000000000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0041
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - &id029
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: withdraw(address,uint256,address)
+      args:
+      - '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      - '4000000000000000000'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: Please kindly Redeem 4 WETH from Aave v3....
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '4000000000000000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0042
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - tone
+    expected_calls:
+    - *id029
+    notes: null
+- vars:
+    user_message: PULl 4 WEth oUT OF aAEV v3. please whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '4000000000000000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0043
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    expected_calls:
+    - *id029
+    notes: null
+- vars:
+    user_message: I need 4 WETH back from my Aave v3 deposit, please.!!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '4000000000000000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0044
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    expected_calls:
+    - *id029
+    notes: null
+- vars:
+    user_message: Ugh, just Hey, Take 4 WETH out of what I lent on Aave v3. if that's
+      ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 withdraw(address,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '4000000000000000000', '<wallet>']
+  metadata:
+    id: aave-withdraw-0045
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-withdraw
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - filler
+    - tone
+    expected_calls:
+    - *id029
+    notes: null
+- vars:
+    user_message: Borrow 2,000 USDC from Aave v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '2000000000', '2', '0',
+      '<wallet>']
+  metadata:
+    id: aave-borrow-0046
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - tone
+    expected_calls:
+    - &id030
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: borrow(address,uint256,uint256,uint16,address)
+      args:
+      - '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      - '2000000000'
+      - '2'
+      - '0'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: lol ok taKE OuT A LOAN of 2000 uSDc oN aaVe v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '2000000000', '2', '0',
+      '<wallet>']
+  metadata:
+    id: aave-borrow-0047
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - tone
+    expected_calls:
+    - *id030
+    notes: null
+- vars:
+    user_message: Draw 2,000 USDC of debt from Aave v3.!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '2000000000', '2', '0',
+      '<wallet>']
+  metadata:
+    id: aave-borrow-0048
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    expected_calls:
+    - *id030
+    notes: null
+- vars:
+    user_message: I want to borrow against my collateral — pull 2000 USDC from Aave
+      v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '2000000000', '2', '0',
+      '<wallet>']
+  metadata:
+    id: aave-borrow-0049
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators: []
+    expected_calls:
+    - *id030
+    notes: null
+- vars:
+    user_message: oPeN A 2000 uSdC LOan foR mE on aAve V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '2000000000', '2', '0',
+      '<wallet>']
+  metadata:
+    id: aave-borrow-0050
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    expected_calls:
+    - *id030
+    notes: null
+- vars:
+    user_message: BOrrOW 200 USdt frMo aaVe V3. if that's ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '200000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0051
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    expected_calls:
+    - &id031
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: borrow(address,uint256,uint256,uint16,address)
+      args:
+      - '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+      - '200000000'
+      - '2'
+      - '0'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: Hey, taek ouT A LoAN of 200 UsdT On AAvE v3. if that's ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '200000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0052
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    expected_calls:
+    - *id031
+    notes: null
+- vars:
+    user_message: lol ok Quick one — dRaw 200 uSDt Of DeBt fRom AAVE v3.... if that's
+      ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '200000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0053
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+    expected_calls:
+    - *id031
+    notes: null
+- vars:
+    user_message: I wanT tO BorRow aGAINst mY COlLATEraL — pull 200 uSDt rFOM aAVE
+      v3. if that's ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '200000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0054
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - typos
+    - filler
+    expected_calls:
+    - *id031
+    notes: null
+- vars:
+    user_message: Ugh, just opeN a 200 usdt lOan FoR Me ON AAve V3.!! whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '200000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0055
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+    expected_calls:
+    - *id031
+    notes: null
+- vars:
+    user_message: Borrow 1 WBTC from Aave v3.!!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '100000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0056
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    expected_calls:
+    - &id032
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: borrow(address,uint256,uint256,uint16,address)
+      args:
+      - '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+      - '100000000'
+      - '2'
+      - '0'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: Please kindly When you get a sec, TAkE OUt a Loan of 1 WBtc on aAvE
+      V3.!! thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '100000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0057
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+    expected_calls:
+    - *id032
+    notes: null
+- vars:
+    user_message: When you get a sec, drAW 1 WBtC oF dEbT Form aaVe V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '100000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0058
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id032
+    notes: null
+- vars:
+    user_message: lol ok Hey, I want to borrow against my collateral — pull 1 WBTC
+      from Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '100000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0059
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - filler
+    - tone
+    expected_calls:
+    - *id032
+    notes: null
+- vars:
+    user_message: Hey, OPEN a 1 wBtc lOan foR me On aAvE v3. if that's ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '100000000', '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0060
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - *id032
+    notes: null
+- vars:
+    user_message: Borrow 41.9 WETH from aAve v3.... thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '41900000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0061
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    expected_calls:
+    - &id033
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: borrow(address,uint256,uint256,uint16,address)
+      args:
+      - '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      - '41900000000000000000'
+      - '2'
+      - '0'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: When you get a sec, TAkE OuT A LOAN of 41.9 wetH ON aAev V3....
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '41900000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0062
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    expected_calls:
+    - *id033
+    notes: null
+- vars:
+    user_message: Hey, Draw 41.9 WETH of debt rfom Aave v3. whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '41900000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0063
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - typos
+    - filler
+    expected_calls:
+    - *id033
+    notes: null
+- vars:
+    user_message: lol ok I want to borrow against my collateral — pull 41.9 WETH from
+      Aave v3. plesae
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '41900000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0064
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id033
+    notes: null
+- vars:
+    user_message: oPNE A 41.9 weTh lOAn FOR Me ON Aave V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '41900000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0065
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - typos
+    expected_calls:
+    - *id033
+    notes: null
+- vars:
+    user_message: Borrow 5,000 DAI from Aave v3. plesae
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '5000000000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0066
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    expected_calls:
+    - &id034
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: borrow(address,uint256,uint256,uint16,address)
+      args:
+      - '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+      - '5000000000000000000000'
+      - '2'
+      - '0'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: lol ok TAke OUT A LoAn oF 5000 DaI ON aaVe V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '5000000000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0067
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - filler
+    - tone
+    expected_calls:
+    - *id034
+    notes: null
+- vars:
+    user_message: Ugh, just Draw 5,000 DAI of debt from Aaev v3....
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '5000000000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0068
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id034
+    notes: null
+- vars:
+    user_message: I WanT tO bORrWO Against My collaTEral — PuLL 5000 DAI FROM AAvE
+      V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '5000000000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0069
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - typos
+    expected_calls:
+    - *id034
+    notes: null
+- vars:
+    user_message: Open A 5,000 dAI Loan foR ME on AaVe v3....
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 borrow(address,uint256,uint256,uint16,address)
+      args=['0x6B175474E89094C44Da98b954EedeAC495271d0F', '5000000000000000000000',
+      '2', '0', '<wallet>']
+  metadata:
+    id: aave-borrow-0070
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-borrow
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    expected_calls:
+    - *id034
+    notes: null
+- vars:
+    user_message: When you get a sec, REPya 85.27 USdC on mY aave v3 LOaN. whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '85270000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0071
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    expected_calls:
+    - &id035
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: repay(address,uint256,uint256,address)
+      args:
+      - '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      - '85270000'
+      - '2'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: lol ok Pay abck 85.27 USDC to Aave v3. please
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '85270000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0072
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - tone
+    expected_calls:
+    - *id035
+    notes: null
+- vars:
+    user_message: settlE 85.27 USdC OF My aave v3 DEbt.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '85270000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0073
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - tone
+    expected_calls:
+    - *id035
+    notes: null
+- vars:
+    user_message: Let's pay down 85.27 USDC of what I owe on Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '85270000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0074
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - filler
+    expected_calls:
+    - *id035
+    notes: null
+- vars:
+    user_message: I'd like to clear 85.27 USDC form my Aave v3 borrow.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '85270000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0075
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - typos
+    expected_calls:
+    - *id035
+    notes: null
+- vars:
+    user_message: Repay 50 USDT on my aAve v3 loan.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0076
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - typos
+    expected_calls:
+    - &id036
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: repay(address,uint256,uint256,address)
+      args:
+      - '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+      - '50000000'
+      - '2'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: When you get a sec, PaY BACk 50 usDt TO aaVe v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0077
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id036
+    notes: null
+- vars:
+    user_message: Please kindly sETtEL 50 USDT oF MY aave v3 DEBT.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0078
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - tone
+    expected_calls:
+    - *id036
+    notes: null
+- vars:
+    user_message: Hey, Let's pay down 50 USDT of what I owe on Aave v3. if that's
+      ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0079
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - filler
+    expected_calls:
+    - *id036
+    notes: null
+- vars:
+    user_message: Ugh, just Hey, i'D LIKE TO Clear 50 UsDt fROM my Aaev v3 borRow.
+      if that's ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xdAC17F958D2ee523a2206206994597C13D831ec7', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0080
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id036
+    notes: null
+- vars:
+    user_message: eRpay 3.04 WETH on my Aave v3 loan.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '3040000000000000000', '2',
+      '<wallet>']
+  metadata:
+    id: aave-repay-0081
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    expected_calls:
+    - &id037
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: repay(address,uint256,uint256,address)
+      args:
+      - '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      - '3040000000000000000'
+      - '2'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: lol ok Pay back 3.04 WETH to Aave v3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '3040000000000000000', '2',
+      '<wallet>']
+  metadata:
+    id: aave-repay-0082
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - tone
+    expected_calls:
+    - *id037
+    notes: null
+- vars:
+    user_message: SeTTle 3.04 WEth of my aVAe v3 DEBT. if that's ok
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '3040000000000000000', '2',
+      '<wallet>']
+  metadata:
+    id: aave-repay-0083
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id037
+    notes: null
+- vars:
+    user_message: Please kindly Quick one — lEt's PAy DoWn 3.04 WetH OF WHat I oWe
+      On aAVe v3. thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '3040000000000000000', '2',
+      '<wallet>']
+  metadata:
+    id: aave-repay-0084
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - filler
+    - tone
+    expected_calls:
+    - *id037
+    notes: null
+- vars:
+    user_message: I'd like to clear 3.04 WETH from my Aaev v3 borrow.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '3040000000000000000', '2',
+      '<wallet>']
+  metadata:
+    id: aave-repay-0085
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - typos
+    expected_calls:
+    - *id037
+    notes: null
+- vars:
+    user_message: Ugh, just Hey, rpEaY 0.5 WBTC oN MY aave v3 LOaN. whenever
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0086
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - &id038
+      tool: executeTx
+      chainId: '1'
+      to: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2'
+      value: '0'
+      function: repay(address,uint256,uint256,address)
+      args:
+      - '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+      - '50000000'
+      - '2'
+      - <wallet>
+    notes: null
+- vars:
+    user_message: Ugh, just Hey, Pay back 0.5 WBTC to aAve v3. thanks!
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0087
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - typos
+    - filler
+    - tone
+    expected_calls:
+    - *id038
+    notes: null
+- vars:
+    user_message: lol ok Settle 0.5 WBTC of my Aave v3 debt.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0088
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: direct
+    mutators:
+    - tone
+    expected_calls:
+    - *id038
+    notes: null
+- vars:
+    user_message: When you get a sec, lET's PAy DOWN 0.5 WbtC oF whAt I OWe oN aAve
+      V3.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0089
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    - filler
+    expected_calls:
+    - *id038
+    notes: null
+- vars:
+    user_message: i'd LIKE To CLEAr 0.5 wbTC From MY AAVe V3 boRroW.
+    protocol: aave
+    expected_summary: executeTx to 0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2 repay(address,uint256,uint256,address)
+      args=['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '50000000', '2', '<wallet>']
+  metadata:
+    id: aave-repay-0090
+    source: generated-protocol
+    protocol: aave
+    language: english
+    category: aave-repay
+    difficulty: hard
+    level: payload
+    query_type: one_shot
+    requires:
+    - aave_pool
+    style: narrative
+    mutators:
+    - case
+    expected_calls:
+    - *id038
     notes: null

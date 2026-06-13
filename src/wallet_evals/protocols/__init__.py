@@ -6,10 +6,10 @@ Each protocol module exposes:
   build_cases(fixtures, rng, start_idx=1) -> list[dict]   # promptfoo test dicts
 
 Register modules in PROTOCOL_MODULES so scripts/generate_protocol_cases.py can
-iterate them. Aave will add itself here later.
+iterate them.
 """
 from __future__ import annotations
 
-from wallet_evals.protocols import safe
+from wallet_evals.protocols import safe, aave
 
-PROTOCOL_MODULES = [safe]
+PROTOCOL_MODULES = [safe, aave]
