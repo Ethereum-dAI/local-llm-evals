@@ -23,6 +23,10 @@ Design notes live under `docs/` (gitignored).
 | `src/wallet_evals/intents.py` | shared gold-builders (structured intent → `expected_calls`) |
 | `scripts/convert_recognition.py` | regenerates `pf/tests.yaml` from the Swift app's `recognition.json` |
 | `scripts/generate_cases.py` | regenerates `pf/tests.generated.yaml` from `datasets/seeds.yaml` |
+| `datasets/protocols/*.fixtures.json` | frozen real protocol txs (decoded) for protocol evals |
+| `src/wallet_evals/protocols/` | protocol modules (Safe owner-management; Aave later) → `executeTx` gold |
+| `scripts/generate_protocol_cases.py` | builds `pf/tests.protocols.yaml` from protocol fixtures |
+| `pf/tests.protocols.yaml` | generated protocol-transaction eval cases (Safe add/remove signer) |
 
 ## Setup
 
@@ -75,6 +79,22 @@ amounts/addresses, single-turn ablation negatives ("address is missing"), and
 scripted multi-turn cases. Gold is **computed** from each seed intent, so every
 generated case self-scores to 1 (`tests/test_generated_integrity.py`). Output is
 deterministic for a fixed seed.
+
+## Protocol-transaction evals (Safe)
+
+```bash
+uv run python scripts/generate_protocol_cases.py
+EVAL_DATASET=pf/tests.protocols.yaml \
+  PROMPTFOO_PYTHON="$PWD/.venv/bin/python" npx promptfoo@latest eval
+```
+
+Safe add/remove-signer cases whose gold is a generic `executeTx`
+(`addOwnerWithThreshold` / `removeOwner`), built from real mainnet transactions
+frozen in `datasets/protocols/safe.fixtures.json`. The model is given a Safe
+reference + the Safe's owners list (so `prevOwner` is derivable) via a gated
+system addendum; non-protocol cases are unaffected. Expect low scores until
+protocol tooling/context is added — the gap is the point. Refresh the fixtures
+with `uv run --with web3 python scripts/fetch_safe_fixtures.py`.
 
 ## Test (offline, no API key)
 
