@@ -41,10 +41,17 @@ def synth_owners(fx: dict) -> list[str]:
     owner), sized to a plausible pre-add set.
     """
     p = fx["params"]
+    if fx["op"] == "removeOwner":
+        assert p["prevOwner"] != SENTINEL_OWNERS, (
+            "prevOwner is the sentinel (owner is first); synth_owners cannot "
+            "represent this — add such fixtures with an explicit owners list")
     th = p["threshold"]
     if fx["op"] == "removeOwner":
         base = [p["prevOwner"], p["owner"]]
-        need = max(th - len(base), 0)
+        # Pre-removal list needs threshold+1 owners so the post-removal Safe
+        # (one fewer owner) still satisfies the threshold — otherwise the
+        # scenario shown to the model is an on-chain-invalid state.
+        need = max(th + 1 - len(base), 0)
     else:  # addOwnerWithThreshold
         base = []
         need = max(th - 1, 1)

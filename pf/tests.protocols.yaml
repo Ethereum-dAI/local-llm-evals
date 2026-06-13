@@ -634,6 +634,7 @@
       owners:
       - '0xfb505A2420a761e6E58EadBd6d668c85aE81c863'
       - '0xdD175Ad35Ec9fEA448AD639f4ff4BE58cACCA295'
+      - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
       threshold: 2
   metadata:
     id: safe-remove-0026
@@ -1138,6 +1139,7 @@
       - '0x0D858351A5FB419C9A3760647900d2F7aD526c83'
       - '0x8c42138C925d1049EC6B29F1EcF817b1628e54Ba'
       - '0x8DbC9ba71C340f00518f29FaD98F5e9F7Fd1D5Cb'
+      - '0xc011F5503d270C89F358468b6Dee9b51adeb5413'
       threshold: 3
   metadata:
     id: safe-remove-0046

@@ -1,5 +1,8 @@
 import json
+import random
 from pathlib import Path
+
+from wallet_evals.protocols import safe as safe_mod
 
 FIXTURES = Path(__file__).resolve().parents[1] / "datasets" / "protocols" / "safe.fixtures.json"
 
@@ -19,10 +22,6 @@ def test_fixtures_shape():
         assert f["params"]["threshold"] >= 1
         if f["op"] == "removeOwner":
             assert f["params"]["prevOwner"].startswith("0x")
-
-
-import random
-from wallet_evals.protocols import safe as safe_mod
 
 
 def test_registry_lists_safe():
@@ -50,7 +49,8 @@ def test_synth_owners_remove_is_self_consistent():
     for fx in (f for f in json.loads(safe_mod.FIXTURES.read_text())
                if f["op"] == "removeOwner"):
         ctx = safe_mod.account_context(fx)
-        assert len(ctx["owners"]) >= fx["params"]["threshold"]
+        # post-removal owner count must still satisfy the threshold
+        assert len(ctx["owners"]) - 1 >= fx["params"]["threshold"]
         assert safe_mod.derive_prev_owner(ctx["owners"], fx["params"]["owner"]) \
             == fx["params"]["prevOwner"]
 
