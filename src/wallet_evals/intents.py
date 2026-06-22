@@ -70,3 +70,31 @@ def build_swap_call(amount: str, from_sym: str, to_sym: str) -> dict:
             "currencyIn": in_addr, "currencyOut": out_addr,
             "amountIn": to_base_units(amount, in_dec),
             "amountOutMinimum": "0", "recipient": "<wallet>"}
+
+
+def format_expected_summary(calls: list[dict]) -> str:
+    """A human-readable one-line-per-call summary of expected_calls.
+
+    Read-only display aid: generators put this in `vars.expected_summary` so the
+    promptfoo viewer shows an Expected column next to the model's actual output.
+    It is never sent to the model (the prompt only renders user_message/messages/
+    account_context) and never used for scoring (the scorer reads metadata).
+    """
+    if not calls:
+        return "(no tool call)"
+    lines: list[str] = []
+    for c in calls:
+        if c.get("tool") == "swap":
+            lines.append(
+                f"swap {c.get('currencyIn')} -> {c.get('currencyOut')} "
+                f"amountIn={c.get('amountIn')} minOut={c.get('amountOutMinimum')} "
+                f"recipient={c.get('recipient')}")
+            continue
+        parts = [f"{c.get('tool')} to {c.get('to')}"]
+        if c.get("value") and c.get("value") != "0":
+            parts.append(f"value={c.get('value')}")
+        parts.append(c.get("function") or "(native)")
+        if c.get("args"):
+            parts.append(f"args={c.get('args')}")
+        lines.append(" ".join(parts))
+    return " | ".join(lines)

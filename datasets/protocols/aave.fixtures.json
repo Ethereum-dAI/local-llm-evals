@@ -1,0 +1,20 @@
+[
+  {"op": "supply", "chainId": "1", "asset": "USDT", "amount": "62000000", "amount_human": "62", "tx_hash": "0x8b70d51bec63b5d5308a6344ca430093e79a294b842153426697c291e6b629a5"},
+  {"op": "supply", "chainId": "1", "asset": "WETH", "amount": "11340000000000000000", "amount_human": "11.34", "tx_hash": "0x348fec1f3ec3ec2e9b4971eae4c0103e8cdf28727842fd8299d49da814358748"},
+  {"op": "supply", "chainId": "1", "asset": "USDC", "amount": "99999000000", "amount_human": "99999", "tx_hash": "0x8276b861679d14c515ee9a4e1054ea509d48b79c71f6693ad444a440c8a8433e"},
+  {"op": "supply", "chainId": "1", "asset": "DAI", "amount": "10000000000000000000", "amount_human": "10", "tx_hash": "0x980a5afb255c671ba6a9df15402c7bee1011d4b76000a250df5382571397a28a"},
+  {"op": "supply", "chainId": "1", "asset": "WBTC", "amount": "200000000", "amount_human": "2", "tx_hash": "0x82050bf192ad0c0b129fa76a3edc50cc3bcac40e1fe0b77353ee65a81daa8acc"},
+  {"op": "withdraw", "chainId": "1", "asset": "WBTC", "amount": "50000000", "amount_human": "0.5", "tx_hash": "0xdf3a3de1a268128f96f2f4c839147c73bc9a5a997c139915bd7a12ef8c845ba0"},
+  {"op": "withdraw", "chainId": "1", "asset": "USDT", "amount": "50000000", "amount_human": "50", "tx_hash": "0xd11e793edd0a034cdb8e31a7e3b9d353a78afbca0478546ad11488cfb570596e"},
+  {"op": "withdraw", "chainId": "1", "asset": "USDC", "amount": "22000000", "amount_human": "22", "tx_hash": "0x22cf2d9f1fff8d371dea203a1532b608859573644c96243519ed3bb4b8edf161"},
+  {"op": "withdraw", "chainId": "1", "asset": "WETH", "amount": "4000000000000000000", "amount_human": "4", "tx_hash": "0x4c45ddfcb508121aaec851f1c3c413dfc22b809f6f85568e159c29e74104fb12"},
+  {"op": "borrow", "chainId": "1", "asset": "USDC", "amount": "2000000000", "amount_human": "2000", "rate_mode": 2, "tx_hash": "0x0a5d9e187e988155d59da8c63cd2792ca351eae9005ecf85c3a9e437dd4674b7"},
+  {"op": "borrow", "chainId": "1", "asset": "USDT", "amount": "200000000", "amount_human": "200", "rate_mode": 2, "tx_hash": "0x667f50f0879e0f420ba6039d5956797376492086da58cfd1b85fdcd7493a2600"},
+  {"op": "borrow", "chainId": "1", "asset": "WBTC", "amount": "100000000", "amount_human": "1", "rate_mode": 2, "tx_hash": "0xbd2b9bfcdb2be0ec2b23631fcbb1c68d6600a859374feac27d330329ac3e7c16"},
+  {"op": "borrow", "chainId": "1", "asset": "WETH", "amount": "41900000000000000000", "amount_human": "41.9", "rate_mode": 2, "tx_hash": "0xd218481d8b111de88e148802128b537127491393b96debe10b6fdaf45f660064"},
+  {"op": "borrow", "chainId": "1", "asset": "DAI", "amount": "5000000000000000000000", "amount_human": "5000", "rate_mode": 2, "tx_hash": "0x75afe41f84b7e6302dbdbfa14869520024ccc928754eacd4858faed3f23ab03e"},
+  {"op": "repay", "chainId": "1", "asset": "USDC", "amount": "85270000", "amount_human": "85.27", "rate_mode": 2, "tx_hash": "0x8294d1043fb0c1f5b13a616abbff163d6c5b521595f6d7f12cc16cd874c43462"},
+  {"op": "repay", "chainId": "1", "asset": "USDT", "amount": "50000000", "amount_human": "50", "rate_mode": 2, "tx_hash": "0x624445d9ecd1c3e0c3168c52ab0b36f25d9a72d0c7290e3a22b225fe873de303"},
+  {"op": "repay", "chainId": "1", "asset": "WETH", "amount": "3040000000000000000", "amount_human": "3.04", "rate_mode": 2, "tx_hash": "0x4c1fc9dc1ea69c8f88f1897719697417588f20c9cf5eb5457f96dae197eb7b21"},
+  {"op": "repay", "chainId": "1", "asset": "WBTC", "amount": "50000000", "amount_human": "0.5", "rate_mode": 2, "tx_hash": "0x911ae3c8a278eddadaef44ebe3462624521b1bcfc87de4867d725576bba88c09"}
+]

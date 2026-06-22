@@ -13,7 +13,7 @@ import re
 from typing import Callable
 
 from wallet_evals.intents import (
-    resolve_recipient, build_transfer_call, build_swap_call,
+    resolve_recipient, build_transfer_call, build_swap_call, format_expected_summary,
 )
 
 
@@ -54,7 +54,7 @@ def mutate_punctuation(text: str, rng: random.Random) -> str:
 # Token symbols are never typo'd: a corrupted symbol (USDC->UDSC) makes the
 # request genuinely ambiguous, which correctly causes a careful model to ask for
 # clarification — that penalizes caution rather than testing parsing capability.
-_PROTECTED_WORDS = {"ETH", "WETH", "USDC", "DAI"}
+_PROTECTED_WORDS = {"ETH", "WETH", "USDC", "DAI", "USDT", "WBTC"}
 
 
 def mutate_typos(text: str, rng: random.Random) -> str:
@@ -238,7 +238,9 @@ def build_positive_case(intent: dict, template: str, rng: random.Random, idx: in
     md = _base_metadata(intent, "pos", idx,
                         level="payload", query_type="one_shot", style=style,
                         mutators=labels, expected_calls=gold_calls(intent))
-    return {"vars": {"user_message": surface}, "metadata": md}
+    return {"vars": {"user_message": surface,
+                     "expected_summary": format_expected_summary(md["expected_calls"])},
+            "metadata": md}
 
 
 # Partial templates that OMIT one field (keyed by (action, missing_field)).
@@ -291,7 +293,9 @@ def build_negative_case(intent: dict, field: str, rng: random.Random, idx: int) 
     surface, labels = apply_mutators(render_surface(template, intent), rng)
     md = _base_metadata(intent, "neg", idx, style="direct",
                         level="intent", category=f"ablation-{field}", mutators=labels)
-    return {"vars": {"user_message": surface}, "metadata": md}
+    return {"vars": {"user_message": surface,
+                     "expected_summary": format_expected_summary(md["expected_calls"])},
+            "metadata": md}
 
 
 def build_multiturn_case(intent: dict, field: str, rng: random.Random, idx: int,
@@ -313,4 +317,6 @@ def build_multiturn_case(intent: dict, field: str, rng: random.Random, idx: int,
                         level="payload", query_type="multi_turn", style=style,
                         category=f"multiturn-{field}", mutators=labels,
                         expected_calls=gold_calls(intent))
-    return {"vars": {"messages": messages}, "metadata": md}
+    return {"vars": {"messages": messages,
+                     "expected_summary": format_expected_summary(md["expected_calls"])},
+            "metadata": md}
