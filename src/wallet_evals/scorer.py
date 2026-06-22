@@ -21,6 +21,10 @@ _ADDRESS_RE = re.compile(r"^0x", re.IGNORECASE)
 def _norm_scalar(value: Any) -> Any:
     if isinstance(value, str) and _ADDRESS_RE.match(value):
         return value.lower()
+    # A JSON number and its decimal-string form ABI-encode identically, so
+    # compare them equal (model emits 0, gold "0"). bool is not a number here.
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return str(value)
     return value
 
 
