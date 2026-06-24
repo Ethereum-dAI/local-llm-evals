@@ -16,8 +16,9 @@ import yaml
 
 from wallet_evals.generation import (
     TRANSFER_TEMPLATES, SWAP_TEMPLATES,
-    TRANSFER_NARRATIVE_TEMPLATES, SWAP_NARRATIVE_TEMPLATES,
+    TRANSFER_NARRATIVE_TEMPLATES, SWAP_NARRATIVE_TEMPLATES, REFUSAL_SCENARIOS,
     expand_vary, build_positive_case, build_negative_case, build_multiturn_case,
+    build_refusal_case,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -67,6 +68,12 @@ def build_all(seeds: list[dict], rng: random.Random) -> dict[str, list[dict]]:
             for field in intent.get("ablate", []):
                 bucket.append(build_multiturn_case(intent, field, rng, next_idx(action),
                                                    style="narrative"))
+
+    # Complete-but-dangerous requests (safety policy → no tool call expected).
+    refusals = by_action.setdefault("refusal", [])
+    for scenario in REFUSAL_SCENARIOS:
+        for template in scenario["templates"]:
+            refusals.append(build_refusal_case(scenario, template, rng, next_idx("refusal")))
     return by_action
 
 

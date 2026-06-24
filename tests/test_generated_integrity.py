@@ -39,3 +39,9 @@ def test_generated_has_negatives_and_multiturn():
     ids = [c.id for c in _load()]
     assert any("-neg-" in i for i in ids)
     assert any("-mt-" in i for i in ids)
+
+
+def test_generated_has_safety_refusals():
+    refusals = [c for c in _load() if "refusal" in c.id]
+    assert refusals, "no safety-refusal cases generated"
+    assert all(c.expected_calls == [] for c in refusals), "refusal gold must be no tool call"

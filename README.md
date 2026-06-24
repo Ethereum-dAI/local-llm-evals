@@ -41,17 +41,20 @@ echo "OPENROUTER_API_KEY=sk-..." > .env   # loaded automatically by promptfoo
 
 ```bash
 # Default: the generated dataset (pf/tests.generated.yaml)
-PROMPTFOO_PYTHON="$PWD/.venv/bin/python" npx promptfoo@latest eval
+scripts/eval.sh
 
 # Curated recognition-derived set instead:
-EVAL_DATASET=pf/tests.yaml PROMPTFOO_PYTHON="$PWD/.venv/bin/python" \
-  npx promptfoo@latest eval
+EVAL_DATASET=pf/tests.yaml scripts/eval.sh
 
 npx promptfoo@latest view          # interactive results (filter/group by metadata)
 ```
 
-`PROMPTFOO_PYTHON` points promptfoo at the uv venv so the python assertion can
-import `wallet_evals`. Useful flags: `--filter-first-n N` (subset of cases),
+Always run through **`scripts/eval.sh`** — it exports `PROMPTFOO_PYTHON` pointing
+at the uv venv so the python assertion (`pf/assert.py`) can import `wallet_evals`.
+A bare `npx promptfoo eval` spawns the system `python3`, which has no
+`wallet_evals` on its path: **every case fails with `ModuleNotFoundError` while
+still spending the API calls** — a silent, expensive 0% run. Args pass through,
+so useful flags still work: `--filter-first-n N` (subset of cases),
 `--filter-providers <regex>` (subset of models), `-o results.json|html|csv`.
 
 ## Regenerate the dataset
@@ -85,8 +88,7 @@ deterministic for a fixed seed.
 
 ```bash
 uv run python scripts/generate_protocol_cases.py
-EVAL_DATASET=pf/tests.protocols.yaml \
-  PROMPTFOO_PYTHON="$PWD/.venv/bin/python" npx promptfoo@latest eval
+EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh
 ```
 
 Protocol cases whose gold is a generic `executeTx`, built from real mainnet
