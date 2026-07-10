@@ -1,0 +1,12 @@
+[
+  {"op": "addOwnerWithThreshold", "chainId": "1", "safe": "0x1a2b3c4d5e6f70819293a4b5c6d7e8f901234567",
+   "params": {"owner": "0xaa11bb22cc33dd44ee55ff66007788990011aabb", "threshold": 2},
+   "tx_hash": "0xftadd0000000000000000000000000000000000000000000000000000000001"},
+  {"op": "addOwnerWithThreshold", "chainId": "1", "safe": "0x9f8e7d6c5b4a39281706f5e4d3c2b1a098765432",
+   "params": {"owner": "0xbb22cc33dd44ee55ff6600778899001122bbccdd", "threshold": 3},
+   "tx_hash": "0xftadd0000000000000000000000000000000000000000000000000000000002"},
+  {"op": "removeOwner", "chainId": "1", "safe": "0x2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f",
+   "params": {"prevOwner": "0xcc33dd44ee55ff660077889900112233ccddeeff",
+              "owner": "0xdd44ee55ff6600778899001122334455ddeeff00", "threshold": 2},
+   "tx_hash": "0xftrem0000000000000000000000000000000000000000000000000000000001"}
+]

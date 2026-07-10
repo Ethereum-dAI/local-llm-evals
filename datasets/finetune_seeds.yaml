@@ -1,0 +1,25 @@
+# Structured intents for the FunctionGemma FINE-TUNING set — deliberately
+# DISJOINT from datasets/seeds.yaml. Same shape and generators, but every amount
+# and (via a different generator seed) every random recipient differs, so no
+# training surface can leak into the eval set (datasets/seeds.yaml).
+#
+# Amounts stay arithmetic-heavy (the base-unit conversion is the capability we
+# want the model to learn) and integral in base units for each token's decimals
+# (ETH/WETH/DAI = 18, USDC = 6).
+- action: transfer
+  amount: { vary: ["0.000000007", "42.987654321", "0.3", "8888.000000001"] }
+  token: ETH
+  recipient: { vary: ["vitalik.eth", "random_address"] }
+  ablate: ["recipient", "amount"]
+
+- action: transfer
+  amount: { vary: ["0.000002", "654321.098765", "0.09", "0.000009"] }
+  token: { vary: ["USDC", "DAI"] }
+  recipient: { vary: ["vitalik.eth", "random_address"] }
+  ablate: ["recipient", "token"]
+
+- action: swap
+  amount: { vary: ["0.000002", "135790.24", "0.09", "0.000008"] }
+  from_token: { vary: ["USDC", "ETH"] }
+  to_token: { vary: ["ETH", "DAI", "WETH"] }
+  ablate: ["to_token", "amount"]

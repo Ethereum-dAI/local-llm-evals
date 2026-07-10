@@ -1,0 +1,7 @@
+[
+  {"op": "supply", "chainId": "1", "asset": "DAI", "amount": "7500000000000000000000", "amount_human": "7500", "tx_hash": "0xftsupply00000000000000000000000000000000000000000000000000000001"},
+  {"op": "supply", "chainId": "1", "asset": "USDC", "amount": "12345670000", "amount_human": "12345.67", "tx_hash": "0xftsupply00000000000000000000000000000000000000000000000000000002"},
+  {"op": "withdraw", "chainId": "1", "asset": "WETH", "amount": "2500000000000000000", "amount_human": "2.5", "tx_hash": "0xftwithdraw000000000000000000000000000000000000000000000000000001"},
+  {"op": "borrow", "chainId": "1", "asset": "USDT", "amount": "333000000", "amount_human": "333", "rate_mode": 2, "tx_hash": "0xftborrow00000000000000000000000000000000000000000000000000000001"},
+  {"op": "repay", "chainId": "1", "asset": "WBTC", "amount": "75000000", "amount_human": "0.75", "rate_mode": 2, "tx_hash": "0xftrepay000000000000000000000000000000000000000000000000000000001"}
+]
