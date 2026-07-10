@@ -13,10 +13,11 @@ train_on_responses_only (see the TODO near the trainer).
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 # ---- knobs (smoke defaults; the expansion pass edits these) -------------------
-DATA = Path("functiongemma_train.jsonl")  # uploaded via `colab upload`
+DATA_NAME = "functiongemma_train.jsonl"  # uploaded via `colab upload`
 LIMIT = 5            # smoke: first 5 rows. Expansion: None -> use all 88.
 MAX_STEPS = 30       # smoke: a handful of steps just to move the loss.
 BASE_MODEL = "unsloth/functiongemma-270m-it"
@@ -26,14 +27,36 @@ EXPORT_GGUF = False  # smoke: skip. Expansion: True -> also save a Q8_0 GGUF.
 # ------------------------------------------------------------------------------
 
 
+def resolve_data() -> Path:
+    """Find the uploaded JSONL. `colab upload` may land it outside the exec cwd
+    (/content), so check the likely dirs and then glob for it."""
+    env = os.environ.get("SMOKE_DATA")
+    candidates = [
+        Path(env) if env else None,
+        Path(DATA_NAME),
+        Path("/content") / DATA_NAME,
+        Path("/root") / DATA_NAME,
+        Path.home() / DATA_NAME,
+    ]
+    for c in candidates:
+        if c and c.exists():
+            return c
+    for root in ("/content", "/root", str(Path.home())):
+        hits = list(Path(root).rglob(DATA_NAME))
+        if hits:
+            return hits[0]
+    raise SystemExit(
+        f"{DATA_NAME} not found (cwd={Path.cwd()}). Upload it to /content, then verify:\n"
+        "  colab upload -s gemma-ft data_for_finetune/functiongemma_train.jsonl "
+        "/content/functiongemma_train.jsonl\n"
+        "  colab ls -s gemma-ft /content"
+    )
+
+
 def load_examples() -> list[dict]:
-    if not DATA.exists():
-        raise SystemExit(
-            f"{DATA} not found in {Path.cwd()}. Upload it first:\n"
-            "  colab upload -s gemma-ft data_for_finetune/functiongemma_train.jsonl "
-            "functiongemma_train.jsonl"
-        )
-    rows = [json.loads(l) for l in DATA.read_text().splitlines() if l.strip()]
+    data = resolve_data()
+    print(f"[smoke] using data at {data}")
+    rows = [json.loads(l) for l in data.read_text().splitlines() if l.strip()]
     return rows[:LIMIT] if LIMIT else rows
 
 

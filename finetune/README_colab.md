@@ -25,8 +25,10 @@ colab new -s gemma-ft --gpu T4
 # 3. install Unsloth on the runtime (pulls torch/transformers/trl/peft/bitsandbytes)
 colab install -s gemma-ft unsloth
 
-# 4. upload the training data (LOCAL -> REMOTE path, keep the same filename)
-colab upload -s gemma-ft data_for_finetune/functiongemma_train.jsonl functiongemma_train.jsonl
+# 4. upload the training data. Use an ABSOLUTE remote path — exec runs in
+#    /content, and a relative remote path can land elsewhere. Verify with `ls`.
+colab upload -s gemma-ft data_for_finetune/functiongemma_train.jsonl /content/functiongemma_train.jsonl
+colab ls -s gemma-ft /content   # should list functiongemma_train.jsonl
 
 # 5. run the smoke fine-tune (ships the script and executes it on the GPU)
 colab exec -s gemma-ft -f finetune/smoke_finetune.py
