@@ -25,6 +25,18 @@ providers:
       temperature: 0.1
       max_tokens: 4096
       tools: file://pf/tools.json
+  # Local GGUF served in-process via llama-cpp-python (see pf/provider_functiongemma.py).
+  # Needs the optional `local` dep group: run with
+  #   uv sync --group local   (once)   then   scripts/eval.sh -o functiongemma.out.json
+  # Not on OpenRouter — it's a 270M on-device model, later fine-tuned on Unsloth.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: functiongemma-270m-it
+    config:
+      repo_id: unsloth/functiongemma-270m-it-GGUF
+      filename: "*Q8_0.gguf"
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
 
 # Single binary scorer reused as a python assertion (reads gold from test metadata).
 defaultTest:

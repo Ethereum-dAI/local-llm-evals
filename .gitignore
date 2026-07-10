@@ -10,6 +10,9 @@ out.json
 *.out.json
 .promptfoo/
 
+# Local GGUF model weights (FunctionGemma etc.)
+/models/
+
 # Python
 __pycache__/
 *.py[cod]

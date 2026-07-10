@@ -13,6 +13,13 @@ dependencies = [
 dev = [
     "pytest>=8.0",
 ]
+# Optional: only needed to *serve* the local FunctionGemma GGUF (compiles a
+# native extension). Core users, CI, and the offline test suite don't need it.
+#   uv run --group local python scripts/probe_functiongemma.py
+local = [
+    "llama-cpp-python>=0.3.0",
+    "huggingface-hub>=0.24",
+]
 
 [build-system]
 requires = ["hatchling"]
