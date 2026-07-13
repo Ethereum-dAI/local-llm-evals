@@ -53,6 +53,21 @@ def resolve_data() -> Path:
     )
 
 
+def ensure_deps() -> None:
+    """Self-bootstrap on a fresh Colab VM: install Unsloth if it isn't importable.
+    Folding this into the script means one `colab exec` does install + train, so a
+    dropped session between separate CLI calls can't strand us half-set-up."""
+    try:
+        import unsloth  # noqa: F401
+        return
+    except Exception:
+        import subprocess
+        import sys
+        print("[smoke] installing unsloth (one-time, ~minutes) ...", flush=True)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "unsloth"],
+                       check=True)
+
+
 def load_examples() -> list[dict]:
     data = resolve_data()
     print(f"[smoke] using data at {data}")
@@ -61,6 +76,7 @@ def load_examples() -> list[dict]:
 
 
 def main() -> None:
+    ensure_deps()
     from unsloth import FastLanguageModel  # noqa: E402  (heavy; import on-runtime)
     from datasets import Dataset
     from trl import SFTConfig, SFTTrainer
