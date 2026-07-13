@@ -1,0 +1,35 @@
+# FunctionGemma lift comparison: base vs fine-tuned, LOCAL only (no OpenRouter,
+# no API cost). Run with the uv venv so the scorer can import wallet_evals:
+#   scripts/eval.sh -c promptfooconfig.functiongemma.yaml -o functiongemma.ft.out.json
+# The fine-tuned GGUF is produced by finetune/train_functiongemma.py and
+# downloaded via `colab download` to models/ (gitignored — ~290 MB).
+description: FunctionGemma base vs fine-tuned (local GGUF)
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # Baseline: the stock on-device model.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: functiongemma-base
+    config:
+      repo_id: unsloth/functiongemma-270m-it-GGUF
+      filename: "*Q8_0.gguf"
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+  # Fine-tuned: our LoRA-merged Q8_0 GGUF (models/ is gitignored).
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: functiongemma-ft
+    config:
+      model_path: models/functiongemma-270m-ft.Q8_0.gguf
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.generated.yaml') }}"
