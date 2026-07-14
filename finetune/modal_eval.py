@@ -37,7 +37,7 @@ image = (
 app = modal.App("functiongemma-eval")
 
 
-@app.function(image=image, gpu="T4", timeout=3600,
+@app.function(image=image, gpu="T4", timeout=7200,
               volumes={"/root/.cache/huggingface": hf_cache, "/outputs": outputs})
 def evaluate() -> dict:
     import json
@@ -75,18 +75,32 @@ def evaluate() -> dict:
             out.append(m)
         return out
 
+    # Batched generation (sequential was too slow -> 1h timeout). Render every
+    # prompt to text, then left-pad and generate in batches.
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "left"
+    texts = [tokenizer.apply_chat_template(remap(render({"vars": t["vars"]})),
+                                           tools=tools, add_generation_prompt=True,
+                                           tokenize=False) for t in tests]
+
+    BATCH = 32
+    outs: list[str] = []
+    for start in range(0, len(texts), BATCH):
+        chunk = texts[start:start + BATCH]
+        enc = tokenizer(chunk, return_tensors="pt", padding=True, truncation=True,
+                        max_length=MAX_SEQ_LEN, add_special_tokens=False).to(model.device)
+        gen = model.generate(**enc, max_new_tokens=200, do_sample=False,
+                             pad_token_id=tokenizer.pad_token_id)
+        inlen = enc["input_ids"].shape[1]
+        for j in range(len(chunk)):
+            outs.append(tokenizer.decode(gen[j][inlen:], skip_special_tokens=False))
+        print(f"[eval] {start + len(chunk)}/{len(texts)}", flush=True)
+
     agg = defaultdict(lambda: [0, 0])
     total = [0, 0]
-    for i, t in enumerate(tests):
+    for t, text in zip(tests, outs):
         md = t["metadata"]
-        messages = remap(render({"vars": t["vars"]}))
-        enc = tokenizer.apply_chat_template(
-            messages, tools=tools, add_generation_prompt=True,
-            return_tensors="pt", return_dict=True,
-        ).to(model.device)
-        gen = model.generate(**enc, max_new_tokens=256, do_sample=False)
-        text = tokenizer.decode(gen[0][enc["input_ids"].shape[1]:],
-                                skip_special_tokens=False)
         scoreable = raw_output_to_scoreable(text)
         if scoreable.strip().startswith("["):
             turn = parse_turn(content=None, native_tool_calls=json.loads(scoreable),
@@ -100,8 +114,6 @@ def evaluate() -> dict:
         agg[cat][1] += 1
         total[0] += s
         total[1] += 1
-        if i % 40 == 0:
-            print(f"[eval] {i}/{len(tests)} ...", flush=True)
 
     summary = {"overall_pass": total[0], "overall_total": total[1],
                "overall_pct": round(100 * total[0] / total[1], 1),
