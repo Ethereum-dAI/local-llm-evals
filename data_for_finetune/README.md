@@ -4,8 +4,12 @@
 fine-tuning `unsloth/functiongemma-270m-it`, generated from the same intent
 builders as the eval harness but from separate sources under a different seed, so
 **no training conversation appears in the eval set** (`tests/test_finetune_integrity.py`
-enforces this). 88 examples ≈ 20% of the eval set (447), stratified across
-transfer / swap / multi-turn / ablation / Safe / Aave / refusal.
+enforces this). ~1740 examples, stratified across transfer / swap / multi-turn /
+ablation / Safe / Aave / refusal, weighted toward transfer+swap (the core task).
+
+The file is **gitignored** (regenerable + large); run the generator below to
+produce it. (v1 was ~90 examples and the fine-tune collapsed to 0% on the core
+task — too small; v2 scales it ~20x.)
 
 ## Regenerate
 

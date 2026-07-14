@@ -1,7 +1,153 @@
 [
-  {"op": "supply", "chainId": "1", "asset": "DAI", "amount": "7500000000000000000000", "amount_human": "7500", "tx_hash": "0xftsupply00000000000000000000000000000000000000000000000000000001"},
-  {"op": "supply", "chainId": "1", "asset": "USDC", "amount": "12345670000", "amount_human": "12345.67", "tx_hash": "0xftsupply00000000000000000000000000000000000000000000000000000002"},
-  {"op": "withdraw", "chainId": "1", "asset": "WETH", "amount": "2500000000000000000", "amount_human": "2.5", "tx_hash": "0xftwithdraw000000000000000000000000000000000000000000000000000001"},
-  {"op": "borrow", "chainId": "1", "asset": "USDT", "amount": "333000000", "amount_human": "333", "rate_mode": 2, "tx_hash": "0xftborrow00000000000000000000000000000000000000000000000000000001"},
-  {"op": "repay", "chainId": "1", "asset": "WBTC", "amount": "75000000", "amount_human": "0.75", "rate_mode": 2, "tx_hash": "0xftrepay000000000000000000000000000000000000000000000000000000001"}
+ {
+  "op": "supply",
+  "chainId": "1",
+  "asset": "USDC",
+  "amount": "4321500000",
+  "amount_human": "4321.5",
+  "tx_hash": "0xftsupply00010000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "supply",
+  "chainId": "1",
+  "asset": "DAI",
+  "amount": "250250000000000000000",
+  "amount_human": "250.25",
+  "tx_hash": "0xftsupply00020000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "supply",
+  "chainId": "1",
+  "asset": "WETH",
+  "amount": "3750000000000000000",
+  "amount_human": "3.75",
+  "tx_hash": "0xftsupply00030000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "supply",
+  "chainId": "1",
+  "asset": "USDT",
+  "amount": "900000000",
+  "amount_human": "900",
+  "tx_hash": "0xftsupply00040000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "supply",
+  "chainId": "1",
+  "asset": "WBTC",
+  "amount": "125000000",
+  "amount_human": "1.25",
+  "tx_hash": "0xftsupply00050000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "supply",
+  "chainId": "1",
+  "asset": "DAI",
+  "amount": "7500000000000000000000",
+  "amount_human": "7500",
+  "tx_hash": "0xftsupply00060000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "withdraw",
+  "chainId": "1",
+  "asset": "USDC",
+  "amount": "88800000",
+  "amount_human": "88.8",
+  "tx_hash": "0xftwithdraw000700000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "withdraw",
+  "chainId": "1",
+  "asset": "DAI",
+  "amount": "1500000000000000000000",
+  "amount_human": "1500",
+  "tx_hash": "0xftwithdraw000800000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "withdraw",
+  "chainId": "1",
+  "asset": "WETH",
+  "amount": "600000000000000000",
+  "amount_human": "0.6",
+  "tx_hash": "0xftwithdraw000900000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "withdraw",
+  "chainId": "1",
+  "asset": "WBTC",
+  "amount": "30000000",
+  "amount_human": "0.3",
+  "tx_hash": "0xftwithdraw001000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "withdraw",
+  "chainId": "1",
+  "asset": "USDT",
+  "amount": "640000000",
+  "amount_human": "640",
+  "tx_hash": "0xftwithdraw001100000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "borrow",
+  "chainId": "1",
+  "asset": "USDC",
+  "amount": "750000000",
+  "amount_human": "750",
+  "rate_mode": 2,
+  "tx_hash": "0xftborrow00120000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "borrow",
+  "chainId": "1",
+  "asset": "DAI",
+  "amount": "3200500000000000000000",
+  "amount_human": "3200.5",
+  "rate_mode": 2,
+  "tx_hash": "0xftborrow00130000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "borrow",
+  "chainId": "1",
+  "asset": "WETH",
+  "amount": "5500000000000000000",
+  "amount_human": "5.5",
+  "rate_mode": 2,
+  "tx_hash": "0xftborrow00140000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "borrow",
+  "chainId": "1",
+  "asset": "WBTC",
+  "amount": "40000000",
+  "amount_human": "0.4",
+  "rate_mode": 2,
+  "tx_hash": "0xftborrow00150000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "repay",
+  "chainId": "1",
+  "asset": "USDT",
+  "amount": "120000000",
+  "amount_human": "120",
+  "rate_mode": 2,
+  "tx_hash": "0xftrepay001600000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "repay",
+  "chainId": "1",
+  "asset": "WETH",
+  "amount": "1100000000000000000",
+  "amount_human": "1.1",
+  "rate_mode": 2,
+  "tx_hash": "0xftrepay001700000000000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "repay",
+  "chainId": "1",
+  "asset": "USDC",
+  "amount": "512340000",
+  "amount_human": "512.34",
+  "rate_mode": 2,
+  "tx_hash": "0xftrepay001800000000000000000000000000000000000000000000000000000"
+ }
 ]

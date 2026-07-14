@@ -62,6 +62,18 @@ def resolve_data() -> Path:
 
 def main() -> None:
     ensure_deps()
+
+    # Warm the HF cache first: Unsloth loads the base model under a forced
+    # hf-offline context, which raises "no model.safetensors" on a fresh VM if the
+    # weights aren't already cached. Pre-fetching (with retries) sidesteps that.
+    from huggingface_hub import snapshot_download
+    for attempt in range(3):
+        try:
+            snapshot_download(BASE_MODEL)
+            break
+        except Exception as e:
+            print(f"[train] snapshot_download retry {attempt}: {e}", flush=True)
+
     from unsloth import FastLanguageModel
     from unsloth.chat_templates import train_on_responses_only
     from datasets import Dataset

@@ -1,25 +1,35 @@
 # Structured intents for the FunctionGemma FINE-TUNING set — deliberately
 # DISJOINT from datasets/seeds.yaml. Same shape and generators, but every amount
 # and (via a different generator seed) every random recipient differs, so no
-# training surface can leak into the eval set (datasets/seeds.yaml).
+# training surface can leak into the eval set (enforced by
+# tests/test_finetune_integrity.py::test_disjoint_from_eval_set).
 #
-# Amounts stay arithmetic-heavy (the base-unit conversion is the capability we
-# want the model to learn) and integral in base units for each token's decimals
-# (ETH/WETH/DAI = 18, USDC = 6).
+# v2: amounts scaled up ~4x (the v1 88-example set was far too small — the model
+# collapsed to 0% on transfer/swap). Amounts stay arithmetic-heavy (base-unit
+# conversion is the capability we want) and integral in base units for each
+# token's decimals. NOTE: swap and USDC/DAI transfer amounts must be <=6 dp
+# (USDC has 6 decimals) or gold computation raises; only ETH transfers may use
+# up to 18 dp.
 - action: transfer
-  amount: { vary: ["0.000000007", "42.987654321", "0.3", "8888.000000001"] }
+  amount: { vary: ["0.000000007", "42.987654321", "0.3", "8888.000000001", "0.5",
+                   "2.25", "19.75", "123.456", "0.08", "54321.1", "0.000000123",
+                   "777.777777", "3.14159", "0.000012345", "6543.21", "0.9"] }
   token: ETH
   recipient: { vary: ["vitalik.eth", "random_address"] }
   ablate: ["recipient", "amount"]
 
 - action: transfer
-  amount: { vary: ["0.000002", "654321.098765", "0.09", "0.000009"] }
+  amount: { vary: ["0.000002", "654321.098765", "0.09", "0.000009", "1.5", "250.75",
+                   "0.000004", "4200.123456", "0.55", "33.33", "0.000055", "78901.2",
+                   "0.25", "880000.1", "12.345678", "0.000008"] }
   token: { vary: ["USDC", "DAI"] }
   recipient: { vary: ["vitalik.eth", "random_address"] }
   ablate: ["recipient", "token"]
 
 - action: swap
-  amount: { vary: ["0.000002", "135790.24", "0.09", "0.000008"] }
+  amount: { vary: ["0.000002", "135790.24", "0.091", "0.000008", "2.5", "500.5",
+                   "0.000004", "75.25", "3300.99", "0.15", "64.5", "0.000045",
+                   "21000.1", "8.88", "410.4", "0.75"] }
   from_token: { vary: ["USDC", "ETH"] }
   to_token: { vary: ["ETH", "DAI", "WETH"] }
   ablate: ["to_token", "amount"]

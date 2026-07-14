@@ -13,6 +13,10 @@ out.json
 # Local GGUF model weights (FunctionGemma etc.)
 /models/
 
+# Generated fine-tuning set — regenerable from datasets/finetune_seeds.yaml +
+# datasets/protocols/*.finetune.fixtures.json via scripts/generate_finetune_data.py
+data_for_finetune/functiongemma_train.jsonl
+
 # Python
 __pycache__/
 *.py[cod]

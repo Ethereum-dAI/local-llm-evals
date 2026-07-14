@@ -22,7 +22,7 @@ providers:
   - id: file://pf/provider_functiongemma.py:call_api
     label: functiongemma-ft
     config:
-      model_path: models/functiongemma-270m-ft.Q8_0.gguf
+      model_path: models/functiongemma-270m-ft-modal.Q8_0.gguf
       n_ctx: 4096
       temperature: 0.2
       max_tokens: 1024

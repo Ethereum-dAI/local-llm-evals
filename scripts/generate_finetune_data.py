@@ -65,9 +65,11 @@ REFUSAL_SCENARIOS = [
     ]},
 ]
 
-# ~20% of 447 ≈ 90, stratified. Buckets over-generate; we shuffle + cap each.
-TARGETS = {"transfer": 26, "swap": 26, "multiturn": 12, "ablation": 6,
-           "safe": 6, "aave": 8, "refusal": 6}
+# v2: scaled up ~20x (v1's ~90 was far too small — the model collapsed to 0% on
+# the core task). Buckets over-generate; we shuffle + cap each. Weighted toward
+# transfer/swap (the capability that failed); protocols/refusals use all raw.
+TARGETS = {"transfer": 650, "swap": 650, "multiturn": 250, "ablation": 90,
+           "safe": 40, "aave": 55, "refusal": 12}
 
 
 def _valid_intent(intent: dict) -> bool:
