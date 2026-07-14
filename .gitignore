@@ -22,3 +22,6 @@ __pycache__/
 *.py[cod]
 .venv/
 .python-version
+
+# Diagnostic sample (generated training rows)
+finetune/diag_sample.jsonl

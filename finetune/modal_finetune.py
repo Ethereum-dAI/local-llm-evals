@@ -174,10 +174,15 @@ def train() -> str:
     # Export Q8_0 GGUF (unsloth builds llama.cpp for the conversion).
     gguf_dir = f"{OUTPUTS_DIR}/gguf"
     model.save_pretrained_gguf(gguf_dir, tokenizer, quantization_method=GGUF_QUANT)
-    q8 = [p for p in Path(OUTPUTS_DIR).rglob("*.gguf") if "q8_0" in p.name.lower()]
-    if not q8:
+    # Pick the freshly-produced q8_0, excluding FINAL_GGUF itself (a prior run's
+    # copy lives there and would make shutil.copy raise SameFileError).
+    final = Path(FINAL_GGUF).resolve()
+    cands = [p for p in Path(OUTPUTS_DIR).rglob("*.gguf")
+             if "q8_0" in p.name.lower() and p.resolve() != final]
+    if not cands:
         raise SystemExit("no q8_0 gguf produced under /outputs")
-    shutil.copy(q8[0], FINAL_GGUF)
+    src = max(cands, key=lambda p: p.stat().st_mtime)  # newest
+    shutil.copy(src, FINAL_GGUF)
     size_mb = Path(FINAL_GGUF).stat().st_size / 1e6
     print(f"[train] GGUF ready: {FINAL_GGUF} ({size_mb:.1f} MB)", flush=True)
 
