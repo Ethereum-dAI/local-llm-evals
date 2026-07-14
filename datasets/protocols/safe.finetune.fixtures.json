@@ -1,0 +1,85 @@
+[
+ {
+  "op": "addOwnerWithThreshold",
+  "chainId": "1",
+  "safe": "0xe8bc163c82eee18733288c7d4ac636db3a6deb01",
+  "params": {
+   "owner": "0x2352da7280f1decc3acf1ba84eb945c9fc2b7b54",
+   "threshold": 2
+  },
+  "tx_hash": "0xftsafeadd000100000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "addOwnerWithThreshold",
+  "chainId": "1",
+  "safe": "0xad328846aa18b32a335816374511cac1063c704b",
+  "params": {
+   "owner": "0x9250b9912ee91d6b46e23299459ecd6eb8154451",
+   "threshold": 3
+  },
+  "tx_hash": "0xftsafeadd000200000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "addOwnerWithThreshold",
+  "chainId": "1",
+  "safe": "0x41242b9fae56fad4e6e77dfe33cb18d1c3fc583f",
+  "params": {
+   "owner": "0xde2d91dc0a2580414e9a70f7dfc76af727b69cac",
+   "threshold": 2
+  },
+  "tx_hash": "0xftsafeadd000300000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "addOwnerWithThreshold",
+  "chainId": "1",
+  "safe": "0x5b840157e7e86aef3b3fd0fc24f3add34d3e7f21",
+  "params": {
+   "owner": "0x1b2501a20fe1bcd82b48c8db1e0f9dd2da9de58d",
+   "threshold": 4
+  },
+  "tx_hash": "0xftsafeadd000400000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "addOwnerWithThreshold",
+  "chainId": "1",
+  "safe": "0x3b96fc064fa874a80a132bda60bebf54efbc780a",
+  "params": {
+   "owner": "0xe6670506c75ce37bd5321e28454d69024c547fa4",
+   "threshold": 2
+  },
+  "tx_hash": "0xftsafeadd000500000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "removeOwner",
+  "chainId": "1",
+  "safe": "0x8c4bba9e7c828a1bbd6fb23f09d445de192ac2e9",
+  "params": {
+   "prevOwner": "0xf64551fcd6f07823cb87971cfb91446425da1828",
+   "owner": "0xfd127cea1b46ac032a03dd941f38de6a932d40c3",
+   "threshold": 2
+  },
+  "tx_hash": "0xftsaferem000100000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "removeOwner",
+  "chainId": "1",
+  "safe": "0xb604257892f6c012bf913cef1edd2d3a48985045",
+  "params": {
+   "prevOwner": "0x3946ca64ff78d93ca61090a437cbb6b3d2ca0d48",
+   "owner": "0x95b70fd9f1baf96ea89b25f5c5b590877a3d5fe0",
+   "threshold": 2
+  },
+  "tx_hash": "0xftsaferem000200000000000000000000000000000000000000000000000"
+ },
+ {
+  "op": "removeOwner",
+  "chainId": "1",
+  "safe": "0xb266db9649984b4dd680ab7dd39fb64f2ce4ec3f",
+  "params": {
+   "prevOwner": "0x43bb00d0ce7790a53b91256b370c887b24791a55",
+   "owner": "0x9bf308ca455411a898dd96ae64cf79d3ea3e2ab0",
+   "threshold": 3
+  },
+  "tx_hash": "0xftsaferem000300000000000000000000000000000000000000000000000"
+ }
+]
