@@ -1,0 +1,46 @@
+# Gemma-4 E4B lift comparison: base vs fine-tuned, LOCAL only (no OpenRouter, no
+# API cost). E4B is the on-device model local-wallet-mac ships, evaluated at the
+# Q4_K_M quant it actually runs (and that issue #8 wants benchmarked). Run with the
+# uv venv so the scorer can import wallet_evals:
+#   scripts/eval.sh -c promptfooconfig.gemma4-ft.yaml -o gemma4.ft.out.json
+# The fine-tuned GGUF is produced by finetune/modal_export_gemma4.py and pulled
+# from the public HF repo (llama-cpp-python caches it under ~/.cache/huggingface).
+description: Gemma-4 E4B base vs fine-tuned (local GGUF, Q4_K_M)
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # Baseline: the EXACT GGUF local-wallet-mac ships. The wallet content-pins this
+  # file by SHA256 (90ce9812…, see OnboardingSettingsStore.swift). It was deleted
+  # from the repo's `main` on 2026-07-16, so we pull it at the pinned revision that
+  # still carries the byte-identical Q4_K_M (verified: sha256 matches the wallet).
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-base
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+  # Fine-tuned: our bf16-merged Q4_K_M GGUF, pulled from the public HF repo.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft
+    config:
+      repo_id: gabrielfior/gemma-4-E4B-wallet-ft
+      filename: "*Q4_K_M.gguf"
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.generated.yaml') }}"
