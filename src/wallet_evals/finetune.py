@@ -130,13 +130,20 @@ def assistant_target(metadata: dict[str, Any], *, reasoning_text: str | None = N
 
 def case_to_example(metadata: dict[str, Any], rendered_messages: list[dict[str, Any]],
                     tools: list[dict], *, reasoning_text: str | None = None,
-                    dialect: Dialect = FUNCTIONGEMMA) -> dict[str, Any]:
+                    dialect: Dialect = FUNCTIONGEMMA,
+                    to_developer: bool = True) -> dict[str, Any]:
     """Build one training example from a case's metadata + rendered prompt.
 
     `rendered_messages` is `pf.prompt.render(context)` (system + optional protocol
-    context + the user/assistant turns); we remap roles and append the target.
+    context + the user/assistant turns); we (optionally) remap roles and append
+    the target.
+
+    `to_developer` remaps `system` -> `developer` for FunctionGemma (the role it
+    needs to activate function calling). Gemma-4's chat template has a native
+    `<|turn>system`, so its dataset passes `to_developer=False` to keep `system`.
     """
-    messages = to_developer_roles(rendered_messages)
+    messages = to_developer_roles(rendered_messages) if to_developer else \
+        [dict(m) for m in rendered_messages]
     messages.append({"role": "assistant",
                      "content": assistant_target(metadata, reasoning_text=reasoning_text,
                                                   dialect=dialect)})

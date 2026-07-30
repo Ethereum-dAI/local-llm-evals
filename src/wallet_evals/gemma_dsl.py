@@ -29,6 +29,10 @@ FUNCTIONGEMMA = Dialect(
     opener="<start_function_call>", closer="<end_function_call>", quote="<escape>"
 )
 
+# String → Dialect, so a promptfoo provider can select a dialect from YAML config
+# (`config.dialect: gemma4`). Keys are the stable public names.
+DIALECTS: dict[str, Dialect] = {"gemma4": GEMMA4, "functiongemma": FUNCTIONGEMMA}
+
 
 def _parse_args(body: str, quote: str) -> dict[str, str]:
     out: dict[str, str] = {}

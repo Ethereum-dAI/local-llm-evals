@@ -17,4 +17,13 @@ cd "$(dirname "$0")/.."
 PROMPTFOO_PYTHON="$(uv run --quiet python -c 'import sys; print(sys.executable)')"
 export PROMPTFOO_PYTHON
 
+# When OpenRouter is unavailable (e.g. out of credits), skip its providers so the
+# run doesn't error out on every hosted case. Local providers still run.
+#   DISABLE_OPENROUTER=true scripts/eval.sh -o out.json
+# `--filter-providers` keeps only providers whose id/label matches the regex; the
+# negative lookahead keeps everything that does NOT contain "openrouter".
+if [ "${DISABLE_OPENROUTER:-}" = "true" ]; then
+  set -- --filter-providers '^(?!.*openrouter).+' "$@"
+fi
+
 exec npx promptfoo eval "$@"

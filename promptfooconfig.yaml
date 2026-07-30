@@ -7,19 +7,29 @@ description: Local agent wallet — executeTx/readTx/swap intent eval
 prompts:
   - file://pf/prompt.py:render
 
-# Two cheap OpenRouter models: gpt-4o-mini + Gemma 4 (closest hosted proxy to the
-# shipped on-device Gemma 4 E4B).
+# gpt-4o-mini + gpt-5 (hosted anchors) and the QUANTIZED on-device Gemma 4 E4B.
 providers:
   - id: openrouter:openai/gpt-4o-mini
     config:
       temperature: 0.2
       max_tokens: 4096
       tools: file://pf/tools.json
-  - id: openrouter:google/gemma-4-26b-a4b-it
+  # Issue #8: benchmark the QUANTIZED on-device model, not hosted gemma-4 full.
+  # This is the exact GGUF local-wallet-mac ships (ggml-org/gemma-4-E4B-it-GGUF,
+  # Q4_K_M, SHA-pinned). The file was deleted from the repo's `main`, so it's
+  # pulled at the revision that still carries the byte-identical bytes. Local,
+  # in-process via llama-cpp-python (needs `uv sync --group local`).
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma-4-E4B-it-Q4_K_M
     config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
       temperature: 0.2
-      max_tokens: 4096
-      tools: file://pf/tools.json
+      max_tokens: 1024
   - id: openrouter:openai/gpt-5
     config:
       temperature: 0.1
