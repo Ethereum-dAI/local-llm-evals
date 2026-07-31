@@ -86,7 +86,10 @@ uv run python scripts/generate_protocol_cases.py   # from datasets/protocols/*.f
 - `uv run` for Python; `uv run --with web3` for the (non-suite) fixture fetchers.
 - `uv run pytest -q` is offline (no API key).
 - `docs/` is gitignored — specs/plans live on disk only, not committed.
-- Commit/push only when asked; branch off `eval/protocol-harness`.
-- Skills (SKILL.md) are **not** usable here — the models run as plain OpenRouter
-  chat completions with no agent runtime. Gated context injection (`vars.protocol`)
-  is the portable equivalent.
+- Commit/push only when asked; branch off `main` and target PRs at `main` (it is
+  the repo's default branch as of 2026-07-31). `feat/eval-harness` was the old
+  default and is a superseded line of development — don't branch from it.
+- Skills (SKILL.md) are **not** usable here — the models are plain chat
+  completions with no agent runtime, whether hosted (OpenRouter) or local GGUF
+  (`pf/provider_functiongemma.py` via llama-cpp-python). Gated context injection
+  (`vars.protocol`) is the portable equivalent.
