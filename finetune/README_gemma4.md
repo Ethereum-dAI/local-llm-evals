@@ -137,11 +137,72 @@ refusals (the one gap: `unverified-token-swap`, 0/2 both — it still swaps into
 raw unknown token address). ~14 cases per side hit the 5-min llama-cpp worker
 timeout and count as fails; the gap dwarfs that noise.
 
+> **The 76.9% understates the fine-tune.** A re-run on 2026-07-30 hit **zero**
+> worker timeouts and scored **246/307 = 80.1%** — same GGUF, same prompt, same
+> scorer. The 13 timeouts in the run above were counted as failures, so treat
+> **80.1%** as the current figure and 76.9% as timeout-depressed.
+
 Training: LoRA r=16, 3 epochs, lr 2e-4, A100-40GB, final train loss 0.0078,
 0/1739 rows masked (turn markers verified). The GPU-scored **adapter** (bf16, via
 `modal_eval_gemma4.py`) reads 190/307 = 61.9% — lower only because that eval caps
 generation at 256 tokens, truncating some `<think>`+call outputs; the Q4_K_M
 promptfoo run (1024-token budget) is the truer figure.
+
+## Same-day head-to-head vs gpt-5 (2026-07-30)
+
+Both halves run fresh on the same day, same prompt, same 307 cases, `--no-cache`.
+Split into two evals on purpose: gpt-5 is network-bound and parallelises at `-j 8`,
+the local GGUF is CPU-bound and must stay at `-j 1` (the llama-cpp worker is not
+reentrant). In one serialized eval each half waited on the other — gpt-5's average
+latency was 37 s there vs 11 s apart. `scripts/merge_evals.py` stitches the two
+exports back into a single eval so the UI shows a real side-by-side.
+
+```bash
+scripts/eval.sh -c promptfooconfig.gpt5-only.yaml     -j 8 -o gpt5.fresh.out.json
+scripts/eval.sh -c promptfooconfig.gemma4ft-only.yaml -j 1 -o gemma4ft.fresh.out.json
+uv run python scripts/merge_evals.py -o merged.out.json gpt5.fresh.out.json gemma4ft.fresh.out.json
+npx promptfoo import merged.out.json --new-id
+```
+
+| category | gpt-5 | fine-tuned E4B (on-device) |
+|---|---|---|
+| generated-transfer-pos | 95/101 | 72/101 |
+| generated-swap-pos | 88/96 | 80/96 |
+| multi-turn (4 kinds) | 75/75 | 61/75 |
+| ablation (ask when info missing) | 28/28 | 28/28 |
+| safety-refusal (4 kinds) | 7/7 | 5/7 |
+| **overall** | **293/307 = 95.4%** | **246/307 = 80.1%** |
+
+Cost $3.26, ~1 h wall-clock (both concurrent). Every result re-scores through
+`pf/assert.py` with 0 mismatches against promptfoo's own verdicts.
+
+**The ~15-point gap is almost entirely base-unit arithmetic.** 50 of the
+fine-tune's 61 failures are amount errors (48 off by a power of 10, 2
+digit-transposition) vs 4 of gpt-5's 14. Discount amount errors on both sides and
+the two converge to **96.4% vs 96.7% — a one-case gap**. Against the *stock*
+model on the same basis the lift still reads **49.5% → 92.2%**, so fine-tuning's
+value (DSL compliance, arg completeness, refusals) does not depend on arithmetic.
+
+Failure taxonomy, fine-tuned (61): 48 amount off-by-10^k · 7 malformed address
+length · 2 digit-transposition · 2 acted-when-must-refuse · 1 wrong tool · 1 wrong
+`currencyIn`. The amount errors are zero-counting, not token-decimals confusion —
+12 of 13 token groupings involve only 18-decimal tokens, and the direction is
+near-symmetric (26 overshoot / 24 undershoot). **The 7 malformed addresses are the
+dangerous class**: all are length errors (5×41 hex, 2×39), which would produce an
+unsendable or wrong-recipient transaction. A `^0x[0-9a-fA-F]{40}$` check at the
+tool boundary catches 100% of them.
+
+Failure taxonomy, gpt-5 (14): **10 are over-refusal, not capability** — it answers
+"I'm sorry, but I cannot assist with that request" to heavily case-mangled asks
+(`hOnEstLy eTh haS JUSt been siTTinG…`), i.e. the surface mutators read as
+adversarial obfuscation. Some are arguably *correct* refusals, because a typo'd
+**verb** destroys intent (`send 0.000003 USDC to becmoe WETH`). Token symbols are
+already typo-protected; the action verb is not. So the anchor's ceiling is
+suppressed here and the true frontier gap is wider than 15 points.
+
+gpt-5 also re-scores **96.7% (Jul 9) vs 95.4% (Jul 30)** on a byte-identical prompt
+and dataset — ±1.3 pts of run-to-run nondeterminism at `temperature: 0.1`. Don't
+read small deltas against the anchor as regressions.
 
 **Uploaded:** [`gabrielfior/gemma-4-E4B-wallet-ft`](https://huggingface.co/gabrielfior/gemma-4-E4B-wallet-ft)
 (public) — `gemma-4-E4B-wallet-ft.Q4_K_M.gguf` (5.34 GB, same footprint as the
