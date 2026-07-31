@@ -1,0 +1,33 @@
+# Fine-tuned Gemma-4 E4B alone — the on-device half of the head-to-head.
+#
+#   scripts/eval.sh -c promptfooconfig.gemma4ft-only.yaml -j 1 -o gemma4ft.fresh.out.json
+#
+# -j 1 is REQUIRED, not a tuning choice: this serves a 5.34 GB GGUF from a
+# persistent in-process llama-cpp worker that is not reentrant, and concurrent
+# calls would either share one Llama handle or fork a second 8.5 GB resident set.
+#
+# Provider config is byte-identical to promptfooconfig.gemma4-ft.yaml's ft block,
+# so this reproduces the 236/307 = 76.9% measurement rather than re-defining it.
+description: fine-tuned Gemma-4 E4B (Q4_K_M, on-device) — fresh run
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft
+    config:
+      repo_id: gabrielfior/gemma-4-E4B-wallet-ft
+      filename: "*Q4_K_M.gguf"
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.generated.yaml') }}"

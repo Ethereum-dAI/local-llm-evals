@@ -1,0 +1,45 @@
+# Head-to-head: hosted frontier anchor (gpt-5) vs our fine-tuned ON-DEVICE model
+# (Gemma-4 E4B at the Q4_K_M quant the wallet actually ships). Both scored in the
+# SAME run, same day, same prompt — so the comparison needs no cross-run caveat.
+#
+#   scripts/eval.sh -c promptfooconfig.gpt5-vs-gemma4ft.yaml -j 1 -o gpt5-vs-ft.out.json
+#
+# -j 1 is deliberate: the local provider serves a 5.34 GB GGUF from a persistent
+# in-process llama-cpp worker, which is not reentrant. Concurrency >1 risks two
+# calls sharing one Llama handle. It costs wall-clock, not correctness.
+#
+# Baseline note: the STOCK wallet GGUF is intentionally absent here. It is already
+# measured at 30/307 = 9.8% in gemma4.ft.out.json, and that run re-scores to the
+# byte-identical result under the current scorer, so re-running it would add ~2.5 h
+# of local compute for a number we already hold. See finetune/README_gemma4.md.
+description: gpt-5 vs fine-tuned Gemma-4 E4B (Q4_K_M, on-device)
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # Frontier anchor. Hosted via OpenRouter (OPENROUTER_API_KEY from .env).
+  - id: openrouter:openai/gpt-5
+    config:
+      temperature: 0.1
+      max_tokens: 4096
+      tools: file://pf/tools.json
+  # Our fine-tune, quantized to the same Q4_K_M the wallet ships, pulled from the
+  # public HF repo and served locally by llama-cpp-python (needs `uv sync --group local`).
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft
+    config:
+      repo_id: gabrielfior/gemma-4-E4B-wallet-ft
+      filename: "*Q4_K_M.gguf"
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.generated.yaml') }}"
