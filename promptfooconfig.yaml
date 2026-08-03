@@ -2,7 +2,7 @@
 # Run: PROMPTFOO_PYTHON=.venv/bin/python npx promptfoo@latest eval
 #      npx promptfoo@latest view
 # Requires OPENROUTER_API_KEY (loaded from .env).
-description: Local agent wallet — executeTx/readTx/swap intent eval
+description: Local agent wallet — executeTx/readTx/swap/shield/unshield intent eval
 
 prompts:
   - file://pf/prompt.py:render

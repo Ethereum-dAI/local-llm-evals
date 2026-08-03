@@ -56,6 +56,8 @@ def _build_call(name: str, fields: dict[str, Any]) -> ParsedToolCall:
         amountIn=_as_str(fields.get("amountIn")),
         amountOutMinimum=_as_str(fields.get("amountOutMinimum")),
         recipient=_as_str(fields.get("recipient")),
+        amount=_as_str(fields.get("amount")),
+        token=_as_str(fields.get("token")),
     )
 
 

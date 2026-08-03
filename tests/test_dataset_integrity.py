@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from wallet_evals.promptfoo import load_cases
-from wallet_evals.schema import ParsedToolCall, ParsedTurn
+from wallet_evals.schema import ParsedTurn
 from wallet_evals.scorer import score_case
 
 TESTS = Path(__file__).resolve().parents[1] / "pf" / "tests.yaml"
@@ -22,16 +22,7 @@ def test_ids_unique():
 
 def test_every_case_self_scores_one():
     for case in _load():
-        turn = ParsedTurn(tool_calls=[
-            ParsedToolCall(
-                name=c.tool, chainId=c.chainId, to=c.to, value=c.value,
-                function=c.function, args=c.args,
-                currencyIn=c.currencyIn, currencyOut=c.currencyOut,
-                amountIn=c.amountIn, amountOutMinimum=c.amountOutMinimum,
-                recipient=c.recipient,
-            )
-            for c in case.expected_calls
-        ])
+        turn = ParsedTurn(tool_calls=[c.as_parsed_call() for c in case.expected_calls])
         assert score_case(case, turn) == 1, f"{case.id} not self-consistent"
 
 

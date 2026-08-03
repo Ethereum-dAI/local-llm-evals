@@ -66,9 +66,67 @@ uv run python scripts/generate_protocol_cases.py   # from datasets/protocols/*.f
 - Surface phrasings: `TRANSFER_TEMPLATES` / `SWAP_TEMPLATES` (+ narrative) in
   `src/wallet_evals/generation.py`.
 - Safety refusals: `REFUSAL_SCENARIOS` + `build_refusal_case` (same file).
+- RAILGUN keeps its own templates, refusals and multi-turn banks inside
+  `protocols/railgun.py` (self-contained; it needs privacy-specific wording).
+- `_PROTECTED_WORDS` in `generation.py` shields token symbols **and** the privacy
+  verbs from `mutate_typos`: a typo'd "unshield" is unanswerable, not harder.
+- Changing `pf/tools.json` invalidates the fine-tune JSONLs, which embed it
+  verbatim (`tests/test_*finetune_integrity.py::test_tools_present` catches this).
+  They're gitignored — just rerun `scripts/generate_finetune_data.py` and
+  `scripts/generate_gemma4_finetune_data.py`.
 - Protocol modules: `src/wallet_evals/protocols/` — gold is a **generic
   `executeTx`** for all protocols (no per-protocol tools; scorer/schema/tools.json
-  stay unchanged when adding one).
+  stay unchanged when adding one). **One deliberate exception: `railgun`.** Shield's
+  real ABI is nested note-ciphertext tuples and unshield is not a tx at all (Groth16
+  proof + the wallet's own broadcaster), so it scores the app's own `shield`/
+  `unshield` intent tools instead — see below. Prefer `executeTx` for anything new;
+  only break the rule when there is genuinely no transaction to encode.
+
+## RAILGUN shield/unshield — the human-unit exception
+
+`shield`/`unshield` mirror `local-wallet-mac`'s `ToolDefinitions.swift` **verbatim**:
+a human-decimal `amount` ("0.01"), an ETH-only `token`, and (unshield) a 0x `to`.
+They are the ONE place base units do not apply — `RAILGUN_REFERENCE` in `pf/prompt.py`
+states that override, and a wei-converted amount correctly scores 0. Two scoped
+normalizations in the scorer, both erasing formatting rather than capability:
+`token` folds case and defaults to ETH when omitted (the app's own
+`SlashCommandParser` fills it in), and `amount` compares numerically so "0.010" ==
+"0.01". Gold builders live in `intents.py` and refuse a non-ETH token or an
+unresolved ENS recipient — the app cannot resolve ENS for unshield yet, so no gold
+may encode one.
+
+Because `pf/tools.json` now offers 5 tools to **every** case, run numbers from
+before this change aren't directly comparable — the tool list in the request grew,
+so a re-run is needed rather than a re-score of frozen outputs.
+
+**This slice does not discriminate — treat it as a regression test.** E4B-base
+scores ~97% here vs 9.8% on the generated set, because human-unit amounts remove
+the base-unit arithmetic that separates models. What's left is tool selection plus
+copying a number. Don't read a high railgun score as capability.
+
+### The zero-address refusal wording is load-bearing (measured)
+
+E4B-base originally refused burn-address unshields 10/10 but the **zero** address
+only **3/10** — because `SYSTEM` teaches that the zero address *is* native ETH for
+swaps, so the model holds a strong positive association for `0x0` and none for
+`dEaD`. Fixing it needed three things, A/B'd on the 4 refusal cases × 5 reps
+(temperature 0.2 — a single pass cannot tell a fix from noise; the first attempt
+looked like it "moved" failures and was actually flat):
+
+| wording | refused | zero-addr | leading-zero over-refusal |
+| --- | --- | --- | --- |
+| one-liner, `0x000...dEaD` abbreviated | 13/20 65% | 3/10 | none |
+| + consequence + swap-sentinel disambiguation | 17-18/20 ~87% | 9/10 | none |
+| + precise burn addr + "leading zeros are fine" carve-out | **20/20 100%** | 10/10 | none |
+
+So: spell both addresses out in full, say the funds are *destroyed permanently*,
+explicitly separate "token id" from "recipient", and state that an ordinary
+address merely starting with a zero is fine. `tests/test_prompt_render.py` asserts
+each of those four properties — if you reword the block, re-run the A/B
+(`ab_safety.py` pattern) rather than trusting one pass. Position in the block
+barely mattered; the explanation did. A mechanical rule ("refuse if `to` starts
+with 4+ zeros") would also pass these cases but was rejected: real addresses can
+begin with zeros, so it wins the eval by shipping a false-positive heuristic.
 
 ## Prompt (`pf/prompt.py`)
 

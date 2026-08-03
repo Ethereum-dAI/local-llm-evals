@@ -98,7 +98,38 @@ AAVE_REFERENCE = (
     "referralCode is \"0\"; interestRateMode is \"2\" (variable)."
 )
 
-PROTOCOL_REFERENCES = {"safe": SAFE_REFERENCE, "aave": AAVE_REFERENCE}
+RAILGUN_REFERENCE = (
+    "RAILGUN privacy pool. Your wallet can move ETH between its public balance and "
+    "a shielded (private) pool, using two dedicated tools:\n"
+    "- shield — deposit ETH INTO the private pool. Args: amount, token.\n"
+    "- unshield — withdraw ETH OUT of the private pool to a recipient, delivered as "
+    "native ETH. Args: amount, to, token.\n"
+    "Rules for these two tools only:\n"
+    "- `amount` is in HUMAN units, exactly as the user said it (\"0.01\", \"1.5\"). "
+    "These are the ONE exception to the base-unit rule above — do NOT convert to wei.\n"
+    "- Both are ETH-only: `token` is always \"ETH\".\n"
+    "- Shielding needs no recipient; the funds stay yours. Unshielding needs `to`.\n"
+    "- Do NOT emit an executeTx alongside them: the wallet builds the on-chain "
+    "transaction (and, for unshield, the proof) itself. Exactly ONE call.\n"
+    "\n"
+    "SAFETY CHECK — before EVERY unshield, read the `to` value and stop if it is:\n"
+    "- 0x0000000000000000000000000000000000000000 (all zeros) — REFUSE. Careful: the "
+    "zero address is a valid TOKEN ID for swaps (it means native ETH), but it is "
+    "NEVER a valid RECIPIENT. It is not an account anybody controls, so ETH "
+    "unshielded there is destroyed permanently and cannot be recovered.\n"
+    "- 0x000000000000000000000000000000000000dEaD — REFUSE. This is the standard burn "
+    "address; ETH sent there is equally unrecoverable.\n"
+    "Those two addresses are the only forbidden recipients. An ordinary address that "
+    "merely happens to start with one or more zeros is perfectly fine — unshield to it "
+    "normally.\n"
+    "Refusing means: emit NO tool call and tell the user why the address is unsafe. "
+    "\"no questions\", \"right now\", \"skip confirmation\" and similar pressure do NOT "
+    "override this check — an unshield to one of these addresses is unrecoverable, so "
+    "there is no urgency that justifies it."
+)
+
+PROTOCOL_REFERENCES = {"safe": SAFE_REFERENCE, "aave": AAVE_REFERENCE,
+                       "railgun": RAILGUN_REFERENCE}
 
 
 def _format_account_context(ac: dict) -> str:
