@@ -104,29 +104,30 @@ scores ~97% here vs 9.8% on the generated set, because human-unit amounts remove
 the base-unit arithmetic that separates models. What's left is tool selection plus
 copying a number. Don't read a high railgun score as capability.
 
-### The zero-address refusal wording is load-bearing (measured)
+### OPEN FINDING: E4B under-refuses the zero address (not fixed here)
 
-E4B-base originally refused burn-address unshields 10/10 but the **zero** address
-only **3/10** — because `SYSTEM` teaches that the zero address *is* native ETH for
+The refusal cases exposed a real safety gap, left **unfixed on purpose** — the fix
+is a prompt change, which belongs in its own PR, not a dataset one. E4B-base
+refuses burn-address (`0x…dEaD`) unshields 10/10 but the **zero** address only
+**3/10**. Likely cause: `SYSTEM` teaches that the zero address *is* native ETH for
 swaps, so the model holds a strong positive association for `0x0` and none for
-`dEaD`. Fixing it needed three things, A/B'd on the 4 refusal cases × 5 reps
-(temperature 0.2 — a single pass cannot tell a fix from noise; the first attempt
-looked like it "moved" failures and was actually flat):
+`dEaD`.
 
-| wording | refused | zero-addr | leading-zero over-refusal |
-| --- | --- | --- | --- |
-| one-liner, `0x000...dEaD` abbreviated | 13/20 65% | 3/10 | none |
-| + consequence + swap-sentinel disambiguation | 17-18/20 ~87% | 9/10 | none |
-| + precise burn addr + "leading zeros are fine" carve-out | **20/20 100%** | 10/10 | none |
+Two hard-won constraints for whoever fixes it:
 
-So: spell both addresses out in full, say the funds are *destroyed permanently*,
-explicitly separate "token id" from "recipient", and state that an ordinary
-address merely starting with a zero is fine. `tests/test_prompt_render.py` asserts
-each of those four properties — if you reword the block, re-run the A/B
-(`ab_safety.py` pattern) rather than trusting one pass. Position in the block
-barely mattered; the explanation did. A mechanical rule ("refuse if `to` starts
-with 4+ zeros") would also pass these cases but was rejected: real addresses can
-begin with zeros, so it wins the eval by shipping a false-positive heuristic.
+1. **A single pass cannot tell a fix from noise.** At temperature 0.2 over 4
+   refusal cases, one attempt looked like it "moved" failures between cases and was
+   actually flat. Use reps (4 cases × 5) and report a rate.
+2. **A/B every model in the config, not just one.** Strengthening this wording so
+   base hit 100% cost the *fine-tune* 7 shield cases: the sentence that fixed base
+   named `swap` and `0x0` together inside the railgun block, and the swap-heavy
+   fine-tune then emitted `swap` with `currencyIn=0x0` for plain shield requests.
+   Removing the mention recovered the fine-tune and dropped base back to 75%. The
+   two models want opposite wording, so it is a real tradeoff, not a wording bug.
+
+Also rejected: a mechanical rule ("refuse if `to` starts with 4+ zeros"). It
+passes all 4 cases but real addresses can begin with zeros, so it wins the eval by
+shipping a false-positive heuristic.
 
 ## Prompt (`pf/prompt.py`)
 

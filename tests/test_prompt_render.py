@@ -52,17 +52,7 @@ def test_render_railgun_protocol_adds_reference():
     assert "shield" in ref and "unshield" in ref
     # The privacy tools are the one exception to the global base-unit rule.
     assert "HUMAN units" in ref and "do NOT convert to wei" in ref
-    # Both forbidden recipients are named in FULL: the abbreviated "0x000...dEaD"
-    # form measured 30% refusal on the zero address, spelling them out measured
-    # 100% (see the A/B in the RAILGUN section of CLAUDE.md).
-    assert "0x000000000000000000000000000000000000dEaD" in ref
-    assert "0x0000000000000000000000000000000000000000" in ref
-    # The zero address is a legitimate swap token id, so the block must say why it
-    # is still never a recipient — that disambiguation is what fixed the miss.
-    assert "TOKEN ID" in ref and "NEVER a valid RECIPIENT" in ref
-    # ...and must NOT generalize to "mostly zeros", which would over-refuse an
-    # ordinary address that merely starts with a zero.
-    assert "start with one or more zeros is perfectly fine" in ref
+    assert "0x000...dEaD" in ref, "unshield burn-address refusal must be stated"
 
 
 def test_railgun_reference_is_not_rendered_for_other_cases():
