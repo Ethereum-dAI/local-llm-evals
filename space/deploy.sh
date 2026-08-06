@@ -42,7 +42,7 @@ if [[ "$MODE" == "--gradio" ]]; then
     hf repos create "$PLAYGROUND" --repo-type space --space-sdk gradio \
         --flavor "$FLAVOR" --private --exist-ok
     hf upload "$PLAYGROUND" "$HERE/build/gradio" . --repo-type space \
-        --exclude "**/__pycache__/**" \
+        --exclude "**/__pycache__/**" --delete "*" \
         --commit-message "Live playground over the local GGUFs"
     echo "Playground: https://huggingface.co/spaces/$PLAYGROUND"
     exit 0
@@ -53,15 +53,17 @@ echo "==> Staging the dataset tree"
 
 echo "==> Dataset: $DATASET"
 hf repos create "$DATASET" --repo-type dataset --private --exist-ok
+# --delete "*" prunes anything no longer in the staged tree. Without it a file
+# that moves in the manifest lingers in the repo forever.
 hf upload "$DATASET" "$HERE/build/dataset" . --repo-type dataset \
-    --exclude "**/__pycache__/**" \
+    --exclude "**/__pycache__/**" --delete "*" \
     --commit-message "Wallet tool-calling SFT data + training scripts"
 
 # space/static/ duplicates nothing, so it uploads straight from the tree.
 echo "==> Report Space: $REPORT (static)"
 hf repos create "$REPORT" --repo-type space --space-sdk static --private --exist-ok
 hf upload "$REPORT" "$HERE/static" . --repo-type space \
-    --exclude "**/__pycache__/**" \
+    --exclude "**/__pycache__/**" --delete "*" \
     --commit-message "Eval report: 307 cases x 7 models, exact-match scoring"
 
 echo

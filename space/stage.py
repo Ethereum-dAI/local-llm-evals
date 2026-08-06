@@ -54,16 +54,64 @@ GRADIO_FILES: tuple[tuple[str, str], ...] = (
     *tuple((f"src/wallet_evals/{m}", f"wallet_evals/{m}") for m in WALLET_EVALS_MODULES),
 )
 
+# The dataset repo has to stand on its own: someone who downloads it should be
+# able to regenerate the JSONLs and retrain without the (private) harness. That
+# means shipping the generators plus the exact modules they import — traced, not
+# guessed — under the harness's own layout.
+#
+# The `src/` prefix is load-bearing. `wallet_evals/intents.py` reads
+# `datasets/lookup.json` relative to its own grandparent, so flattening the
+# package to the repo root makes that path miss by exactly one level. A bundled
+# `pyproject.toml` (space/dataset_pyproject.toml) puts `src` on the path.
+GENERATOR_MODULES = (
+    "src/wallet_evals/__init__.py",
+    "src/wallet_evals/finetune.py",
+    "src/wallet_evals/gemma_dsl.py",
+    "src/wallet_evals/generation.py",
+    "src/wallet_evals/intents.py",
+    "src/wallet_evals/protocols/__init__.py",
+    "src/wallet_evals/protocols/aave.py",
+    "src/wallet_evals/protocols/railgun.py",
+    "src/wallet_evals/protocols/safe.py",
+)
+
+# Never publishable: the 307 held-out cases and the seeds/scorer that reconstruct
+# them. `test_space_staging.py` enforces this list against the manifest.
+EVAL_SET_FILES = (
+    "pf/tests.generated.yaml",
+    "pf/tests.protocols.yaml",
+    "pf/tests.yaml",
+    "datasets/seeds.yaml",
+)
+
 DATASET_FILES: tuple[tuple[str, str], ...] = (
     ("space/dataset_card.md", "README.md"),
-    ("pf/tools.json", "tools.json"),
+    # Mirrors the harness paths the generators read, so they run unmodified.
+    ("space/dataset_pyproject.toml", "pyproject.toml"),
+    ("pf/prompt.py", "pf/prompt.py"),
+    ("pf/tools.json", "pf/tools.json"),
+    # Read at import time by wallet_evals/intents.py — invisible to an import
+    # trace, and the first thing that broke when this tree was tested standalone.
+    ("datasets/lookup.json", "datasets/lookup.json"),
+    ("datasets/finetune_seeds.yaml", "datasets/finetune_seeds.yaml"),
+    ("datasets/protocols/safe.finetune.fixtures.json",
+     "datasets/protocols/safe.finetune.fixtures.json"),
+    ("datasets/protocols/aave.finetune.fixtures.json",
+     "datasets/protocols/aave.finetune.fixtures.json"),
+    ("scripts/generate_finetune_data.py", "scripts/generate_finetune_data.py"),
+    ("scripts/generate_gemma4_finetune_data.py", "scripts/generate_gemma4_finetune_data.py"),
+    ("finetune/_bundled.py", "scripts/_bundled.py"),
     ("finetune/modal_finetune.py", "scripts/modal_finetune.py"),
     ("finetune/modal_finetune_gemma4.py", "scripts/modal_finetune_gemma4.py"),
     ("finetune/modal_export.py", "scripts/modal_export.py"),
     ("finetune/modal_export_gemma4.py", "scripts/modal_export_gemma4.py"),
     ("finetune/train_functiongemma.py", "scripts/train_functiongemma.py"),
+    # modal_export.py's post-merge sanity check — previously not published at all,
+    # which broke the export job outright.
+    ("finetune/diag_sample.jsonl", "data/diag_sample.jsonl"),
     ("data_for_finetune/functiongemma_train.jsonl", "data/functiongemma_train.jsonl"),
     ("data_for_finetune/gemma4_train.jsonl", "data/gemma4_train.jsonl"),
+    *tuple((m, m) for m in GENERATOR_MODULES),
 )
 
 TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES}

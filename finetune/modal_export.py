@@ -20,6 +20,10 @@ from pathlib import Path
 
 import modal
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _bundled import bundled  # noqa: E402  (needs the line above)
+
 BASE_MODEL = "unsloth/functiongemma-270m-it"
 ADAPTER = "/outputs/checkpoint-309"
 HF_REPO = "ef-dai-team/functiongemma-270m-wallet-ft"
@@ -39,7 +43,8 @@ image = (
         "pip install -r /llama.cpp/requirements/requirements-convert_hf_to_gguf.txt",
     )
     .env({"HF_HOME": "/root/.cache/huggingface"})
-    .add_local_file(str(_REPO / "finetune" / "diag_sample.jsonl"), "/data/diag.jsonl")
+    .add_local_file(str(bundled(_REPO, "finetune/diag_sample.jsonl",
+                                       "data/diag_sample.jsonl")), "/data/diag.jsonl")
 )
 
 app = modal.App("functiongemma-export")

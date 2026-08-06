@@ -28,6 +28,10 @@ from pathlib import Path
 
 import modal
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _bundled import bundled  # noqa: E402  (needs the line above)
+
 # ---- knobs (identical recipe to finetune/train_functiongemma.py) --------------
 BASE_MODEL = "unsloth/functiongemma-270m-it"
 MAX_SEQ_LEN = 2048
@@ -42,7 +46,8 @@ FINAL_GGUF = f"{OUTPUTS_DIR}/functiongemma-270m-ft.Q8_0.gguf"
 
 # Repo root, so `modal run` works regardless of cwd.
 _REPO = Path(__file__).resolve().parent.parent
-_DATA_LOCAL = _REPO / "data_for_finetune" / "functiongemma_train.jsonl"
+_DATA_LOCAL = bundled(_REPO, "data_for_finetune/functiongemma_train.jsonl",
+                             "data/functiongemma_train.jsonl")
 # ------------------------------------------------------------------------------
 
 # Persistent Volumes: base weights cached once, outputs survive the container.
