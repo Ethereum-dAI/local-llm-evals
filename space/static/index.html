@@ -583,16 +583,19 @@ function repro() {
   $("repro").innerHTML = `
     <div class="card">
       <h3>1 · Get the data</h3>
-      <p>1739 SFT examples per target model, disjoint from these 307 cases by construction.</p>
+      <p>1739 SFT examples per target model, disjoint from these 307 cases by construction. Private to <code>ef-dai-team</code> — if you get a 401, ask to be added to the org.</p>
       <pre>hf download ${DATASET_REPO} \\
   --repo-type dataset --local-dir ./wallet-ft</pre>
       <p><a href="https://huggingface.co/datasets/${DATASET_REPO}">Open the dataset &rarr;</a></p>
     </div>
     <div class="card">
       <h3>2 · Or regenerate it</h3>
-      <p>Both JSONLs are byte-stable outputs of seeded scripts — verified to reproduce bit for bit.</p>
-      <pre>uv run python scripts/generate_finetune_data.py
-uv run python scripts/generate_gemma4_finetune_data.py</pre>
+      <p>The dataset ships its own generators, seeds and <code>pyproject.toml</code>. Run these from inside the download above — no access to the harness needed. Both JSONLs are byte-stable and verified to reproduce bit for bit.</p>
+      <pre>cd wallet-ft
+uv run python scripts/generate_finetune_data.py \\
+  --out data/functiongemma_train.jsonl
+uv run python scripts/generate_gemma4_finetune_data.py \\
+  --out data/gemma4_train.jsonl</pre>
     </div>
     <div class="card">
       <h3>3 · Train and export</h3>
@@ -601,15 +604,19 @@ uv run python scripts/generate_gemma4_finetune_data.py</pre>
 modal run scripts/modal_export.py</pre>
     </div>
     <div class="card">
-      <h3>4 · Score it</h3>
-      <p>Point the harness's local GGUF provider at your export. The eval set never touches training, so the number is comparable to the strips above.</p>
-      <pre>EVAL_DATASET=pf/tests.generated.yaml scripts/eval.sh</pre>
+      <h3>4 · Score it — not from here</h3>
+      <p>The 307 cases are deliberately unpublished. Keeping them off the Hub is what stops them leaking into training corpora, and it is the reason the strips above mean anything. Scoring needs the private harness; every model's result on every case is already browsable in the case browser on this page.</p>
     </div>
     <div class="card">
-      <h3>Models</h3>
+      <h3>Get the models</h3>
+      <p>Both fine-tunes are <strong>public</strong> — no org membership needed. Each carries a merged GGUF plus the LoRA adapter.</p>
+      <pre>hf download ${MODEL_270M} \\
+  --include "*.gguf" --local-dir ./model-270m   # 291 MB
+hf download ${MODEL_E4B} \\
+  --include "*.gguf" --local-dir ./model-e4b    # 5.3 GB</pre>
       <ul>
-        <li><a href="https://huggingface.co/${MODEL_270M}">${MODEL_270M}</a> — the 270M fine-tune, Q8_0 GGUF + LoRA adapter</li>
-        <li><a href="https://huggingface.co/${MODEL_E4B}">${MODEL_E4B}</a> — the E4B fine-tune, Q4_K_M GGUF + LoRA adapter</li>
+        <li><a href="https://huggingface.co/${MODEL_270M}">${MODEL_270M}</a> — the 270M fine-tune. Scores 8.8%; read its card first.</li>
+        <li><a href="https://huggingface.co/${MODEL_E4B}">${MODEL_E4B}</a> — the E4B fine-tune, 80.1%</li>
         <li><a href="https://huggingface.co/unsloth/functiongemma-270m-it">unsloth/functiongemma-270m-it</a> — the base</li>
       </ul>
     </div>
