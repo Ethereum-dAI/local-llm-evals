@@ -22,7 +22,7 @@ import modal
 
 BASE_MODEL = "unsloth/functiongemma-270m-it"
 ADAPTER = "/outputs/checkpoint-309"
-HF_REPO = "gabrielfior/functiongemma-270m-wallet-ft"
+HF_REPO = "ef-dai-team/functiongemma-270m-wallet-ft"
 GGUF_NAME = "functiongemma-270m-wallet-ft.Q8_0.gguf"
 _REPO = Path(__file__).resolve().parent.parent
 

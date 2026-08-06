@@ -140,6 +140,50 @@ shipping a false-positive heuristic.
 - `vars.expected_summary` is a **read-only viewer column** — never emitted to the
   model, never scored.
 
+## Published artifacts (Hugging Face, `ef-dai-team`)
+
+Everything lives under the org now — the models were **moved** out of
+`gabrielfior/` (old ids still redirect, but don't write new ones).
+
+| Repo | Vis. | Notes |
+| --- | --- | --- |
+| [`functiongemma-270m-wallet-ft`](https://huggingface.co/ef-dai-team/functiongemma-270m-wallet-ft) | public | `license: gemma` (inherited). The failed fine-tune. |
+| [`gemma-4-E4B-wallet-ft`](https://huggingface.co/ef-dai-team/gemma-4-E4B-wallet-ft) | public | `license: apache-2.0`. The 80.1% one. |
+| [`wallet-tool-calling-ft`](https://huggingface.co/datasets/ef-dai-team/wallet-tool-calling-ft) | private | Both training JSONLs + the Modal jobs. Apache-2.0. |
+| [`wallet-tool-calling-eval`](https://huggingface.co/spaces/ef-dai-team/wallet-tool-calling-eval) | private | Static report Space. |
+
+`space/` holds both Space builds. Deploy with `space/deploy.sh ef-dai-team`:
+
+- `space/static/` — the **shipped** report. One tick per case per model over all
+  307 cases, plus a browser showing every model's recorded output and the
+  scorer's verdict. `build_static.py` bakes `data.json` from the `*.out.json`
+  runs, so **`space/static/data.json` is the only committed record of those runs**
+  (the `*.out.json` files themselves are gitignored) — don't ignore it.
+- `space/app.py` — a Gradio playground doing live inference over the three local
+  GGUFs, reusing the harness's own prompt/tools/scorer so it scores identically.
+  **Not deployed:** Gradio and Docker Spaces are 402-gated behind a Team plan for
+  orgs (and PRO for personal accounts) — Static is the only free SDK. Ship it
+  with `space/deploy.sh ef-dai-team --gradio` once the org is upgraded.
+
+### Never commit a second copy of anything
+
+HF repos must be flat and self-contained, so the Space needs `prompt.py` and
+`wallet_evals/` beside `app.py`, and the dataset needs the training scripts
+beside the data. **Do not vendor them.** `space/stage.py` assembles those trees
+on demand from one source each, into the gitignored `space/build/`:
+
+```bash
+uv run python space/stage.py gradio     # pf/ + src/wallet_evals/ + space/app.py
+uv run python space/stage.py dataset    # finetune/ + data_for_finetune/ + the card
+```
+
+Adding an import to `space/app.py` means adding the module to
+`WALLET_EVALS_MODULES` in `stage.py` — nowhere else. `tests/test_space_staging.py`
+fails if any tracked file becomes a byte-for-byte copy of another, if a staged
+file drifts from its source, or if the staged Space can't import what it needs.
+An earlier revision of this work shipped 16 such duplicates; the test exists so
+that can't recur.
+
 ## Conventions
 
 - `uv run` for Python; `uv run --with web3` for the (non-suite) fixture fetchers.

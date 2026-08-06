@@ -23,7 +23,7 @@ import modal
 
 BASE_MODEL = "unsloth/gemma-4-E4B-it"
 OUTPUTS_DIR = "/outputs"
-HF_REPO = "gabrielfior/gemma-4-E4B-wallet-ft"
+HF_REPO = "ef-dai-team/gemma-4-E4B-wallet-ft"
 GGUF_NAME = "gemma-4-E4B-wallet-ft.Q4_K_M.gguf"
 _REPO = Path(__file__).resolve().parent.parent
 

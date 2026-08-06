@@ -15,7 +15,7 @@ protocols/*.finetune.fixtures ─┤ scripts/generate_finetune_data.py
                                         ├ finetune/modal_eval.py         (score adapter on the eval set)
                                         └ finetune/modal_export.py       (bf16 merge → GGUF q8_0 → HF upload)
                                                  │
-                       huggingface.co/gabrielfior/functiongemma-270m-wallet-ft  (public: GGUF + adapter)
+                       huggingface.co/ef-dai-team/functiongemma-270m-wallet-ft  (public: GGUF + adapter)
                                                  │
                     promptfooconfig.functiongemma*.yaml → pf/provider_functiongemma.py (llama-cpp)
 ```
@@ -88,7 +88,7 @@ generation before it uploads.
 
 `modal_export.py` uploads from the Modal container using `HfApi(token=...)`:
 
-- Repo: **[gabrielfior/functiongemma-270m-wallet-ft](https://huggingface.co/gabrielfior/functiongemma-270m-wallet-ft)** (public)
+- Repo: **[ef-dai-team/functiongemma-270m-wallet-ft](https://huggingface.co/ef-dai-team/functiongemma-270m-wallet-ft)** (public)
 - `functiongemma-270m-wallet-ft.Q8_0.gguf` — deployable, ~292 MB
 - `adapter/` — the LoRA adapter (base = `unsloth/functiongemma-270m-it`)
 
@@ -106,7 +106,7 @@ providers:
   - id: file://pf/provider_functiongemma.py:call_api
     label: functiongemma-ft
     config:
-      repo_id: gabrielfior/functiongemma-270m-wallet-ft   # pull from HF (Llama.from_pretrained)
+      repo_id: ef-dai-team/functiongemma-270m-wallet-ft   # pull from HF (Llama.from_pretrained)
       filename: "*.Q8_0.gguf"                             # glob within the repo
       # model_path: models/foo.Q8_0.gguf                  # …or a local file instead
       n_ctx: 4096

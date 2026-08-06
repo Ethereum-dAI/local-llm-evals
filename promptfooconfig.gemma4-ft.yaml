@@ -30,7 +30,7 @@ providers:
   - id: file://pf/provider_functiongemma.py:call_api
     label: gemma4-e4b-ft
     config:
-      repo_id: gabrielfior/gemma-4-E4B-wallet-ft
+      repo_id: ef-dai-team/gemma-4-E4B-wallet-ft
       filename: "*Q4_K_M.gguf"
       dialect: gemma4
       system_role: system

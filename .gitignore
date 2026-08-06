@@ -24,3 +24,6 @@ __pycache__/
 .venv/
 .python-version
 
+# Deployable trees assembled by space/stage.py from the canonical sources.
+# Never commit these — the copies are the thing we are avoiding.
+space/build/

@@ -22,7 +22,7 @@ providers:
   - id: file://pf/provider_functiongemma.py:call_api
     label: functiongemma-ft
     config:
-      repo_id: gabrielfior/functiongemma-270m-wallet-ft
+      repo_id: ef-dai-team/functiongemma-270m-wallet-ft
       filename: "*.Q8_0.gguf"
       n_ctx: 4096
       temperature: 0.2

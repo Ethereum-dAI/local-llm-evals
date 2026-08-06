@@ -1,0 +1,10 @@
+# gradio / spaces / huggingface_hub are preinstalled and platform-managed — do
+# not pin them here.
+#
+# llama-cpp-python has no current prebuilt CPU wheel (the community index stops
+# at 0.2.64, which predates gemma3 support), so this builds from source on the
+# first Space build and is cached afterwards. 0.3.33 is the version the
+# evals-local-llm harness measured with; keep them in step so the Space and the
+# scoreboard agree.
+llama-cpp-python==0.3.33
+pydantic>=2
