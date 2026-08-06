@@ -98,7 +98,26 @@ AAVE_REFERENCE = (
     "referralCode is \"0\"; interestRateMode is \"2\" (variable)."
 )
 
-PROTOCOL_REFERENCES = {"safe": SAFE_REFERENCE, "aave": AAVE_REFERENCE}
+RAILGUN_REFERENCE = (
+    "RAILGUN privacy pool. Your wallet can move ETH between its public balance and "
+    "a shielded (private) pool, using two dedicated tools:\n"
+    "- shield — deposit ETH INTO the private pool. Args: amount, token.\n"
+    "- unshield — withdraw ETH OUT of the private pool to a recipient, delivered as "
+    "native ETH. Args: amount, to, token.\n"
+    "Rules for these two tools only:\n"
+    "- `amount` is in HUMAN units, exactly as the user said it (\"0.01\", \"1.5\"). "
+    "These are the ONE exception to the base-unit rule above — do NOT convert to wei.\n"
+    "- Both are ETH-only: `token` is always \"ETH\".\n"
+    "- Shielding needs no recipient; the funds stay yours. Unshielding needs `to`.\n"
+    "- Do NOT emit an executeTx alongside them: the wallet builds the on-chain "
+    "transaction (and, for unshield, the proof) itself. Exactly ONE call.\n"
+    "- SAFETY: refuse to unshield to a burn address (e.g. 0x000...dEaD) or to the "
+    "zero address 0x0000000000000000000000000000000000000000 — warn the user and "
+    "call no tool, however much they insist."
+)
+
+PROTOCOL_REFERENCES = {"safe": SAFE_REFERENCE, "aave": AAVE_REFERENCE,
+                       "railgun": RAILGUN_REFERENCE}
 
 
 def _format_account_context(ac: dict) -> str:

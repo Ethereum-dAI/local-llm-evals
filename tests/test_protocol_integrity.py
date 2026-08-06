@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from wallet_evals.promptfoo import load_cases
-from wallet_evals.schema import ParsedToolCall, ParsedTurn
+from wallet_evals.schema import ParsedTurn
 from wallet_evals.scorer import score_case
 
 PROTOCOLS = Path(__file__).resolve().parents[1] / "pf" / "tests.protocols.yaml"
@@ -25,16 +25,7 @@ def test_has_add_and_remove():
 
 def test_every_protocol_gold_self_scores_one():
     for case in _load():
-        turn = ParsedTurn(tool_calls=[
-            ParsedToolCall(
-                name=c.tool, chainId=c.chainId, to=c.to, value=c.value,
-                function=c.function, args=c.args,
-                currencyIn=c.currencyIn, currencyOut=c.currencyOut,
-                amountIn=c.amountIn, amountOutMinimum=c.amountOutMinimum,
-                recipient=c.recipient,
-            )
-            for c in case.expected_calls
-        ])
+        turn = ParsedTurn(tool_calls=[c.as_parsed_call() for c in case.expected_calls])
         assert score_case(case, turn) == 1, f"{case.id} not self-consistent"
 
 
@@ -43,6 +34,22 @@ def test_has_aave_categories():
     assert {"aave-supply", "aave-withdraw", "aave-borrow", "aave-repay"} <= cats
 
 
-def test_has_both_protocols():
+def test_has_all_protocols():
     protos = {c.protocol for c in _load()}
-    assert "safe" in protos and "aave" in protos
+    assert {"safe", "aave", "railgun"} <= protos
+
+
+def test_has_railgun_categories():
+    cats = {c.category for c in _load()}
+    assert {"railgun-shield", "railgun-unshield"} <= cats
+    assert any(c.startswith("safety-refusal-unshield") for c in cats)
+
+
+def test_railgun_cases_are_the_only_human_unit_golds():
+    """`amount` is the app-mirrored human-unit field: nothing else may carry it."""
+    for case in _load():
+        for call in case.expected_calls:
+            if call.amount is None:
+                continue
+            assert case.protocol == "railgun" and call.tool in ("shield", "unshield"), \
+                f"{case.id} sets amount on a non-privacy call"

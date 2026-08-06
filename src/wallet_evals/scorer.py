@@ -8,9 +8,10 @@ compare (the dataset is already on-chain canonical).
 from __future__ import annotations
 
 import re
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
-from wallet_evals.schema import Case, ExpectedCall, ParsedToolCall, ParsedTurn
+from wallet_evals.schema import PRIVACY_TOOLS, Case, ExpectedCall, ParsedToolCall, ParsedTurn
 
 # Lowercase any 0x-prefixed string so checksummed and lowercased address/bytes
 # forms compare equal. Non-0x values (decimal amounts, function signatures) are
@@ -49,6 +50,37 @@ def _swap_min_out(name: str, v: str | None) -> str | None:
     return "0" if (name == "swap" and v is None) else v
 
 
+def _privacy_token(name: str, v: Any) -> Any:
+    """shield/unshield are ETH-only, and the app's own SlashCommandParser fills in
+    `token: "ETH"` when it is absent — so omitting it is correct, not a miss.
+    Symbol case carries no meaning either ("eth" and "ETH" are one token, and the
+    case mutator lowercases the surface), so fold it: this erases a formatting
+    difference, not a capability gap. Scoped to shield/unshield — a stray `token`
+    on another tool is ignored, as it was before these fields existed."""
+    if name not in PRIVACY_TOOLS:
+        return None
+    return "eth" if v is None else (v.lower() if isinstance(v, str) else v)
+
+
+def _dec_or_raw(v: Any) -> Any:
+    """Fold a human-unit amount to its numeric form: "0.010" and "0.01" are the
+    same deposit and round-trip to identical wei. Unparseable values fall back to
+    an exact compare (a model emitting "all" must still match gold "all")."""
+    if v is None:
+        return None
+    try:
+        return f"dec:{Decimal(str(v)).normalize()}"
+    except (InvalidOperation, ValueError):
+        return v
+
+
+def _privacy_amount(name: str, v: Any) -> Any:
+    """`amount` scoped to shield/unshield, like the swap defaults above: it is not
+    in any other tool's schema, so a stray one is noise the app would drop on
+    decode — ignore it rather than newly failing an otherwise-correct executeTx."""
+    return _dec_or_raw(v) if name in PRIVACY_TOOLS else None
+
+
 def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
     if expected.tool != actual.name:
         return False
@@ -74,6 +106,13 @@ def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
         return False
     if _swap_min_out(expected.tool, expected.amountOutMinimum) != \
             _swap_min_out(actual.name, actual.amountOutMinimum):
+        return False
+    # RAILGUN privacy fields (None on both sides for every other tool).
+    if _privacy_amount(expected.tool, expected.amount) != \
+            _privacy_amount(actual.name, actual.amount):
+        return False
+    if _privacy_token(expected.tool, expected.token) != \
+            _privacy_token(actual.name, actual.token):
         return False
     return True
 
@@ -106,6 +145,11 @@ _CALL_FIELDS = (
     ("amountIn", lambda e: e.amountIn, lambda a: a.amountIn, lambda x: x),
     ("amountOutMinimum", lambda e: _swap_min_out(e.tool, e.amountOutMinimum),
      lambda a: _swap_min_out(a.name, a.amountOutMinimum), lambda x: x),
+    # Raw getters so the reason string shows what the model actually emitted
+    # ("expected '0.01' got '10000000000000000'"), not the folded compare form.
+    ("amount", lambda e: e.amount, lambda a: a.amount, _dec_or_raw),
+    ("token", lambda e: _privacy_token(e.tool, e.token),
+     lambda a: _privacy_token(a.name, a.token), lambda x: x),
 )
 
 

@@ -1,0 +1,89 @@
+# RAILGUN shield/unshield only — every model, hosted and on-device.
+#
+# The privacy tools are the one place base units do NOT apply (they mirror the
+# app's own ToolDefinitions: a human-unit `amount` + an ETH-only `token`), so this
+# slice measures something the rest of the suite never does: does the model follow
+# a per-protocol schema override instead of the global wei rule?
+#
+# Filter to the 66 railgun cases inside pf/tests.protocols.yaml — do NOT point
+# EVAL_DATASET at a hand-cut file, the generated set stays the single source:
+#   EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh \
+#       -c promptfooconfig.railgun.yaml --filter-metadata protocol=railgun \
+#       -j 1 -o railgun.out.json
+#
+# -j 1 whenever a local provider is in the run: the GGUF is served by a persistent
+# in-process llama-cpp worker that is not reentrant. Splitting hosted (-j 8) from
+# local (-j 1) and stitching with scripts/merge_evals.py is much faster in
+# wall-clock — see the two commands in the header of each half below.
+description: RAILGUN shield/unshield — all models
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # --- hosted anchors: scripts/eval.sh -c ... --filter-providers openrouter -j 8
+  # Frontier anchor — expected to be near-ceiling.
+  - id: openrouter:openai/gpt-5
+    config:
+      temperature: 0.1
+      max_tokens: 4096
+      tools: file://pf/tools.json
+  # Weak hosted anchor.
+  - id: openrouter:openai/gpt-4o-mini
+    config:
+      temperature: 0.2
+      max_tokens: 4096
+      tools: file://pf/tools.json
+
+  # --- on-device: DISABLE_OPENROUTER=true scripts/eval.sh -c ... -j 1
+  # The EXACT GGUF local-wallet-mac ships (SHA-pinned Q4_K_M at the revision that
+  # still carries the byte-identical file). This is the number that matters for the
+  # shipped wallet.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-base
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+  # Our fine-tune, same quant. NOTE: its training set predates the privacy tools —
+  # it has never seen a shield/unshield target, so this measures generalization
+  # from the tool schema alone, not learned behaviour.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft
+    config:
+      repo_id: gabrielfior/gemma-4-E4B-wallet-ft
+      filename: "*Q4_K_M.gguf"
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+  # 270M base.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: functiongemma-270m-it
+    config:
+      repo_id: unsloth/functiongemma-270m-it-GGUF
+      filename: "*Q8_0.gguf"
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+  # 270M fine-tune (same caveat as gemma4-e4b-ft: no privacy examples in training).
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: functiongemma-270m-ft
+    config:
+      model_path: models/functiongemma-270m-ft-modal.Q8_0.gguf
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.protocols.yaml') }}"

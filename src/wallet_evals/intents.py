@@ -72,6 +72,31 @@ def build_swap_call(amount: str, from_sym: str, to_sym: str) -> dict:
             "amountOutMinimum": "0", "recipient": "<wallet>"}
 
 
+def build_shield_call(amount: str, token_sym: str = "ETH") -> dict:
+    """Gold for a RAILGUN shield (deposit into the private pool).
+
+    Deliberately NOT base units: `shield`/`unshield` mirror the macOS app's own
+    ToolDefinitions, which take a human decimal `amount` and an ETH-only `token`.
+    """
+    if token_sym.upper() != "ETH":
+        raise ValueError(f"RAILGUN shield is ETH-only, got {token_sym!r}")
+    return {"tool": "shield", "chainId": CHAIN_ID, "amount": str(amount), "token": "ETH"}
+
+
+def build_unshield_call(amount: str, recipient_addr: str, token_sym: str = "ETH") -> dict:
+    """Gold for a RAILGUN unshield (withdraw to `recipient_addr` as native ETH).
+
+    The recipient must already be a 0x address: the app does not yet resolve ENS
+    or contact names for unshield, so gold never carries an unresolved name.
+    """
+    if token_sym.upper() != "ETH":
+        raise ValueError(f"RAILGUN unshield is ETH-only, got {token_sym!r}")
+    if not (recipient_addr.startswith("0x") and len(recipient_addr) == 42):
+        raise ValueError(f"unshield recipient must be a 0x address, got {recipient_addr!r}")
+    return {"tool": "unshield", "chainId": CHAIN_ID, "amount": str(amount),
+            "token": "ETH", "to": recipient_addr}
+
+
 def format_expected_summary(calls: list[dict]) -> str:
     """A human-readable one-line-per-call summary of expected_calls.
 
@@ -89,6 +114,10 @@ def format_expected_summary(calls: list[dict]) -> str:
                 f"swap {c.get('currencyIn')} -> {c.get('currencyOut')} "
                 f"amountIn={c.get('amountIn')} minOut={c.get('amountOutMinimum')} "
                 f"recipient={c.get('recipient')}")
+            continue
+        if c.get("tool") in ("shield", "unshield"):
+            line = f"{c.get('tool')} {c.get('amount')} {c.get('token')}"
+            lines.append(line if c.get("to") is None else f"{line} to {c.get('to')}")
             continue
         parts = [f"{c.get('tool')} to {c.get('to')}"]
         if c.get("value") and c.get("value") != "0":

@@ -1,0 +1,10 @@
+[
+  {"op": "shield", "chainId": "1", "amount": "0.01", "token": "ETH"},
+  {"op": "shield", "chainId": "1", "amount": "0.25", "token": "ETH"},
+  {"op": "shield", "chainId": "1", "amount": "1.5", "token": "ETH"},
+  {"op": "shield", "chainId": "1", "amount": "2", "token": "ETH"},
+  {"op": "unshield", "chainId": "1", "amount": "0.01", "token": "ETH", "to": "0x4e1b2c8a37f5d9e0c6b3a84f21d7e5093a6c8b4d"},
+  {"op": "unshield", "chainId": "1", "amount": "0.005", "token": "ETH", "to": "0xb7f3d2a915c48e60d1af7b3925e6c04d8f1a2b93"},
+  {"op": "unshield", "chainId": "1", "amount": "0.75", "token": "ETH", "to": "0x9c05e4a1d38b7f26034ac95e1b8d7f402e6a3c51"},
+  {"op": "unshield", "chainId": "1", "amount": "3", "token": "ETH", "to": "0x2af86d05b91c374e0d8f5a2b6e19c47035da8f6b"}
+]

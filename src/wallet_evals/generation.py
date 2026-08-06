@@ -56,6 +56,11 @@ def mutate_punctuation(text: str, rng: random.Random) -> str:
 # clarification — that penalizes caution rather than testing parsing capability.
 _PROTECTED_WORDS = {"ETH", "WETH", "USDC", "DAI", "USDT", "WBTC"}
 
+# Same rationale, one level up: for a RAILGUN case the privacy verb is the ONLY
+# thing that distinguishes shield from unshield from a plain transfer, so a typo
+# there doesn't test parsing — it makes the request genuinely unanswerable.
+_PROTECTED_WORDS |= {"SHIELD", "SHIELDED", "UNSHIELD", "RAILGUN", "PRIVATE", "PRIVACY"}
+
 
 def mutate_typos(text: str, rng: random.Random) -> str:
     """Swap two adjacent letters in one word — never digits/hex/token symbols."""

@@ -16,7 +16,7 @@ Design notes live under `docs/` (gitignored).
 | `pf/tests.yaml` | curated recognition-derived test cases (promptfoo-native; `vars.user_message` + `metadata.expected_calls`) |
 | `pf/tests.generated.yaml` | **generated** harder cases (noise, param diversity, ablation negatives, multi-turn) |
 | `pf/prompt.py` | chat builder: renders `messages` (multi-turn) or `user_message` |
-| `pf/tools.json` | the `executeTx` / `readTx` / `swap` tool schemas |
+| `pf/tools.json` | the `executeTx` / `readTx` / `swap` / `shield` / `unshield` tool schemas |
 | `pf/assert.py` | python assertion — reuses `score_case` against the gold in each test's metadata |
 | `promptfooconfig.yaml` | providers (cheap OpenRouter models), prompt, tools, assertion, tests |
 | `src/wallet_evals/` | reused core: schema, tool-call parsing, binary scorer, tests loader |
@@ -26,8 +26,9 @@ Design notes live under `docs/` (gitignored).
 | `datasets/protocols/*.fixtures.json` | frozen real protocol txs (decoded) for protocol evals |
 | `src/wallet_evals/protocols/` | protocol modules (Safe owner-management; Aave later) → `executeTx` gold |
 | `src/wallet_evals/protocols/aave.py` | Aave v3 module (supply/withdraw/borrow/repay) → `executeTx` gold |
+| `src/wallet_evals/protocols/railgun.py` | RAILGUN privacy module (shield/unshield) → dedicated intent-tool gold |
 | `scripts/generate_protocol_cases.py` | builds `pf/tests.protocols.yaml` from protocol fixtures |
-| `pf/tests.protocols.yaml` | generated protocol-transaction eval cases (Safe add/remove signer) |
+| `pf/tests.protocols.yaml` | generated protocol-transaction eval cases (Safe, Aave, RAILGUN) |
 
 ## Setup
 
@@ -84,7 +85,7 @@ scripted multi-turn cases. Gold is **computed** from each seed intent, so every
 generated case self-scores to 1 (`tests/test_generated_integrity.py`). Output is
 deterministic for a fixed seed.
 
-## Protocol-transaction evals (Safe + Aave)
+## Protocol-transaction evals (Safe + Aave + RAILGUN)
 
 ```bash
 uv run python scripts/generate_protocol_cases.py
@@ -96,6 +97,17 @@ transactions frozen in `datasets/protocols/*.fixtures.json`:
 - **Safe** owner management — `addOwnerWithThreshold` / `removeOwner` (the model
   is given the Safe's owners list so `prevOwner` is derivable).
 - **Aave v3** lending — `supply` / `withdraw` / `borrow` / `repay` to the Pool.
+
+**RAILGUN** (`shield` / `unshield`) is the one exception to the generic-`executeTx`
+rule, because the app's Kohaku-backed integration is the exception too: shield's
+real ABI takes nested note-ciphertext tuples and unshield is not a transaction at
+all (a Groth16 proof relayed by the wallet's own broadcaster). So these two score
+the same high-level intent call `local-wallet-mac` itself consumes — `shield` and
+`unshield` in `pf/tools.json`, mirroring `ToolDefinitions.swift`: a **human-unit**
+`amount` and an ETH-only `token`, NOT base units. Their gated reference block says
+so explicitly; every other tool keeps the base-unit rule. Fixtures here are
+hand-authored (`datasets/protocols/railgun.fixtures.json`) rather than fetched —
+the integration is Sepolia-only alpha with no single decodable mainnet tx.
 
 Each case carries `vars.protocol`, which gates a per-protocol reference block
 (addresses, ABIs, defaults) in the system prompt; non-protocol cases are
