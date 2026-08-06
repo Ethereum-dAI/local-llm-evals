@@ -24,3 +24,6 @@ __pycache__/
 .venv/
 .python-version
 
+
+# Copies of the regenerable fine-tuning sets, staged for the HF dataset repo
+dataset_repo/data/*.jsonl

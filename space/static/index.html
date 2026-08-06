@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exact or nothing — wallet tool-calling eval</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23126E78'/%3E%3Crect x='3' y='3' width='2' height='10' fill='%23fff'/%3E%3Crect x='7' y='3' width='2' height='10' fill='%23fff' opacity='.35'/%3E%3Crect x='11' y='3' width='2' height='10' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1F2F7; --panel:#FFFFFF; --ink:#1E2133; --muted:#666C8C;
+  --rule:#CDD1E0; --ghost:#DFE2EC;
+  --pass:#126E78; --fail:#B0472F;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"Public Sans",system-ui,-apple-system,sans-serif;
+  --gut:clamp(1.25rem,4vw,3rem);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14161F; --panel:#1C1F2B; --ink:#E7E9F2; --muted:#959BB9;
+    --rule:#333849; --ghost:#2A2F3E;
+    --pass:#3FC7B4; --fail:#E0714F;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:0 var(--gut)}
+a{color:inherit; text-decoration:none; border-bottom:1px solid var(--rule)}
+a:hover{border-bottom-color:currentColor}
+:focus-visible{outline:2px solid var(--pass); outline-offset:2px}
+
+/* ---- masthead ------------------------------------------------------- */
+.masthead{
+  display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; align-items:baseline;
+  padding:1.5rem 0 0; font-family:var(--mono); font-size:.7rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+}
+.masthead .sep{color:var(--rule)}
+.tag-private{
+  border:1px solid var(--rule); border-radius:2px; padding:.15rem .45rem;
+  letter-spacing:.1em;
+}
+
+/* ---- hero ----------------------------------------------------------- */
+.hero{padding:clamp(2.5rem,7vw,5rem) 0 2rem}
+.hero h1{
+  font-family:var(--mono); font-weight:700;
+  font-size:clamp(2.4rem,9vw,5.5rem); line-height:.92; letter-spacing:-.045em;
+  margin:0 0 1.25rem;
+}
+.hero h1 .dim{color:var(--rule)}
+.lede{
+  max-width:46ch; font-size:clamp(1rem,1.6vw,1.15rem); color:var(--muted);
+  margin:0 0 .75rem;
+}
+.lede strong{color:var(--ink); font-weight:500}
+.hero-grid{
+  display:grid; gap:clamp(1.5rem,4vw,4rem);
+  grid-template-columns:minmax(0,1fr);
+}
+@media (min-width:900px){
+  .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,25rem)}
+}
+.spec{
+  margin:0; padding-top:.35rem; border-top:1px solid var(--rule);
+  font-family:var(--mono); font-size:.72rem; line-height:1.75;
+  display:grid; grid-template-columns:4.5rem minmax(0,1fr); gap:.1rem .9rem;
+}
+.spec dt{
+  letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  font-size:.62rem; padding-top:.28rem;
+}
+.spec dd{margin:0; overflow-wrap:anywhere}
+.spec .k{font-weight:700; color:var(--pass)}
+.spec .kv{display:grid; grid-template-columns:1.2rem minmax(0,1fr)}
+.swatch{
+  display:inline-block; width:.45rem; height:.9rem; vertical-align:-.15rem;
+}
+.swatch.on{background:var(--pass)}
+.swatch.off{background:var(--ghost)}
+
+/* ---- tick strips ---------------------------------------------------- */
+.strips{margin:clamp(2rem,5vw,3.5rem) 0 0}
+.strip{
+  display:grid; grid-template-columns:minmax(0,1fr); gap:.3rem;
+  padding:.85rem 0; border-top:1px solid var(--rule);
+}
+.strip:last-of-type{border-bottom:1px solid var(--rule)}
+.strip-head{
+  display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap;
+}
+.strip-name{font-weight:700; font-size:.95rem; letter-spacing:-.01em}
+.strip-kind{
+  font-family:var(--mono); font-size:.6rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted);
+  border:1px solid var(--rule); border-radius:2px; padding:.05rem .35rem;
+}
+.strip-score{
+  margin-left:auto; font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:.95rem; font-weight:500;
+}
+.strip-score .frac{color:var(--muted); font-size:.75rem; margin-left:.5rem}
+.strip svg{display:block; width:100%; height:auto; overflow:visible}
+.strip svg rect.hit{fill:transparent; cursor:pointer}
+.strip svg rect.tk{pointer-events:none}
+.tk.on{fill:var(--pass)}
+.tk.off{fill:var(--ghost)}
+.strip svg .hit:hover + .tk, .strip svg .hit:focus-visible + .tk{fill:var(--ink)}
+.strip.is-subject .strip-name{color:var(--fail)}
+
+.axis{
+  display:flex; margin-top:.6rem; font-family:var(--mono); font-size:.62rem;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+}
+.axis span{
+  flex:var(--w) 1 0;
+  border-left:1px solid var(--rule); padding:.35rem 0 0 .4rem;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.axis span:first-child{border-left:0; padding-left:0}
+/* Too narrow to keep the bands proportional and legible — fall back to a
+   wrapped legend rather than clipping the labels. */
+@media (max-width:760px){
+  .axis{flex-wrap:wrap; gap:0 1rem}
+  .axis span{flex:0 0 auto; border-left:0; padding-left:0}
+}
+
+.readout{
+  margin-top:1.5rem; font-family:var(--mono); font-size:.78rem;
+  color:var(--muted); min-height:1.4em;
+}
+.readout b{color:var(--ink); font-weight:500}
+
+/* ---- generic section ------------------------------------------------ */
+.section{padding:clamp(3rem,7vw,5.5rem) 0 0}
+.section > h2{
+  font-size:clamp(1.35rem,3vw,1.9rem); letter-spacing:-.02em; margin:0 0 .4rem;
+}
+.eyebrow{
+  font-family:var(--mono); font-size:.66rem; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 .7rem;
+}
+.section > p{max-width:64ch; color:var(--muted); margin:0 0 1rem}
+.section > p strong{color:var(--ink); font-weight:500}
+
+/* ---- callout -------------------------------------------------------- */
+.callout{
+  border-left:3px solid var(--fail); background:var(--panel);
+  padding:1.1rem 1.3rem; margin:1.5rem 0; max-width:72ch;
+}
+.callout p{margin:0 0 .6rem}
+.callout p:last-child{margin-bottom:0}
+
+/* ---- tables --------------------------------------------------------- */
+.tablewrap{overflow-x:auto; margin:1.5rem 0 0; border:1px solid var(--rule); background:var(--panel)}
+table{border-collapse:collapse; width:100%; min-width:640px; font-size:.85rem}
+th,td{padding:.55rem .8rem; text-align:left; border-bottom:1px solid var(--rule)}
+thead th{
+  font-family:var(--mono); font-size:.62rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  position:sticky; top:0; background:var(--panel);
+}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+td.cat{font-family:var(--mono); font-size:.78rem}
+.zero{color:var(--fail)}
+.full{color:var(--pass)}
+
+/* ---- case browser --------------------------------------------------- */
+.controls{
+  display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin:1.5rem 0 1rem;
+}
+select,button{
+  font:inherit; font-size:.85rem; color:var(--ink); background:var(--panel);
+  border:1px solid var(--rule); border-radius:2px; padding:.4rem .6rem;
+}
+button{cursor:pointer}
+button:hover{border-color:var(--ink)}
+.counter{font-family:var(--mono); font-size:.78rem; color:var(--muted); margin-left:auto}
+
+.case{border:1px solid var(--rule); background:var(--panel)}
+.case-head{padding:1.1rem 1.3rem; border-bottom:1px solid var(--rule)}
+.case-meta{
+  font-family:var(--mono); font-size:.65rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:.5rem;
+}
+.turns{margin:0; display:grid; gap:.35rem}
+.turn{display:grid; grid-template-columns:4.5rem 1fr; gap:.7rem; align-items:baseline}
+.turn dt{
+  font-family:var(--mono); font-size:.62rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted);
+}
+.turn dd{margin:0; font-size:.95rem}
+.turn.assistant dd{color:var(--muted); font-style:italic}
+
+.gold{padding:1.1rem 1.3rem; border-bottom:1px solid var(--rule)}
+.label{
+  font-family:var(--mono); font-size:.62rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:.45rem;
+}
+pre{
+  font-family:var(--mono); font-size:.78rem; line-height:1.5; margin:0;
+  white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere;
+}
+.rows{display:grid}
+.row{
+  display:grid; grid-template-columns:minmax(0,15rem) minmax(0,1fr);
+  gap:0 1.3rem; padding:.9rem 1.3rem; border-bottom:1px solid var(--rule);
+}
+.row:last-child{border-bottom:0}
+.row-model{display:flex; gap:.5rem; align-items:baseline}
+.verdict{
+  font-family:var(--mono); font-size:.72rem; font-weight:700; letter-spacing:.06em;
+  white-space:nowrap;
+}
+.verdict.pass{color:var(--pass)}
+.verdict.fail{color:var(--fail)}
+.row-name{font-size:.85rem; font-weight:500; min-width:0; overflow-wrap:anywhere}
+.row-body{min-width:0}
+.reason{
+  font-family:var(--mono); font-size:.7rem; color:var(--muted);
+  margin-top:.45rem; overflow-wrap:anywhere;
+}
+@media (max-width:720px){
+  .row{grid-template-columns:minmax(0,1fr); gap:.5rem}
+  .turn{grid-template-columns:minmax(0,1fr); gap:.1rem}
+}
+
+/* ---- repro ---------------------------------------------------------- */
+.grid2{display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr)); margin-top:1.5rem}
+.card{border:1px solid var(--rule); background:var(--panel); padding:1.2rem 1.3rem}
+.card h3{margin:0 0 .5rem; font-size:1rem}
+.card p{margin:0 0 .7rem; color:var(--muted); font-size:.9rem}
+.card pre{
+  background:var(--paper); border:1px solid var(--rule); padding:.6rem .7rem;
+  overflow-x:auto; font-size:.73rem;
+}
+.card ul{margin:0; padding-left:1.1rem; font-size:.9rem; color:var(--muted)}
+.card li{margin-bottom:.3rem}
+
+footer{
+  margin-top:clamp(3rem,7vw,5rem); padding:2rem 0 3rem;
+  border-top:1px solid var(--rule); font-family:var(--mono); font-size:.7rem;
+  color:var(--muted); display:flex; flex-wrap:wrap; gap:.5rem 1.5rem;
+}
+
+/* ---- load-in -------------------------------------------------------- */
+@media (prefers-reduced-motion:no-preference){
+  .tk{opacity:0; animation:ink .38s ease-out forwards}
+}
+@keyframes ink{to{opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <span>ef-dai-team</span><span class="sep">/</span>
+    <span>evals-local-llm</span><span class="sep">/</span>
+    <span>wallet tool calling</span>
+    <span class="tag-private" style="margin-left:auto">Internal</span>
+  </header>
+
+  <section class="hero">
+    <h1>Exact<span class="dim">&nbsp;or&nbsp;</span>nothing<span class="dim">.</span></h1>
+    <div class="hero-grid">
+      <div>
+        <p class="lede">
+          307 wallet requests. Each one scores <strong>1</strong> only if the model emits the
+          byte-exact tool call the wallet would execute — right tool, right address,
+          right amount in base units. Anything else scores <strong>0</strong>.
+        </p>
+        <p class="lede">
+          One mark per case below, in dataset order. Filled means the call was exact.
+        </p>
+      </div>
+      <dl class="spec">
+        <dt>Scoring</dt>
+        <dd>
+          <div class="kv"><span class="k">1</span><span>every field of every call equals gold</span></div>
+          <div class="kv"><span class="k">0</span><span>anything else</span></div>
+        </dd>
+        <dt>Marks</dt>
+        <dd><span class="swatch on"></span> exact &nbsp; <span class="swatch off"></span> wrong</dd>
+        <dt>Tools</dt>
+        <dd>executeTx · readTx · swap · shield · unshield</dd>
+        <dt>Set</dt>
+        <dd>pf/tests.generated.yaml</dd>
+      </dl>
+    </div>
+
+    <div class="strips" id="strips"></div>
+    <div class="axis" id="axis"></div>
+    <p class="readout" id="readout">Hover a mark to read the case. Click to open it below.</p>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">The finding</p>
+    <h2>The 270M fine-tune only passes when the right answer is silence</h2>
+    <p>
+      Read the top strip again. Every mark in it sits in the <strong>ablation</strong> and
+      <strong>refusal</strong> bands on the right — the cases where the correct behaviour is to
+      ask a clarifying question or refuse, and emit no call at all. Across
+      transfers, swaps and multi-turn, it is unbroken empty space.
+    </p>
+    <div class="callout">
+      <p>
+        <strong>8.8% is not a score, it's an artefact.</strong> FunctionGemma-270M
+        wallet-ft scores 0/101 on transfers, 0/96 on swaps and 0/75 on multi-turn.
+        Its 27 passing cases are all cases where staying quiet is correct.
+      </p>
+      <p>
+        The untuned base model scores 8.1% the same way. Fine-tuning moved the core
+        task by nothing.
+      </p>
+      <p>
+        The same dataset and the same LoRA recipe take <strong>Gemma-4 E4B from 9.8% to
+        80.1%</strong>. The constraint is model capacity, not training data.
+      </p>
+    </div>
+    <div class="tablewrap"><table id="cattable"></table></div>
+  </section>
+
+  <section class="section" id="browser">
+    <p class="eyebrow">Case browser</p>
+    <h2>What each model actually emitted</h2>
+    <p>
+      Every output below was recorded during a real promptfoo run and is reproduced
+      verbatim, alongside the verdict from the same deterministic scorer that
+      produced the strips. Nothing here is regenerated at page load.
+    </p>
+
+    <div class="controls">
+      <select id="filter-band" aria-label="Filter by band"></select>
+      <select id="filter-model" aria-label="Filter by model outcome"></select>
+      <button id="prev" type="button">&larr; Previous</button>
+      <button id="next" type="button">Next &rarr;</button>
+      <span class="counter" id="counter"></span>
+    </div>
+
+    <article class="case" id="case"></article>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Reproduce</p>
+    <h2>Everything needed to train this from scratch</h2>
+    <div class="grid2" id="repro"></div>
+  </section>
+
+  <footer>
+    <span id="foot-dataset"></span>
+    <span id="foot-cases"></span>
+    <span>Scoring: deterministic, binary, exact-match</span>
+  </footer>
+
+</div>
+
+<script>
+const DATASET_REPO = "ef-dai-team/wallet-tool-calling-ft";
+const MODEL_270M = "ef-dai-team/functiongemma-270m-wallet-ft";
+const MODEL_E4B = "ef-dai-team/gemma-4-E4B-wallet-ft";
+const SUBJECT = "fg270m-ft";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const pct = (p, t) => (100 * p / t).toFixed(1);
+
+let DATA = null;
+let view = [];      // case indices currently in the filtered view
+let cursor = 0;
+
+/* ---- tick strips ----------------------------------------------------- */
+
+const TICK_W = 2, TICK_GAP = 0.9, TICK_H = 20;
+
+function strips() {
+  const n = DATA.case_count;
+  const width = n * TICK_W;
+  const host = $("strips");
+  host.innerHTML = DATA.models.map((m, row) => {
+    // The hit rect is emitted before its tick so the CSS adjacent-sibling
+    // hover selector can highlight the mark under the cursor.
+    const pairs = m.marks.map((v, i) => {
+      const x = (i * TICK_W).toFixed(2);
+      const delay = (row * 60 + i * 1.1).toFixed(0);
+      return `<rect class="hit" data-i="${i}" x="${x}" y="0" width="${TICK_W}" height="${TICK_H}"></rect>`
+           + `<rect class="tk ${v ? "on" : "off"}" x="${x}" y="0" width="${TICK_W - TICK_GAP}"`
+           + ` height="${TICK_H}" style="animation-delay:${delay}ms"></rect>`;
+    }).join("");
+    return `<div class="strip${m.key === SUBJECT ? " is-subject" : ""}" data-model="${m.key}">
+      <div class="strip-head">
+        <span class="strip-name">${esc(m.display)}</span>
+        <span class="strip-kind">${esc(m.kind)}</span>
+        <span class="strip-score">${pct(m.passed, m.total)}%<span class="frac">${m.passed}/${m.total}</span></span>
+      </div>
+      <svg viewBox="0 0 ${width} ${TICK_H}" role="img"
+           aria-label="${esc(m.display)}: ${m.passed} of ${m.total} cases exact">${pairs}</svg>
+    </div>`;
+  }).join("");
+
+  host.addEventListener("mousemove", onStripHover);
+  host.addEventListener("mouseleave", () => { $("readout").innerHTML = READOUT_IDLE; });
+  host.addEventListener("click", onStripClick);
+}
+
+const READOUT_IDLE = "Hover a mark to read the case. Click to open it below.";
+
+function stripTarget(ev) {
+  const hit = ev.target.closest("rect.hit");
+  if (!hit) return null;
+  const strip = ev.target.closest(".strip");
+  return { i: +hit.dataset.i, model: strip?.dataset.model };
+}
+
+function onStripHover(ev) {
+  const t = stripTarget(ev);
+  if (!t) return;
+  const c = DATA.cases[t.i];
+  const r = c.results[t.model];
+  const verdict = r ? (r.pass ? "exact" : "wrong") : "no data";
+  $("readout").innerHTML =
+    `<b>${esc(c.id)}</b> · ${esc(c.category)} · ${verdict} — “${esc(c.prompt.slice(0, 90))}”`;
+}
+
+function onStripClick(ev) {
+  const t = stripTarget(ev);
+  if (!t) return;
+  resetFilters();
+  cursor = view.indexOf(t.i);
+  if (cursor < 0) cursor = 0;
+  renderCase();
+  $("browser").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function axis() {
+  $("axis").innerHTML = (DATA.axis_bands || DATA.bands).map((b) =>
+    `<span style="--w:${b.count}">${esc(b.label)} · ${b.count}</span>`).join("");
+}
+
+/* ---- per-category table ---------------------------------------------- */
+
+function catTable() {
+  const cols = ["fg270m", "fg270m-ft", "e4b", "e4b-ft", "gpt5"];
+  const byKey = Object.fromEntries(DATA.models.map((m) => [m.key, m]));
+  const head = `<thead><tr><th>Category</th><th>Cases</th>`
+    + cols.map((k) => `<th style="text-align:right">${esc(byKey[k].display)}</th>`).join("")
+    + `</tr></thead>`;
+  const rows = DATA.category_order.map((cat) => {
+    const total = byKey[cols[0]].per_category[cat]?.total ?? 0;
+    if (!total) return "";
+    const cells = cols.map((k) => {
+      const c = byKey[k].per_category[cat];
+      if (!c) return `<td class="num">–</td>`;
+      const cls = c.passed === 0 ? "zero" : (c.passed === c.total ? "full" : "");
+      return `<td class="num ${cls}">${pct(c.passed, c.total)}%<span style="color:var(--muted)"> ${c.passed}/${c.total}</span></td>`;
+    }).join("");
+    return `<tr><td class="cat">${esc(cat)}</td><td class="num">${total}</td>${cells}</tr>`;
+  }).join("");
+  $("cattable").innerHTML = head + `<tbody>${rows}</tbody>`;
+}
+
+/* ---- case browser ----------------------------------------------------- */
+
+function bandOf(category) {
+  if (category.startsWith("generated-transfer")) return "transfer";
+  if (category.startsWith("generated-swap")) return "swap";
+  if (category.startsWith("multiturn")) return "multi-turn";
+  if (category.startsWith("ablation")) return "ablation";
+  return "refusal";
+}
+
+function buildFilters() {
+  $("filter-band").innerHTML = `<option value="">All bands (${DATA.case_count})</option>`
+    + DATA.bands.map((b) => `<option value="${esc(b.label)}">${esc(b.label)} · ${b.count}</option>`).join("");
+  $("filter-model").innerHTML = `<option value="">Any outcome</option>`
+    + DATA.models.map((m) => `<option value="fail:${m.key}">${esc(m.display)} got it wrong</option>`).join("")
+    + DATA.models.map((m) => `<option value="pass:${m.key}">${esc(m.display)} got it exact</option>`).join("");
+  $("filter-band").addEventListener("change", applyFilters);
+  $("filter-model").addEventListener("change", applyFilters);
+}
+
+function resetFilters() {
+  $("filter-band").value = "";
+  $("filter-model").value = "";
+  applyFilters(true);
+}
+
+function applyFilters(skipRender) {
+  const band = $("filter-band").value;
+  const outcome = $("filter-model").value;
+  view = DATA.cases.map((c, i) => i).filter((i) => {
+    const c = DATA.cases[i];
+    if (band && bandOf(c.category) !== band) return false;
+    if (outcome) {
+      const [want, key] = outcome.split(":");
+      const r = c.results[key];
+      if (!r) return false;
+      if (want === "pass" && !r.pass) return false;
+      if (want === "fail" && r.pass) return false;
+    }
+    return true;
+  });
+  cursor = 0;
+  if (skipRender !== true) renderCase();
+}
+
+function fmtGold(gold) {
+  if (!gold || !gold.length) return "no tool call expected — the model must ask or refuse";
+  return JSON.stringify(gold, null, 2);
+}
+
+function fmtOutput(text) {
+  const t = (text || "").trim();
+  if (!t) return "(empty)";
+  if (t.startsWith("[") || t.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(t);
+      const expanded = Array.isArray(parsed) ? parsed.map((c) => {
+        let args = c.arguments;
+        if (typeof args === "string") { try { args = JSON.parse(args); } catch (e) { void e; } }
+        return { name: c.name, arguments: args };
+      }) : parsed;
+      return JSON.stringify(expanded, null, 2);
+    } catch (e) { void e; }
+  }
+  return t;
+}
+
+function renderCase() {
+  const host = $("case");
+  if (!view.length) {
+    host.innerHTML = `<div class="case-head"><p style="margin:0">No case matches that combination. Loosen a filter.</p></div>`;
+    $("counter").textContent = "0 cases";
+    return;
+  }
+  cursor = (cursor + view.length) % view.length;
+  const c = DATA.cases[view[cursor]];
+
+  const turns = c.turns && c.turns.length
+    ? c.turns.map((t) => `<div class="turn ${t.role}"><dt>${esc(t.role)}</dt><dd>${esc(t.content)}</dd></div>`).join("")
+    : `<div class="turn user"><dt>user</dt><dd>${esc(c.prompt)}</dd></div>`;
+
+  const rows = DATA.models.map((m) => {
+    const r = c.results[m.key];
+    if (!r) return "";
+    return `<div class="row">
+      <div class="row-model">
+        <span class="verdict ${r.pass ? "pass" : "fail"}">${r.pass ? "● EXACT" : "○ WRONG"}</span>
+        <span class="row-name">${esc(m.display)}</span>
+      </div>
+      <div class="row-body">
+        <pre>${esc(fmtOutput(r.output))}</pre>
+        ${r.pass ? "" : `<p class="reason">${esc(r.reason)}</p>`}
+      </div>
+    </div>`;
+  }).join("");
+
+  host.innerHTML = `
+    <div class="case-head">
+      <p class="case-meta">${esc(c.id)} · ${esc(c.category)}${c.difficulty ? " · " + esc(c.difficulty) : ""}</p>
+      <dl class="turns">${turns}</dl>
+    </div>
+    <div class="gold">
+      <p class="label">Gold — what the wallet needs</p>
+      <pre>${esc(fmtGold(c.gold))}</pre>
+    </div>
+    <div class="rows">${rows}</div>`;
+
+  $("counter").textContent = `${cursor + 1} of ${view.length}`;
+}
+
+/* ---- reproduce -------------------------------------------------------- */
+
+function repro() {
+  $("repro").innerHTML = `
+    <div class="card">
+      <h3>1 · Get the data</h3>
+      <p>1739 SFT examples per target model, disjoint from these 307 cases by construction.</p>
+      <pre>hf download ${DATASET_REPO} \\
+  --repo-type dataset --local-dir ./wallet-ft</pre>
+      <p><a href="https://huggingface.co/datasets/${DATASET_REPO}">Open the dataset &rarr;</a></p>
+    </div>
+    <div class="card">
+      <h3>2 · Or regenerate it</h3>
+      <p>Both JSONLs are byte-stable outputs of seeded scripts — verified to reproduce bit for bit.</p>
+      <pre>uv run python scripts/generate_finetune_data.py
+uv run python scripts/generate_gemma4_finetune_data.py</pre>
+    </div>
+    <div class="card">
+      <h3>3 · Train and export</h3>
+      <p>LoRA r=16, α=16 via SFTTrainer, then merge and quantise to GGUF. Unsloth needs CUDA, so these run on Modal.</p>
+      <pre>modal run scripts/modal_finetune.py
+modal run scripts/modal_export.py</pre>
+    </div>
+    <div class="card">
+      <h3>4 · Score it</h3>
+      <p>Point the harness's local GGUF provider at your export. The eval set never touches training, so the number is comparable to the strips above.</p>
+      <pre>EVAL_DATASET=pf/tests.generated.yaml scripts/eval.sh</pre>
+    </div>
+    <div class="card">
+      <h3>Models</h3>
+      <ul>
+        <li><a href="https://huggingface.co/${MODEL_270M}">${MODEL_270M}</a> — the 270M fine-tune, Q8_0 GGUF + LoRA adapter</li>
+        <li><a href="https://huggingface.co/${MODEL_E4B}">${MODEL_E4B}</a> — the E4B fine-tune, Q4_K_M GGUF + LoRA adapter</li>
+        <li><a href="https://huggingface.co/unsloth/functiongemma-270m-it">unsloth/functiongemma-270m-it</a> — the base</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Why there's no live demo here</h3>
+      <p>Hosting a Gradio Space needs a Team plan on this org. The Gradio app is written and sits in <code>space/</code> in the harness repo — it runs locally with <code>python app.py</code>, and deploys the moment the org is upgraded.</p>
+    </div>`;
+}
+
+/* ---- boot -------------------------------------------------------------- */
+
+fetch("data.json").then((r) => r.json()).then((d) => {
+  DATA = d;
+  strips();
+  axis();
+  catTable();
+  buildFilters();
+  applyFilters();
+  repro();
+  $("foot-dataset").textContent = d.dataset;
+  $("foot-cases").textContent = `${d.case_count} cases × ${d.models.length} models`;
+  $("prev").addEventListener("click", () => { cursor--; renderCase(); });
+  $("next").addEventListener("click", () => { cursor++; renderCase(); });
+}).catch((e) => {
+  $("readout").textContent = "Could not load data.json — " + e.message;
+});
+</script>
+</body>
+</html>

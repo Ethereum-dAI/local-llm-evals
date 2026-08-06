@@ -140,6 +140,35 @@ shipping a false-positive heuristic.
 - `vars.expected_summary` is a **read-only viewer column** — never emitted to the
   model, never scored.
 
+## Published artifacts (Hugging Face, `ef-dai-team`)
+
+Everything lives under the org now — the models were **moved** out of
+`gabrielfior/` (old ids still redirect, but don't write new ones).
+
+| Repo | Vis. | Notes |
+| --- | --- | --- |
+| [`functiongemma-270m-wallet-ft`](https://huggingface.co/ef-dai-team/functiongemma-270m-wallet-ft) | public | `license: gemma` (inherited). The failed fine-tune. |
+| [`gemma-4-E4B-wallet-ft`](https://huggingface.co/ef-dai-team/gemma-4-E4B-wallet-ft) | public | `license: apache-2.0`. The 80.1% one. |
+| [`wallet-tool-calling-ft`](https://huggingface.co/datasets/ef-dai-team/wallet-tool-calling-ft) | private | Both training JSONLs + the Modal jobs. Apache-2.0. |
+| [`wallet-tool-calling-eval`](https://huggingface.co/spaces/ef-dai-team/wallet-tool-calling-eval) | private | Static report Space. |
+
+`space/` holds both Space builds. Deploy with `space/deploy.sh ef-dai-team`:
+
+- `space/static/` — the **shipped** report. One tick per case per model over all
+  307 cases, plus a browser showing every model's recorded output and the
+  scorer's verdict. `build_static.py` bakes `data.json` from the `*.out.json`
+  runs, so **`space/static/data.json` is the only committed record of those runs**
+  (the `*.out.json` files themselves are gitignored) — don't ignore it.
+- `space/app.py` — a Gradio playground doing live inference over the three local
+  GGUFs, reusing `prompt.py` / `tools.json` / `wallet_evals/` / `scoring.py`
+  copied verbatim so it scores identically to the harness. **Not deployed:**
+  Gradio and Docker Spaces are 402-gated behind a Team plan for orgs (and PRO for
+  personal accounts) — Static is the only free SDK. Ship it with
+  `space/deploy.sh ef-dai-team --gradio` once the org is upgraded.
+
+Vendored copies under `space/` drift if you change `pf/` or `src/wallet_evals/` —
+re-copy them, there is no test guarding it.
+
 ## Conventions
 
 - `uv run` for Python; `uv run --with web3` for the (non-suite) fixture fetchers.

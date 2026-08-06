@@ -16,7 +16,7 @@ scripts/generate_gemma4_finetune_data.py
                  ├ finetune/modal_eval_gemma4.py       (score adapter on the eval set — fast checkpoint)
                  └ finetune/modal_export_gemma4.py     (bf16 merge → f16 GGUF → llama-quantize Q4_K_M → HF)
                           │
-        huggingface.co/gabrielfior/gemma-4-E4B-wallet-ft  (public: Q4_K_M GGUF + adapter)
+        huggingface.co/ef-dai-team/gemma-4-E4B-wallet-ft  (public: Q4_K_M GGUF + adapter)
                           │
         promptfooconfig.gemma4-ft.yaml → pf/provider_functiongemma.py (llama-cpp-python)
 ```
@@ -204,7 +204,7 @@ gpt-5 also re-scores **96.7% (Jul 9) vs 95.4% (Jul 30)** on a byte-identical pro
 and dataset — ±1.3 pts of run-to-run nondeterminism at `temperature: 0.1`. Don't
 read small deltas against the anchor as regressions.
 
-**Uploaded:** [`gabrielfior/gemma-4-E4B-wallet-ft`](https://huggingface.co/gabrielfior/gemma-4-E4B-wallet-ft)
+**Uploaded:** [`ef-dai-team/gemma-4-E4B-wallet-ft`](https://huggingface.co/ef-dai-team/gemma-4-E4B-wallet-ft)
 (public) — `gemma-4-E4B-wallet-ft.Q4_K_M.gguf` (5.34 GB, same footprint as the
 stock wallet model) + `adapter/`. The bf16 merge sanity-gated correctly (emits
 `<think>` + a well-formed call with right base-unit arithmetic).

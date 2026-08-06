@@ -1,0 +1,474 @@
+{
+  "dataset": "pf/tests.generated.yaml",
+  "models": [
+    {
+      "display": "gpt-5 (anchor)",
+      "provider_label": "openrouter:openai/gpt-5",
+      "source_run": "gpt5.fresh.out.json",
+      "overall": {
+        "passed": 292,
+        "total": 306
+      },
+      "per_category": {
+        "ablation-amount": {
+          "passed": 8,
+          "total": 8
+        },
+        "ablation-recipient": {
+          "passed": 6,
+          "total": 6
+        },
+        "ablation-to_token": {
+          "passed": 10,
+          "total": 10
+        },
+        "ablation-token": {
+          "passed": 4,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 88,
+          "total": 96
+        },
+        "generated-transfer-pos": {
+          "passed": 94,
+          "total": 100
+        },
+        "multiturn-amount": {
+          "passed": 20,
+          "total": 20
+        },
+        "multiturn-recipient": {
+          "passed": 21,
+          "total": 21
+        },
+        "multiturn-to_token": {
+          "passed": 22,
+          "total": 22
+        },
+        "multiturn-token": {
+          "passed": 12,
+          "total": 12
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-burn-send": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-zero-send": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "display": "Gemma-4 E4B wallet-ft",
+      "provider_label": "gemma4-e4b-ft",
+      "source_run": "gemma4ft.fresh.out.json",
+      "overall": {
+        "passed": 246,
+        "total": 307
+      },
+      "per_category": {
+        "ablation-amount": {
+          "passed": 8,
+          "total": 8
+        },
+        "ablation-recipient": {
+          "passed": 6,
+          "total": 6
+        },
+        "ablation-to_token": {
+          "passed": 10,
+          "total": 10
+        },
+        "ablation-token": {
+          "passed": 4,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 80,
+          "total": 96
+        },
+        "generated-transfer-pos": {
+          "passed": 72,
+          "total": 101
+        },
+        "multiturn-amount": {
+          "passed": 20,
+          "total": 20
+        },
+        "multiturn-recipient": {
+          "passed": 14,
+          "total": 21
+        },
+        "multiturn-to_token": {
+          "passed": 19,
+          "total": 22
+        },
+        "multiturn-token": {
+          "passed": 8,
+          "total": 12
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-burn-send": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 0,
+          "total": 2
+        },
+        "safety-refusal-zero-send": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "display": "Gemma-4 26B-A4B",
+      "provider_label": "openrouter:google/gemma-4-26b-a4b-it",
+      "source_run": "functiongemma-all.out.json",
+      "overall": {
+        "passed": 166,
+        "total": 307
+      },
+      "per_category": {
+        "ablation-amount": {
+          "passed": 8,
+          "total": 8
+        },
+        "ablation-recipient": {
+          "passed": 6,
+          "total": 6
+        },
+        "ablation-to_token": {
+          "passed": 10,
+          "total": 10
+        },
+        "ablation-token": {
+          "passed": 2,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 46,
+          "total": 96
+        },
+        "generated-transfer-pos": {
+          "passed": 46,
+          "total": 101
+        },
+        "multiturn-amount": {
+          "passed": 9,
+          "total": 20
+        },
+        "multiturn-recipient": {
+          "passed": 10,
+          "total": 21
+        },
+        "multiturn-to_token": {
+          "passed": 17,
+          "total": 22
+        },
+        "multiturn-token": {
+          "passed": 5,
+          "total": 12
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-burn-send": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-zero-send": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "display": "gpt-4o-mini",
+      "provider_label": "openrouter:openai/gpt-4o-mini",
+      "source_run": "functiongemma-all.out.json",
+      "overall": {
+        "passed": 87,
+        "total": 307
+      },
+      "per_category": {
+        "ablation-amount": {
+          "passed": 8,
+          "total": 8
+        },
+        "ablation-recipient": {
+          "passed": 5,
+          "total": 6
+        },
+        "ablation-to_token": {
+          "passed": 9,
+          "total": 10
+        },
+        "ablation-token": {
+          "passed": 1,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 16,
+          "total": 96
+        },
+        "generated-transfer-pos": {
+          "passed": 23,
+          "total": 101
+        },
+        "multiturn-amount": {
+          "passed": 5,
+          "total": 20
+        },
+        "multiturn-recipient": {
+          "passed": 5,
+          "total": 21
+        },
+        "multiturn-to_token": {
+          "passed": 6,
+          "total": 22
+        },
+        "multiturn-token": {
+          "passed": 2,
+          "total": 12
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-burn-send": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-zero-send": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "display": "Gemma-4 E4B (base, wallet-shipped)",
+      "provider_label": "gemma4-e4b-base",
+      "source_run": "gemma4.ft.out.json",
+      "overall": {
+        "passed": 30,
+        "total": 307
+      },
+      "per_category": {
+        "ablation-amount": {
+          "passed": 1,
+          "total": 8
+        },
+        "ablation-recipient": {
+          "passed": 1,
+          "total": 6
+        },
+        "ablation-to_token": {
+          "passed": 6,
+          "total": 10
+        },
+        "ablation-token": {
+          "passed": 1,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 4,
+          "total": 96
+        },
+        "generated-transfer-pos": {
+          "passed": 9,
+          "total": 101
+        },
+        "multiturn-amount": {
+          "passed": 4,
+          "total": 20
+        },
+        "multiturn-recipient": {
+          "passed": 0,
+          "total": 21
+        },
+        "multiturn-to_token": {
+          "passed": 2,
+          "total": 22
+        },
+        "multiturn-token": {
+          "passed": 0,
+          "total": 12
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-burn-send": {
+          "passed": 0,
+          "total": 2
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 0,
+          "total": 2
+        },
+        "safety-refusal-zero-send": {
+          "passed": 0,
+          "total": 1
+        }
+      }
+    },
+    {
+      "display": "FunctionGemma-270M wallet-ft",
+      "provider_label": "functiongemma-ft",
+      "source_run": "functiongemma.ft.out.json",
+      "overall": {
+        "passed": 27,
+        "total": 307
+      },
+      "per_category": {
+        "ablation-amount": {
+          "passed": 6,
+          "total": 8
+        },
+        "ablation-recipient": {
+          "passed": 6,
+          "total": 6
+        },
+        "ablation-to_token": {
+          "passed": 8,
+          "total": 10
+        },
+        "ablation-token": {
+          "passed": 3,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 0,
+          "total": 96
+        },
+        "generated-transfer-pos": {
+          "passed": 0,
+          "total": 101
+        },
+        "multiturn-amount": {
+          "passed": 0,
+          "total": 20
+        },
+        "multiturn-recipient": {
+          "passed": 0,
+          "total": 21
+        },
+        "multiturn-to_token": {
+          "passed": 0,
+          "total": 22
+        },
+        "multiturn-token": {
+          "passed": 0,
+          "total": 12
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 1,
+          "total": 2
+        },
+        "safety-refusal-burn-send": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 0,
+          "total": 2
+        },
+        "safety-refusal-zero-send": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "display": "FunctionGemma-270M (base)",
+      "provider_label": "functiongemma-270m-it",
+      "source_run": "functiongemma-all.out.json",
+      "overall": {
+        "passed": 25,
+        "total": 307
+      },
+      "per_category": {
+        "ablation-amount": {
+          "passed": 6,
+          "total": 8
+        },
+        "ablation-recipient": {
+          "passed": 6,
+          "total": 6
+        },
+        "ablation-to_token": {
+          "passed": 5,
+          "total": 10
+        },
+        "ablation-token": {
+          "passed": 2,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 0,
+          "total": 96
+        },
+        "generated-transfer-pos": {
+          "passed": 0,
+          "total": 101
+        },
+        "multiturn-amount": {
+          "passed": 0,
+          "total": 20
+        },
+        "multiturn-recipient": {
+          "passed": 0,
+          "total": 21
+        },
+        "multiturn-to_token": {
+          "passed": 0,
+          "total": 22
+        },
+        "multiturn-token": {
+          "passed": 0,
+          "total": 12
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-burn-send": {
+          "passed": 1,
+          "total": 2
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-zero-send": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    }
+  ]
+}
