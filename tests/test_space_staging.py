@@ -77,6 +77,80 @@ def test_staged_tree_matches_its_sources(target, tmp_path):
         f"{target}: staged tree has files the manifest does not list"
 
 
+def test_dataset_never_publishes_the_eval_set():
+    """The 307 held-out cases stay private — that is what makes the scores mean
+    anything. Guards the manifest against the files that would leak them, either
+    directly or by making them regenerable."""
+    sources = {src for src, _ in staging.DATASET_FILES}
+    leaked = sources & set(staging.EVAL_SET_FILES)
+    assert not leaked, f"dataset manifest would publish the eval set: {sorted(leaked)}"
+
+    # Belt and braces: catch a rename by comparing content, not just paths.
+    eval_digests = {
+        _digest(ROOT / f): f for f in staging.EVAL_SET_FILES if (ROOT / f).is_file()
+    }
+    for src, rel in staging.DATASET_FILES:
+        path = ROOT / src
+        if path.is_file() and _digest(path) in eval_digests:
+            pytest.fail(f"{rel} is a copy of {eval_digests[_digest(path)]}")
+
+
+def test_published_dataset_regenerates_its_own_data(tmp_path):
+    """The staged dataset must reproduce its JSONLs byte-for-byte, on its own.
+
+    This is the claim the dataset card makes, so it gets tested rather than
+    asserted. It has caught two distinct gaps that an import trace cannot see:
+    a module missing from the manifest, and `datasets/lookup.json`, which
+    `wallet_evals/intents.py` reads at import time.
+
+    Uses PYTHONPATH rather than the bundled pyproject.toml so the suite stays
+    offline; the pyproject is what gives a real downloader the same sys.path.
+    """
+    try:
+        dest = staging.stage("dataset", tmp_path / "dataset")
+    except FileNotFoundError as e:
+        pytest.skip(str(e))
+
+    env = {**os.environ, "PYTHONPATH": str(dest / "src")}
+    for script, published in (("generate_finetune_data.py", "data/functiongemma_train.jsonl"),
+                              ("generate_gemma4_finetune_data.py", "data/gemma4_train.jsonl")):
+        out = tmp_path / f"regen-{script}.jsonl"
+        proc = subprocess.run(
+            [sys.executable, str(dest / "scripts" / script), "--out", str(out)],
+            cwd=dest, env=env, capture_output=True, text=True)
+        assert proc.returncode == 0, \
+            f"published tree cannot run {script}:\n{proc.stderr[-1500:]}"
+        assert _digest(out) == _digest(dest / published), \
+            f"{script} did not reproduce {published} byte-for-byte"
+
+
+def test_published_modal_jobs_find_their_data_in_both_layouts(tmp_path):
+    """`bundled()` must resolve in the dataset layout and the harness layout.
+
+    Every Modal job was silently broken in the published repo because it assumed
+    the harness's directory names; each one died at `add_local_file`.
+    """
+    sys.path.insert(0, str(ROOT / "finetune"))
+    try:
+        from _bundled import bundled
+    finally:
+        sys.path.remove(str(ROOT / "finetune"))
+
+    candidates = (
+        ("data_for_finetune/functiongemma_train.jsonl", "data/functiongemma_train.jsonl"),
+        ("data_for_finetune/gemma4_train.jsonl", "data/gemma4_train.jsonl"),
+        ("finetune/diag_sample.jsonl", "data/diag_sample.jsonl"),
+    )
+    try:
+        dest = staging.stage("dataset", tmp_path / "dataset")
+    except FileNotFoundError as e:
+        pytest.skip(str(e))
+
+    for layout in (ROOT, dest):
+        for cands in candidates:
+            bundled(layout, *cands)  # raises if neither location exists
+
+
 SPACE_IMPORTS = ("prompt", "scoring", "wallet_evals.scorer", "wallet_evals.parsing",
                  "wallet_evals.promptfoo", "wallet_evals.functiongemma",
                  "wallet_evals.gemma_dsl")

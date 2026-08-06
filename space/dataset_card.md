@@ -78,7 +78,7 @@ The assistant target is a tool call for gold-call cases, a clarifying question
 for ablation (missing-field) cases, or a safety warning for refusals. Every
 target decodes and scores back to 1.0 through the harness's unchanged scorer.
 
-`tools.json` at the repo root is the tool schema embedded verbatim in every row:
+`pf/tools.json` is the tool schema embedded verbatim in every row:
 `executeTx`, `readTx`, `shield`, `unshield`, `swap`.
 
 ## Composition
@@ -127,21 +127,27 @@ to 0% on the core task. v2 scaled it ~20×. That helped, but not enough.)
 
 ## Reproduce
 
-**Regenerate the data.** Both JSONLs are byte-stable outputs of seeded scripts in
-the `evals-local-llm` harness — verified: regenerating at the current HEAD
-reproduces these files bit for bit.
+This repo is self-contained: the generators, their seeds, the modules they
+import, and the training jobs all ship with the data. Nothing here needs the
+harness.
+
+**1. Regenerate the JSONLs.** Both are byte-stable outputs of seeded scripts —
+`tests/test_space_staging.py` in the harness reruns them from *this published
+tree* on every commit and fails unless the output matches these files bit for
+bit.
 
 ```bash
-uv run python scripts/generate_finetune_data.py            # FunctionGemma-270M
-uv run python scripts/generate_gemma4_finetune_data.py     # Gemma-4 E4B
+uv run python scripts/generate_finetune_data.py        --out data/functiongemma_train.jsonl
+uv run python scripts/generate_gemma4_finetune_data.py --out data/gemma4_train.jsonl
 ```
 
-Add `--reasoning` to prepend a deterministic `<think>…</think>` block with the
-base-unit arithmetic before each call. Off by default; A/B it on the eval set
-rather than assuming it helps.
+The bundled `pyproject.toml` puts `src/` on the path; the only third-party
+dependency is PyYAML. Add `--reasoning` to prepend a deterministic
+`<think>…</think>` block with the base-unit arithmetic before each call. Off by
+default; A/B it rather than assuming it helps.
 
-**Train.** Unsloth does not run on macOS, so training happens on a CUDA box. The
-Modal jobs used for the runs above are in `scripts/`:
+**2. Train.** Unsloth does not run on macOS, so training happens on a CUDA box.
+The Modal jobs are the ones used for the runs above:
 
 ```bash
 modal run scripts/modal_finetune.py          # LoRA adapter (270M)
@@ -150,11 +156,19 @@ modal run scripts/modal_finetune_gemma4.py   # LoRA adapter (E4B)
 modal run scripts/modal_export_gemma4.py     # merge + Q4_K_M GGUF
 ```
 
+They read their inputs from `data/` here and from `data_for_finetune/` in the
+harness, resolving whichever exists (`scripts/_bundled.py`). Export runs after
+finetune in the same Modal workspace — it reads the adapter from the Modal
+volume the training job wrote, not from this repo. Both export jobs push to
+`ef-dai-team/…`; change `HF_REPO` before running them yourself.
+
 `scripts/train_functiongemma.py` is the equivalent single-box / Colab script.
 
-**Score.** Point the harness's local GGUF provider at your export and run the
-eval. The eval set is untouched by training, so the number is comparable to the
-table above.
+**3. Score.** Not included. The 307-case evaluation set is deliberately
+unpublished — keeping it off the Hub is what stops it leaking into training
+corpora and is the reason the numbers above mean anything. Results for every
+case and model are browsable in the
+[eval report Space](https://huggingface.co/spaces/ef-dai-team/wallet-tool-calling-eval).
 
 ## Models trained from this data
 

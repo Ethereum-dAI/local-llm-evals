@@ -174,7 +174,7 @@ on demand from one source each, into the gitignored `space/build/`:
 
 ```bash
 uv run python space/stage.py gradio     # pf/ + src/wallet_evals/ + space/app.py
-uv run python space/stage.py dataset    # finetune/ + data_for_finetune/ + the card
+uv run python space/stage.py dataset    # generators + seeds + finetune/ + the data
 ```
 
 Adding an import to `space/app.py` means adding the module to
@@ -183,6 +183,28 @@ fails if any tracked file becomes a byte-for-byte copy of another, if a staged
 file drifts from its source, or if the staged Space can't import what it needs.
 An earlier revision of this work shipped 16 such duplicates; the test exists so
 that can't recur.
+
+### The dataset repo must reproduce itself, and must not leak the eval set
+
+It ships the generators, their seeds, `datasets/lookup.json`, the traced module
+closure and a `pyproject.toml`, so a downloader can regenerate both JSONLs with
+no access to this repo. `test_published_dataset_regenerates_its_own_data` runs
+the staged generators and fails unless the output is byte-identical — it has
+already caught two dependencies an import trace cannot see (a missing module,
+and `lookup.json`, which `intents.py` reads at import time).
+
+Two constraints when touching `DATASET_FILES`:
+
+- **Keep the `src/` prefix.** `intents.py` resolves `datasets/lookup.json` from
+  its own grandparent, so flattening the package misses by one level.
+- **Never add anything in `EVAL_SET_FILES`.** The 307 held-out cases stay off the
+  Hub; `test_dataset_never_publishes_the_eval_set` checks the manifest by path
+  *and* by content hash, so a rename doesn't slip through.
+
+`finetune/_bundled.py` lets the Modal jobs resolve their data from either layout
+(`data_for_finetune/` here, `data/` there) — they all silently died at
+`add_local_file` in the published repo before it existed. `deploy.sh` uploads
+with `--delete "*"` so a file that moves in the manifest doesn't linger.
 
 ## Conventions
 

@@ -21,6 +21,10 @@ from pathlib import Path
 
 import modal
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _bundled import bundled  # noqa: E402  (needs the line above)
+
 BASE_MODEL = "unsloth/gemma-4-E4B-it"
 OUTPUTS_DIR = "/outputs"
 HF_REPO = "ef-dai-team/gemma-4-E4B-wallet-ft"
@@ -51,8 +55,8 @@ image = (
     .pip_install("unsloth", "sentencepiece", "gguf", "huggingface_hub",
                  "protobuf", "numpy")
     .env({"HF_HOME": "/root/.cache/huggingface"})
-    .add_local_file(str(_REPO / "data_for_finetune" / "gemma4_train.jsonl"),
-                    "/data/train.jsonl")
+    .add_local_file(str(bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
+                                       "data/gemma4_train.jsonl")), "/data/train.jsonl")
 )
 
 app = modal.App("gemma4-export")

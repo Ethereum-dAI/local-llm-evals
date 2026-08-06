@@ -28,6 +28,10 @@ from pathlib import Path
 
 import modal
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _bundled import bundled  # noqa: E402  (needs the line above)
+
 # ---- knobs --------------------------------------------------------------------
 # The wallet's on-device model id is google/gemma-4-E4B-it (ggml-org quantizes it
 # to the Q4_K_M GGUF it ships). We train from unsloth's ungated mirror of those
@@ -54,7 +58,8 @@ INSTRUCTION_PART = "<|turn>user\n"
 RESPONSE_PART = "<|turn>model\n"
 
 _REPO = Path(__file__).resolve().parent.parent
-_DATA_LOCAL = _REPO / "data_for_finetune" / "gemma4_train.jsonl"
+_DATA_LOCAL = bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
+                             "data/gemma4_train.jsonl")
 # ------------------------------------------------------------------------------
 
 hf_cache = modal.Volume.from_name("gemma4-hf-cache", create_if_missing=True)
