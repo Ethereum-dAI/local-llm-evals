@@ -54,13 +54,21 @@ playground so the gap is visible live rather than asserted.
 
 ## Fidelity to the harness
 
-`prompt.py`, `tools.json`, `wallet_evals/` and `scoring.py` are copied verbatim
-from the [`evals-local-llm`](https://github.com/Ethereum-dAI) harness, and the
-models are served by the same `llama-cpp-python` code path the eval uses. A case
-that passes here passes there.
+`prompt.py`, `tools.json`, `wallet_evals/` and `scoring.py` are not written for
+this Space — they are the [`evals-local-llm`](https://github.com/Ethereum-dAI)
+harness's own files, copied in at build time by `space/stage.py` from a single
+source each (`pf/prompt.py`, `pf/tools.json`, `pf/assert.py`,
+`src/wallet_evals/`). There is no second copy to drift, and a test enforces it.
+Models are served by the same `llama-cpp-python` code path the eval uses, so a
+case that passes here passes there.
 
-Regenerate the frozen data with `uv run python space/build_data.py` from the
-harness repo root.
+To run it from the harness repo root:
+
+```bash
+uv run python space/build_data.py            # refresh the frozen scoreboard
+uv run python space/stage.py gradio          # assemble space/build/gradio
+cd space/build/gradio && python app.py
+```
 
 ## Training data
 

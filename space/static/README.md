@@ -52,5 +52,6 @@ comes from the same deterministic scorer that produced the strips.
 Hosting a Gradio Space requires a Team plan on `ef-dai-team` (verified: the API
 returns 402 for both `cpu-basic` and `zero-a10g`). The interactive playground —
 live inference over all three local GGUFs with the same prompt, tools and
-scorer — is written and lives in `space/` in the harness repo. It runs locally
-with `python app.py` and deploys unchanged once the org is upgraded.
+scorer — is written and lives in `space/` in the harness repo. Assemble it with
+`uv run python space/stage.py gradio`, run it with `python app.py` from
+`space/build/gradio`, and it deploys unchanged once the org is upgraded.

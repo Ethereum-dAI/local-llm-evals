@@ -160,14 +160,29 @@ Everything lives under the org now — the models were **moved** out of
   runs, so **`space/static/data.json` is the only committed record of those runs**
   (the `*.out.json` files themselves are gitignored) — don't ignore it.
 - `space/app.py` — a Gradio playground doing live inference over the three local
-  GGUFs, reusing `prompt.py` / `tools.json` / `wallet_evals/` / `scoring.py`
-  copied verbatim so it scores identically to the harness. **Not deployed:**
-  Gradio and Docker Spaces are 402-gated behind a Team plan for orgs (and PRO for
-  personal accounts) — Static is the only free SDK. Ship it with
-  `space/deploy.sh ef-dai-team --gradio` once the org is upgraded.
+  GGUFs, reusing the harness's own prompt/tools/scorer so it scores identically.
+  **Not deployed:** Gradio and Docker Spaces are 402-gated behind a Team plan for
+  orgs (and PRO for personal accounts) — Static is the only free SDK. Ship it
+  with `space/deploy.sh ef-dai-team --gradio` once the org is upgraded.
 
-Vendored copies under `space/` drift if you change `pf/` or `src/wallet_evals/` —
-re-copy them, there is no test guarding it.
+### Never commit a second copy of anything
+
+HF repos must be flat and self-contained, so the Space needs `prompt.py` and
+`wallet_evals/` beside `app.py`, and the dataset needs the training scripts
+beside the data. **Do not vendor them.** `space/stage.py` assembles those trees
+on demand from one source each, into the gitignored `space/build/`:
+
+```bash
+uv run python space/stage.py gradio     # pf/ + src/wallet_evals/ + space/app.py
+uv run python space/stage.py dataset    # finetune/ + data_for_finetune/ + the card
+```
+
+Adding an import to `space/app.py` means adding the module to
+`WALLET_EVALS_MODULES` in `stage.py` — nowhere else. `tests/test_space_staging.py`
+fails if any tracked file becomes a byte-for-byte copy of another, if a staged
+file drifts from its source, or if the staged Space can't import what it needs.
+An earlier revision of this work shipped 16 such duplicates; the test exists so
+that can't recur.
 
 ## Conventions
 

@@ -615,7 +615,9 @@ modal run scripts/modal_export.py</pre>
     </div>
     <div class="card">
       <h3>Why there's no live demo here</h3>
-      <p>Hosting a Gradio Space needs a Team plan on this org. The Gradio app is written and sits in <code>space/</code> in the harness repo — it runs locally with <code>python app.py</code>, and deploys the moment the org is upgraded.</p>
+      <p>Hosting a Gradio Space needs a Team plan on this org. The app is written and sits in <code>space/</code> in the harness repo; it deploys unchanged the moment the org is upgraded.</p>
+      <pre>uv run python space/stage.py gradio
+cd space/build/gradio &amp;&amp; python app.py</pre>
     </div>`;
 }
 
