@@ -123,3 +123,12 @@ uv run pytest -q
 
 Covers the parser, scorer, swap support, the converter, and a dataset-integrity
 check that every gold case in `pf/tests.yaml` self-scores to 1.
+
+## License
+
+MIT — see `LICENSE`.
+
+The published artifacts carry their own licenses: the training data
+([`ef-dai-team/wallet-tool-calling-ft`](https://huggingface.co/datasets/ef-dai-team/wallet-tool-calling-ft))
+is Apache-2.0, and the fine-tuned models inherit from their base — `gemma-4-E4B-wallet-ft`
+is Apache-2.0, `functiongemma-270m-wallet-ft` is under the Gemma Terms of Use.
