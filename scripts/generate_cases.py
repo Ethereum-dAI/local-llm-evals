@@ -5,10 +5,23 @@ positive cases (one per surface template, with seeded mutation), plus one
 single-turn negative and one scripted multi-turn case per `ablate` field. Cases
 are seeded-shuffled and capped to MAX_PER_ACTION per action; drops are logged.
 
-Run: uv run python scripts/generate_cases.py
+    uv run python scripts/generate_cases.py          # the public dev set (307 cases)
+
+The same code path builds a **private holdout** from a different seeds file, so
+the two sets can never drift in generation logic — only in their inputs:
+
+    uv run python scripts/generate_cases.py \\
+        --seeds holdout/v1/holdout_seeds.yaml \\
+        --out   holdout/v1/tests.holdout.yaml \\
+        --seed  20260807 --max-per-action 70
+
+`holdout/` is gitignored on purpose. The amount literals in a holdout seeds file
+ARE the secret — publishing them would defeat the split, since a leaked amount is
+all a model needs to memorise instead of computing. See tests/test_holdout_integrity.py.
 """
 from __future__ import annotations
 
+import argparse
 import random
 from pathlib import Path
 
@@ -77,28 +90,50 @@ def build_all(seeds: list[dict], rng: random.Random) -> dict[str, list[dict]]:
     return by_action
 
 
+def _parse_args() -> argparse.Namespace:
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--seeds", type=Path, default=SEEDS,
+                    help="intent seeds YAML (default: datasets/seeds.yaml)")
+    ap.add_argument("--out", type=Path, default=OUT,
+                    help="destination YAML (default: pf/tests.generated.yaml)")
+    ap.add_argument("--seed", type=int, default=SEED,
+                    help=f"RNG seed for surfaces and selection (default: {SEED})")
+    ap.add_argument("--max-per-action", type=int, default=MAX_PER_ACTION,
+                    help=f"cap per action after shuffling (default: {MAX_PER_ACTION})")
+    return ap.parse_args()
+
+
 def main() -> None:
-    seeds = yaml.safe_load(SEEDS.read_text())
-    rng = random.Random(SEED)
+    args = _parse_args()
+    seeds = yaml.safe_load(args.seeds.read_text())
+    rng = random.Random(args.seed)
     by_action = build_all(seeds, rng)
 
     selected: list[dict] = []
     for action in sorted(by_action):
         cases = by_action[action]
         rng.shuffle(cases)
-        kept = cases[:MAX_PER_ACTION]
+        kept = cases[:args.max_per_action]
         dropped = len(cases) - len(kept)
         print(f"{action}: generated {len(cases)}, kept {len(kept)}, dropped {dropped}")
         selected.extend(kept)
 
+    # Path is written relative to the repo when possible, so the header stays
+    # identical whether the script is invoked from the repo root or elsewhere.
+    try:
+        seeds_label = args.seeds.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        seeds_label = args.seeds.as_posix()
     header = (
         "# Generated eval cases — DO NOT EDIT BY HAND.\n"
-        "# Produced by scripts/generate_cases.py from datasets/seeds.yaml (seed "
-        f"{SEED}).\n"
+        f"# Produced by scripts/generate_cases.py from {seeds_label} (seed "
+        f"{args.seed}).\n"
         "# Gold is computed from each seed intent; surfaces carry deterministic noise.\n"
     )
-    OUT.write_text(header + yaml.safe_dump(selected, sort_keys=False, allow_unicode=True))
-    print(f"Wrote {len(selected)} cases -> {OUT}")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(header + yaml.safe_dump(selected, sort_keys=False, allow_unicode=True))
+    print(f"Wrote {len(selected)} cases -> {args.out}")
 
 
 if __name__ == "__main__":

@@ -27,3 +27,10 @@ __pycache__/
 # Deployable trees assembled by space/stage.py from the canonical sources.
 # Never commit these — the copies are the thing we are avoiding.
 space/build/
+
+# The private holdout: its seeds AND its generated cases. The amount literals in a
+# holdout seeds file are the secret (a leaked amount is a memorisable gold answer),
+# so neither the inputs nor the outputs may enter this public repo. Canonical home
+# is the private Ethereum-dAI/local-llm-evals-holdout repo, one directory per
+# version. tests/test_holdout_integrity.py fails if anything under here is tracked.
+holdout/

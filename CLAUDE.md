@@ -53,6 +53,54 @@ For a prompt change, do a small A/B: run a subset, toggle the prompt, compare.
 - Refusal cases have `expected_calls == []` → pass iff the model makes **no** tool
   call. All models currently pass these (safety floor, not a discriminator).
 
+## Dev set vs private holdout
+
+`pf/tests.generated.yaml` (307 cases) is the **public dev set**: contributors clone
+the repo, self-score, and iterate against it freely. Overfitting it is expected —
+treat it as practice, not as a result.
+
+**Official numbers come only from the private holdout.** It lives in
+`holdout/v<N>/`, which is **gitignored** — both the seeds and the generated cases.
+Canonical home is the private `Ethereum-dAI/local-llm-evals-holdout` repo, one
+directory per version. Build and run one with:
+
+```bash
+uv run python scripts/generate_cases.py \
+    --seeds holdout/v1/holdout_seeds.yaml --out holdout/v1/tests.holdout.yaml \
+    --seed 20260807 --max-per-action 70          # -> 147 cases
+EVAL_DATASET=holdout/v1/tests.holdout.yaml scripts/eval.sh -o holdout-v1.out.json
+```
+
+Same `generate_cases.py` as the dev set, so the two can never drift in generation
+logic — only in their inputs. The default arguments still reproduce
+`pf/tests.generated.yaml` byte for byte.
+
+**The amount literals are the secret.** Every base-unit gold answer is
+`amount x token decimals`, and the whole 307-case dev set reduces to just 15
+distinct amounts — so a leaked amount is a memorisable answer, and the slice stops
+measuring the arithmetic it exists to measure.
+
+Two consequences, both enforced by `tests/test_holdout_integrity.py`:
+
+- **Rotate by editing amount literals, never by changing `--seed`.** The RNG only
+  redraws surface phrasing and `random_address` recipients; a reseed leaves every
+  amount — and therefore every gold answer — standing. This is the trap: a reseeded
+  holdout *looks* fresh and protects nothing.
+- **Nothing under `holdout/` may be tracked.** Two containment tests run even
+  without a holdout checked out (`test_holdout_is_gitignored`,
+  `test_no_holdout_file_is_tracked`), so `git add -A` can't publish the yardstick.
+  The remaining five skip cleanly on a fresh public clone.
+
+Disjointness is three-way and asserted: holdout ∩ dev = ∅, holdout ∩ train = ∅
+(and dev ∩ train = ∅, previously true only by construction). `v2` must also not
+recycle `v1`'s amounts. The strongest check compares *computed* base-unit values,
+not just literals — different literals can collide after the decimal shift.
+
+Also: **don't publish per-case holdout results.** For 302 of the 307 dev cases at
+least one model passes, and a passing output *is* the gold call, so a case browser
+leaks the answers even with `prompt` and `gold` stripped. Holdout reporting is
+aggregate + per-category only.
+
 ## Datasets are generated — don't hand-edit
 
 `pf/tests.generated.yaml` and `pf/tests.protocols.yaml` are byte-stable outputs of
