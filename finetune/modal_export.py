@@ -28,6 +28,10 @@ BASE_MODEL = "unsloth/functiongemma-270m-it"
 ADAPTER = "/outputs/checkpoint-309"
 HF_REPO = "ef-dai-team/functiongemma-270m-wallet-ft"
 GGUF_NAME = "functiongemma-270m-wallet-ft.Q8_0.gguf"
+# ADAPTER is a trainer checkpoint, so it carries resume-only files. Keep these off
+# the Hub: `training_args.bin` is a pickle HF's scanner flags as unsafe.
+CHECKPOINT_ONLY_FILES = ["training_args.bin", "optimizer.pt", "scheduler.pt",
+                         "rng_state*.pth"]
 _REPO = Path(__file__).resolve().parent.parent
 
 hf_cache = modal.Volume.from_name("functiongemma-hf-cache", create_if_missing=True)
@@ -95,7 +99,11 @@ def export_and_upload(hf_token: str) -> str:
     api = HfApi(token=hf_token)
     api.create_repo(HF_REPO, repo_type="model", private=False, exist_ok=True)
     api.upload_file(path_or_fileobj=gguf_path, path_in_repo=GGUF_NAME, repo_id=HF_REPO)
-    api.upload_folder(folder_path=ADAPTER, path_in_repo="adapter", repo_id=HF_REPO)
+    # Skip resume-only pickles: HF's picklescan flags training_args.bin as unsafe
+    # (it unpickles arbitrary classes) and optimizer/scheduler/RNG state is dead
+    # weight for anyone loading the adapter. See modal_export_gemma4.py.
+    api.upload_folder(folder_path=ADAPTER, path_in_repo="adapter", repo_id=HF_REPO,
+                      ignore_patterns=CHECKPOINT_ONLY_FILES)
     url = f"https://huggingface.co/{HF_REPO}"
     print(f"[export] uploaded -> {url}", flush=True)
     return json.dumps({"repo": url, "gguf_mb": round(size_mb, 1), "sanity": gen[:120]})
