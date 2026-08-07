@@ -142,9 +142,27 @@ uv run python scripts/generate_gemma4_finetune_data.py --out data/gemma4_train.j
 ```
 
 The bundled `pyproject.toml` puts `src/` on the path; the only third-party
-dependency is PyYAML. Add `--reasoning` to prepend a deterministic
-`<think>…</think>` block with the base-unit arithmetic before each call. Off by
-default; A/B it rather than assuming it helps.
+dependency is PyYAML.
+
+**The two generators disagree on reasoning, and the defaults above are what
+shipped.** A deterministic `<think>…</think>` block spelling out the base-unit
+arithmetic is prepended to each call — on by default for Gemma-4, off by default
+for FunctionGemma:
+
+| | flag | default | `<think>` rows shipped |
+| --- | --- | --- | --- |
+| `generate_gemma4_finetune_data.py` | `--no-reasoning` to disable | **on** | 1550 / 1739 |
+| `generate_finetune_data.py` | `--reasoning` to enable | off | 0 / 1739 |
+
+So `data/gemma4_train.jsonl` already contains the reasoning blocks — passing
+`--reasoning` to it changes nothing, and `--no-reasoning` is the switch you want
+for an ablation. A/B this rather than assuming it helps.
+
+The 1550 are exactly the transfer, swap and multi-turn rows (650 + 650 + 250) —
+the ones whose gold needs base-unit arithmetic. The other 189 carry no block:
+`ablation-*` and `safety-refusal-*` have no call to derive, and `safe-*` /
+`aave-*` are not covered by the reasoning builder. If you are training on the
+protocol slices, note they teach the call without teaching the arithmetic.
 
 **2. Train.** Unsloth does not run on macOS, so training happens on a CUDA box.
 The Modal jobs are the ones used for the runs above:
