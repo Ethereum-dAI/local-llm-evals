@@ -1,0 +1,1 @@
+{"results": {"gsm8k": {"name": "gsm8k", "alias": "gsm8k", "sample_len": 1319, "exact_match,strict-match": 0.796057619408643, "exact_match_stderr,strict-match": 0.01109860228489917, "exact_match,flexible-extract": 0.7945413191811979, "exact_match_stderr,flexible-extract": 0.011129170248544765}}, "n-samples": {"gsm8k": {"original": 1319, "effective": 1319}}}
