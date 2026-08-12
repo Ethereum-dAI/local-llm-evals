@@ -59,6 +59,13 @@ _REFUSAL_FALLBACK = (
     "recognised details."
 )
 
+# Sentinel `dialect` selecting the Hermes/Qwen JSON encoding instead of a Gemma
+# DSL. It is a Dialect only so one `dialect=` parameter still selects the target
+# encoding for every model family; its delimiters are never used for encoding —
+# `encode_hermes_calls` writes the tags itself. They are the real ones Qwen3
+# emits, so a decode of this dialect's output is still well defined.
+HERMES = Dialect(opener="<tool_call>", closer="</tool_call>", quote='"')
+
 
 def to_developer_roles(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Copy `messages`, remapping `system` -> `developer` (FunctionGemma's role
@@ -107,6 +114,30 @@ def refusal_message(category: str) -> str:
     return REFUSAL_MESSAGES.get(kind, _REFUSAL_FALLBACK)
 
 
+def encode_hermes_calls(calls: list[dict[str, Any]]) -> str:
+    """Serialize gold calls the way Qwen3 emits them: Hermes-style JSON in tags.
+
+        <tool_call>
+        {"name": "executeTx", "arguments": {"chainId": "1", ...}}
+        </tool_call>
+
+    This is the mirror of `json_tool_calls.parse_json_tool_calls`, exactly as
+    `encode_gemma_call` mirrors `gemma_dsl.parse_gemma_tool_calls`. A None-valued
+    field is KEPT here (unlike the DSL, which omits it): `function: null` is the
+    documented way to say "native transfer, no calldata", and JSON can say it.
+    """
+    out: list[str] = []
+    for call in calls:
+        call = dict(call)
+        name = call.pop("tool", None) or call.pop("name")
+        order = _SWAP_ORDER if name == "swap" else _EXECUTE_ORDER
+        keys = [k for k in order if k in call] + [k for k in call if k not in order]
+        args = {k: call[k] for k in keys}
+        payload = json.dumps({"name": name, "arguments": args})
+        out.append(f"<tool_call>\n{payload}\n</tool_call>")
+    return "\n".join(out)
+
+
 def assistant_target(metadata: dict[str, Any], *, reasoning_text: str | None = None,
                      dialect: Dialect = FUNCTIONGEMMA) -> str:
     """The assistant turn content for a case.
@@ -117,7 +148,8 @@ def assistant_target(metadata: dict[str, Any], *, reasoning_text: str | None = N
     """
     calls = metadata.get("expected_calls") or []
     if calls:
-        dsl = encode_calls(calls, dialect)
+        dsl = encode_hermes_calls(calls) if dialect is HERMES else \
+            encode_calls(calls, dialect)
         if reasoning_text:
             return f"<think>{reasoning_text}</think>\n{dsl}"
         return dsl
@@ -145,8 +177,9 @@ def case_to_example(metadata: dict[str, Any], rendered_messages: list[dict[str, 
     messages = to_developer_roles(rendered_messages) if to_developer else \
         [dict(m) for m in rendered_messages]
     messages.append({"role": "assistant",
-                     "content": assistant_target(metadata, reasoning_text=reasoning_text,
-                                                  dialect=dialect)})
+                     "content": assistant_target(metadata,
+                                                 reasoning_text=reasoning_text,
+                                                 dialect=dialect)})
     return {
         "id": metadata["id"],
         "category": metadata.get("category"),

@@ -1,0 +1,45 @@
+# 2026-08-11 — Qwen3-8B (OpenRouter), 307-case dev set.
+#
+#   scripts/eval.sh -c promptfooconfig.qwen3.yaml -j 8 --no-cache \
+#       -o relaunch/qwen3-8b.out.json
+#
+# Why 8B: it is the closest hosted analogue to the on-device Gemma-4 E4B this
+# harness exists to measure, so the number answers "would a different small open
+# model do better on-device", not "is a frontier model good at this" (gpt-5
+# already answers that at 95.8%).
+#
+# --no-cache is mandatory, same as the relaunch configs: promptfoo would
+# otherwise replay stored responses and the run would measure nothing.
+#
+# SAMPLING IS THE MODEL CARD'S, NOT THE HARNESS'S. Qwen3's card prescribes
+# Temperature=0.6, TopP=0.95, TopK=20, MinP=0 for thinking mode and says in bold
+# "DO NOT use greedy decoding, as it can lead to performance degradation and
+# endless repetitions". The incumbent columns ran at 0.2 (gemma-4) and 0.1
+# (gpt-5), so sampling is NOT held constant across this comparison — each model
+# runs as its own authors intend, which is the defensible reading when a low
+# score would otherwise be blamed on settings the authors warned against.
+# top_k/min_p go through `passthrough` because promptfoo's OpenAI-shaped body
+# only names temperature/top_p/penalties; passthrough is merged in verbatim.
+description: Qwen3-8B (OpenRouter, card-recommended sampling) — 307-case dev set
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: openrouter:qwen/qwen3-8b
+    label: qwen3-8b
+    config:
+      temperature: 0.6
+      top_p: 0.95
+      passthrough:
+        top_k: 20
+        min_p: 0
+      max_tokens: 4096
+      tools: file://pf/tools.json
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.generated.yaml') }}"

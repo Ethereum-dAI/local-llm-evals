@@ -14,10 +14,9 @@ import re
 from typing import Any
 
 from wallet_evals.gemma_dsl import FUNCTIONGEMMA, Dialect, parse_gemma_tool_calls
+from wallet_evals.json_tool_calls import parse_json_tool_calls
 
 _THINK_RE = re.compile(r"<think>.*?</think>\s*", re.DOTALL)
-
-
 def decode_prompt(prompt: str, system_role: str = "developer") -> list[dict[str, str]]:
     """promptfoo hands the rendered prompt as a JSON conversation (our
     prompt.py:render returns a message list) or a plain string. Normalize to a
@@ -67,6 +66,26 @@ def raw_output_to_scoreable(raw: str, dialect: Dialect = FUNCTIONGEMMA) -> str:
         {"name": name, "arguments": json.dumps(fields)} for name, fields in parsed
     ]
     return json.dumps(calls)
+
+
+def json_output_to_scoreable(raw: str) -> str:
+    """`raw_output_to_scoreable` for models that emit JSON tool calls as text.
+
+    Qwen3 writes `<tool_call>{"name": ..., "arguments": {...}}</tool_call>`
+    rather than the Gemma DSL, and llama-cpp hands it back as plain content. Same
+    contract as the DSL version: an OpenAI-shaped JSON string when a call is
+    present, the text verbatim otherwise (so refusals still score and surface).
+
+    The `<think>` strip matters here: the fine-tune reasons before every answer,
+    and an unstripped block would become the "prose" of a refusal.
+    """
+    raw = _THINK_RE.sub("", raw, count=1)
+    parsed = parse_json_tool_calls(raw)
+    if not parsed:
+        return raw
+    return json.dumps(
+        [{"name": name, "arguments": json.dumps(args)} for name, args in parsed]
+    )
 
 
 def tool_calls_to_scoreable(tool_calls: list[dict[str, Any]]) -> str:
