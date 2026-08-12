@@ -9,14 +9,23 @@
 out.json
 *.out.json
 .promptfoo/
+# Per-run promptfoo state. Concurrent runs need one config dir EACH — a shared
+# SQLite results DB throws SQLITE_BUSY and can still write a truncated export.
+.promptfoo-*/
+# Single-provider exports + merged evals kept for cross-run comparison. Some do
+# not end in .out.json, and they run to tens of MB.
+/relaunch/
 
-# Local GGUF model weights (FunctionGemma etc.)
-/models/
+# Local GGUF model weights (FunctionGemma etc.). No trailing slash: a worktree
+# may carry `models` as a SYMLINK to the main checkout's copy, and `/models/`
+# matches only a real directory.
+/models
 
 # Generated fine-tuning sets — regenerable from datasets/finetune_seeds.yaml +
 # datasets/protocols/*.finetune.fixtures.json via scripts/generate_*finetune_data.py
 data_for_finetune/functiongemma_train.jsonl
 data_for_finetune/gemma4_train.jsonl
+data_for_finetune/qwen_train.jsonl
 
 # Python
 __pycache__/

@@ -1,0 +1,38 @@
+# Qwen3-8B wallet fine-tune, pulled FROM THE HUB — the published-artifact check.
+#
+#   PROMPTFOO_CONFIG_DIR=.promptfoo-hf scripts/eval.sh \
+#       -c promptfooconfig.qwen3-ft.hf.yaml -j 1 --no-cache --filter-first-n 10 \
+#       -o relaunch/qwen3-ft.hf-smoke.json
+#
+# Identical to promptfooconfig.qwen3-ft.yaml except that it resolves the model by
+# `repo_id`/`filename` instead of `model_path`. That is the whole point: it proves
+# the uploaded file is what a colleague actually gets, rather than re-testing the
+# local copy the upload came from. Run it with HF_HOME pointed at an empty
+# directory to be sure the download really happens.
+description: Qwen3-8B wallet fine-tune (downloaded from the Hub) — publish check
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-ft-from-hub
+    config:
+      repo_id: ef-dai-team/qwen3-8b-wallet-ft
+      filename: qwen3-8b-wallet-ft.Q4_K_M.gguf
+      tool_format: json
+      system_role: system
+      n_ctx: 8192
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 2048
+      n_gpu_layers: -1
+      timeout: 1800000
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.generated.yaml') }}"

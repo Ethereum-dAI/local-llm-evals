@@ -42,10 +42,12 @@ from typing import Any
 
 from wallet_evals.functiongemma import (
     decode_prompt,
+    json_output_to_scoreable,
     raw_output_to_scoreable,
     tool_calls_to_scoreable,
 )
 from wallet_evals.gemma_dsl import DIALECTS
+from wallet_evals.llama_serving import sampling_kwargs
 
 _TOOLS_PATH = Path(__file__).with_name("tools.json")
 # Cache keyed by model identity, NOT a single global: a base-vs-fine-tuned config
@@ -59,14 +61,22 @@ def _load_model(config: dict[str, Any]):
     n_ctx = int(config.get("n_ctx", 4096))
     model_path = config.get("model_path")
     revision = config.get("revision")
-    key = (model_path, config.get("repo_id"), config.get("filename"), revision, n_ctx)
+    key = (model_path, config.get("repo_id"), config.get("filename"), revision,
+           n_ctx)
     if key in _llms:
         return _llms[key]
 
     from llama_cpp import Llama  # heavy, optional dep — import only when serving
 
+    # Default 0 = CPU only, which is what every earlier local run used. -1 offloads
+    # every layer to Metal: same weights, same quantization, same sampling — only
+    # the backend doing the arithmetic changes — but ~an order of magnitude less
+    # wall clock, which is the difference between a 1-hour and a 10-hour run.
+    n_gpu_layers = int(config.get("n_gpu_layers", 0))
+
     if model_path:
-        llm = Llama(model_path=model_path, n_ctx=n_ctx, verbose=False)
+        llm = Llama(model_path=model_path, n_ctx=n_ctx, n_gpu_layers=n_gpu_layers,
+                    verbose=False)
     elif revision:
         # Pinned revision: llama-cpp's from_pretrained globs the repo's `main`
         # branch, but the wallet's Q4_K_M was deleted from main (it lives only at
@@ -76,12 +86,14 @@ def _load_model(config: dict[str, Any]):
 
         path = hf_hub_download(repo_id=config["repo_id"],
                                filename=config["filename"], revision=revision)
-        llm = Llama(model_path=path, n_ctx=n_ctx, verbose=False)
+        llm = Llama(model_path=path, n_ctx=n_ctx, n_gpu_layers=n_gpu_layers,
+                    verbose=False)
     else:
         llm = Llama.from_pretrained(
             repo_id=config["repo_id"],
             filename=config.get("filename", "*.gguf"),
             n_ctx=n_ctx,
+            n_gpu_layers=n_gpu_layers,
             verbose=False,
         )
     _llms[key] = llm
@@ -95,16 +107,27 @@ def _load_tools(config: dict[str, Any]) -> list[dict]:
 
 def call_api(prompt: str, options: dict, context: dict) -> dict:
     config = (options or {}).get("config", {}) or {}
+    # `tool_format` selects how the model's OUTPUT is read: the Gemma DSL (default,
+    # unchanged for the Gemma-family providers) or JSON-in-text, which is what the
+    # Qwen3 fine-tune emits.
+    tool_format = config.get("tool_format", "gemma")
     dialect = DIALECTS[config.get("dialect", "functiongemma")]
     system_role = config.get("system_role", "developer")
     try:
         llm = _load_model(config)
         messages = decode_prompt(prompt, system_role=system_role)
+        tools = _load_tools(config)
+        # top_p/top_k/min_p are passed only when the config names them, so the
+        # Gemma-family providers keep llama-cpp's defaults untouched while a
+        # model whose card prescribes sampling (Qwen3) can be run the way its
+        # authors specify.
+        sampling = sampling_kwargs(config)
         resp = llm.create_chat_completion(
             messages=messages,
-            tools=_load_tools(config),
+            tools=tools,
             temperature=float(config.get("temperature", 0.2)),
             max_tokens=int(config.get("max_tokens", 1024)),
+            **sampling,
         )
     except Exception as e:  # surface as a case error, not a crashed run
         return {"output": "", "error": f"{type(e).__name__}: {e}"}
@@ -115,6 +138,8 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
     native = message.get("tool_calls")
     if isinstance(native, list) and native:
         output = tool_calls_to_scoreable(native)
+    elif tool_format == "json":
+        output = json_output_to_scoreable(message.get("content") or "")
     else:
         output = raw_output_to_scoreable(message.get("content") or "", dialect)
     result: dict[str, Any] = {"output": output}

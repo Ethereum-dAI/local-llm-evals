@@ -33,6 +33,7 @@ WALLET_EVALS_MODULES = (
     "__init__.py",
     "functiongemma.py",
     "gemma_dsl.py",
+    "json_tool_calls.py",
     "parsing.py",
     "promptfoo.py",
     "schema.py",

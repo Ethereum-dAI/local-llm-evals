@@ -22,6 +22,14 @@ local = [
     "llama-cpp-python>=0.3.0",
     "huggingface-hub>=0.24",
 ]
+# Optional: only needed to serve those same GGUFs from Modal GPUs instead of the
+# local CPU/Metal box (pf/provider_modal_gguf.py + scripts/modal_gguf_infer.py).
+# It has to live in the venv itself, not `uv run --with modal`, because promptfoo
+# imports the provider under $PROMPTFOO_PYTHON.
+#   uv sync --group modal
+modal = [
+    "modal>=1.0",
+]
 
 [build-system]
 requires = ["hatchling"]

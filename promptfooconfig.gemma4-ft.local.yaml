@@ -1,0 +1,45 @@
+# RELAUNCH 2026-08-10 — our FINE-TUNED Gemma-4 E4B, the launch candidate.
+#
+#   scripts/eval.sh -c promptfooconfig.relaunch-gemma4-ft.yaml -j 1 --no-cache \
+#       -o relaunch/gemma4-ft.out.json
+#
+# -j 1 is REQUIRED: see the base config. Same quant (Q4_K_M) and same decoding
+# params as the base run, so the base-vs-ft delta isolates the fine-tune and not
+# the serving setup.
+#
+# model_path (not repo_id) on purpose: downloaded once to models/ under an
+# explicit name from ef-dai-team/gemma-4-E4B-wallet-ft, so the run never depends
+# on HF cache resolution. This model is NOT available on OpenRouter — a private
+# fine-tune has no hosted endpoint — so local llama-cpp is the only way to score
+# the artifact the wallet would actually ship.
+description: gemma-4-E4B fine-tune (local Q4_K_M, Metal) — same-machine control for the Qwen3-8B fine-tuned (Q4_K_M, local) — 307-case dev set
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft
+    config:
+      model_path: models/gemma4-e4b-ft.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      # Metal offload: verified verdict-identical to CPU (307/307 on phi-4-mini),
+      # ~8x faster. Added so this re-run finishes alongside the Modal training.
+      n_gpu_layers: -1
+      # See the base config: 300 s default drops slow cases from the denominator
+      # instead of failing them. This model is the slower of the two (it emits a
+      # <think> trace, ~3.3x the base's median latency), so it is the more
+      # exposed of the pair — and losing cases from the CANDIDATE's denominator
+      # is exactly the error that would flatter a ship decision.
+      timeout: 1800000
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.generated.yaml') }}"

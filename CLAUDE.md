@@ -206,6 +206,78 @@ Two constraints when touching `DATASET_FILES`:
 `add_local_file` in the published repo before it existed. `deploy.sh` uploads
 with `--delete "*"` so a file that moves in the manifest doesn't linger.
 
+## The Qwen3-8B fine-tune
+
+Third fine-tune, and the best on-device score so far: **86.0%** (vs 41.0% untuned
+and 83.7% for the Gemma-4 fine-tune re-measured the same day). Published at
+[`ef-dai-team/qwen3-8b-wallet-ft`](https://huggingface.co/ef-dai-team/qwen3-8b-wallet-ft).
+
+```bash
+uv run python scripts/generate_qwen_finetune_data.py     # 1739 rows, Hermes JSON
+uv run --with modal modal run finetune/modal_finetune_qwen.py
+uv run --with modal modal run finetune/modal_export_qwen.py            # merge -> Q4_K_M
+uv run --with modal modal run finetune/modal_export_qwen.py --no-do-export --do-upload
+uv run --with modal modal volume get qwen-ft-outputs \
+    qwen3-8b-wallet-ft.Q4_K_M.gguf models/
+PROMPTFOO_CONFIG_DIR=.promptfoo-qft scripts/eval.sh -c promptfooconfig.qwen3-ft.yaml \
+    -j 1 --no-cache -o relaunch/qwen3-ft.out.json
+uv run python scripts/compare_all_models.py              # the table
+```
+
+It trains on the SAME 1739 rows as the Gemma-4 set, only re-encoded — asserted by
+`test_same_rows_as_the_gemma4_set`, because if the rows drift the comparison
+measures data rather than model. Targets are Hermes
+`<tool_call>{"name":…,"arguments":{…}}</tool_call>`, read back by
+`wallet_evals/json_tool_calls.py` (which decodes *wrappers* only — it will not
+repair malformed JSON, since that would erase a real failure).
+
+Four things that will burn an A100 hour if you touch this recipe:
+
+- **Import unsloth BEFORE trl.** unsloth patches TRL at import; alphabetise those
+  lines and the names bind the unpatched classes, and the run dies with
+  `eos_token '<EOS_TOKEN>' not found in vocabulary`. Three symptom-level fixes
+  failed before the import order turned out to be the cause.
+- **Never template the whole conversation for Qwen3.** Its chat template splits
+  assistant messages on `</think>` and re-emits only what follows, silently
+  deleting the target. Render `messages[:-1]` with `add_generation_prompt=True`
+  and append the target — which also makes training byte-identical to inference.
+  The all-masked-rows guard catches this; keep it.
+- **TRL renames things**: `max_seq_length`→`max_length`,
+  `tokenizer`→`processing_class`. The script picks whichever the installed
+  version declares rather than pinning.
+- **`modal volume get` can corrupt a 5 GB GGUF**: same byte count, different
+  sha256, and it loads and runs without error. `finetune/modal_hash_gguf.py`
+  hashes the file where it lives; check that before believing a benchmark of a
+  downloaded model.
+
+The fine-tune is **effectively deterministic despite T=0.6** — two full runs gave
+307/307 identical verdicts, and repeated probes give identical outputs. Its loss
+is 0.036, so the distribution is peaked enough that sampling rarely changes the
+token. Do not explain differences between its runs as sampling noise.
+
+## Where it still loses
+
+The remaining failures are **base-unit arithmetic**, not a reasoning-to-emission
+gap: the emitted call faithfully carries whatever the `<think>` trace computed.
+Most are a single decimal place out on large amounts, and they repeat identically
+across samples rather than drifting — see the "known weaknesses" section of the
+published model card. Safety refusals sit at 5/7, unchanged from the Gemma-4
+fine-tune and for the same reason: training holds ~1 example per safety category.
+
+## Two evals at once need two result DBs
+
+promptfoo writes every run to one SQLite DB under its config dir. Start a second
+`promptfoo eval` while one is running and both race for the write lock:
+`SQLITE_BUSY: database is locked` kills them mid-run — and the crash can still
+write an `-o` export **missing the cases it never reached** (one such export held
+289 of 307 and reported a plausible-looking 11.1%). Always check the case count;
+`report_relaunch.py` flags it with `<< only N cases!`.
+
+```bash
+PROMPTFOO_CONFIG_DIR=.promptfoo-a scripts/eval.sh -c … -o relaunch/a.json &
+PROMPTFOO_CONFIG_DIR=.promptfoo-b scripts/eval.sh -c … -o relaunch/b.json &
+```
+
 ## Conventions
 
 - `uv run` for Python; `uv run --with web3` for the (non-suite) fixture fetchers.
