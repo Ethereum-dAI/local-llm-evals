@@ -1,4 +1,4 @@
-"""Generate pf/tests.generated.yaml from datasets/seeds.yaml — deterministically.
+"""Generate pf/tests.app-contract.yaml from datasets/seeds.yaml — deterministically.
 
 For each seed: expand `vary` into concrete intents, then for each intent emit
 positive cases (one per surface template, with seeded mutation), plus one
@@ -9,6 +9,7 @@ Run: uv run python scripts/generate_cases.py
 """
 from __future__ import annotations
 
+import argparse
 import random
 from pathlib import Path
 
@@ -23,7 +24,11 @@ from wallet_evals.generation import (
 
 ROOT = Path(__file__).resolve().parent.parent
 SEEDS = ROOT / "datasets" / "seeds.yaml"
-OUT = ROOT / "pf" / "tests.generated.yaml"
+OUT = ROOT / "pf" / "tests.app-contract.yaml"
+# The base-unit dataset every published score was measured against. The builders
+# that produced it were replaced by the app-contract ones, so it can no longer be
+# regenerated — it is a frozen artifact and this script must never write it.
+FROZEN = ROOT / "pf" / "tests.generated.yaml"
 SEED = 20260608
 MAX_PER_ACTION = 150
 
@@ -78,6 +83,15 @@ def build_all(seeds: list[dict], rng: random.Random) -> dict[str, list[dict]]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", type=Path, default=OUT,
+                        help=f"destination YAML (default: {OUT.relative_to(ROOT)})")
+    args = parser.parse_args()
+    out = args.out.resolve()
+    if out == FROZEN.resolve():
+        parser.error(f"{FROZEN.relative_to(ROOT)} is the frozen base-unit dataset "
+                     "and is no longer generated; pick another --out")
+
     seeds = yaml.safe_load(SEEDS.read_text())
     rng = random.Random(SEED)
     by_action = build_all(seeds, rng)
@@ -97,8 +111,8 @@ def main() -> None:
         f"{SEED}).\n"
         "# Gold is computed from each seed intent; surfaces carry deterministic noise.\n"
     )
-    OUT.write_text(header + yaml.safe_dump(selected, sort_keys=False, allow_unicode=True))
-    print(f"Wrote {len(selected)} cases -> {OUT}")
+    out.write_text(header + yaml.safe_dump(selected, sort_keys=False, allow_unicode=True))
+    print(f"Wrote {len(selected)} cases -> {out}")
 
 
 if __name__ == "__main__":
