@@ -82,7 +82,7 @@ def test_convert_swap_exact_in():
     assert call["amount_side"] == "input"
 
 
-def test_convert_swap_native_eth_uses_zero_address():
+def test_convert_swap_native_eth_from_token():
     raw = {"id": "swap-en-002", "user_message": "Swap 1 ETH for USDC", "category": "truePositiveSwap",
            "language": "english", "expected_tool": "swap",
            "expected_args": {"from_token": {"kind": "exact", "value": "ETH"},

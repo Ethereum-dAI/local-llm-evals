@@ -3,10 +3,10 @@
 `pf/tests.yaml` is the single source of truth for test cases: a promptfoo-native
 list of tests, each `{vars: {user_message}, metadata: {gold + slices}}`. This
 script generates it from the Swift app's recognition.json so the dataset stays
-reproducible from the production source. Swaps become the synthetic `swap`
-intent; transfers/approvals become `executeTx`; ambiguous cases become no-call.
-Exact-output swaps, "all" amounts, and unresolved ENS/tokens are reported as
-needing manual authoring. Resolution uses datasets/lookup.json, here only.
+reproducible from the production source. Transfers become the app-contract `transfer`
+(recipient copied, amount in human units); swaps become `swap` (token symbols);
+ambiguous cases become no-call. Cases needing manual authoring: unknown token symbols,
+"all" amounts, exact-output swaps, and unknown swap currencies.
 """
 from __future__ import annotations
 
@@ -94,8 +94,8 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
 
     requires: list[str] = []
     if to_value in LOOKUP["ens"]:
-        # Gold carries the resolved address, so passing demands ENS resolution —
-        # flag it so the report can slice this capability out.
+        # Flag cases whose recipient is a known ENS name, so the report can slice
+        # how models handle named recipients — the wallet does the resolving.
         requires.append("ens_resolution")
     if not token.get("native"):
         requires.append("token_address_lookup")
