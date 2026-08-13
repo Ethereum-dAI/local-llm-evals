@@ -72,3 +72,24 @@ def test_expected_summary_var_is_not_leaked_to_model():
     chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth",
                             "expected_summary": "executeTx to 0xSECRETGOLD (native)"}})
     assert all("0xSECRETGOLD" not in m["content"] for m in chat)
+
+
+def test_system_states_the_app_contract():
+    assert "HUMAN units" in SYSTEM
+    assert "thousands separators" in SYSTEM
+    assert "NOT resolve it to an address yourself" in SYSTEM
+    assert "Never convert to wei or base units" in SYSTEM
+
+
+def test_system_no_longer_demands_base_units_or_ens_resolution():
+    # These two conventions are what made the model do the wallet's job in Swift.
+    assert "Convert every human amount to base units" not in SYSTEM
+    assert "Resolve any ENS name or token symbol to its address" not in SYSTEM
+
+
+def test_aave_reference_still_carries_the_base_unit_rule():
+    # The protocol datasets keep executeTx + base units, so the rule must survive
+    # in the reference block that renders only for them.
+    chat = render({"vars": {"user_message": "Supply 3 USDC to Aave v3.",
+                            "protocol": "aave"}})
+    assert "base units" in chat[1]["content"]
