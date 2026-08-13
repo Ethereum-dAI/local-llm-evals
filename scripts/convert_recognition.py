@@ -17,7 +17,7 @@ from pathlib import Path
 import yaml
 
 from wallet_evals.intents import (
-    LOOKUP, resolve_recipient, swap_currency,
+    LOOKUP, swap_currency,
     build_transfer_call, build_swap_call, format_expected_summary,
 )
 
@@ -88,11 +88,9 @@ def convert_case(raw: dict) -> tuple[dict | None, str | None]:
         return None, raw["id"]
 
     to_value = args["to"]["value"]
-    recipient = resolve_recipient(to_value)
-    if recipient is None:
-        return None, raw["id"]
-
-    call = build_transfer_call(amount, token_sym, recipient)
+    # App contract: the recipient is copied, not resolved, so any surface form is
+    # answerable and nothing needs to fall out to manual conversion here.
+    call = build_transfer_call(amount, token_sym, to_value)
 
     requires: list[str] = []
     if to_value in LOOKUP["ens"]:
