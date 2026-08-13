@@ -11,7 +11,9 @@ import re
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-from wallet_evals.schema import PRIVACY_TOOLS, Case, ExpectedCall, ParsedToolCall, ParsedTurn
+from wallet_evals.schema import (
+    HUMAN_UNIT_TOOLS, PRIVACY_TOOLS, Case, ExpectedCall, ParsedToolCall, ParsedTurn,
+)
 
 # Lowercase any 0x-prefixed string so checksummed and lowercased address/bytes
 # forms compare equal. Non-0x values (decimal amounts, function signatures) are
@@ -50,18 +52,6 @@ def _swap_min_out(name: str, v: str | None) -> str | None:
     return "0" if (name == "swap" and v is None) else v
 
 
-def _privacy_token(name: str, v: Any) -> Any:
-    """shield/unshield are ETH-only, and the app's own SlashCommandParser fills in
-    `token: "ETH"` when it is absent — so omitting it is correct, not a miss.
-    Symbol case carries no meaning either ("eth" and "ETH" are one token, and the
-    case mutator lowercases the surface), so fold it: this erases a formatting
-    difference, not a capability gap. Scoped to shield/unshield — a stray `token`
-    on another tool is ignored, as it was before these fields existed."""
-    if name not in PRIVACY_TOOLS:
-        return None
-    return "eth" if v is None else (v.lower() if isinstance(v, str) else v)
-
-
 def _dec_or_raw(v: Any) -> Any:
     """Fold a human-unit amount to its numeric form: "0.010" and "0.01" are the
     same deposit and round-trip to identical wei. Unparseable values fall back to
@@ -74,11 +64,45 @@ def _dec_or_raw(v: Any) -> Any:
         return v
 
 
-def _privacy_amount(name: str, v: Any) -> Any:
-    """`amount` scoped to shield/unshield, like the swap defaults above: it is not
-    in any other tool's schema, so a stray one is noise the app would drop on
-    decode — ignore it rather than newly failing an otherwise-correct executeTx."""
-    return _dec_or_raw(v) if name in PRIVACY_TOOLS else None
+def _symbol(name: str, v: Any) -> Any:
+    """A token SYMBOL on a human-unit tool. Missing means ETH: the app's transfer
+    schema marks `token` optional and documents "Default to ETH if the user does not
+    name a token", and shield/unshield are ETH-only. Symbol case carries no meaning
+    ("eth" and "ETH" are one token, and the case mutator lowercases the surface), so
+    fold it — this erases a formatting difference, not a capability gap."""
+    if name not in HUMAN_UNIT_TOOLS:
+        return None
+    return "eth" if v is None else (v.lower() if isinstance(v, str) else v)
+
+
+def _symbol_strict(name: str, v: Any) -> Any:
+    """from_token/to_token: same case folding, but NO default — the app's swap marks
+    both required, so an omitted side is a real miss."""
+    if name not in HUMAN_UNIT_TOOLS:
+        return None
+    return v.lower() if isinstance(v, str) else v
+
+
+def _human_amount(name: str, v: Any) -> Any:
+    """`amount` scoped to the human-unit tools, folded to its numeric value. Not in
+    any other tool's schema, so a stray one is noise the app would drop on decode."""
+    return _dec_or_raw(v) if name in HUMAN_UNIT_TOOLS else None
+
+
+def _swap_side(name: str, v: Any) -> Any:
+    """The app's swap pins amount_side to the single enum value "input", so omitting
+    it is accepting the only legal value."""
+    return ("input" if v is None else v) if name == "swap" else None
+
+
+def _recipient_text(name: str, v: Any) -> Any:
+    """`to` on a human-unit tool is the surface string the user wrote, not a resolved
+    address, so fold case for ENS and contact names too — mutate_case sends
+    "ViTALik.eTh" and ENS resolution is case-insensitive. Other tools keep the
+    0x-only rule."""
+    if name not in HUMAN_UNIT_TOOLS:
+        return _norm_scalar(v)
+    return v.lower() if isinstance(v, str) else v
 
 
 def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
@@ -86,7 +110,8 @@ def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
         return False
     if expected.chainId != actual.chainId:
         return False
-    if _norm_scalar(expected.to) != _norm_scalar(actual.to):
+    if _recipient_text(expected.tool, expected.to) != \
+            _recipient_text(actual.name, actual.to):
         return False
     if _value_or_zero(expected.value) != _value_or_zero(actual.value):
         return False
@@ -107,12 +132,20 @@ def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
     if _swap_min_out(expected.tool, expected.amountOutMinimum) != \
             _swap_min_out(actual.name, actual.amountOutMinimum):
         return False
-    # RAILGUN privacy fields (None on both sides for every other tool).
-    if _privacy_amount(expected.tool, expected.amount) != \
-            _privacy_amount(actual.name, actual.amount):
+    # App-contract human-unit fields (None on both sides for executeTx/readTx).
+    if _human_amount(expected.tool, expected.amount) != \
+            _human_amount(actual.name, actual.amount):
         return False
-    if _privacy_token(expected.tool, expected.token) != \
-            _privacy_token(actual.name, actual.token):
+    if _symbol(expected.tool, expected.token) != _symbol(actual.name, actual.token):
+        return False
+    if _symbol_strict(expected.tool, expected.from_token) != \
+            _symbol_strict(actual.name, actual.from_token):
+        return False
+    if _symbol_strict(expected.tool, expected.to_token) != \
+            _symbol_strict(actual.name, actual.to_token):
+        return False
+    if _swap_side(expected.tool, expected.amount_side) != \
+            _swap_side(actual.name, actual.amount_side):
         return False
     return True
 
@@ -134,7 +167,8 @@ def score_case(case: Case, turn: ParsedTurn) -> int:
 _CALL_FIELDS = (
     ("tool", lambda e: e.tool, lambda a: a.name, lambda x: x),
     ("chainId", lambda e: e.chainId, lambda a: a.chainId, lambda x: x),
-    ("to", lambda e: e.to, lambda a: a.to, _norm_scalar),
+    ("to", lambda e: _recipient_text(e.tool, e.to),
+     lambda a: _recipient_text(a.name, a.to), lambda x: x),
     ("value", lambda e: e.value, lambda a: a.value, lambda x: _value_or_zero(x)),
     ("function", lambda e: e.function, lambda a: a.function, lambda x: x),
     ("args", lambda e: e.args, lambda a: a.args, _norm),
@@ -148,8 +182,14 @@ _CALL_FIELDS = (
     # Raw getters so the reason string shows what the model actually emitted
     # ("expected '0.01' got '10000000000000000'"), not the folded compare form.
     ("amount", lambda e: e.amount, lambda a: a.amount, _dec_or_raw),
-    ("token", lambda e: _privacy_token(e.tool, e.token),
-     lambda a: _privacy_token(a.name, a.token), lambda x: x),
+    ("token", lambda e: _symbol(e.tool, e.token),
+     lambda a: _symbol(a.name, a.token), lambda x: x),
+    ("from_token", lambda e: _symbol_strict(e.tool, e.from_token),
+     lambda a: _symbol_strict(a.name, a.from_token), lambda x: x),
+    ("to_token", lambda e: _symbol_strict(e.tool, e.to_token),
+     lambda a: _symbol_strict(a.name, a.to_token), lambda x: x),
+    ("amount_side", lambda e: _swap_side(e.tool, e.amount_side),
+     lambda a: _swap_side(a.name, a.amount_side), lambda x: x),
 )
 
 
