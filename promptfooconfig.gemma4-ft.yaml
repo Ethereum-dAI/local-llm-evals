@@ -26,6 +26,11 @@ providers:
       n_ctx: 4096
       temperature: 0.2
       max_tokens: 1024
+      # Metal offload: verified verdict-identical to CPU, ~8x faster.
+      n_gpu_layers: -1
+      # The 300 s default silently dropped 14 cases to empty output on the
+      # published run and scored them as failures. Fail slow cases, don't lose them.
+      timeout: 1800000
   # Fine-tuned: our bf16-merged Q4_K_M GGUF, pulled from the public HF repo.
   - id: file://pf/provider_functiongemma.py:call_api
     label: gemma4-e4b-ft
