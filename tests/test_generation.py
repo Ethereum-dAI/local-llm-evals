@@ -118,12 +118,13 @@ def test_expand_vary_deterministic():
 from wallet_evals.generation import gold_calls, build_positive_case
 
 
-def test_gold_calls_transfer_resolves_ens():
+def test_gold_calls_transfer_passes_recipient_through_unresolved():
     intent = {"action": "transfer", "amount": "0.1", "token": "ETH",
               "recipient": "vitalik.eth"}
     calls = gold_calls(intent)
-    assert calls[0]["to"] == "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-    assert calls[0]["value"] == "100000000000000000"
+    assert calls[0]["to"] == "vitalik.eth"
+    assert calls[0]["amount"] == "0.1"
+    assert calls[0]["token"] == "ETH"
 
 
 def test_gold_calls_swap():
@@ -131,7 +132,8 @@ def test_gold_calls_swap():
               "to_token": "ETH"}
     calls = gold_calls(intent)
     assert calls[0]["tool"] == "swap"
-    assert calls[0]["amountIn"] == "100000000"
+    assert calls[0]["amount"] == "100"
+    assert calls[0]["from_token"] == "USDC" and calls[0]["to_token"] == "ETH"
 
 
 def test_build_positive_case_structure():
@@ -146,7 +148,7 @@ def test_build_positive_case_structure():
     assert md["level"] == "payload"
     assert md["protocol"] == "transfer"
     assert md["source"] == "generated"
-    assert md["expected_calls"][0]["value"] == "100000000000000000"
+    assert md["expected_calls"][0]["amount"] == "0.1"
 
 
 from wallet_evals.generation import (
@@ -189,7 +191,7 @@ def test_build_multiturn_case_three_turns_and_full_gold():
     md = case["metadata"]
     assert md["id"] == "gen-transfer-mt-0003"
     assert md["level"] == "payload"
-    assert md["expected_calls"][0]["value"] == "100000000000000000"  # full gold
+    assert md["expected_calls"][0]["amount"] == "0.1"  # full gold
 
 
 def test_multiturn_has_no_user_message_var():
@@ -218,7 +220,7 @@ def test_build_all_drops_self_swaps():
     for case in cases:
         calls = case["metadata"]["expected_calls"]
         for call in calls:
-            assert call.get("currencyIn") != call.get("currencyOut")
+            assert call.get("from_token") != call.get("to_token")
 
 
 def test_load_cases_supports_messages(tmp_path):

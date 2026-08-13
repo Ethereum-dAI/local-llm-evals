@@ -13,7 +13,7 @@ import re
 from typing import Callable
 
 from wallet_evals.intents import (
-    resolve_recipient, build_transfer_call, build_swap_call, format_expected_summary,
+    build_transfer_call, build_swap_call, format_expected_summary,
 )
 
 
@@ -199,12 +199,13 @@ def expand_vary(seed: dict, rng: random.Random) -> list[dict]:
 def gold_calls(intent: dict) -> list[dict]:
     """Compute the gold expected_calls for a fully-specified concrete intent."""
     if intent["action"] == "transfer":
-        recipient = resolve_recipient(intent["recipient"])
-        if recipient is None:
-            raise ValueError(f"unresolved recipient: {intent['recipient']!r}")
-        return [build_transfer_call(intent["amount"], intent["token"], recipient)]
+        # The recipient is passed through verbatim: under the app contract the model
+        # copies what the user wrote, so there is nothing to resolve or to fail on.
+        return [build_transfer_call(intent["amount"], intent["token"],
+                                    intent["recipient"])]
     if intent["action"] == "swap":
-        return [build_swap_call(intent["amount"], intent["from_token"], intent["to_token"])]
+        return [build_swap_call(intent["amount"], intent["from_token"],
+                                intent["to_token"])]
     raise ValueError(f"unknown action: {intent['action']!r}")
 
 

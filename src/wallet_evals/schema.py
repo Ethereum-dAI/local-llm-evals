@@ -9,11 +9,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 _PREVIEW_WIDTH = 72
 
-ToolName = Literal["executeTx", "readTx", "swap", "shield", "unshield"]
+ToolName = Literal["executeTx", "readTx", "swap", "shield", "unshield", "transfer"]
 
 # Tools whose arguments mirror the macOS app's own ToolDefinitions verbatim:
-# a HUMAN-unit `amount` plus an ETH-only `token`, not a base-unit payload.
+# a HUMAN-unit `amount` plus a token SYMBOL, not a base-unit payload.
 PRIVACY_TOOLS = ("shield", "unshield")
+HUMAN_UNIT_TOOLS = ("transfer", "swap", "shield", "unshield")
 
 
 class PreviewContext(BaseModel):
@@ -50,6 +51,10 @@ class ExpectedCall(Previewable):
     # RAILGUN privacy fields (None for every other tool). `amount` is human units.
     amount: str | None = None
     token: str | None = None
+    # App-contract swap fields (None for every other tool). Symbols, not addresses.
+    from_token: str | None = None
+    to_token: str | None = None
+    amount_side: str | None = None
 
     def as_parsed_call(self) -> "ParsedToolCall":
         """This gold call as if a model had emitted it — used to assert that every
@@ -63,13 +68,14 @@ class ExpectedCall(Previewable):
             line = (f"  expected call #{ctx.call_index + 1}: {self.tool} "
                     f"(chainId={self.chainId}) amount={self.amount} token={self.token}")
             return line if self.to is None else f"{line} to={self.to}"
+        if self.tool == "transfer":
+            return (f"  expected call #{ctx.call_index + 1}: transfer "
+                    f"(chainId={self.chainId}) amount={self.amount} "
+                    f"token={self.token} to={self.to}")
         if self.tool == "swap":
-            lines = [
-                f"  expected call #{ctx.call_index + 1}: swap (chainId={self.chainId})",
-                f"      {self.currencyIn} -> {self.currencyOut}",
-                f"      amountIn={self.amountIn} amountOutMinimum={self.amountOutMinimum} recipient={self.recipient}",
-            ]
-            return "\n".join(lines)
+            return (f"  expected call #{ctx.call_index + 1}: swap "
+                    f"(chainId={self.chainId}) amount={self.amount} "
+                    f"{self.from_token} -> {self.to_token}")
         lines = [
             f"  expected call #{ctx.call_index + 1}: {self.tool} -> {self.to}",
             f"      chainId={self.chainId} value={self.value} function={self.function}",
@@ -126,6 +132,10 @@ class ParsedToolCall(BaseModel):
     # RAILGUN privacy fields (None for every other tool). `amount` is human units.
     amount: str | None = None
     token: str | None = None
+    # App-contract swap fields (None for every other tool). Symbols, not addresses.
+    from_token: str | None = None
+    to_token: str | None = None
+    amount_side: str | None = None
 
 
 class ParsedTurn(BaseModel):

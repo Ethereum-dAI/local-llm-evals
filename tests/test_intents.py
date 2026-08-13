@@ -24,31 +24,31 @@ def test_swap_currency_native_and_erc20():
     assert swap_currency("NOPE") is None
 
 
-def test_build_transfer_call_native():
-    call = build_transfer_call("0.1", "ETH", "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
+def test_build_transfer_call_is_human_units_and_unresolved_recipient():
+    # Mirrors ToolDefinitions.transfer in the macOS app: human decimal amount,
+    # token by symbol, recipient exactly as the user expressed it.
+    call = build_transfer_call("0.1", "ETH", "vitalik.eth")
     assert call == {
-        "tool": "executeTx", "chainId": CHAIN_ID,
-        "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-        "value": "100000000000000000", "function": None, "args": [],
+        "tool": "transfer", "chainId": CHAIN_ID,
+        "to": "vitalik.eth", "amount": "0.1", "token": "ETH",
     }
 
 
-def test_build_transfer_call_erc20():
+def test_build_transfer_call_erc20_does_not_encode_calldata():
     call = build_transfer_call("3", "USDC", "0x2222222222222222222222222222222222222222")
-    assert call["to"] == LOOKUP["tokens"]["USDC"]["address"]
-    assert call["value"] == "0"
-    assert call["function"] == "transfer(address,uint256)"
-    assert call["args"] == ["0x2222222222222222222222222222222222222222", "3000000"]
+    assert call == {
+        "tool": "transfer", "chainId": CHAIN_ID,
+        "to": "0x2222222222222222222222222222222222222222",
+        "amount": "3", "token": "USDC",
+    }
 
 
-def test_build_swap_call():
+def test_build_swap_call_is_symbols_and_human_units():
     call = build_swap_call("100", "USDC", "ETH")
-    assert call["tool"] == "swap"
-    assert call["currencyIn"] == LOOKUP["tokens"]["USDC"]["address"]
-    assert call["currencyOut"] == "0x0000000000000000000000000000000000000000"
-    assert call["amountIn"] == "100000000"
-    assert call["amountOutMinimum"] == "0"
-    assert call["recipient"] == "<wallet>"
+    assert call == {
+        "tool": "swap", "chainId": CHAIN_ID, "amount": "100",
+        "from_token": "USDC", "to_token": "ETH", "amount_side": "input",
+    }
 
 
 def test_build_transfer_call_unknown_token_raises():
@@ -74,9 +74,13 @@ def test_format_expected_summary_variants():
         "value": "0", "function": "transfer(address,uint256)", "args": ["0xR", "5"]}])
     assert "transfer(address,uint256)" in s and "args=['0xR', '5']" in s
     # swap
-    s = format_expected_summary([{"tool": "swap", "chainId": "1", "currencyIn": "0xA",
-        "currencyOut": "0xB", "amountIn": "7", "amountOutMinimum": "0", "recipient": "<wallet>"}])
-    assert "swap 0xA -> 0xB" in s and "amountIn=7" in s
+    s = format_expected_summary([{"tool": "swap", "chainId": "1", "amount": "7",
+        "from_token": "USDC", "to_token": "ETH", "amount_side": "input"}])
+    assert "swap 7 USDC -> ETH" in s
+    # transfer
+    s = format_expected_summary([{"tool": "transfer", "chainId": "1",
+        "to": "vitalik.eth", "amount": "0.1", "token": "ETH"}])
+    assert s == "transfer 0.1 ETH to vitalik.eth"
     # multi-call joins with " | "
     s = format_expected_summary([
         {"tool": "executeTx", "chainId": "1", "to": "0x1", "value": "1", "function": None, "args": []},

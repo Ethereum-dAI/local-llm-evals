@@ -44,32 +44,28 @@ def swap_currency(symbol: str) -> tuple[str, int] | None:
     return token["address"], token["decimals"]
 
 
-def build_transfer_call(amount: str, token_sym: str, recipient_addr: str) -> dict:
-    """Build an executeTx gold call for a transfer of `amount` `token_sym`."""
-    token = LOOKUP["tokens"].get(token_sym)
-    if token is None:
+def build_transfer_call(amount: str, token_sym: str, recipient_raw: str) -> dict:
+    """Gold for an app-contract transfer.
+
+    Mirrors the macOS app's ToolDefinitions.transfer the same way build_shield_call
+    mirrors ToolDefinitions.shield: a HUMAN decimal `amount`, a token SYMBOL, and the
+    recipient exactly as the user expressed it ("Pass the value as the user expressed
+    it - do not attempt to resolve ENS yourself"). The app converts and resolves in
+    Swift, so asking the model to do it measured work the wallet never requests.
+    """
+    if token_sym not in LOOKUP["tokens"]:
         raise ValueError(f"unknown token symbol: {token_sym!r}")
-    if token.get("native"):
-        return {"tool": "executeTx", "chainId": CHAIN_ID, "to": recipient_addr,
-                "value": to_base_units(amount, token["decimals"]),
-                "function": None, "args": []}
-    return {"tool": "executeTx", "chainId": CHAIN_ID, "to": token["address"], "value": "0",
-            "function": "transfer(address,uint256)",
-            "args": [recipient_addr, to_base_units(amount, token["decimals"])]}
+    return {"tool": "transfer", "chainId": CHAIN_ID, "to": recipient_raw,
+            "amount": str(amount), "token": token_sym}
 
 
 def build_swap_call(amount: str, from_sym: str, to_sym: str) -> dict:
-    """Build a synthetic swap gold call (exact-input)."""
-    cin = swap_currency(from_sym)
-    cout = swap_currency(to_sym)
-    if cin is None or cout is None:
-        raise ValueError(f"unknown swap currency: {from_sym!r} or {to_sym!r}")
-    in_addr, in_dec = cin
-    out_addr, _ = cout
-    return {"tool": "swap", "chainId": CHAIN_ID,
-            "currencyIn": in_addr, "currencyOut": out_addr,
-            "amountIn": to_base_units(amount, in_dec),
-            "amountOutMinimum": "0", "recipient": "<wallet>"}
+    """Gold for an app-contract swap (exact-input, symbols not addresses)."""
+    for sym in (from_sym, to_sym):
+        if sym not in LOOKUP["tokens"]:
+            raise ValueError(f"unknown swap currency: {sym!r}")
+    return {"tool": "swap", "chainId": CHAIN_ID, "amount": str(amount),
+            "from_token": from_sym, "to_token": to_sym, "amount_side": "input"}
 
 
 def build_shield_call(amount: str, token_sym: str = "ETH") -> dict:
@@ -109,11 +105,12 @@ def format_expected_summary(calls: list[dict]) -> str:
         return "(no tool call)"
     lines: list[str] = []
     for c in calls:
+        if c.get("tool") == "transfer":
+            lines.append(f"transfer {c.get('amount')} {c.get('token')} to {c.get('to')}")
+            continue
         if c.get("tool") == "swap":
-            lines.append(
-                f"swap {c.get('currencyIn')} -> {c.get('currencyOut')} "
-                f"amountIn={c.get('amountIn')} minOut={c.get('amountOutMinimum')} "
-                f"recipient={c.get('recipient')}")
+            lines.append(f"swap {c.get('amount')} {c.get('from_token')} -> "
+                         f"{c.get('to_token')}")
             continue
         if c.get("tool") in ("shield", "unshield"):
             line = f"{c.get('tool')} {c.get('amount')} {c.get('token')}"
