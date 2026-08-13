@@ -10,9 +10,8 @@ python_version: "3.12"
 short_description: Local SLMs turning wallet requests into tool calls
 startup_duration_timeout: 1h
 models:
-  - ef-dai-team/functiongemma-270m-wallet-ft
+  - ef-dai-team/qwen3-8b-wallet-ft
   - ef-dai-team/gemma-4-E4B-wallet-ft
-  - unsloth/functiongemma-270m-it-GGUF
 ---
 
 # Wallet tool-call playground
@@ -43,14 +42,17 @@ that separates models.
 
 ## Honest result
 
-The 270M fine-tune this Space showcases (`ef-dai-team/functiongemma-270m-wallet-ft`)
-scores **8.8%** on the 307-case eval set, against **8.1%** for the untuned base —
-and **0% on every category that requires emitting a tool call**. All of its
-passing cases are ones where the correct answer is *not* to call a tool.
+The same 1739 synthetic rows and the same LoRA recipe were applied to two bases.
+`gemma-4-E4B` goes from **12.7% to 80.1%** on the 307-case eval set;
+`Qwen3-8B` goes from **41.0% to 86.0%**, against a **95.8%** gpt-5 anchor. The
+weaker base gains far more (+67.4 pp vs +45.0 pp) and still finishes behind — so
+the dataset is not the binding constraint, the capability the base brought with
+it is.
 
-The same data and recipe applied to `gemma-4-E4B` reaches **80.1%**. The binding
-constraint is model capacity, not the dataset. Both models are selectable in the
-playground so the gap is visible live rather than asserted.
+Both fine-tunes are selectable in the playground, so the remaining gap to the
+anchor is visible live rather than asserted. Both are also still weak in the same
+place: safety refusals, 5 of 7, from roughly one training example per refusal
+category.
 
 ## Fidelity to the harness
 

@@ -6,9 +6,9 @@ colorTo: gray
 sdk: static
 app_file: index.html
 pinned: false
-short_description: 307 wallet requests, 7 models, exact-match scoring
+short_description: 307 wallet requests, 5 models, exact-match scoring
 models:
-  - ef-dai-team/functiongemma-270m-wallet-ft
+  - ef-dai-team/qwen3-8b-wallet-ft
   - ef-dai-team/gemma-4-E4B-wallet-ft
 datasets:
   - ef-dai-team/wallet-tool-calling-ft
@@ -18,22 +18,31 @@ datasets:
 
 An internal report on whether a small local model can turn a natural-language
 wallet request into the byte-exact tool call a macOS Ethereum wallet would
-execute. 307 cases, 7 models, deterministic binary scoring.
+execute. 307 cases, 5 models, deterministic binary scoring.
 
-The headline: **the FunctionGemma-270M fine-tune did not work.** It scores 8.8%
-against 8.1% for the untuned base, and 0% on every category that requires
-emitting a call. The same data and recipe take Gemma-4 E4B from 9.8% to 80.1%.
+The headline: **fine-tuning works, and the base model sets the ceiling.** The
+same 1739 synthetic rows and the same LoRA recipe take Gemma-4 E4B from 12.7% to
+80.1% and Qwen3-8B from 41.0% to 86.0%, against a 95.8% gpt-5 anchor. The weaker
+base gains far more and still finishes behind.
 
 ## What you're looking at
 
 `index.html` renders one tick per case per model, in dataset order — filled for
 an exact match, hollow for anything else. Cases are grouped transfer → swap →
 multi-turn → ablation → refusal, so a model that only ever passes by staying
-silent shows up as a cluster at the far right. That is exactly what the 270M
-fine-tune does.
+silent shows up as a cluster at the far right — 35 of the 307 cases want no tool
+call, which is why a headline percentage alone cannot be read as capability.
 
 Hover a tick to read the case; click it to open the full record below, where
 every model's recorded output appears verbatim next to the scorer's verdict.
+
+## One run vintage
+
+Every column comes from the 2026-08-10/11 relaunch — the first runs made after
+the tool list in the request grew from 3 tools to 5. A model shown 5 tools is
+answering a different question from one shown 3, so earlier runs (gpt-4o-mini,
+Gemma-4 26B-A4B, and both FunctionGemma-270M columns) are not shown here rather
+than being silently mixed in. Bringing them back means re-running them.
 
 ## Provenance
 
@@ -51,7 +60,7 @@ comes from the same deterministic scorer that produced the strips.
 
 Hosting a Gradio Space requires a Team plan on `ef-dai-team` (verified: the API
 returns 402 for both `cpu-basic` and `zero-a10g`). The interactive playground —
-live inference over all three local GGUFs with the same prompt, tools and
-scorer — is written and lives in `space/` in the harness repo. Assemble it with
+live inference over the local GGUFs with the same prompt, tools and scorer — is
+written and lives in `space/` in the harness repo. Assemble it with
 `uv run python space/stage.py gradio`, run it with `python app.py` from
 `space/build/gradio`, and it deploys unchanged once the org is upgraded.
