@@ -12,7 +12,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from wallet_evals.schema import (
-    HUMAN_UNIT_TOOLS, PRIVACY_TOOLS, Case, ExpectedCall, ParsedToolCall, ParsedTurn,
+    HUMAN_UNIT_TOOLS, TOKEN_TOOLS, Case, ExpectedCall, ParsedToolCall, ParsedTurn,
 )
 
 # Lowercase any 0x-prefixed string so checksummed and lowercased address/bytes
@@ -65,20 +65,26 @@ def _dec_or_raw(v: Any) -> Any:
 
 
 def _symbol(name: str, v: Any) -> Any:
-    """A token SYMBOL on a human-unit tool. Missing means ETH: the app's transfer
-    schema marks `token` optional and documents "Default to ETH if the user does not
-    name a token", and shield/unshield are ETH-only. Symbol case carries no meaning
-    ("eth" and "ETH" are one token, and the case mutator lowercases the surface), so
-    fold it — this erases a formatting difference, not a capability gap."""
-    if name not in HUMAN_UNIT_TOOLS:
+    """`token`: a token SYMBOL, scoped to TOKEN_TOOLS (transfer/shield/unshield —
+    swap names its sides from_token/to_token instead, so `token` is not in its
+    schema and a stray one there is noise the app would drop on decode, not a
+    miss). Missing means ETH: the app's transfer schema marks `token` optional
+    and documents "Default to ETH if the user does not name a token", and
+    shield/unshield are ETH-only. Symbol case carries no meaning ("eth" and "ETH"
+    are one token, and the case mutator lowercases the surface), so fold it —
+    this erases a formatting difference, not a capability gap."""
+    if name not in TOKEN_TOOLS:
         return None
     return "eth" if v is None else (v.lower() if isinstance(v, str) else v)
 
 
 def _symbol_strict(name: str, v: Any) -> Any:
-    """from_token/to_token: same case folding, but NO default — the app's swap marks
-    both required, so an omitted side is a real miss."""
-    if name not in HUMAN_UNIT_TOOLS:
+    """from_token/to_token: scoped to swap ONLY — it is the only tool whose schema
+    carries these fields, so a stray one on transfer/shield/unshield is noise the
+    app would drop on decode, not a miss. Same case folding as `_symbol`, but NO
+    default — the app's swap marks both sides required, so an omitted side is a
+    real miss."""
+    if name != "swap":
         return None
     return v.lower() if isinstance(v, str) else v
 

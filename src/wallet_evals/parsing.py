@@ -58,6 +58,9 @@ def _build_call(name: str, fields: dict[str, Any]) -> ParsedToolCall:
         recipient=_as_str(fields.get("recipient")),
         amount=_as_str(fields.get("amount")),
         token=_as_str(fields.get("token")),
+        from_token=_as_str(fields.get("from_token")),
+        to_token=_as_str(fields.get("to_token")),
+        amount_side=_as_str(fields.get("amount_side")),
     )
 
 

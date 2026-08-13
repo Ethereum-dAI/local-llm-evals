@@ -16,6 +16,10 @@ ToolName = Literal["executeTx", "readTx", "swap", "shield", "unshield", "transfe
 PRIVACY_TOOLS = ("shield", "unshield")
 HUMAN_UNIT_TOOLS = ("transfer", "swap", "shield", "unshield")
 
+# Tools whose schema carries a `token` field. Swap names its sides with
+# from_token/to_token instead, so `token` is not part of its schema.
+TOKEN_TOOLS = ("transfer", "shield", "unshield")
+
 
 class PreviewContext(BaseModel):
     """Optional context passed through the preview hierarchy."""

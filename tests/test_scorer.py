@@ -200,3 +200,18 @@ def test_app_swap_reversed_direction_fails():
         name="swap", chainId="1", amount="100", from_token="ETH",
         to_token="USDC", amount_side="input")])
     assert score_case(_app_swap_case(), turn) == 0
+
+
+def test_app_swap_stray_token_is_ignored():
+    # swap's schema has no `token` field (it names sides from_token/to_token
+    # instead), so a stray one is noise the app would drop on decode, not a miss.
+    turn = ParsedTurn(tool_calls=[ParsedToolCall(
+        name="swap", chainId="1", amount="100", from_token="USDC",
+        to_token="ETH", amount_side="input", token="USDC")])
+    assert score_case(_app_swap_case(), turn) == 1
+
+
+def test_transfer_stray_from_token_is_ignored():
+    # transfer's schema has no from_token/to_token field (that's swap-only), so a
+    # stray one is noise the app would drop on decode, not a miss.
+    assert score_case(_transfer_case(), _transfer_turn(from_token="ETH")) == 1
