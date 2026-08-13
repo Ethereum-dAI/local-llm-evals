@@ -42,6 +42,12 @@ providers:
       n_ctx: 4096
       temperature: 0.2
       max_tokens: 1024
+      # Metal offload: verified verdict-identical to CPU, ~8x faster.
+      n_gpu_layers: -1
+      # Both providers carry the 30-minute timeout so neither loses cases to the 300 s
+      # default. The base run lost 14 cases silently to that timeout, so both providers
+      # now fail slow cases instead of losing them from their denominator.
+      timeout: 1800000
 
 defaultTest:
   assert:
