@@ -12,9 +12,7 @@ The copies are materialised on demand, here, from one source of truth each.
 
     uv run python space/stage.py gradio     # -> space/build/gradio
     uv run python space/stage.py dataset    # -> space/build/dataset
-
-`space/static/` is uploaded directly and deliberately has no staging step: it
-duplicates nothing, so there is nothing to assemble.
+    uv run python space/stage.py static     # -> space/build/static
 """
 from __future__ import annotations
 
@@ -115,7 +113,24 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
     *tuple((m, m) for m in GENERATOR_MODULES),
 )
 
-TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES}
+# The static report. It used to upload straight from `space/static/`, which was
+# true for as long as every file it needed lived there. The benchmark chart does
+# not — `charts/chart-scores.jpg` is also what `scripts/export_chart_images.py`
+# writes and what gets pasted into decks — so it gets staged like everything else
+# rather than copied under space/.
+STATIC_FILES: tuple[tuple[str, str], ...] = (
+    ("space/static/README.md", "README.md"),
+    ("space/static/index.html", "index.html"),
+    ("space/static/data.json", "data.json"),
+    # Both charts are exports of `scripts/export_chart_images.py`, which writes
+    # into charts/. The headline one was once uploaded straight to the Space and
+    # existed nowhere else in this repo, so the next `--delete "*"` upload removed
+    # it. Listing it here is what makes it survive a redeploy.
+    ("charts/02-overall-accuracy.jpg", "overall-accuracy.jpg"),
+    ("charts/chart-scores.jpg", "chart-scores.jpg"),
+)
+
+TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES, "static": STATIC_FILES}
 
 
 def stage(target: str, dest: Path | None = None) -> Path:

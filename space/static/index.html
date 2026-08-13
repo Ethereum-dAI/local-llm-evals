@@ -113,7 +113,6 @@ a:hover{border-bottom-color:currentColor}
 .tk.on{fill:var(--pass)}
 .tk.off{fill:var(--ghost)}
 .strip svg .hit:hover + .tk, .strip svg .hit:focus-visible + .tk{fill:var(--ink)}
-.strip.is-subject .strip-name{color:var(--fail)}
 
 .axis{
   display:flex; margin-top:.6rem; font-family:var(--mono); font-size:.62rem;
@@ -172,6 +171,18 @@ td.num{font-family:var(--mono); font-variant-numeric:tabular-nums; text-align:ri
 td.cat{font-family:var(--mono); font-size:.78rem}
 .zero{color:var(--fail)}
 .full{color:var(--pass)}
+
+/* ---- figure --------------------------------------------------------- */
+.figure{margin:1.5rem 0 0; border:1px solid var(--rule); background:var(--panel)}
+.figure figcaption b{color:var(--ink); font-weight:500}
+/* The benchmark chart is a light-mode export from another harness. It keeps its
+   own white ground in dark mode — inverting or filtering a JPEG of a chart
+   wrecks the series colours, and a bordered white panel reads as an inset. */
+.figure img{display:block; width:100%; height:auto; background:#fff}
+.figure figcaption{
+  padding:.85rem 1.3rem; border-top:1px solid var(--rule);
+  font-family:var(--mono); font-size:.7rem; line-height:1.7; color:var(--muted);
+}
 
 /* ---- case browser --------------------------------------------------- */
 .controls{
@@ -303,30 +314,90 @@ footer{
   </section>
 
   <section class="section">
+    <p class="eyebrow">Headline</p>
+    <h2>What the fine-tune bought</h2>
+    <figure class="figure">
+      <img src="overall-accuracy.jpg" width="1680" height="636"
+           alt="Horizontal bar chart of overall accuracy on the 307-case wallet
+                tool-calling eval: Gemma-4 E4B Q4_K_M 12.7% (39/307), fine-tuned
+                Gemma-4 E4B Q4_K_M 80.1% (246/307), gpt-5 95.8% (294/307).">
+      <figcaption>
+        <b>Same prompt, same 307 cases, no cached responses.</b> The on-device
+        Gemma-4 the wallet ships scores 12.7%; the same model fine-tuned on the
+        synthetic set scores 80.1%, against a 95.8% hosted ceiling. Run of
+        2026-08-10 &mdash; the same run behind the first, second and fifth strips
+        above.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="section">
     <p class="eyebrow">The finding</p>
-    <h2>The 270M fine-tune only passes when the right answer is silence</h2>
+    <h2>The base model you start from sets the ceiling</h2>
     <p>
-      Read the top strip again. Every mark in it sits in the <strong>ablation</strong> and
-      <strong>refusal</strong> bands on the right — the cases where the correct behaviour is to
-      ask a clarifying question or refuse, and emit no call at all. Across
-      transfers, swaps and multi-turn, it is unbroken empty space.
+      The strips come in pairs: each fine-tune sits directly under the model it was
+      trained from, on the same 1739 synthetic rows with the same LoRA recipe. Both
+      pairs move a long way. They do not land in the same place, and the ordering
+      of the two fine-tunes is the ordering of the two bases.
     </p>
     <div class="callout">
       <p>
-        <strong>8.8% is not a score, it's an artefact.</strong> FunctionGemma-270M
-        wallet-ft scores 0/101 on transfers, 0/96 on swaps and 0/75 on multi-turn.
-        Its 27 passing cases are all cases where staying quiet is correct.
+        <strong>Same data, same recipe, different starting point.</strong> Gemma-4
+        E4B goes 12.7% &rarr; 80.1% (+67.4 pp). Qwen3-8B goes 41.0% &rarr; 86.0%
+        (+45.0 pp). The weaker base gains far more and still finishes behind.
       </p>
       <p>
-        The untuned base model scores 8.1% the same way. Fine-tuning moved the core
-        task by nothing.
+        So the training set is not the binding constraint — the same rows are
+        enough to teach both models the task. What separates the two results is the
+        capability each one brought with it, most of it base-unit arithmetic.
       </p>
       <p>
-        The same dataset and the same LoRA recipe take <strong>Gemma-4 E4B from 9.8% to
-        80.1%</strong>. The constraint is model capacity, not training data.
+        Both fine-tunes remain weak in the same place: <strong>safety refusals,
+        5 of 7</strong>. The training set contains roughly one example per refusal
+        category out of 1739 rows, which is the likely cause and a cheap fix.
       </p>
     </div>
+    <p>
+      Two things that are <em>not</em> held constant, stated rather than buried.
+      Each model runs at its own card's sampling — Qwen3 at 0.6/0.95/20 (its card
+      forbids greedy decoding), Gemma-4 at 0.2, gpt-5 at 0.1 — because a low score
+      from settings the authors warned against measures nothing. And the Qwen3
+      base column is hosted at full precision while its fine-tune is a Q4_K_M
+      file running on-device; quantization costs a few points rather than adding
+      them, so that pairing understates the gain rather than inventing it.
+    </p>
     <div class="tablewrap"><table id="cattable"></table></div>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Sanity check</p>
+    <h2>The E4B fine-tune did not trade away general capability</h2>
+    <p>
+      Training a model for one narrow skill invites the obvious objection: it got
+      better at wallet calls by getting worse at everything else. It did not.
+      Across six standard benchmarks nothing collapses: <strong>MMLU is 4.4 points
+      higher</strong> after fine-tuning, <strong>TruthfulQA 2.2 lower</strong>, and
+      the other four move by about a point or less. So the jump above is a skill
+      that was added, not traded for.
+    </p>
+    <p>
+      The Q4_K_M columns are the quantized builds that actually run on-device.
+      Quantization costs between 1 and 4.6 points depending on the benchmark, and
+      costs both models about the same, so it does not disturb the
+      base-vs-fine-tune comparison either.
+    </p>
+    <figure class="figure">
+      <img src="chart-scores.jpg" width="2400" height="1040"
+           alt="Grouped bar chart of MMLU, GSM8K, HellaSwag, ARC-Challenge,
+                Winogrande and TruthfulQA scores for four variants: gemma-4-E4B-it,
+                gemma-4-E4B-wallet-ft, and the Q4_K_M quantization of each. Within
+                every benchmark the four bars are close; no variant collapses.">
+      <figcaption>
+        Measured with lm-evaluation-harness 0.4.12 at temperature 0 &mdash; a
+        different harness from the 307 cases above, and no part of the exact-match
+        scoring. It is here as a guardrail, not as a result.
+      </figcaption>
+    </figure>
   </section>
 
   <section class="section" id="browser">
@@ -365,9 +436,8 @@ footer{
 
 <script>
 const DATASET_REPO = "ef-dai-team/wallet-tool-calling-ft";
-const MODEL_270M = "ef-dai-team/functiongemma-270m-wallet-ft";
+const MODEL_QWEN = "ef-dai-team/qwen3-8b-wallet-ft";
 const MODEL_E4B = "ef-dai-team/gemma-4-E4B-wallet-ft";
-const SUBJECT = "fg270m-ft";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
@@ -395,7 +465,7 @@ function strips() {
            + `<rect class="tk ${v ? "on" : "off"}" x="${x}" y="0" width="${TICK_W - TICK_GAP}"`
            + ` height="${TICK_H}" style="animation-delay:${delay}ms"></rect>`;
     }).join("");
-    return `<div class="strip${m.key === SUBJECT ? " is-subject" : ""}" data-model="${m.key}">
+    return `<div class="strip" data-model="${m.key}">
       <div class="strip-head">
         <span class="strip-name">${esc(m.display)}</span>
         <span class="strip-kind">${esc(m.kind)}</span>
@@ -448,8 +518,10 @@ function axis() {
 /* ---- per-category table ---------------------------------------------- */
 
 function catTable() {
-  const cols = ["fg270m", "fg270m-ft", "e4b", "e4b-ft", "gpt5"];
+  // Every model in the payload, in payload order — the table used to name its
+  // columns explicitly, which silently dropped a model the moment MODELS changed.
   const byKey = Object.fromEntries(DATA.models.map((m) => [m.key, m]));
+  const cols = DATA.models.map((m) => m.key);
   const head = `<thead><tr><th>Category</th><th>Cases</th>`
     + cols.map((k) => `<th style="text-align:right">${esc(byKey[k].display)}</th>`).join("")
     + `</tr></thead>`;
@@ -599,9 +671,9 @@ uv run python scripts/generate_gemma4_finetune_data.py \\
     </div>
     <div class="card">
       <h3>3 · Train and export</h3>
-      <p>LoRA r=16, α=16 via SFTTrainer, then merge and quantise to GGUF. Unsloth needs CUDA, so these run on Modal.</p>
-      <pre>modal run scripts/modal_finetune.py
-modal run scripts/modal_export.py</pre>
+      <p>LoRA r=16, α=16 via SFTTrainer, then merge and quantise to Q4_K_M GGUF. Unsloth needs CUDA, so these run on Modal.</p>
+      <pre>modal run scripts/modal_finetune_gemma4.py
+modal run scripts/modal_export_gemma4.py</pre>
     </div>
     <div class="card">
       <h3>4 · Score it — not from here</h3>
@@ -609,15 +681,15 @@ modal run scripts/modal_export.py</pre>
     </div>
     <div class="card">
       <h3>Get the models</h3>
-      <p>Both fine-tunes are <strong>public</strong> — no org membership needed. Each carries a merged GGUF plus the LoRA adapter.</p>
-      <pre>hf download ${MODEL_270M} \\
-  --include "*.gguf" --local-dir ./model-270m   # 291 MB
+      <p>Both fine-tunes are <strong>public</strong> — no org membership needed. Each carries a merged Q4_K_M GGUF plus the LoRA adapter.</p>
+      <pre>hf download ${MODEL_QWEN} \\
+  --include "*.gguf" --local-dir ./model-qwen   # 5.0 GB
 hf download ${MODEL_E4B} \\
   --include "*.gguf" --local-dir ./model-e4b    # 5.3 GB</pre>
       <ul>
-        <li><a href="https://huggingface.co/${MODEL_270M}">${MODEL_270M}</a> — the 270M fine-tune. Scores 8.8%; read its card first.</li>
-        <li><a href="https://huggingface.co/${MODEL_E4B}">${MODEL_E4B}</a> — the E4B fine-tune, 80.1%</li>
-        <li><a href="https://huggingface.co/unsloth/functiongemma-270m-it">unsloth/functiongemma-270m-it</a> — the base</li>
+        <li><a href="https://huggingface.co/${MODEL_QWEN}">${MODEL_QWEN}</a> — the Qwen3-8B fine-tune, 86.0%</li>
+        <li><a href="https://huggingface.co/${MODEL_E4B}">${MODEL_E4B}</a> — the Gemma-4 E4B fine-tune, 80.1%</li>
+        <li><a href="https://huggingface.co/Qwen/Qwen3-8B">Qwen/Qwen3-8B</a> and <a href="https://huggingface.co/ggml-org/gemma-4-E4B-it-GGUF">gemma-4-E4B-it</a> — the two bases</li>
       </ul>
     </div>
     <div class="card">

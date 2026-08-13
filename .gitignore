@@ -36,3 +36,7 @@ __pycache__/
 # Deployable trees assembled by space/stage.py from the canonical sources.
 # Never commit these — the copies are the thing we are avoiding.
 space/build/
+
+# Per-run promptfoo result DBs (concurrent runs each need their own config dir).
+# Several MB of SQLite each, and `.promptfoo/` above does not match them.
+.promptfoo-*/

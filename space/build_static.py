@@ -3,12 +3,16 @@
 The Space has no server, so everything it shows must be baked in here: the case
 list, the gold call, and — for every model — the output it actually produced and
 the scorer's verdict on it. Nothing is recomputed at view time and nothing is
-estimated; each row is lifted from a real `*.out.json` in the repo root.
+estimated; each row is lifted from a real promptfoo export under `relaunch/`.
+
+Those exports are gitignored, so `space/static/data.json` is the only committed
+record of the runs — which is why it is checked in and must not be ignored.
 
 Run from the repo root:  uv run python space/build_static.py
 """
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -51,26 +55,43 @@ BANDS = [
 
 # key -> (source run, provider label, display name, kind, note)
 # Every source run below covers all 307 cases, so the strips are comparable.
+#
+# ONE RUN VINTAGE, deliberately. Every column comes from the 2026-08-10/11
+# relaunch, which is the first set of runs made after `pf/tools.json` grew from 3
+# tools to 5 (railgun shield/unshield). A model shown 5 tools is answering a
+# different request from one shown 3, so the earlier runs — gpt-4o-mini,
+# Gemma-4 26B-A4B and both FunctionGemma-270M columns, all from
+# functiongemma-all.out.json (2026-07-09) — cannot share a strip chart with these
+# and are not listed. Re-running them is what it would take to bring them back.
+#
+# Ordered base -> fine-tune, twice, then the anchor: the page's whole argument is
+# the vertical distance between each pair.
 MODELS = [
-    ("fg270m-ft", "functiongemma.ft.out.json", "functiongemma-ft",
-     "FunctionGemma-270M wallet-ft", "local",
-     "The fine-tune. LoRA on 1739 examples, exported Q8_0."),
-    ("fg270m", "functiongemma-all.out.json", "functiongemma-270m-it",
-     "FunctionGemma-270M base", "local",
-     "What it started from, untuned."),
-    ("e4b", "gemma4.ft.out.json", "gemma4-e4b-base",
+    ("e4b", "relaunch/gemma4-base.final.json", "gemma4-e4b-base",
      "Gemma-4 E4B base", "local",
      "The GGUF the wallet actually ships today."),
-    ("e4b-ft", "gemma4ft.fresh.out.json", "gemma4-e4b-ft",
+    ("e4b-ft", "relaunch/gemma4-ft.final.json", "gemma4-e4b-ft",
      "Gemma-4 E4B wallet-ft", "local",
-     "Same data, same recipe, bigger model."),
-    ("4o-mini", "functiongemma-all.out.json", "openrouter:openai/gpt-4o-mini",
-     "gpt-4o-mini", "hosted", "Hosted reference point."),
-    ("gemma26b", "functiongemma-all.out.json", "openrouter:google/gemma-4-26b-a4b-it",
-     "Gemma-4 26B-A4B", "hosted", "Hosted reference point."),
-    ("gpt5", "functiongemma-all.out.json", "openrouter:openai/gpt-5",
+     "Same model, fine-tuned on 1739 synthetic rows."),
+    # Base is hosted at full precision, the fine-tune is a local Q4_K_M GGUF —
+    # the only pair here that is not quantization-matched. Quantization costs a
+    # few points rather than adding them, so it understates the fine-tune's gain
+    # rather than manufacturing it.
+    ("qwen3", "relaunch/qwen3-8b.out.json", "qwen3-8b",
+     "Qwen3-8B base", "hosted",
+     "The strongest untuned model measured here (OpenRouter, full precision)."),
+    ("qwen3-ft", "relaunch/qwen3-ft.out.json", "qwen3-8b-ft",
+     "Qwen3-8B wallet-ft", "local",
+     "The same 1739 rows on a stronger base, Q4_K_M on-device. Best result so far."),
+    ("gpt5", "relaunch/gpt5.final.json", "openrouter:openai/gpt-5",
      "gpt-5", "hosted", "The capable anchor. Calibrates the ceiling."),
 ]
+
+# The case list is read from whichever run is listed first — any of them covers
+# all 307 with the same generated ids. Named rather than hardcoded because the
+# previous hardcoded choice (functiongemma-all.out.json) outlived the model it
+# was named for.
+REFERENCE_RUN = MODELS[0][1]
 
 MAX_OUTPUT_CHARS = 1400
 
@@ -82,7 +103,13 @@ def _label(result: dict) -> str:
 
 def _rows(filename: str, provider_label: str) -> dict[str, dict]:
     """Map case id -> that provider's recorded result, from one promptfoo run."""
-    data = json.loads((ROOT / filename).read_text())
+    path = ROOT / filename
+    if not path.is_file():
+        raise SystemExit(
+            f"missing run export: {filename}\n"
+            "The *.out.json exports are gitignored — re-run the eval that produces "
+            "it, or drop the model from MODELS.")
+    data = json.loads(path.read_text())
     out = {}
     for r in data.get("results", {}).get("results", []):
         if _label(r) != provider_label:
@@ -91,6 +118,14 @@ def _rows(filename: str, provider_label: str) -> dict[str, dict]:
         if not case_id:
             continue
         out[case_id] = r
+    # A label typo would otherwise sail through as a column of 307 zeroes, which
+    # reads as "this model failed everything" rather than "this is not that
+    # model's run" — the one failure mode a frozen report cannot show you.
+    if not out:
+        labels = sorted({_label(r) for r in data.get("results", {}).get("results", [])})
+        raise SystemExit(
+            f"{filename} has no results for provider label {provider_label!r}. "
+            f"It contains: {', '.join(labels) or '(none)'}")
     return out
 
 
@@ -111,14 +146,29 @@ def _output_text(result: dict) -> str:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    # For publishing a report while one model's run is still going. Off by
+    # default: a column silently vanishing is exactly how a report ends up
+    # claiming something the strips do not show.
+    ap.add_argument("--allow-missing", action="store_true",
+                    help="skip models whose run export is absent instead of failing")
+    args = ap.parse_args()
+
+    models_wanted = list(MODELS)
+    if args.allow_missing:
+        absent = [m for m in models_wanted if not (ROOT / m[1]).is_file()]
+        models_wanted = [m for m in models_wanted if (ROOT / m[1]).is_file()]
+        for key, filename, *_ in absent:
+            print(f"!! SKIPPING {key}: no {filename} yet — this build is PARTIAL")
+
     per_model = {
         key: _rows(filename, label)
-        for key, filename, label, _display, _kind, _note in MODELS
+        for key, filename, label, _display, _kind, _note in models_wanted
     }
 
     # The case list comes from the run with full coverage; every model's run is
     # keyed by the same generated case ids.
-    reference = json.loads((ROOT / "functiongemma-all.out.json").read_text())
+    reference = json.loads((ROOT / REFERENCE_RUN).read_text())
     seen: dict[str, dict] = {}
     for r in reference["results"]["results"]:
         md = r["testCase"].get("metadata", {})
@@ -144,7 +194,7 @@ def main() -> None:
             "gold": md.get("expected_calls", []),
             "results": {},
         }
-        for key, *_ in MODELS:
+        for key, *_ in models_wanted:
             got = per_model[key].get(md["id"])
             if got is None:
                 continue
@@ -156,7 +206,7 @@ def main() -> None:
         cases.append(entry)
 
     models = []
-    for key, filename, label, display, kind, note in MODELS:
+    for key, filename, label, display, kind, note in models_wanted:
         marks = [c["results"].get(key, {}).get("pass") for c in cases]
         models.append({
             "key": key,
