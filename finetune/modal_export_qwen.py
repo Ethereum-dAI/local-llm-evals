@@ -28,13 +28,7 @@ from pathlib import Path
 import modal
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-try:
-    from _bundled import bundled  # noqa: E402  (needs the line above)
-except ModuleNotFoundError:
-    # See modal_finetune_qwen.py: in-container this file stands alone, and the
-    # path `bundled` resolves is only needed at image-build time.
-    def bundled(repo: Path, *candidates: str) -> Path:  # type: ignore[misc]
-        return repo / candidates[0]
+from _bundled import bundled  # noqa: E402  (needs the line above)
 
 BASE_MODEL = "unsloth/Qwen3-8B"
 OUTPUTS_DIR = "/outputs"
@@ -55,9 +49,24 @@ image = (
     .pip_install("torch", "transformers>=4.54", "peft", "accelerate",
                  "sentencepiece", "gguf", "huggingface_hub", "protobuf", "numpy")
     .env({"HF_HOME": "/root/.cache/huggingface"})
-    .add_local_file(str(bundled(_REPO, "data_for_finetune/qwen_train.jsonl",
-                                       "data/qwen_train.jsonl")), "/data/train.jsonl")
+    .add_local_python_source("_bundled")
 )
+
+# `bundled()` is a LOCAL-only path helper — it resolves candidates relative to
+# _REPO, which is only the repo root when this module is imported locally by
+# the `modal run` CLI. Modal re-imports this same module INSIDE the container
+# (to find the app/function objects after the image is already built), and
+# there `__file__` is `/root/modal_export_qwen.py`, so `_REPO` becomes `/` and
+# `bundled()` would raise FileNotFoundError before the container ever does
+# anything useful. Gate on modal.is_local() (False inside a Function/container,
+# True everywhere else) so `bundled()` and the `.add_local_file()` that
+# consumes it are never evaluated remotely.
+if modal.is_local():
+    image = image.add_local_file(
+        str(bundled(_REPO, "data_for_finetune/qwen_train.jsonl",
+                            "data/qwen_train.jsonl")),
+        "/data/train.jsonl",
+    )
 
 app = modal.App("qwen-export")
 

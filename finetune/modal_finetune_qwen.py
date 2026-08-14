@@ -28,16 +28,7 @@ from pathlib import Path
 import modal
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-try:
-    from _bundled import bundled  # noqa: E402  (needs the line above)
-except ModuleNotFoundError:
-    # Modal 1.5 dropped directory automounting, so inside the container this file
-    # is the ONLY thing at /root and its sibling helper is gone — while the module
-    # body (including the image definition) still re-executes there. `bundled`
-    # only ever resolves a build-time path, so a no-op stand-in is correct: the
-    # data file was already baked into the image by the local run.
-    def bundled(repo: Path, *candidates: str) -> Path:  # type: ignore[misc]
-        return repo / candidates[0]
+from _bundled import bundled  # noqa: E402  (needs the line above)
 
 # ---- knobs --------------------------------------------------------------------
 BASE_MODEL = "unsloth/Qwen3-8B"
@@ -64,8 +55,6 @@ INSTRUCTION_PART = "<|im_start|>user\n"
 RESPONSE_PART = "<|im_start|>assistant\n"
 
 _REPO = Path(__file__).resolve().parent.parent
-_DATA_LOCAL = bundled(_REPO, "data_for_finetune/qwen_train.jsonl",
-                             "data/qwen_train.jsonl")
 # ------------------------------------------------------------------------------
 
 hf_cache = modal.Volume.from_name("qwen-hf-cache", create_if_missing=True)
@@ -77,8 +66,21 @@ image = (
                  "libssl-dev", "libcurl4-openssl-dev", "curl")
     .pip_install("unsloth", "huggingface_hub")
     .env({"HF_HOME": HF_CACHE_DIR})
-    .add_local_file(str(_DATA_LOCAL), DATA_REMOTE)
+    .add_local_python_source("_bundled")
 )
+
+# `bundled()` is a LOCAL-only path helper (see modal_export_gemma4_local.py for
+# the full explanation) — it resolves candidates relative to _REPO, which is
+# only the repo root when this module is imported by the local `modal run`
+# CLI. Modal re-imports this module INSIDE the container to find the app/
+# function objects after the image is already built, and there `__file__` is
+# `/root/modal_finetune_qwen.py`, so _REPO becomes `/` and bundled() would
+# raise. Gate on modal.is_local() (False inside a Function/container, True
+# everywhere else) so correctness doesn't depend on a path coincidence.
+if modal.is_local():
+    _DATA_LOCAL = bundled(_REPO, "data_for_finetune/qwen_train.jsonl",
+                                 "data/qwen_train.jsonl")
+    image = image.add_local_file(str(_DATA_LOCAL), DATA_REMOTE)
 
 app = modal.App("qwen-finetune")
 
@@ -223,5 +225,14 @@ def train() -> str:
 
 
 @app.local_entrypoint()
-def main():
-    print(train.remote())
+def main() -> None:
+    # spawn (not .remote()): submit the job and return immediately so the run
+    # does NOT depend on the local client's streaming connection staying alive.
+    # A dropped connection was cancelling .remote()/--detach runs ~30 min in
+    # on the sibling Gemma-4 job (see modal_finetune_gemma4.py) — the same risk
+    # applies here, and this run is long enough (3 epochs, A100) to hit it. The
+    # function runs server-side to completion and commits the adapter to the
+    # outputs Volume; poll `modal app logs <app-id>` or
+    # `modal volume ls qwen-ft-outputs /` for `adapter`.
+    call = train.spawn()
+    print(f"SPAWNED train call_id={call.object_id} — running detached on Modal.")
