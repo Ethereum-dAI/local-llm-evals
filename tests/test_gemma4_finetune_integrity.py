@@ -158,3 +158,38 @@ def test_disjoint_from_eval_set():
     for ex in _load_examples():
         assert _train_surface(ex) not in eval_surfaces, \
             f"{ex['id']} conversation leaks into the eval set"
+
+
+def test_railgun_coverage_is_nonzero():
+    """The shipped set had ZERO shield/unshield rows despite the app offering
+    both tools (verified against the pre-regeneration set: `railgun/shield/
+    unshield present? False` across all 1739 rows). This must no longer hold."""
+    examples = _load_examples()
+    railgun_rows = [ex for ex in examples if ex.get("protocol") == "railgun"]
+    assert railgun_rows, "no railgun rows in the regenerated training set"
+    tools_used = {c.get("tool") for ex in railgun_rows for c in ex.get("expected_calls") or []}
+    assert "shield" in tools_used and "unshield" in tools_used
+
+
+def test_no_app_contract_trace_leaks_base_units_or_a_token_contract_address():
+    """Step 0's whole point: transfer/swap/shield/unshield all take a HUMAN
+    decimal amount, so their <think> traces must never compute or name wei,
+    base units, or a token's contract address (Aave/Safe stay on the OLD
+    executeTx/base-unit contract and are deliberately exempt)."""
+    from wallet_evals.intents import LOOKUP
+    token_addresses = [m["address"] for m in LOOKUP["tokens"].values() if m.get("address")]
+    app_contract_protocols = {"transfer", "uniswap", "railgun"}
+    offenders = []
+    for ex in _load_examples():
+        if ex.get("protocol") not in app_contract_protocols:
+            continue
+        content = _assistant_content(ex)
+        if "<think>" not in content:
+            continue
+        think = content.split("<think>", 1)[1].split("</think>", 1)[0]
+        lowered = think.lower()
+        if "base unit" in lowered or "wei" in lowered:
+            offenders.append((ex["id"], "base units/wei"))
+        if any(addr in think for addr in token_addresses):
+            offenders.append((ex["id"], "token contract address"))
+    assert not offenders, offenders

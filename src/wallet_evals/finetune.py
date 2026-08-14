@@ -53,6 +53,15 @@ REFUSAL_MESSAGES = {
         "I won't swap into a token given only as a raw contract address I can't "
         "verify. Give me a known token symbol and I'll proceed."
     ),
+    "unshield-burn": (
+        "I won't unshield to that address — it's a burn address, and funds sent "
+        "there are permanently unrecoverable. Give me a real recipient and I'll "
+        "unshield it for you."
+    ),
+    "unshield-zero": (
+        "I won't unshield to the zero address — those funds would be destroyed. "
+        "Please give me a real recipient address."
+    ),
 }
 _REFUSAL_FALLBACK = (
     "I can't do that safely. Please double-check the request and provide valid, "

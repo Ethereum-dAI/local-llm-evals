@@ -31,10 +31,11 @@ from wallet_evals.generation import (  # noqa: E402
     TRANSFER_TEMPLATES, SWAP_TEMPLATES,
     TRANSFER_NARRATIVE_TEMPLATES, SWAP_NARRATIVE_TEMPLATES,
     expand_vary, build_positive_case, build_negative_case, build_multiturn_case,
-    build_refusal_case,
+    build_refusal_case, build_separator_case, group_amount,
 )
-from wallet_evals.intents import LOOKUP, swap_currency, to_base_units  # noqa: E402
-from wallet_evals.protocols import safe as safe_mod, aave as aave_mod  # noqa: E402
+from wallet_evals.protocols import (  # noqa: E402
+    safe as safe_mod, aave as aave_mod, railgun as railgun_mod,
+)
 from wallet_evals.finetune import case_to_example  # noqa: E402
 from pf.prompt import render  # noqa: E402
 
@@ -42,6 +43,7 @@ SEED = 20260710
 SEEDS = ROOT / "datasets" / "finetune_seeds.yaml"
 SAFE_FIXTURES = ROOT / "datasets" / "protocols" / "safe.finetune.fixtures.json"
 AAVE_FIXTURES = ROOT / "datasets" / "protocols" / "aave.finetune.fixtures.json"
+RAILGUN_FIXTURES = ROOT / "datasets" / "protocols" / "railgun.finetune.fixtures.json"
 TOOLS = json.loads((ROOT / "pf" / "tools.json").read_text())
 OUT = ROOT / "data_for_finetune" / "functiongemma_train.jsonl"
 
@@ -68,37 +70,96 @@ REFUSAL_SCENARIOS = [
 # v2: scaled up ~20x (v1's ~90 was far too small — the model collapsed to 0% on
 # the core task). Buckets over-generate; we shuffle + cap each. Weighted toward
 # transfer/swap (the capability that failed); protocols/refusals use all raw.
+# v3 (app contract): added `separator` (thousands-separator stripping, the
+# biggest remaining app-contract failure mode) and `railgun` (shield/unshield —
+# the shipped set had zero coverage despite the app shipping both tools).
 TARGETS = {"transfer": 650, "swap": 650, "multiturn": 250, "ablation": 90,
-           "safe": 40, "aave": 55, "refusal": 12}
+           "safe": 40, "aave": 55, "refusal": 12, "separator": 80, "railgun": 100}
+
+# A 4+ digit integer part is the threshold at which the surface renders
+# comma-grouped in real usage (matches the eval's own arithmetic-separator
+# slice, datasets/seeds.arithmetic.yaml) — the trigger for a `separator` case.
+_SEPARATOR_MIN_INTEGER_DIGITS = 4
 
 
 def _valid_intent(intent: dict) -> bool:
     return intent["action"] != "swap" or intent["from_token"] != intent["to_token"]
 
 
+def _has_big_integer_part(amount: str) -> bool:
+    return len(amount.split(".", 1)[0]) >= _SEPARATOR_MIN_INTEGER_DIGITS
+
+
 def _reasoning_text(intent: dict) -> str:
-    """Deterministic, ground-truth <think> trace: the base-unit arithmetic + the
-    resolved call shape. Only defined for transfer/swap (where arithmetic is the
-    capability separator)."""
-    if intent["action"] == "transfer":
+    """Deterministic, ground-truth <think> trace for the APP CONTRACT.
+
+    States which tool the request maps to and the exact human-unit call the app
+    itself takes — transfer/swap/shield/unshield all take a HUMAN decimal
+    `amount` (the app converts to base units and resolves ENS in Swift, never
+    the model), so this trace must never compute or mention wei, base units, a
+    decimals shift, or a token's contract address. Derived purely from the
+    structured intent (never a value parsed back off the rendered surface) —
+    the same determinism guarantee the old base-unit version had.
+
+    `intent["surface_amount"]`, when present and different from `intent["amount"]`,
+    is the comma-grouped string actually shown to the model (set by the
+    `separator` bucket in `_collect`); the trace then names the separator and
+    states the plain decimal, which is the exact skill that bucket exists to
+    teach (Step 2 / brief's biggest remaining failure mode).
+    """
+    action = intent["action"]
+    amount = intent["amount"]
+    surface_amount = intent.get("surface_amount")
+    separator_note = ""
+    if surface_amount and surface_amount != amount:
+        separator_note = (
+            f"The amount is written with thousands separators (\"{surface_amount}\") "
+            f"— those commas are just digit grouping, not part of the number: strip "
+            f"them and read the plain decimal {amount}. "
+        )
+
+    if action == "transfer":
         tok = intent["token"]
-        meta = LOOKUP["tokens"][tok]
-        dec = meta["decimals"]
-        base = to_base_units(intent["amount"], dec)
-        if meta.get("native"):
-            return (f"{tok} is native with {dec} decimals, so {intent['amount']} "
-                    f"{tok} = {base} wei. Native transfer: executeTx to the "
-                    f"recipient, value {base}, no calldata.")
-        return (f"{tok} has {dec} decimals, so {intent['amount']} {tok} = {base} "
-                f"base units. ERC-20 transfer: executeTx to the {tok} contract "
-                f"{meta['address']}, function transfer(address,uint256), "
-                f"args [recipient, {base}].")
-    frm = intent["from_token"]
-    addr, dec = swap_currency(frm)
-    base = to_base_units(intent["amount"], dec)
-    return (f"{frm} has {dec} decimals, so {intent['amount']} {frm} = {base} base "
-            f"units. Emit one swap: currencyIn {addr}, amountIn {base}, "
-            f"amountOutMinimum 0, recipient <wallet>.")
+        return (f"{separator_note}This is a transfer. The wallet takes amount in "
+                f"HUMAN units, so emit transfer with amount {amount}, token {tok} "
+                f"(by symbol, never a contract address), and the recipient copied "
+                f"exactly as the user wrote it ({intent['recipient']}) — the "
+                f"wallet resolves ENS/contacts itself, so it is never looked up "
+                f"here.")
+    if action == "swap":
+        frm, to = intent["from_token"], intent["to_token"]
+        return (f"{separator_note}This is a swap. Emit swap with amount {amount} "
+                f"(HUMAN units, the input side), from_token {frm}, to_token {to} "
+                f"(symbols, never contract addresses), amount_side \"input\" — "
+                f"always \"input\" for an input amount, so no follow-up question "
+                f"is needed.")
+    if action == "shield":
+        return (f"This is a shield. RAILGUN shield/unshield are ETH-only, so "
+                f"token defaults to \"ETH\" even when the user never says the "
+                f"word. Emit shield with amount {amount} (HUMAN units), token ETH.")
+    if action == "unshield":
+        return (f"This is an unshield. RAILGUN shield/unshield are ETH-only, so "
+                f"token defaults to \"ETH\" even when the user never says the "
+                f"word. Emit unshield with amount {amount} (HUMAN units), token "
+                f"ETH, and the recipient copied exactly as the user wrote it "
+                f"({intent['to']}).")
+    raise ValueError(f"no reasoning trace defined for action: {action!r}")
+
+
+def _railgun_intent(test: dict) -> dict | None:
+    """Reconstruct a `shield`/`unshield` "intent" straight from the case's own
+    gold call, for `_reasoning_text` — RAILGUN cases don't go through
+    `wallet_evals.generation.expand_vary`, so there is no seed-shaped intent
+    dict to reuse. `None` for a no-call case (refusal): a <think> trace is only
+    ever a prefix to a real tool call."""
+    calls = test["metadata"].get("expected_calls") or []
+    if not calls:
+        return None
+    call = calls[0]
+    intent = {"action": call["tool"], "amount": call["amount"], "token": call["token"]}
+    if call["tool"] == "unshield":
+        intent["to"] = call["to"]
+    return intent
 
 
 def _collect(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
@@ -127,6 +188,12 @@ def _collect(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
                                 None, "ablation"))
                 triples.append((build_multiturn_case(intent, field, rng, nxt(action)),
                                 intent, "multiturn"))
+            if _has_big_integer_part(intent["amount"]):
+                reasoning_intent = {**intent, "surface_amount": group_amount(intent["amount"])}
+                for template in _TEMPLATES[action]:
+                    triples.append((build_separator_case(intent, template, rng,
+                                                         nxt(f"{action}-sep")),
+                                    reasoning_intent, "separator"))
 
     for scenario in REFUSAL_SCENARIOS:
         for template in scenario["templates"]:
@@ -139,6 +206,9 @@ def _collect(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
     aave_fx = json.loads(AAVE_FIXTURES.read_text())
     for test in aave_mod.build_cases(aave_fx, rng, start_idx=1):
         triples.append((test, None, "aave"))
+    railgun_fx = json.loads(RAILGUN_FIXTURES.read_text())
+    for test in railgun_mod.build_cases(railgun_fx, rng, start_idx=1):
+        triples.append((test, _railgun_intent(test), "railgun"))
 
     return triples
 

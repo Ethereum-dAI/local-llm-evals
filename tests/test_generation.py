@@ -302,3 +302,64 @@ def test_narrative_multiturn_turn1_omits_field():
     assert case["metadata"]["style"] == "narrative"
     assert "DAI" not in msgs[0]["content"]      # to_token omitted in turn 1
     assert "DAI" in msgs[2]["content"]          # supplied in the completing turn
+
+
+from wallet_evals.generation import group_amount, group_integer_part, build_separator_case
+
+
+def test_group_integer_part_below_threshold_unchanged():
+    assert group_integer_part("123") == "123"
+    assert group_integer_part("1") == "1"
+
+
+def test_group_integer_part_groups_by_threes():
+    assert group_integer_part("1000") == "1,000"
+    assert group_integer_part("1234567") == "1,234,567"
+
+
+def test_group_amount_only_groups_integer_part():
+    assert group_amount("20000") == "20,000"
+    assert group_amount("1234.5") == "1,234.5"
+    assert group_amount("12.3456") == "12.3456"  # short int part, fraction untouched
+    assert group_amount("100") == "100"          # <=3 digits, untouched
+
+
+def test_mutate_punctuation_still_matches_group_amount():
+    """The refactor extracted mutate_punctuation's grouping into group_amount —
+    assert the two agree on a plain amount (mutate_punctuation may still append
+    trailing punctuation, so compare the amount-bearing prefix)."""
+    out = mutate_punctuation("987654.32", random.Random(0))
+    assert out.startswith(group_amount("987654.32"))
+
+
+def test_build_separator_case_surface_carries_commas_gold_stays_plain():
+    intent = {"action": "transfer", "amount": "20000", "token": "ETH",
+              "recipient": "vitalik.eth"}
+    case = build_separator_case(intent, "Send {amount} {token} to {recipient}",
+                                random.Random(0), idx=1)
+    assert "20,000" in case["vars"]["user_message"]
+    assert case["metadata"]["expected_calls"][0]["amount"] == "20000"
+    assert case["metadata"]["id"] == "gen-transfer-sep-0001"
+    assert case["metadata"]["category"] == "generated-transfer-sep"
+
+
+def test_build_separator_case_never_regroups_via_punctuation_mutator():
+    """Punctuation is excluded from the mutator draw so it never fights the
+    deterministic grouping already applied to the amount."""
+    for seed in range(20):
+        case = build_separator_case(
+            {"action": "swap", "amount": "135790.24", "from_token": "USDC",
+             "to_token": "ETH"},
+            "Swap {amount} {from_token} for {to_token}", random.Random(seed), idx=1)
+        assert "punctuation" not in case["metadata"]["mutators"]
+        assert "135,790.24" in case["vars"]["user_message"]
+
+
+def test_build_separator_case_deterministic():
+    intent = {"action": "transfer", "amount": "654321.098765", "token": "USDC",
+              "recipient": "vitalik.eth"}
+    a = build_separator_case(intent, "Send {amount} {token} to {recipient}",
+                             random.Random(3), idx=5)
+    b = build_separator_case(intent, "Send {amount} {token} to {recipient}",
+                             random.Random(3), idx=5)
+    assert a == b

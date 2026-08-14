@@ -27,6 +27,28 @@ def mutate_case(text: str, rng: random.Random) -> str:
     return "".join(c.upper() if rng.random() < 0.5 else c.lower() for c in text)
 
 
+def group_integer_part(intpart: str) -> str:
+    """Comma-group a run of integer digits ("20000" -> "20,000"); left alone at
+    3 digits or fewer. Pure formatting — never used for gold, only for a
+    rendered surface."""
+    if len(intpart) <= 3:
+        return intpart
+    rev = intpart[::-1]
+    return ",".join(rev[i:i + 3] for i in range(0, len(rev), 3))[::-1]
+
+
+def group_amount(amount: str) -> str:
+    """Comma-group a full decimal amount string ("20000" -> "20,000",
+    "1234.5" -> "1,234.5"). Only the integer part is grouped; fractional
+    digits are always left intact. Used both by `mutate_punctuation` (applied
+    probabilistically to a whole rendered surface) and by `build_separator_case`
+    (applied deterministically to guarantee separator-stripping coverage)."""
+    if "." in amount:
+        intpart, frac = amount.split(".", 1)
+        return f"{group_integer_part(intpart)}.{frac}"
+    return group_integer_part(amount)
+
+
 def mutate_punctuation(text: str, rng: random.Random) -> str:
     """Add thousands-commas to amount-like digit runs and noisy trailing punctuation.
 
@@ -38,11 +60,7 @@ def mutate_punctuation(text: str, rng: random.Random) -> str:
         # Group only the integer part; never touch fractional digits after a "."
         # (grouping a decimal like 12.3456 -> 12.3,456 corrupts the number).
         intpart, frac = m.group(1), m.group(2) or ""
-        if len(intpart) <= 3:
-            return intpart + frac
-        rev = intpart[::-1]
-        grouped = ",".join(rev[i:i + 3] for i in range(0, len(rev), 3))[::-1]
-        return grouped + frac
+        return group_integer_part(intpart) + frac
 
     words = [
         w if "0x" in w.lower() else re.sub(r"(\d+)(\.\d+)?", comma, w)
@@ -246,6 +264,30 @@ def build_positive_case(intent: dict, template: str, rng: random.Random, idx: in
     surface, labels = apply_mutators(render_surface(template, intent), rng)
     md = _base_metadata(intent, "pos", idx,
                         level="payload", query_type="one_shot", style=style,
+                        mutators=labels, expected_calls=gold_calls(intent))
+    return {"vars": {"user_message": surface,
+                     "expected_summary": format_expected_summary(md["expected_calls"])},
+            "metadata": md}
+
+
+def build_separator_case(intent: dict, template: str, rng: random.Random, idx: int) -> dict:
+    """A surface with a GUARANTEED comma-grouped amount; gold is still the plain
+    decimal from `intent`. Dedicated coverage for the thousands-separator failure
+    mode: a model that drops the comma and rereads the digits (e.g. "987,654.32"
+    -> "987.65432") emits a silently wrong amount the wallet would accept and
+    send. Unlike `build_positive_case`, the comma grouping here is not left to
+    `mutate_punctuation`'s 50% draw — every case in this bucket carries one.
+    Non-punctuation surface noise (case/typos/filler/tone) still varies; the
+    punctuation mutator is skipped so it never fights the deterministic grouping.
+    """
+    surface = render_surface(template, {**intent, "amount": group_amount(intent["amount"])})
+    labels: list[str] = []
+    for name, fn in MUTATORS:
+        if name != "punctuation" and rng.random() < 0.5:
+            surface = fn(surface, rng)
+            labels.append(name)
+    md = _base_metadata(intent, "sep", idx,
+                        level="payload", query_type="one_shot", style="direct",
                         mutators=labels, expected_calls=gold_calls(intent))
     return {"vars": {"user_message": surface,
                      "expected_summary": format_expected_summary(md["expected_calls"])},
