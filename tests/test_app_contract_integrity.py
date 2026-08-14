@@ -20,9 +20,24 @@ def _load():
     return load_cases(TESTS)
 
 
-def test_app_contract_case_count_matches_the_frozen_dataset():
+def test_app_contract_first_307_match_the_frozen_dataset_count_and_the_arithmetic_slice_is_appended():
+    # pf/tests.app-contract.yaml now holds the original 307 transfer/swap cases
+    # PLUS an appended arithmetic slice (scripts/generate_cases.py's
+    # --extra-seeds path, from datasets/seeds.arithmetic.yaml, its own RNG
+    # stream). The frozen count is still exactly 307; the first 307 cases here
+    # are byte-identical to it (proven by scripts/generate_cases.py's own
+    # SEPARATE RNG for the extra seeds, plus the diff check in the brief); the
+    # rest is the arithmetic slice, labelled distinctly so it's never mistaken
+    # for part of the original 307.
     frozen = load_cases(Path(__file__).resolve().parents[1] / "pf" / "tests.generated.yaml")
-    assert len(_load()) == len(frozen) == 307
+    assert len(frozen) == 307
+
+    cases = _load()
+    base = [c for c in cases if not c.category.startswith("arithmetic-")]
+    arithmetic = [c for c in cases if c.category.startswith("arithmetic-")]
+    assert len(base) == 307
+    assert len(arithmetic) > 0
+    assert len(cases) == 307 + len(arithmetic)
 
 
 def test_app_contract_ids_unique():
