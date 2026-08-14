@@ -110,10 +110,25 @@ BAND_ORDER = ["transfer", "swap", "arithmetic", "multi-turn",
 # key -> (source run, provider label, display name, kind, note)
 # A missing source run is handled gracefully (warn + skip), so this report can
 # be built before every run has landed.
+#
+# Display order is deliberately weakest-to-strongest so the strips read as a
+# progression left-to-right: the two on-device bases, the two on-device
+# wallet fine-tunes, then the hosted frontier anchor.
 MODELS = [
     ("e4b-base", "gemma4.appcontract.out.json", "gemma4-e4b-base",
      "Gemma-4 E4B base", "local",
      "The Q4_K_M GGUF local-wallet-mac ships today, unmodified."),
+    ("qwen3-base", "qwen3-base.appcontract.out.json", "qwen3-8b",
+     "Qwen3-8B base", "hosted",
+     "Hosted via OpenRouter, card-recommended sampling (temperature 0.6, "
+     "top_p 0.95, top_k 20) — the closest same-scale analogue to the "
+     "on-device Gemma-4 E4B family, unmodified."),
+    ("qwen3-ft", "qwen3-ft.appcontract.out.json", "qwen3-8b-ft-appcontract",
+     "Qwen3-8B wallet-ft (app-contract)", "local",
+     "Same Qwen3-8B base, re-tuned on the app-contract data (Q4_K_M, run "
+     "locally). Distinct from an older Qwen fine-tune trained on a "
+     "different, base-unit contract — the -appcontract suffix is the guard "
+     "against scoring the wrong one."),
     ("e4b-ft", "gemma4.appcontract.out.json", "gemma4-e4b-ft-appcontract",
      "Gemma-4 E4B wallet-ft (app-contract)", "local",
      "Same base, re-tuned on the app-contract data: human-decimal transfer/"

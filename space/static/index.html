@@ -314,7 +314,14 @@ footer{
 
   <section class="section">
     <p class="eyebrow">The finding</p>
-    <h2>The lift is almost entirely Aave and Safe — protocols the shipping model never saw</h2>
+    <h2>Fine-tuning on the app contract lifts Gemma-4 but not Qwen3</h2>
+    <p>
+      Five models, two on-device families plus one hosted frontier anchor:
+      Gemma-4 E4B and Qwen3-8B each run as a shipping/candidate base and as an
+      app-contract fine-tune, and gpt-5 calibrates the ceiling on the same 593
+      cases. The clearest result is Aave and Safe — protocols the shipping
+      model never saw.
+    </p>
     <p>
       Gemma-4 E4B base here is not an untuned model — it's the exact Q4_K_M GGUF
       <code>local-wallet-mac</code> ships today, a fine-tune from an earlier round
@@ -339,9 +346,21 @@ footer{
         49/50. Overall: <strong>536/593 (90.4%)</strong>.
       </p>
       <p>
-        gpt-5, the hosted frontier anchor, is mid-run on the same 593 cases as of
-        this writing; its strip and the third column below fill in once that run
-        lands.
+        A second, larger on-device family — Qwen3-8B — tells a different story.
+        Its base model, hosted via OpenRouter at the card's recommended sampling,
+        is already strong zero-shot at <strong>87.9% (521/593)</strong>, including
+        40/90 on Aave and 48/50 on Safe without ever training on this contract.
+        Re-tuning it on the same app-contract data — run locally, same Q4_K_M
+        quantisation as the Gemma-4 comparison — does not repeat the Gemma-4 lift:
+        the fine-tune scores <strong>86.3% (512/593)</strong>, slightly below its
+        own base.
+      </p>
+      <p>
+        gpt-5, the hosted frontier anchor, tops the field at
+        <strong>96.5% (572/593)</strong> — every one of the 90 Aave cases, all but
+        one of 50 Safe, and 52/56 on RAILGUN. All five strips above and the
+        breakdown table below are the same 593 cases, scored by the same
+        deterministic scorer.
       </p>
     </div>
     <div class="tablewrap"><table id="cattable"></table></div>
@@ -467,7 +486,8 @@ function axis() {
 
 function catTable() {
   // Data-driven: whatever models actually made it into data.json, in that
-  // order. A model with no run artefact yet (e.g. gpt-5 mid-run) is simply
+  // order. A model with no run artefact yet (build_static.py warns and skips
+  // it) is simply
   // absent from DATA.models, so it never appears as a column.
   const cols = DATA.models.map((m) => m.key);
   const byKey = Object.fromEntries(DATA.models.map((m) => [m.key, m]));
