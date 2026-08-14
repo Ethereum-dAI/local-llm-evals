@@ -21,11 +21,11 @@
 # would defeat it.
 #
 # Run with the uv venv so the scorer can import wallet_evals:
-#   scripts/eval.sh -c promptfooconfig.gemma4-threeway.yaml -o gemma4.threeway.out.json -j 1
+#   scripts/eval.sh -c promptfooconfig.gemma4-fourway.yaml -o gemma4.fourway.out.json -j 1
 #
 # -j 1 is required: all three providers are local llama.cpp processes sharing one
 # Metal device, so concurrency contends for the GPU instead of speeding anything up.
-description: Gemma-4 E4B base vs shipped fine-tune vs app-contract fine-tune
+description: Gemma-4 E4B base vs shipped FT vs app-contract FT v1 vs v2
 
 prompts:
   - file://pf/prompt.py:render
@@ -68,14 +68,36 @@ providers:
       n_gpu_layers: -1
       timeout: 1800000
 
+  # This branch's FIRST app-contract fine-tune (2026-08-14 morning). Kept in the
+  # comparison deliberately: v1 vs v2 differ ONLY in training data — v1 carries
+  # 94 RAILGUN rows and emits a chainId argument on transfer/swap; v2 has
+  # neither. Same base model, same hyperparameters, same 4 refusal rows. So the
+  # v1/v2 delta isolates the cost of training on tools and fields the app does
+  # not have, with everything else held constant.
+  #
+  # Scoring v1 here is fair: the scorer ignores chainId wherever gold omits it
+  # (mirroring the app, which never reads it), so v1 is not penalised for
+  # volunteering a field it was trained to emit.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-v1-appcontract
+    config:
+      model_path: models/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+
   # This branch's fine-tune. Loaded from a LOCAL path by design: it is
   # deliberately NOT published to HuggingFace, and the published repo above is
   # SHA256-pinned by the shipping wallet, so it must not be overwritten.
-  # Retrained 2026-08-14 with RAILGUN removed (local-wallet-mac#86, PR #87);
-  # the file name below must match what finetune/modal_export_gemma4_local.py
-  # wrote for THAT run, not an earlier one.
+  # Retrained 2026-08-14 with RAILGUN removed (local-wallet-mac#86, PR #87) and
+  # chainId dropped from transfer/swap; the file name below must match what
+  # finetune/modal_export_gemma4_local.py wrote for THAT run, not an earlier one.
   - id: file://pf/provider_functiongemma.py:call_api
-    label: gemma4-e4b-ft-new-appcontract
+    label: gemma4-e4b-ft-v2-appcontract
     config:
       model_path: models/gemma4-e4b-wallet-ft-appcontract-v2.Q4_K_M.gguf
       dialect: gemma4
