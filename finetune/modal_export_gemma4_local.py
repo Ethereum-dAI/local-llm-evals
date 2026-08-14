@@ -31,11 +31,29 @@ Output lands at gemma4-ft-outputs:/outputs/gguf/gemma4-e4b-wallet-ft-appcontract
 — a name that cannot collide with the production
 `gemma-4-E4B-wallet-ft.Q4_K_M.gguf` (different subdir, different stem).
 
+**Stale-adapter guard.** The `gemma4-ft-outputs` Volume is not empty between runs
+— it still holds artifacts (checkpoints, merged models) from whatever ran there
+before. `_resolve_adapter` used to trust `/outputs/adapter` (or the newest
+`checkpoint-N`) unconditionally, which means a training run that fails, is
+still in progress, or never gets around to writing `adapter` would silently
+merge a PREVIOUS run's weights and produce a GGUF named for THIS run — wrong,
+and nothing downstream would notice (the filename says "appcontract", the old
+model still passes the tool-call smoke test, the eval number is just quietly
+about the wrong model). So `min_mtime` is a REQUIRED argument: the unix
+timestamp of when you launched the training run whose adapter you want. Any
+candidate adapter (the stable path or a checkpoint fallback) whose
+`adapter_config.json` is older than that cutoff is rejected with a loud
+`SystemExit` naming the candidate, its mtime, and the cutoff — nothing is
+merged from before the run you meant to export.
+
 Run (spawns detached — a dropped client connection can't cancel the ~20-40 min
 GPU job; poll `modal app logs` for "[export-local] DONE" or
-"[export-local] SMOKE TEST FAILED"):
+"[export-local] SMOKE TEST FAILED"). `MIN_MTIME` is the unix timestamp your
+training run was launched (e.g. `date -j -f "%Y-%m-%d %H:%M:%S" "2026-08-13
+21:00:00" +%s`, or just `date +%s` run right before `modal run
+modal_finetune_gemma4.py`):
 
-    uv run --with modal modal run finetune/modal_export_gemma4_local.py
+    uv run --with modal modal run finetune/modal_export_gemma4_local.py --min-mtime $MIN_MTIME
 
 Then pull the finished GGUF down into this repo's (gitignored) models/ dir —
 the exact command is also printed by the run itself once it succeeds:
@@ -99,24 +117,62 @@ image = (
 app = modal.App("gemma4-export-local")
 
 
-def _resolve_adapter() -> str:
+def _resolve_adapter(min_mtime: float) -> tuple[str, float]:
     """Prefer the stable /outputs/adapter path; fall back to the newest
-    checkpoint-N the trainer wrote (the probe-loop bug can skip the final save)."""
+    checkpoint-N the trainer wrote (the probe-loop bug can skip the final save).
+
+    Rejects ANY candidate — the stable path included — whose adapter_config.json
+    is older than `min_mtime`. The outputs Volume persists across runs and is
+    NOT cleared between them, so without this gate a failed/in-progress/never-
+    finished training run would silently fall through to a previous run's
+    adapter, and this script would merge and export the WRONG model under the
+    current run's (correctly-named) filename. Returns (path, mtime) so the
+    caller can print/return which weights were actually merged.
+    """
     import os
     import re
+    from datetime import datetime, timezone
+
+    def _fmt(ts: float) -> str:
+        return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+
+    def _check(path: str) -> float:
+        cfg = f"{path}/adapter_config.json"
+        if not os.path.isfile(cfg):
+            raise SystemExit(f"{path} has no adapter_config.json")
+        mtime = os.path.getmtime(cfg)
+        if mtime < min_mtime:
+            raise SystemExit(
+                f"[export-local] REJECTED candidate adapter {path!r}: "
+                f"adapter_config.json mtime {mtime:.0f} ({_fmt(mtime)}) is older "
+                f"than --min-mtime cutoff {min_mtime:.0f} ({_fmt(min_mtime)}) — "
+                "this looks like a stale adapter from a PREVIOUS run on the same "
+                "Volume, refusing to merge it. Pass the unix timestamp of when "
+                "you launched THIS training run."
+            )
+        return mtime
+
     stable = f"{OUTPUTS_DIR}/adapter"
     if os.path.isfile(f"{stable}/adapter_config.json"):
-        return stable
+        mtime = _check(stable)
+        print(f"[export-local] resolved adapter = {stable} "
+              f"(mtime {mtime:.0f} = {_fmt(mtime)})", flush=True)
+        return stable, mtime
+
     cks = [d for d in os.listdir(OUTPUTS_DIR) if re.fullmatch(r"checkpoint-\d+", d)]
     if not cks:
         raise SystemExit(f"no adapter or checkpoint-* under {OUTPUTS_DIR}")
     newest = max(cks, key=lambda d: int(d.split("-")[1]))
-    return f"{OUTPUTS_DIR}/{newest}"
+    candidate = f"{OUTPUTS_DIR}/{newest}"
+    mtime = _check(candidate)
+    print(f"[export-local] no stable /outputs/adapter yet — falling back to "
+          f"checkpoint {candidate} (mtime {mtime:.0f} = {_fmt(mtime)})", flush=True)
+    return candidate, mtime
 
 
 @app.function(image=image, gpu="A10G", timeout=5400,
               volumes={"/root/.cache/huggingface": hf_cache, "/outputs": outputs})
-def export_local() -> str:
+def export_local(min_mtime: float) -> str:
     import hashlib
     import json
     import subprocess
@@ -129,9 +185,12 @@ def export_local() -> str:
     from peft import PeftModel
     from transformers import AutoTokenizer
 
-    # 1. bf16 merge — identical recipe to modal_export_gemma4.py.
-    adapter = _resolve_adapter()
-    print(f"[export-local] adapter = {adapter}", flush=True)
+    # 1. bf16 merge — identical recipe to modal_export_gemma4.py. adapter
+    # resolution is mtime-gated against min_mtime (see _resolve_adapter) so a
+    # stale adapter left over from a previous run on this Volume can never be
+    # silently merged under this run's filename.
+    adapter, adapter_mtime = _resolve_adapter(min_mtime)
+    print(f"[export-local] adapter = {adapter} (mtime {adapter_mtime:.0f})", flush=True)
     base, _ = FastModel.from_pretrained(
         model_name=BASE_MODEL, max_seq_length=2048,
         load_in_4bit=False, full_finetuning=False,
@@ -181,6 +240,25 @@ def export_local() -> str:
             h.update(chunk)
     sha256 = h.hexdigest()
 
+    if not smoke_ok:
+        # Quarantine, don't just label-and-leave: a later `modal volume get`
+        # that only pattern-matches GGUF_NAME must not be able to fetch this
+        # file. Rename under a REJECTED- prefix (keeps it around for manual
+        # inspection, per the brief, but off the name anything downstream would
+        # actually pull) rather than deleting outright.
+        rejected_path = f"{gguf_dir}/REJECTED-{GGUF_NAME}"
+        Path(gguf_path).rename(rejected_path)
+        outputs.commit()
+        print("[export-local] SMOKE TEST FAILED — merged model did not emit a "
+              f"tool call. The GGUF was still produced (for inspection) but "
+              f"renamed to {rejected_path} so it cannot be fetched by the normal "
+              f"download command. sha256={sha256}, {size_bytes} bytes. It must "
+              "NOT be treated as a good artifact or scored in the benchmark.",
+              flush=True)
+        raise SystemExit(
+            "merged model did not emit a tool call — refusing to publish as good"
+        )
+
     outputs.commit()
 
     volume_path = f"{GGUF_SUBDIR}/{GGUF_NAME}"
@@ -189,22 +267,15 @@ def export_local() -> str:
         f"{volume_path} models/{GGUF_NAME}"
     )
 
-    if not smoke_ok:
-        print("[export-local] SMOKE TEST FAILED — merged model did not emit a "
-              "tool call. The GGUF was still produced (for inspection) at "
-              f"{gguf_path}, sha256={sha256}, {size_bytes} bytes, but it must "
-              "NOT be treated as a good artifact or scored in the benchmark.",
-              flush=True)
-        raise SystemExit(
-            "merged model did not emit a tool call — refusing to publish as good"
-        )
-
-    print(f"[export-local] DONE — sha256={sha256}", flush=True)
+    print(f"[export-local] DONE — adapter={adapter} (mtime {adapter_mtime:.0f}), "
+          f"sha256={sha256}", flush=True)
     print(f"[export-local] size = {size_bytes} bytes ({size_mb:.1f} MB)", flush=True)
     print(f"[export-local] download with:\n  {download_cmd}", flush=True)
     return json.dumps({
         "volume": "gemma4-ft-outputs",
         "volume_path": volume_path,
+        "adapter": adapter,
+        "adapter_mtime": adapter_mtime,
         "size_bytes": size_bytes,
         "sha256": sha256,
         "download_cmd": download_cmd,
@@ -213,12 +284,19 @@ def export_local() -> str:
 
 
 @app.local_entrypoint()
-def main() -> None:
+def main(min_mtime: float) -> None:
+    # min_mtime is REQUIRED: the unix timestamp of when you launched the
+    # training run whose adapter you want exported. Without it, a Volume that
+    # still holds a previous run's adapter/checkpoints (it is never cleared
+    # between runs) could get silently merged instead — see the stale-adapter
+    # guard note in the module docstring and _resolve_adapter.
+    #
     # spawn + --detach (implicit via .spawn()) so a dropped client connection
     # can't cancel the ~20-40 min job; progress + the final sha256/size are
     # printed to the logs ("[export-local] DONE"). Read with `modal app logs`.
     # No token to read locally — there is nothing to authenticate to upload.
-    call = export_local.spawn()
-    print(f"SPAWNED export-local call_id={call.object_id} — poll logs for "
-          f"'[export-local] DONE' (success) or "
-          f"'[export-local] SMOKE TEST FAILED' (do not evaluate the GGUF).")
+    call = export_local.spawn(min_mtime=min_mtime)
+    print(f"SPAWNED export-local call_id={call.object_id} (min_mtime={min_mtime:.0f}) "
+          f"— poll logs for '[export-local] DONE' (success) or "
+          f"'[export-local] SMOKE TEST FAILED' / a stale-adapter SystemExit "
+          f"(do not evaluate the GGUF).")
