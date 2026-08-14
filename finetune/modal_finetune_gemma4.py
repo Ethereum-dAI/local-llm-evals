@@ -65,8 +65,6 @@ INSTRUCTION_PART = "<|turn>user\n"
 RESPONSE_PART = "<|turn>model\n"
 
 _REPO = Path(__file__).resolve().parent.parent
-_DATA_LOCAL = bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
-                             "data/gemma4_train.jsonl")
 # ------------------------------------------------------------------------------
 
 hf_cache = modal.Volume.from_name("gemma4-hf-cache", create_if_missing=True)
@@ -78,9 +76,24 @@ image = (
                  "libssl-dev", "libcurl4-openssl-dev", "curl")
     .pip_install("unsloth", "huggingface_hub")
     .env({"HF_HOME": HF_CACHE_DIR})
-    .add_local_file(str(_DATA_LOCAL), DATA_REMOTE)
     .add_local_python_source("_bundled")
 )
+
+# `bundled()` is a LOCAL-only path helper (see modal_export_gemma4_local.py for
+# the full explanation) — it resolves candidates relative to _REPO, which is
+# only the repo root when this module is imported by the local `modal run`
+# CLI. Modal re-imports this module INSIDE the container to find the app/
+# function objects after the image is already built, and there `__file__` is
+# `/root/modal_finetune_gemma4.py`, so _REPO becomes `/` and bundled() would
+# raise. This script only survived that so far by coincidence — DATA_REMOTE
+# happens to equal bundled()'s second candidate path, so the in-container
+# FileNotFoundError never actually triggered. Gate on modal.is_local() (False
+# inside a Function/container, True everywhere else) so correctness no longer
+# depends on that coincidence.
+if modal.is_local():
+    _DATA_LOCAL = bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
+                                 "data/gemma4_train.jsonl")
+    image = image.add_local_file(str(_DATA_LOCAL), DATA_REMOTE)
 
 app = modal.App("gemma4-finetune")
 

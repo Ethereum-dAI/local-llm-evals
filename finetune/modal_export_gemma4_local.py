@@ -110,10 +110,27 @@ image = (
     # NOTE: no huggingface_hub needed here — there is nothing to upload.
     .pip_install("unsloth", "sentencepiece", "gguf", "protobuf", "numpy")
     .env({"HF_HOME": "/root/.cache/huggingface"})
-    .add_local_file(str(bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
-                                       "data/gemma4_train.jsonl")), "/data/train.jsonl")
     .add_local_python_source("_bundled")
 )
+
+# `bundled()` is a LOCAL-only path helper — it resolves candidates relative to
+# _REPO, which is only the repo root when this module is imported locally by
+# the `modal run` CLI. Modal re-imports this same module INSIDE the container
+# (to find the app/function objects after the image is already built), and
+# there `__file__` is `/root/modal_export_gemma4_local.py`, so `_REPO` becomes
+# `/` and `bundled()` raises FileNotFoundError before the container ever does
+# anything useful — the image is already built by then, so nothing here needs
+# to run again. `modal.is_local()` is False inside a Modal Function/container
+# and True everywhere else (including this local-entrypoint import), so
+# gating on it keeps `bundled()` and the `.add_local_file()` that consumes it
+# from ever being evaluated remotely, without needing the image object itself
+# to be conditional.
+if modal.is_local():
+    image = image.add_local_file(
+        str(bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
+                            "data/gemma4_train.jsonl")),
+        "/data/train.jsonl",
+    )
 
 app = modal.App("gemma4-export-local")
 
