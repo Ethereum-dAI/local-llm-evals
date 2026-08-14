@@ -99,6 +99,8 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
      "datasets/protocols/safe.finetune.fixtures.json"),
     ("datasets/protocols/aave.finetune.fixtures.json",
      "datasets/protocols/aave.finetune.fixtures.json"),
+    ("datasets/protocols/railgun.finetune.fixtures.json",
+     "datasets/protocols/railgun.finetune.fixtures.json"),
     ("scripts/generate_finetune_data.py", "scripts/generate_finetune_data.py"),
     ("scripts/generate_gemma4_finetune_data.py", "scripts/generate_gemma4_finetune_data.py"),
     ("finetune/_bundled.py", "scripts/_bundled.py"),
