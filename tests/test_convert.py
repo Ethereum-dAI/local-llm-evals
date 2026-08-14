@@ -33,7 +33,7 @@ def test_convert_native_transfer():
     assert manual is None
     call = case["expected_calls"][0]
     assert call["tool"] == "transfer"
-    assert call["chainId"] == "1"
+    assert "chainId" not in call  # app tools declare none
     assert call["to"] == "vitalik.eth"
     assert call["amount"] == "0.1"
     assert call["token"] == "ETH"
@@ -48,7 +48,7 @@ def test_convert_erc20_transfer():
     case, manual = convert_case(raw)
     call = case["expected_calls"][0]
     assert call["tool"] == "transfer"
-    assert call["chainId"] == "1"
+    assert "chainId" not in call  # app tools declare none
     assert call["to"] == "vitalik.eth"
     assert call["amount"] == "100"
     assert call["token"] == "USDC"
@@ -75,7 +75,7 @@ def test_convert_swap_exact_in():
     assert case["protocol"] == "uniswap"
     call = case["expected_calls"][0]
     assert call["tool"] == "swap"
-    assert call["chainId"] == "1"
+    assert "chainId" not in call  # app tools declare none
     assert call["from_token"] == "USDC"
     assert call["to_token"] == "DAI"
     assert call["amount"] == "100"
@@ -205,6 +205,6 @@ def test_convert_transfer_emits_app_contract_gold():
     case, manual = convert_case(raw)
     assert manual is None
     assert case["expected_calls"] == [{
-        "tool": "transfer", "chainId": "1", "to": "vitalik.eth",
+        "tool": "transfer", "to": "vitalik.eth",
         "amount": "0.1", "token": "ETH",
     }]

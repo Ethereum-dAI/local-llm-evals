@@ -85,10 +85,6 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "chainId": {
-            "type": "string",
-            "description": "EIP-155 chain id as a decimal string, e.g. \"1\" for Ethereum mainnet."
-          },
           "to": {
             "type": "string",
             "description": "Recipient. Accepts a 0x-prefixed 40-hex Ethereum address, an ENS name ending in .eth, or a contact name the user mentioned. Pass the value as the user expressed it - do not attempt to resolve ENS yourself."
@@ -103,7 +99,6 @@
           }
         },
         "required": [
-          "chainId",
           "to",
           "amount"
         ]
@@ -118,10 +113,6 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "chainId": {
-            "type": "string",
-            "description": "EIP-155 chain id as a decimal string, e.g. \"1\" for Ethereum mainnet."
-          },
           "from_token": {
             "type": "string",
             "description": "Token to spend. Symbol (ETH, USDC, DAI, WETH) or 0x-prefixed contract address."
@@ -143,7 +134,6 @@
           }
         },
         "required": [
-          "chainId",
           "from_token",
           "to_token",
           "amount"

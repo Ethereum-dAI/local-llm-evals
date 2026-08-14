@@ -55,7 +55,7 @@ def build_transfer_call(amount: str, token_sym: str, recipient_raw: str) -> dict
     """
     if token_sym not in LOOKUP["tokens"]:
         raise ValueError(f"unknown token symbol: {token_sym!r}")
-    return {"tool": "transfer", "chainId": CHAIN_ID, "to": recipient_raw,
+    return {"tool": "transfer", "to": recipient_raw,
             "amount": str(amount), "token": token_sym}
 
 
@@ -64,7 +64,7 @@ def build_swap_call(amount: str, from_sym: str, to_sym: str) -> dict:
     for sym in (from_sym, to_sym):
         if sym not in LOOKUP["tokens"]:
             raise ValueError(f"unknown swap currency: {sym!r}")
-    return {"tool": "swap", "chainId": CHAIN_ID, "amount": str(amount),
+    return {"tool": "swap", "amount": str(amount),
             "from_token": from_sym, "to_token": to_sym, "amount_side": "input"}
 
 

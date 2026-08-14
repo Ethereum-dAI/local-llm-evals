@@ -114,7 +114,10 @@ def _recipient_text(name: str, v: Any) -> Any:
 def _call_matches(expected: ExpectedCall, actual: ParsedToolCall) -> bool:
     if expected.tool != actual.name:
         return False
-    if expected.chainId != actual.chainId:
+    # The app tools have no chainId, so gold omits it; the wallet ignores any the
+    # model volunteers (nothing reads intent.args["chainId"]). Only enforce it
+    # where the contract actually has the field — executeTx/readTx.
+    if expected.chainId is not None and expected.chainId != actual.chainId:
         return False
     if _recipient_text(expected.tool, expected.to) != \
             _recipient_text(actual.name, actual.to):
@@ -203,6 +206,8 @@ def _call_field_diffs(expected: ExpectedCall, actual: ParsedToolCall) -> list[st
     diffs = []
     for label, get_e, get_a, norm in _CALL_FIELDS:
         ev, av = get_e(expected), get_a(actual)
+        if label == "chainId" and ev is None:
+            continue  # not part of this tool's contract; see _call_matches
         if norm(ev) != norm(av):
             diffs.append(f"{label}: expected {ev!r} got {av!r}")
     return diffs

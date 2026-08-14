@@ -41,7 +41,10 @@ class ExpectedCall(Previewable):
     """One gold on-chain call in a case's expected_calls sequence."""
 
     tool: ToolName
-    chainId: str
+    # Optional: executeTx/readTx (the base-unit protocol contract) carry it, the
+    # app tools do NOT — wallet-macos's ToolDefinitions declares no chainId on
+    # transfer/swap and never reads one; chain comes from activeChain.id.
+    chainId: str | None = None
     to: str | None = None
     value: str = "0"
     function: str | None = None

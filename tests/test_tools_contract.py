@@ -24,15 +24,29 @@ def test_all_four_tools_present():
 
 
 def test_transfer_matches_app_properties():
-    assert _props("transfer") == {"chainId", "to", "amount", "token"}
-    assert BY_NAME["transfer"]["parameters"]["required"] == ["chainId", "to", "amount"]
+    # Exact parity with ToolDefinitions.swift:5. chainId was removed on
+    # 2026-08-14: the app declares no such argument and never reads one
+    # (grep intent.args["chainId"] returns nothing), so requiring it trained the
+    # model to emit an off-contract field — the same drift class as executeTx.
+    assert _props("transfer") == {"to", "amount", "token"}
+    assert BY_NAME["transfer"]["parameters"]["required"] == ["to", "amount"]
 
 
 def test_swap_matches_app_properties():
-    assert _props("swap") == {"chainId", "from_token", "to_token", "amount",
-                              "amount_side"}
+    # Exact parity with ToolDefinitions.swift:15 — see the chainId note above.
+    assert _props("swap") == {"from_token", "to_token", "amount", "amount_side"}
     assert BY_NAME["swap"]["parameters"]["required"] == [
-        "chainId", "from_token", "to_token", "amount"]
+        "from_token", "to_token", "amount"]
+
+
+def test_app_tools_declare_no_chainid_but_protocol_tools_do():
+    """The split that keeps the two contracts honest: transfer/swap mirror the
+    app, which resolves the chain from activeChain.id; executeTx/readTx serve
+    the Aave/Safe datasets, which are base-unit and do carry a chainId."""
+    for name in ("transfer", "swap"):
+        assert "chainId" not in _props(name)
+    for name in ("executeTx", "readTx"):
+        assert "chainId" in _props(name)
     assert BY_NAME["swap"]["parameters"]["properties"]["amount_side"]["enum"] == ["input"]
 
 

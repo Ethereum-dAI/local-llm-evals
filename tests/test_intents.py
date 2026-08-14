@@ -29,7 +29,7 @@ def test_build_transfer_call_is_human_units_and_unresolved_recipient():
     # token by symbol, recipient exactly as the user expressed it.
     call = build_transfer_call("0.1", "ETH", "vitalik.eth")
     assert call == {
-        "tool": "transfer", "chainId": CHAIN_ID,
+        "tool": "transfer",
         "to": "vitalik.eth", "amount": "0.1", "token": "ETH",
     }
 
@@ -37,7 +37,7 @@ def test_build_transfer_call_is_human_units_and_unresolved_recipient():
 def test_build_transfer_call_erc20_does_not_encode_calldata():
     call = build_transfer_call("3", "USDC", "0x2222222222222222222222222222222222222222")
     assert call == {
-        "tool": "transfer", "chainId": CHAIN_ID,
+        "tool": "transfer",
         "to": "0x2222222222222222222222222222222222222222",
         "amount": "3", "token": "USDC",
     }
@@ -46,7 +46,7 @@ def test_build_transfer_call_erc20_does_not_encode_calldata():
 def test_build_swap_call_is_symbols_and_human_units():
     call = build_swap_call("100", "USDC", "ETH")
     assert call == {
-        "tool": "swap", "chainId": CHAIN_ID, "amount": "100",
+        "tool": "swap", "amount": "100",
         "from_token": "USDC", "to_token": "ETH", "amount_side": "input",
     }
 
@@ -78,7 +78,7 @@ def test_format_expected_summary_variants():
         "from_token": "USDC", "to_token": "ETH", "amount_side": "input"}])
     assert "swap 7 USDC -> ETH" in s
     # transfer
-    s = format_expected_summary([{"tool": "transfer", "chainId": "1",
+    s = format_expected_summary([{"tool": "transfer",
         "to": "vitalik.eth", "amount": "0.1", "token": "ETH"}])
     assert s == "transfer 0.1 ETH to vitalik.eth"
     # multi-call joins with " | "

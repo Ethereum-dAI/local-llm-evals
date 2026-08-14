@@ -158,7 +158,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: WETH
@@ -182,7 +181,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: WETH
@@ -207,7 +205,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: ETH
@@ -235,7 +232,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -262,7 +258,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: ETH
@@ -287,7 +282,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: WETH
@@ -338,7 +332,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: ETH
@@ -370,7 +363,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: ETH
@@ -393,7 +385,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: DAI
@@ -420,7 +411,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: ETH
@@ -452,7 +442,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -477,7 +466,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: WETH
@@ -507,7 +495,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: DAI
@@ -531,7 +518,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: ETH
@@ -557,7 +543,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: WETH
@@ -584,7 +569,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: ETH
@@ -609,7 +593,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -676,7 +659,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: WETH
@@ -702,7 +684,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: WETH
@@ -735,7 +716,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: ETH
       to_token: DAI
@@ -761,7 +741,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: DAI
@@ -786,7 +765,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -816,7 +794,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: DAI
@@ -842,7 +819,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: DAI
@@ -866,7 +842,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: DAI
@@ -899,7 +874,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: DAI
@@ -931,7 +905,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: WETH
@@ -977,7 +950,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: DAI
@@ -1008,7 +980,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: WETH
@@ -1039,7 +1010,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: WETH
@@ -1064,7 +1034,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -1117,7 +1086,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: DAI
@@ -1144,7 +1112,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: DAI
@@ -1171,7 +1138,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: ETH
@@ -1195,7 +1161,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: ETH
@@ -1222,7 +1187,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: WETH
@@ -1246,7 +1210,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -1273,7 +1236,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: DAI
@@ -1299,7 +1261,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: WETH
@@ -1330,7 +1291,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: DAI
@@ -1357,7 +1317,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: WETH
@@ -1384,7 +1343,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -1409,7 +1367,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: WETH
@@ -1441,7 +1398,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: WETH
@@ -1473,7 +1429,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: DAI
@@ -1497,7 +1452,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: ETH
@@ -1522,7 +1476,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: ETH
@@ -1549,7 +1502,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -1575,7 +1527,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: DAI
@@ -1601,7 +1552,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: WETH
@@ -1627,7 +1577,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: WETH
@@ -1672,7 +1621,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: WETH
@@ -1698,7 +1646,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: WETH
@@ -1724,7 +1671,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -1751,7 +1697,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: DAI
@@ -1778,7 +1723,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: ETH
       to_token: WETH
@@ -1809,7 +1753,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: WETH
@@ -1844,7 +1787,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: WETH
@@ -1869,7 +1811,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -1893,7 +1834,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -1917,7 +1857,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -1941,7 +1880,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: WETH
@@ -1966,7 +1904,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: WETH
@@ -2010,7 +1947,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: WETH
@@ -2037,7 +1973,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -2064,7 +1999,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: WETH
@@ -2091,7 +2025,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: ETH
@@ -2119,7 +2052,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -2145,7 +2077,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: WETH
@@ -2190,7 +2121,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: DAI
@@ -2221,7 +2151,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: DAI
@@ -2253,7 +2182,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -2286,7 +2214,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: WETH
@@ -2312,7 +2239,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: WETH
@@ -2343,7 +2269,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: WETH
@@ -2369,7 +2294,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: ETH
@@ -2402,7 +2326,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: ETH
@@ -2446,7 +2369,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: DAI
@@ -2478,7 +2400,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: ETH
@@ -2502,7 +2423,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -2554,7 +2474,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: ETH
       to_token: WETH
@@ -2581,7 +2500,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: ETH
@@ -2614,7 +2532,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: WETH
@@ -2641,7 +2558,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: DAI
@@ -2668,7 +2584,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: WETH
@@ -2695,7 +2610,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: ETH
@@ -2724,7 +2638,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: ETH
@@ -2755,7 +2668,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: ETH
@@ -2780,7 +2692,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: WETH
@@ -2806,7 +2717,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: WETH
@@ -2859,7 +2769,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: DAI
@@ -2885,7 +2794,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: ETH
       to_token: WETH
@@ -2917,7 +2825,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: DAI
@@ -2942,7 +2849,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -2974,7 +2880,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: WETH
@@ -3007,7 +2912,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: DAI
@@ -3033,7 +2937,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: DAI
@@ -3059,7 +2962,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -3113,7 +3015,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -3140,7 +3041,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: WETH
@@ -3166,7 +3066,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: DAI
@@ -3193,7 +3092,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: DAI
@@ -3219,7 +3117,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: ETH
@@ -3247,7 +3144,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: DAI
@@ -3272,7 +3168,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -3299,7 +3194,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: WETH
@@ -3324,7 +3218,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -3355,7 +3248,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: ETH
@@ -3387,7 +3279,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: ETH
@@ -3411,7 +3302,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: DAI
@@ -3434,7 +3324,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: ETH
       to_token: DAI
@@ -3480,7 +3369,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: DAI
@@ -3507,7 +3395,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: ETH
@@ -3531,7 +3418,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: ETH
@@ -3557,7 +3443,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: WETH
@@ -3591,7 +3476,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: ETH
@@ -3617,7 +3501,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: DAI
@@ -3668,7 +3551,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: USDC
       to_token: DAI
@@ -3693,7 +3575,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: DAI
@@ -3717,7 +3598,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: ETH
       to_token: DAI
@@ -3760,7 +3640,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: WETH
@@ -3787,7 +3666,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: DAI
@@ -3813,7 +3691,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: DAI
@@ -3839,7 +3716,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: ETH
       to_token: WETH
@@ -3864,7 +3740,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: ETH
       to_token: WETH
@@ -3896,7 +3771,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000003'
       from_token: USDC
       to_token: WETH
@@ -3929,7 +3803,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: USDC
       to_token: DAI
@@ -3954,7 +3827,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.05'
       from_token: ETH
       to_token: WETH
@@ -3986,7 +3858,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '12345.6'
       from_token: ETH
       to_token: WETH
@@ -4012,7 +3883,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: ETH
@@ -4038,7 +3908,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: WETH
@@ -4063,7 +3932,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: USDC
       to_token: DAI
@@ -4095,7 +3963,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: DAI
@@ -4128,7 +3995,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.000001'
       from_token: ETH
       to_token: WETH
@@ -4154,7 +4020,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '987654.32'
       from_token: USDC
       to_token: DAI
@@ -4184,7 +4049,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf4192bf24df925a8201411432b2263a9bbbe39ce'
       amount: '0.07'
       token: DAI
@@ -4210,7 +4074,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '9876543.21'
       token: ETH
@@ -4236,7 +4099,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '73.123456789'
       token: ETH
@@ -4261,7 +4123,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: USDC
@@ -4286,7 +4147,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf4192bf24df925a8201411432b2263a9bbbe39ce'
       amount: '0.07'
       token: DAI
@@ -4310,7 +4170,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: USDC
@@ -4337,7 +4196,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: DAI
@@ -4380,7 +4238,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: DAI
@@ -4411,7 +4268,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf4192bf24df925a8201411432b2263a9bbbe39ce'
       amount: '0.07'
       token: DAI
@@ -4437,7 +4293,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x26ecbfc5849ad01a8696a95a142f38e0f0284171'
       amount: '0.000001'
       token: USDC
@@ -4462,7 +4317,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x73b853907622883b487bfd1a3f7bb7d8f2a3096e'
       amount: '0.000007'
       token: USDC
@@ -4486,7 +4340,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: USDC
@@ -4515,7 +4368,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x285cbf2ddf7366cd8af983a9ac6967f0b7386397'
       amount: '999999.99'
       token: DAI
@@ -4541,7 +4393,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
       amount: '0.000000001'
       token: ETH
@@ -4566,7 +4417,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xc8ca7d3ff56923b882dec601d8c18a871232447a'
       amount: '123456.789012'
       token: USDC
@@ -4592,7 +4442,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
       amount: '9876543.21'
       token: ETH
@@ -4622,7 +4471,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x954d417f03329218758949e9557536f541a1517b'
       amount: '999999.99'
       token: USDC
@@ -4646,7 +4494,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf4192bf24df925a8201411432b2263a9bbbe39ce'
       amount: '0.07'
       token: DAI
@@ -4678,7 +4525,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: DAI
@@ -4704,7 +4550,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xa9a03ac2fb0216fc04ef4f400296acbd07d4dab4'
       amount: '0.000007'
       token: DAI
@@ -4729,7 +4574,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x73b853907622883b487bfd1a3f7bb7d8f2a3096e'
       amount: '0.000007'
       token: USDC
@@ -4755,7 +4599,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '73.123456789'
       token: ETH
@@ -4779,7 +4622,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf13a370c86dedb53d13c77262c9dc58efe49b435'
       amount: '0.000001'
       token: DAI
@@ -4801,7 +4643,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1234.000000005'
       token: ETH
@@ -4827,7 +4668,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x73b853907622883b487bfd1a3f7bb7d8f2a3096e'
       amount: '0.000007'
       token: USDC
@@ -4851,7 +4691,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: DAI
@@ -4883,7 +4722,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.07'
       token: DAI
@@ -4909,7 +4747,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: USDC
@@ -4957,7 +4794,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: DAI
@@ -4981,7 +4817,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '9876543.21'
       token: ETH
@@ -5008,7 +4843,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: USDC
@@ -5033,7 +4867,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '9876543.21'
       token: ETH
@@ -5078,7 +4911,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: DAI
@@ -5104,7 +4936,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: DAI
@@ -5129,7 +4960,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: USDC
@@ -5154,7 +4984,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
       amount: '0.1'
       token: ETH
@@ -5181,7 +5010,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x285cbf2ddf7366cd8af983a9ac6967f0b7386397'
       amount: '999999.99'
       token: DAI
@@ -5207,7 +5035,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x61d5da08dc753d61bd38fcbb5d29cdceab947b93'
       amount: '123456.789012'
       token: DAI
@@ -5231,7 +5058,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
       amount: '0.1'
       token: ETH
@@ -5254,7 +5080,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x61d5da08dc753d61bd38fcbb5d29cdceab947b93'
       amount: '123456.789012'
       token: DAI
@@ -5279,7 +5104,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
       amount: '0.000000001'
       token: ETH
@@ -5311,7 +5135,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xc8ca7d3ff56923b882dec601d8c18a871232447a'
       amount: '123456.789012'
       token: USDC
@@ -5337,7 +5160,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x61d5da08dc753d61bd38fcbb5d29cdceab947b93'
       amount: '123456.789012'
       token: DAI
@@ -5361,7 +5183,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: DAI
@@ -5393,7 +5214,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: USDC
@@ -5419,7 +5239,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: USDC
@@ -5447,7 +5266,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x680e4b9aa35cfed06fdc2fa0dde88f08a373252f'
       amount: '0.07'
       token: USDC
@@ -5477,7 +5295,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '9876543.21'
       token: ETH
@@ -5510,7 +5327,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.07'
       token: DAI
@@ -5555,7 +5371,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: USDC
@@ -5601,7 +5416,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x73b853907622883b487bfd1a3f7bb7d8f2a3096e'
       amount: '0.000007'
       token: USDC
@@ -5634,7 +5448,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf4192bf24df925a8201411432b2263a9bbbe39ce'
       amount: '0.07'
       token: DAI
@@ -5663,7 +5476,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
       amount: '9876543.21'
       token: ETH
@@ -5696,7 +5508,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x285cbf2ddf7366cd8af983a9ac6967f0b7386397'
       amount: '999999.99'
       token: DAI
@@ -5728,7 +5539,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: DAI
@@ -5753,7 +5563,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000000001'
       token: ETH
@@ -5785,7 +5594,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x26ecbfc5849ad01a8696a95a142f38e0f0284171'
       amount: '0.000001'
       token: USDC
@@ -5812,7 +5620,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x26ecbfc5849ad01a8696a95a142f38e0f0284171'
       amount: '0.000001'
       token: USDC
@@ -5834,7 +5641,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: DAI
@@ -5859,7 +5665,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x61d5da08dc753d61bd38fcbb5d29cdceab947b93'
       amount: '123456.789012'
       token: DAI
@@ -5891,7 +5696,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '73.123456789'
       token: ETH
@@ -5922,7 +5726,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xc8ca7d3ff56923b882dec601d8c18a871232447a'
       amount: '123456.789012'
       token: USDC
@@ -5946,7 +5749,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
       amount: '0.1'
       token: ETH
@@ -5978,7 +5780,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1234.000000005'
       token: ETH
@@ -6004,7 +5805,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.07'
       token: DAI
@@ -6032,7 +5832,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xc8ca7d3ff56923b882dec601d8c18a871232447a'
       amount: '123456.789012'
       token: USDC
@@ -6055,7 +5854,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: DAI
@@ -6085,7 +5883,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf13a370c86dedb53d13c77262c9dc58efe49b435'
       amount: '0.000001'
       token: DAI
@@ -6111,7 +5908,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x9a6f73d7bc97f68f280d53bfd7136457c099ee54'
       amount: '1234.000000005'
       token: ETH
@@ -6135,7 +5931,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
       amount: '0.000000001'
       token: ETH
@@ -6167,7 +5962,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: USDC
@@ -6192,7 +5986,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x10584749fec5f3c284b7879a5b0bf996aa0c183a'
       amount: '0.1'
       token: ETH
@@ -6218,7 +6011,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x26ecbfc5849ad01a8696a95a142f38e0f0284171'
       amount: '0.000001'
       token: USDC
@@ -6244,7 +6036,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf13a370c86dedb53d13c77262c9dc58efe49b435'
       amount: '0.000001'
       token: DAI
@@ -6289,7 +6080,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '9876543.21'
       token: ETH
@@ -6314,7 +6104,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '9876543.21'
       token: ETH
@@ -6344,7 +6133,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '9876543.21'
       token: ETH
@@ -6394,7 +6182,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf13a370c86dedb53d13c77262c9dc58efe49b435'
       amount: '0.000001'
       token: DAI
@@ -6418,7 +6205,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf13a370c86dedb53d13c77262c9dc58efe49b435'
       amount: '0.000001'
       token: DAI
@@ -6450,7 +6236,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x61d5da08dc753d61bd38fcbb5d29cdceab947b93'
       amount: '123456.789012'
       token: DAI
@@ -6473,7 +6258,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
       amount: '0.000000001'
       token: ETH
@@ -6506,7 +6290,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x6ea55e10e568d36004ae05a75c7aa42b7b58bd1d'
       amount: '73.123456789'
       token: ETH
@@ -6531,7 +6314,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '73.123456789'
       token: ETH
@@ -6580,7 +6362,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.07'
       token: DAI
@@ -6633,7 +6414,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1234.000000005'
       token: ETH
@@ -6697,7 +6477,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf4192bf24df925a8201411432b2263a9bbbe39ce'
       amount: '0.07'
       token: DAI
@@ -6741,7 +6520,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: USDC
@@ -6771,7 +6549,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.1'
       token: ETH
@@ -6799,7 +6576,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x680e4b9aa35cfed06fdc2fa0dde88f08a373252f'
       amount: '0.07'
       token: USDC
@@ -6822,7 +6598,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x954d417f03329218758949e9557536f541a1517b'
       amount: '999999.99'
       token: USDC
@@ -6848,7 +6623,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf13a370c86dedb53d13c77262c9dc58efe49b435'
       amount: '0.000001'
       token: DAI
@@ -6875,7 +6649,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf4192bf24df925a8201411432b2263a9bbbe39ce'
       amount: '0.07'
       token: DAI
@@ -6900,7 +6673,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
       amount: '9876543.21'
       token: ETH
@@ -6926,7 +6698,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: DAI
@@ -6951,7 +6722,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x680e4b9aa35cfed06fdc2fa0dde88f08a373252f'
       amount: '0.07'
       token: USDC
@@ -6976,7 +6746,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.1'
       token: ETH
@@ -7001,7 +6770,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: DAI
@@ -7025,7 +6793,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
       amount: '0.000000001'
       token: ETH
@@ -7050,7 +6817,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000000001'
       token: ETH
@@ -7074,7 +6840,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: USDC
@@ -7101,7 +6866,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x680e4b9aa35cfed06fdc2fa0dde88f08a373252f'
       amount: '0.07'
       token: USDC
@@ -7134,7 +6898,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
       amount: '0.000000001'
       token: ETH
@@ -7166,7 +6929,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000000001'
       token: ETH
@@ -7191,7 +6953,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x285cbf2ddf7366cd8af983a9ac6967f0b7386397'
       amount: '999999.99'
       token: DAI
@@ -7222,7 +6983,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xa9a03ac2fb0216fc04ef4f400296acbd07d4dab4'
       amount: '0.000007'
       token: DAI
@@ -7247,7 +7007,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.07'
       token: USDC
@@ -7278,7 +7037,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x61d5da08dc753d61bd38fcbb5d29cdceab947b93'
       amount: '123456.789012'
       token: DAI
@@ -7305,7 +7063,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: USDC
@@ -7337,7 +7094,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x73b853907622883b487bfd1a3f7bb7d8f2a3096e'
       amount: '0.000007'
       token: USDC
@@ -7362,7 +7118,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x26ecbfc5849ad01a8696a95a142f38e0f0284171'
       amount: '0.000001'
       token: USDC
@@ -7387,7 +7142,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xa9a03ac2fb0216fc04ef4f400296acbd07d4dab4'
       amount: '0.000007'
       token: DAI
@@ -7412,7 +7166,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.07'
       token: DAI
@@ -7436,7 +7189,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: DAI
@@ -7462,7 +7214,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000000001'
       token: ETH
@@ -7487,7 +7238,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x9a6f73d7bc97f68f280d53bfd7136457c099ee54'
       amount: '1234.000000005'
       token: ETH
@@ -7511,7 +7261,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: USDC
@@ -7536,7 +7285,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x26ecbfc5849ad01a8696a95a142f38e0f0284171'
       amount: '0.000001'
       token: USDC
@@ -7560,7 +7308,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1234.000000005'
       token: ETH
@@ -7584,7 +7331,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: USDC
@@ -7608,7 +7354,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000007'
       token: DAI
@@ -7633,7 +7378,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '73.123456789'
       token: ETH
@@ -7657,7 +7401,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf5db41c1449f836317920c72e63c48cb818eccf'
       amount: '0.000000001'
       token: ETH
@@ -7681,7 +7424,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: USDC
@@ -7706,7 +7448,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x680e4b9aa35cfed06fdc2fa0dde88f08a373252f'
       amount: '0.07'
       token: USDC
@@ -7730,7 +7471,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: DAI
@@ -7764,7 +7504,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x954d417f03329218758949e9557536f541a1517b'
       amount: '999999.99'
       token: USDC
@@ -7790,7 +7529,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x9a6f73d7bc97f68f280d53bfd7136457c099ee54'
       amount: '1234.000000005'
       token: ETH
@@ -7821,7 +7559,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x26ecbfc5849ad01a8696a95a142f38e0f0284171'
       amount: '0.000001'
       token: USDC
@@ -7851,7 +7588,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xf13a370c86dedb53d13c77262c9dc58efe49b435'
       amount: '0.000001'
       token: DAI
@@ -7876,7 +7612,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.000001'
       token: USDC
@@ -7907,7 +7642,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xbf9c5024244342cbd3e2d6baa97d9e06f7e6a2a1'
       amount: '9876543.21'
       token: ETH
@@ -7932,7 +7666,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: DAI
@@ -7957,7 +7690,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0x954d417f03329218758949e9557536f541a1517b'
       amount: '999999.99'
       token: USDC
@@ -7983,7 +7715,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '123456.789012'
       token: DAI
@@ -8008,7 +7739,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.07'
       token: USDC
@@ -8033,7 +7763,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: '0xc8ca7d3ff56923b882dec601d8c18a871232447a'
       amount: '123456.789012'
       token: USDC
@@ -8081,7 +7810,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '999999.99'
       token: DAI
@@ -8106,7 +7834,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '5432100.75'
       from_token: ETH
       to_token: USDC
@@ -8132,7 +7859,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '5432100.75'
       from_token: ETH
       to_token: USDC
@@ -8177,7 +7903,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1.50'
       from_token: ETH
       to_token: USDC
@@ -8202,7 +7927,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '20000'
       from_token: ETH
       to_token: USDC
@@ -8227,7 +7951,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.00000005'
       from_token: ETH
       to_token: USDC
@@ -8273,7 +7996,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -8299,7 +8021,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '8765.432109876'
       from_token: ETH
       to_token: USDC
@@ -8326,7 +8047,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1.50'
       from_token: ETH
       to_token: USDC
@@ -8359,7 +8079,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.123456789012345678'
       from_token: ETH
       to_token: USDC
@@ -8383,7 +8102,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -8477,7 +8195,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '8765.432109876'
       from_token: ETH
       to_token: USDC
@@ -8508,7 +8225,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1.50'
       from_token: ETH
       to_token: USDC
@@ -8536,7 +8252,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.123456789012345678'
       from_token: ETH
       to_token: USDC
@@ -8566,7 +8281,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -8592,7 +8306,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.0000002'
       from_token: ETH
       to_token: USDC
@@ -8624,7 +8337,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.0000002'
       from_token: ETH
       to_token: USDC
@@ -8649,7 +8361,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1.50'
       from_token: ETH
       to_token: USDC
@@ -8674,7 +8385,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -8699,7 +8409,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.123456789012345678'
       from_token: ETH
       to_token: USDC
@@ -8741,7 +8450,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -8766,7 +8474,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '5432100.75'
       from_token: ETH
       to_token: USDC
@@ -8791,7 +8498,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '250'
       from_token: ETH
       to_token: USDC
@@ -8817,7 +8523,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1.50'
       from_token: ETH
       to_token: USDC
@@ -8842,7 +8547,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.0000002'
       from_token: ETH
       to_token: USDC
@@ -8875,7 +8579,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -8901,7 +8604,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1.50'
       from_token: ETH
       to_token: USDC
@@ -8929,7 +8631,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '20000'
       from_token: ETH
       to_token: USDC
@@ -8962,7 +8663,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -8993,7 +8693,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.0000002'
       from_token: ETH
       to_token: USDC
@@ -9027,7 +8726,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '5432100.75'
       from_token: ETH
       to_token: USDC
@@ -9055,7 +8753,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '5432100.75'
       from_token: ETH
       to_token: USDC
@@ -9081,7 +8778,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '1000.5'
       from_token: ETH
       to_token: USDC
@@ -9126,7 +8822,6 @@
     requires: []
     expected_calls:
     - tool: swap
-      chainId: '1'
       amount: '0.00000005'
       from_token: ETH
       to_token: USDC
@@ -9152,7 +8847,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.123456789012345678'
       token: ETH
@@ -9178,7 +8872,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.0000002'
       token: ETH
@@ -9203,7 +8896,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '250'
       token: ETH
@@ -9229,7 +8921,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '20000'
       token: ETH
@@ -9260,7 +8951,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1000.5'
       token: ETH
@@ -9290,7 +8980,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '5432100.75'
       token: ETH
@@ -9315,7 +9004,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.123456789012345678'
       token: ETH
@@ -9338,7 +9026,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.123456789012345678'
       token: ETH
@@ -9363,7 +9050,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.00000005'
       token: ETH
@@ -9388,7 +9074,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1000.5'
       token: ETH
@@ -9420,7 +9105,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '250'
       token: ETH
@@ -9486,7 +9170,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '5432100.75'
       token: ETH
@@ -9516,7 +9199,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1.50'
       token: ETH
@@ -9541,7 +9223,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1000.5'
       token: ETH
@@ -9567,7 +9248,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '250'
       token: ETH
@@ -9592,7 +9272,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '20000'
       token: ETH
@@ -9617,7 +9296,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.0000002'
       token: ETH
@@ -9642,7 +9320,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '250'
       token: ETH
@@ -9672,7 +9349,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.00000005'
       token: ETH
@@ -9695,7 +9371,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '20000'
       token: ETH
@@ -9719,7 +9394,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1.50'
       token: ETH
@@ -9770,7 +9444,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1.50'
       token: ETH
@@ -9793,7 +9466,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.00000005'
       token: ETH
@@ -9825,7 +9497,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.123456789012345678'
       token: ETH
@@ -9850,7 +9521,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '8765.432109876'
       token: ETH
@@ -9875,7 +9545,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.00000005'
       token: ETH
@@ -9900,7 +9569,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.0000002'
       token: ETH
@@ -9924,7 +9592,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.0000002'
       token: ETH
@@ -9949,7 +9616,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.00000005'
       token: ETH
@@ -9974,7 +9640,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.0000002'
       token: ETH
@@ -9999,7 +9664,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.00000005'
       token: ETH
@@ -10022,7 +9686,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1.50'
       token: ETH
@@ -10047,7 +9710,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1.50'
       token: ETH
@@ -10072,7 +9734,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '1.50'
       token: ETH
@@ -10097,7 +9758,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '0.00000005'
       token: ETH
@@ -10129,7 +9789,6 @@
     requires: []
     expected_calls:
     - tool: transfer
-      chainId: '1'
       to: vitalik.eth
       amount: '8765.432109876'
       token: ETH
