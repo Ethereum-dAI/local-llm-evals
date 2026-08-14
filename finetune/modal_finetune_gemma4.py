@@ -37,7 +37,14 @@ from _bundled import bundled  # noqa: E402  (needs the line above)
 # to the Q4_K_M GGUF it ships). We train from unsloth's ungated mirror of those
 # exact weights — same model, no google/* license gate on Modal, unsloth-optimized.
 BASE_MODEL = "unsloth/gemma-4-E4B-it"
-MAX_SEQ_LEN = 2048
+# 4096, not 2048: every example carries a constant ~6.3k-char `tools` JSON
+# payload on top of its messages, and the app-contract reasoning traces are
+# longer than the base-unit ones they replaced, putting the rendered example
+# at ~2.8k tokens median / ~3.1k tokens worst case. 2048 truncated the
+# `<|turn>model\n` response marker off of nearly every row, which made
+# train_on_responses_only mask all labels to -100 and abort. 4096 clears the
+# ~3.1k-token worst case with headroom.
+MAX_SEQ_LEN = 4096
 EPOCHS = 3
 # E4B is ~15x FunctionGemma-270m: small per-device batch + accumulation to reach
 # an effective batch of 16 without exceeding 40 GB.
