@@ -16,11 +16,11 @@ def _props(name):
     return set(BY_NAME[name]["parameters"]["properties"])
 
 
-def test_all_six_tools_present():
-    # transfer/swap/shield/unshield mirror the app; executeTx/readTx serve the
-    # Aave and Safe protocol datasets, which have no app counterpart.
-    assert set(BY_NAME) == {"executeTx", "readTx", "transfer", "swap",
-                            "shield", "unshield"}
+def test_all_four_tools_present():
+    # transfer/swap mirror the app; executeTx/readTx serve the Aave and Safe
+    # protocol datasets, which have no app counterpart. shield/unshield were
+    # dropped with the RAILGUN feature (local-wallet-mac#86, PR #87).
+    assert set(BY_NAME) == {"executeTx", "readTx", "transfer", "swap"}
 
 
 def test_transfer_matches_app_properties():
@@ -39,6 +39,6 @@ def test_swap_matches_app_properties():
 def test_no_app_tool_asks_for_base_units():
     # Every app tool is human-unit now, so "the exception to the base-unit rule"
     # framing the privacy tools used to carry is no longer true of anything.
-    for name in ("transfer", "swap", "shield", "unshield"):
+    for name in ("transfer", "swap"):
         blob = json.dumps(BY_NAME[name]).lower()
         assert "base unit" not in blob and "base-unit" not in blob

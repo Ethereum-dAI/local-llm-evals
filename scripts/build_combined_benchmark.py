@@ -1,7 +1,7 @@
 """Concatenate the app-contract and protocol datasets into one benchmark file.
 
 `pf/tests.app-contract.yaml` (transfer/swap, including the arithmetic slice)
-and `pf/tests.protocols.yaml` (railgun/aave/safe) are each generated
+and `pf/tests.protocols.yaml` (aave/safe) are each generated
 separately from their own seeds/fixtures — see scripts/generate_cases.py and
 scripts/generate_protocol_cases.py. Neither one alone exercises every tool the
 app ships, so this script concatenates them, in that order, into
@@ -61,7 +61,7 @@ def main() -> None:
         "# Generated combined benchmark — DO NOT EDIT BY HAND.\n"
         "# Produced by scripts/build_combined_benchmark.py by concatenating "
         f"{APP_CONTRACT.relative_to(ROOT)} (transfer/swap + the arithmetic slice) "
-        f"then {PROTOCOLS.relative_to(ROOT)} (railgun/aave/safe).\n"
+        f"then {PROTOCOLS.relative_to(ROOT)} (aave/safe).\n"
         "# Regenerate the two source files first if either is stale; this script "
         "only concatenates them.\n"
     )

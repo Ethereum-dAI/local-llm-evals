@@ -160,19 +160,19 @@ def test_disjoint_from_eval_set():
             f"{ex['id']} conversation leaks into the eval set"
 
 
-def test_railgun_coverage_is_nonzero():
-    """The shipped set had ZERO shield/unshield rows despite the app offering
-    both tools (verified against the pre-regeneration set: `railgun/shield/
-    unshield present? False` across all 1739 rows). This must no longer hold."""
+def test_railgun_coverage_is_zero():
+    """Briefly the opposite of this test: the set gained railgun rows because
+    the app shipped shield/unshield. The app is removing them
+    (local-wallet-mac#86, PR #87) and pf/tools.json no longer offers them, so
+    training on them would teach tools the product does not expose."""
     examples = _load_examples()
-    railgun_rows = [ex for ex in examples if ex.get("protocol") == "railgun"]
-    assert railgun_rows, "no railgun rows in the regenerated training set"
-    tools_used = {c.get("tool") for ex in railgun_rows for c in ex.get("expected_calls") or []}
-    assert "shield" in tools_used and "unshield" in tools_used
+    assert not [ex for ex in examples if ex.get("protocol") == "railgun"]
+    tools_used = {c.get("tool") for ex in examples for c in ex.get("expected_calls") or []}
+    assert "shield" not in tools_used and "unshield" not in tools_used
 
 
 def test_no_app_contract_trace_leaks_base_units_or_a_token_contract_address():
-    """Step 0's whole point: transfer/swap/shield/unshield all take a HUMAN
+    """Step 0's whole point: transfer and swap both take a HUMAN
     decimal amount, so their <think> traces must never compute or name wei,
     base units, or a token's contract address (Aave/Safe stay on the OLD
     executeTx/base-unit contract and are deliberately exempt)."""

@@ -5,9 +5,9 @@ The old `_reasoning_text` computed a base-unit derivation ("USDC has 6
 decimals, so 0.000002 USDC = 2 base units...") that would directly contradict
 an app-contract target, which emits the HUMAN-unit amount verbatim. These
 tests assert the rewritten trace only ever talks about the human-unit call the
-app contract actually takes, for all four families it now covers
-(transfer/swap/shield/unshield), and that the deterministic separator-note
-path fires correctly for the `separator` bucket.
+app contract actually takes, for both families it now covers
+(transfer/swap), and that the deterministic separator-note path fires
+correctly for the `separator` bucket.
 """
 from __future__ import annotations
 
@@ -45,23 +45,6 @@ def test_swap_trace_is_app_contract_shaped():
     _assert_app_contract_shape(trace, "7.25")
     assert "swap" in trace
     assert 'amount_side "input"' in trace or "amount_side" in trace
-
-
-def test_shield_trace_is_app_contract_shaped():
-    intent = {"action": "shield", "amount": "0.02", "token": "ETH"}
-    trace = _reasoning_text(intent)
-    _assert_app_contract_shape(trace, "0.02")
-    assert "shield" in trace
-    assert "ETH" in trace
-
-
-def test_unshield_trace_is_app_contract_shaped():
-    recipient = "0x1ca24780dcecb0fd44730555b4222b7a663bc1f6"
-    intent = {"action": "unshield", "amount": "0.0075", "token": "ETH", "to": recipient}
-    trace = _reasoning_text(intent)
-    _assert_app_contract_shape(trace, "0.0075")
-    assert "unshield" in trace
-    assert recipient in trace  # recipient copied verbatim
 
 
 def test_transfer_trace_never_mentions_erc20_contract_address():

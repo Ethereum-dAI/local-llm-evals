@@ -18,6 +18,7 @@ import yaml
 from wallet_evals.generation import (
     TRANSFER_TEMPLATES, SWAP_TEMPLATES,
     TRANSFER_NARRATIVE_TEMPLATES, SWAP_NARRATIVE_TEMPLATES, REFUSAL_SCENARIOS,
+    EXTRA_REFUSAL_SCENARIOS,
     expand_vary, build_positive_case, build_negative_case, build_multiturn_case,
     build_refusal_case,
 )
@@ -40,6 +41,17 @@ MAX_PER_ACTION = 150
 ARITHMETIC_SEEDS = ROOT / "datasets" / "seeds.arithmetic.yaml"
 SEED_ARITHMETIC = 20260812
 MAX_PER_ACTION_ARITHMETIC = 40
+
+# EXTRA_REFUSAL_SCENARIOS is appended the same way, and for a sharper reason:
+# build_refusal_case draws from the RNG it is given, and main() shuffles the
+# "refusal" bucket BEFORE "swap"/"transfer" (alphabetical order). Growing the
+# frozen 7-template REFUSAL_SCENARIOS in place therefore changes how many draws
+# `rng` has consumed by the time swap/transfer are shuffled, silently
+# reselecting the main 307 cases and destroying byte-identity with the frozen
+# base-unit dataset — the property that makes the base-unit vs app-contract
+# comparison honest. Measured: doing so moved the first swap case from
+# gen-swap-pos-0176 to gen-swap-pos-0457.
+SEED_REFUSAL = 20260814
 
 _TEMPLATES = {"transfer": TRANSFER_TEMPLATES, "swap": SWAP_TEMPLATES}
 _NARRATIVE_TEMPLATES = {
@@ -181,6 +193,24 @@ def main() -> None:
             f"{args.extra_seeds.relative_to(ROOT) if args.extra_seeds.is_absolute() else args.extra_seeds} "
             f"(seed {SEED_ARITHMETIC}) via a SEPARATE random.Random stream, so the "
             "cases above are unaffected."
+        )
+
+    extra_refusals: list[dict] = []
+    extra_rng_refusal = random.Random(SEED_REFUSAL)
+    idx = 0
+    for scenario in EXTRA_REFUSAL_SCENARIOS:
+        for template in scenario["templates"]:
+            idx += 1
+            case = build_refusal_case(scenario, template, extra_rng_refusal, idx)
+            case["metadata"]["id"] = case["metadata"]["id"].replace("gen-", "xref-", 1)
+            extra_refusals.append(case)
+    if extra_refusals:
+        print(f"extra refusals: {len(extra_refusals)} cases appended")
+        selected.extend(extra_refusals)
+        header_lines.append(
+            "# The xref- cases below come from EXTRA_REFUSAL_SCENARIOS via a SEPARATE "
+            f"random.Random({SEED_REFUSAL}) stream, so the selections above are "
+            "unaffected."
         )
 
     header = "\n".join(header_lines) + "\n"

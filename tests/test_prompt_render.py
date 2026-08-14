@@ -45,21 +45,13 @@ def test_render_aave_protocol_adds_reference():
     assert "<wallet>" in ref
 
 
-def test_render_railgun_protocol_adds_reference():
+def test_railgun_protocol_no_longer_resolves_to_a_reference():
+    """RAILGUN was removed from the app (local-wallet-mac#86, PR #87). An
+    unknown protocol key must fall through silently rather than inject a
+    reference for tools that no longer exist."""
     chat = render({"vars": {"user_message": "Shield 0.01 ETH.", "protocol": "railgun"}})
-    assert [m["role"] for m in chat] == ["system", "system", "user"]
-    ref = chat[1]["content"]
-    assert "shield" in ref and "unshield" in ref
-    # The privacy tools are the one exception to the global base-unit rule.
-    assert "HUMAN units" in ref and "do NOT convert to wei" in ref
-    assert "0x000...dEaD" in ref, "unshield burn-address refusal must be stated"
-
-
-def test_railgun_reference_is_not_rendered_for_other_cases():
-    for vars_ in ({"user_message": "Send 0.1 ETH to vitalik.eth"},
-                  {"user_message": "Supply 3 USDC to Aave v3.", "protocol": "aave"}):
-        chat = render({"vars": vars_})
-        assert all("do NOT convert to wei" not in m["content"] for m in chat)
+    assert [m["role"] for m in chat] == ["system", "user"]
+    assert all("unshield" not in m["content"] for m in chat)
 
 
 def test_render_no_protocol_unchanged():

@@ -34,7 +34,7 @@ from wallet_evals.generation import (  # noqa: E402
     build_refusal_case, build_separator_case, group_amount,
 )
 from wallet_evals.protocols import (  # noqa: E402
-    safe as safe_mod, aave as aave_mod, railgun as railgun_mod,
+    safe as safe_mod, aave as aave_mod,
 )
 from wallet_evals.finetune import case_to_example  # noqa: E402
 from pf.prompt import render  # noqa: E402
@@ -43,7 +43,6 @@ SEED = 20260710
 SEEDS = ROOT / "datasets" / "finetune_seeds.yaml"
 SAFE_FIXTURES = ROOT / "datasets" / "protocols" / "safe.finetune.fixtures.json"
 AAVE_FIXTURES = ROOT / "datasets" / "protocols" / "aave.finetune.fixtures.json"
-RAILGUN_FIXTURES = ROOT / "datasets" / "protocols" / "railgun.finetune.fixtures.json"
 TOOLS = json.loads((ROOT / "pf" / "tools.json").read_text())
 OUT = ROOT / "data_for_finetune" / "functiongemma_train.jsonl"
 
@@ -71,10 +70,12 @@ REFUSAL_SCENARIOS = [
 # the core task). Buckets over-generate; we shuffle + cap each. Weighted toward
 # transfer/swap (the capability that failed); protocols/refusals use all raw.
 # v3 (app contract): added `separator` (thousands-separator stripping, the
-# biggest remaining app-contract failure mode) and `railgun` (shield/unshield —
-# the shipped set had zero coverage despite the app shipping both tools).
+# biggest remaining app-contract failure mode).
+# v4: dropped `railgun` — shield/unshield are being removed from the app
+# (Ethereum-dAI/local-wallet-mac#86, PR #87) and from pf/tools.json, so training
+# on them would teach tools the product no longer exposes.
 TARGETS = {"transfer": 650, "swap": 650, "multiturn": 250, "ablation": 90,
-           "safe": 40, "aave": 55, "refusal": 12, "separator": 80, "railgun": 100}
+           "safe": 40, "aave": 55, "refusal": 12, "separator": 80}
 
 # A 4+ digit integer part is the threshold at which the surface renders
 # comma-grouped in real usage (matches the eval's own arithmetic-separator
@@ -94,7 +95,7 @@ def _reasoning_text(intent: dict) -> str:
     """Deterministic, ground-truth <think> trace for the APP CONTRACT.
 
     States which tool the request maps to and the exact human-unit call the app
-    itself takes — transfer/swap/shield/unshield all take a HUMAN decimal
+    itself takes — transfer and swap both take a HUMAN decimal
     `amount` (the app converts to base units and resolves ENS in Swift, never
     the model), so this trace must never compute or mention wei, base units, a
     decimals shift, or a token's contract address. Derived purely from the
@@ -133,33 +134,7 @@ def _reasoning_text(intent: dict) -> str:
                 f"(symbols, never contract addresses), amount_side \"input\" — "
                 f"always \"input\" for an input amount, so no follow-up question "
                 f"is needed.")
-    if action == "shield":
-        return (f"This is a shield. RAILGUN shield/unshield are ETH-only, so "
-                f"token defaults to \"ETH\" even when the user never says the "
-                f"word. Emit shield with amount {amount} (HUMAN units), token ETH.")
-    if action == "unshield":
-        return (f"This is an unshield. RAILGUN shield/unshield are ETH-only, so "
-                f"token defaults to \"ETH\" even when the user never says the "
-                f"word. Emit unshield with amount {amount} (HUMAN units), token "
-                f"ETH, and the recipient copied exactly as the user wrote it "
-                f"({intent['to']}).")
     raise ValueError(f"no reasoning trace defined for action: {action!r}")
-
-
-def _railgun_intent(test: dict) -> dict | None:
-    """Reconstruct a `shield`/`unshield` "intent" straight from the case's own
-    gold call, for `_reasoning_text` — RAILGUN cases don't go through
-    `wallet_evals.generation.expand_vary`, so there is no seed-shaped intent
-    dict to reuse. `None` for a no-call case (refusal): a <think> trace is only
-    ever a prefix to a real tool call."""
-    calls = test["metadata"].get("expected_calls") or []
-    if not calls:
-        return None
-    call = calls[0]
-    intent = {"action": call["tool"], "amount": call["amount"], "token": call["token"]}
-    if call["tool"] == "unshield":
-        intent["to"] = call["to"]
-    return intent
 
 
 def _collect(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
@@ -206,10 +181,6 @@ def _collect(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
     aave_fx = json.loads(AAVE_FIXTURES.read_text())
     for test in aave_mod.build_cases(aave_fx, rng, start_idx=1):
         triples.append((test, None, "aave"))
-    railgun_fx = json.loads(RAILGUN_FIXTURES.read_text())
-    for test in railgun_mod.build_cases(railgun_fx, rng, start_idx=1):
-        triples.append((test, _railgun_intent(test), "railgun"))
-
     return triples
 
 

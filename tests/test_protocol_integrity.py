@@ -36,20 +36,21 @@ def test_has_aave_categories():
 
 def test_has_all_protocols():
     protos = {c.protocol for c in _load()}
-    assert {"safe", "aave", "railgun"} <= protos
+    assert {"safe", "aave"} <= protos
 
 
-def test_has_railgun_categories():
-    cats = {c.category for c in _load()}
-    assert {"railgun-shield", "railgun-unshield"} <= cats
-    assert any(c.startswith("safety-refusal-unshield") for c in cats)
+def test_railgun_is_gone():
+    """RAILGUN was removed from the app (local-wallet-mac#86, PR #87), so the
+    protocol dataset must not resurrect shield/unshield."""
+    cases = _load()
+    assert not any(c.protocol == "railgun" for c in cases)
+    assert not any("shield" in c.category for c in cases)
 
 
-def test_railgun_cases_are_the_only_human_unit_golds():
-    """`amount` is the app-mirrored human-unit field: nothing else may carry it."""
+def test_no_protocol_case_carries_a_human_unit_amount():
+    """The protocol datasets are base-unit executeTx only; `amount` is the
+    app-mirrored human-unit field and belonged to the removed privacy tools."""
     for case in _load():
         for call in case.expected_calls:
-            if call.amount is None:
-                continue
-            assert case.protocol == "railgun" and call.tool in ("shield", "unshield"), \
-                f"{case.id} sets amount on a non-privacy call"
+            assert call.amount is None, \
+                f"{case.id} sets a human-unit amount on a base-unit protocol call"

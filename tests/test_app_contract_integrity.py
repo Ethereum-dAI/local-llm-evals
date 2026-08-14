@@ -33,11 +33,37 @@ def test_app_contract_first_307_match_the_frozen_dataset_count_and_the_arithmeti
     assert len(frozen) == 307
 
     cases = _load()
-    base = [c for c in cases if not c.category.startswith("arithmetic-")]
+    # xref- cases are the EXTRA_REFUSAL_SCENARIOS bank, appended from its own
+    # RNG stream just like the arithmetic slice.
+    base = [c for c in cases
+            if not c.category.startswith("arithmetic-") and not c.id.startswith("xref-")]
     arithmetic = [c for c in cases if c.category.startswith("arithmetic-")]
+    extra_refusals = [c for c in cases if c.id.startswith("xref-")]
     assert len(base) == 307
     assert len(arithmetic) > 0
-    assert len(cases) == 307 + len(arithmetic)
+    assert len(extra_refusals) > 0
+    assert len(cases) == 307 + len(arithmetic) + len(extra_refusals)
+
+    # The load-bearing property, asserted rather than asserted-in-a-comment: the
+    # 307 carry the SAME prompts as the frozen base-unit dataset, only different
+    # gold. Without it, "base 9.8% -> 87.9% on the same intents" is not a claim
+    # about the contract change, and the whole comparison collapses.
+    assert {c.id for c in base} == {c.id for c in frozen}
+
+    # Compare the raw `vars` blocks, not the parsed Case: multi-turn prompts
+    # live in vars["messages"], which the Case model does not surface.
+    root = Path(__file__).resolve().parents[1]
+    import yaml
+    def _vars_by_id(path):
+        return {t["metadata"]["id"]: t["vars"]
+                for t in yaml.safe_load((root / path).read_text())}
+    frozen_vars = _vars_by_id("pf/tests.generated.yaml")
+    current_vars = _vars_by_id("pf/tests.app-contract.yaml")
+    for case_id in frozen_vars:
+        fv, cv = frozen_vars[case_id], current_vars[case_id]
+        for key in ("user_message", "messages"):
+            assert fv.get(key) == cv.get(key), \
+                f"{case_id}: {key} drifted from the frozen base-unit dataset"
 
 
 def test_app_contract_ids_unique():
