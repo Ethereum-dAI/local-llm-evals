@@ -72,6 +72,7 @@ image = (
     .pip_install("unsloth", "huggingface_hub")
     .env({"HF_HOME": HF_CACHE_DIR})
     .add_local_file(str(_DATA_LOCAL), DATA_REMOTE)
+    .add_local_python_source("_bundled")
 )
 
 app = modal.App("gemma4-finetune")

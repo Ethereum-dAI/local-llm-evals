@@ -112,6 +112,7 @@ image = (
     .env({"HF_HOME": "/root/.cache/huggingface"})
     .add_local_file(str(bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
                                        "data/gemma4_train.jsonl")), "/data/train.jsonl")
+    .add_local_python_source("_bundled")
 )
 
 app = modal.App("gemma4-export-local")
