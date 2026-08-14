@@ -274,9 +274,19 @@ footer{
     <div class="hero-grid">
       <div>
         <p class="lede">
-          307 wallet requests. Each one scores <strong>1</strong> only if the model emits the
-          byte-exact tool call the wallet would execute — right tool, right address,
-          right amount in base units. Anything else scores <strong>0</strong>.
+          593 wallet requests, scored on the macOS app's own contract:
+          <code>transfer</code>/<code>swap</code> take a <strong>human decimal</strong>
+          amount (<code>50.25 USDC</code>, not base units) and a token symbol, and
+          copy the recipient verbatim. A case scores <strong>1</strong> only if every
+          field of every call the model emits equals gold, byte for byte. Anything
+          else scores <strong>0</strong>.
+        </p>
+        <p class="lede">
+          80 of the 593 are a dedicated <strong>arithmetic slice</strong> — the same
+          transfer/swap shape, with decimals chosen to catch rounding and truncation.
+          196 more are protocol calls (RAILGUN shield/unshield, Aave, Safe) that stay
+          on <code>executeTx</code> with base-unit args, since those interfaces are
+          already fixed on-chain.
         </p>
         <p class="lede">
           One mark per case below, in dataset order. Filled means the call was exact.
@@ -291,9 +301,9 @@ footer{
         <dt>Marks</dt>
         <dd><span class="swatch on"></span> exact &nbsp; <span class="swatch off"></span> wrong</dd>
         <dt>Tools</dt>
-        <dd>executeTx · readTx · swap · shield · unshield</dd>
+        <dd>transfer · swap · executeTx · shield · unshield</dd>
         <dt>Set</dt>
-        <dd>pf/tests.generated.yaml</dd>
+        <dd>pf/tests.combined.yaml</dd>
       </dl>
     </div>
 
@@ -304,26 +314,34 @@ footer{
 
   <section class="section">
     <p class="eyebrow">The finding</p>
-    <h2>The 270M fine-tune only passes when the right answer is silence</h2>
+    <h2>The lift is almost entirely Aave and Safe — protocols the shipping model never saw</h2>
     <p>
-      Read the top strip again. Every mark in it sits in the <strong>ablation</strong> and
-      <strong>refusal</strong> bands on the right — the cases where the correct behaviour is to
-      ask a clarifying question or refuse, and emit no call at all. Across
-      transfers, swaps and multi-turn, it is unbroken empty space.
+      Gemma-4 E4B base here is not an untuned model — it's the exact Q4_K_M GGUF
+      <code>local-wallet-mac</code> ships today, a fine-tune from an earlier round
+      that only ever learned transfer, swap and RAILGUN shield/unshield. Scored
+      against the app's own contract across all 593 cases, it passes
+      <strong>405 (68.3%)</strong>.
+    </p>
+    <p>
+      Split that by what it was trained on and the shape sharpens. On the 397
+      cases that existed in some form before — transfer, swap, the arithmetic
+      slice, multi-turn, ablations, refusals, RAILGUN — it already scores
+      <strong>88.2% (350/397)</strong>. On the 196 Aave and Safe cases, protocol
+      families it has never been trained to call, it scores <strong>0%</strong>:
+      0/90 on Aave, 0/50 on Safe.
     </p>
     <div class="callout">
       <p>
-        <strong>8.8% is not a score, it's an artefact.</strong> FunctionGemma-270M
-        wallet-ft scores 0/101 on transfers, 0/96 on swaps and 0/75 on multi-turn.
-        Its 27 passing cases are all cases where staying quiet is correct.
+        <strong>The app-contract fine-tune closes almost all of that gap.</strong>
+        Re-tuned on the same recipe with Aave and Safe added to the curriculum, it
+        takes the familiar 397 cases to <strong>98.0% (389/397)</strong> and the new
+        196 to <strong>75.0% (147/196)</strong> — RAILGUN 56/56, Aave 42/90, Safe
+        49/50. Overall: <strong>536/593 (90.4%)</strong>.
       </p>
       <p>
-        The untuned base model scores 8.1% the same way. Fine-tuning moved the core
-        task by nothing.
-      </p>
-      <p>
-        The same dataset and the same LoRA recipe take <strong>Gemma-4 E4B from 9.8% to
-        80.1%</strong>. The constraint is model capacity, not training data.
+        gpt-5, the hosted frontier anchor, is mid-run on the same 593 cases as of
+        this writing; its strip and the third column below fill in once that run
+        lands.
       </p>
     </div>
     <div class="tablewrap"><table id="cattable"></table></div>
@@ -364,10 +382,10 @@ footer{
 </div>
 
 <script>
-const DATASET_REPO = "ef-dai-team/wallet-tool-calling-ft";
-const MODEL_270M = "ef-dai-team/functiongemma-270m-wallet-ft";
-const MODEL_E4B = "ef-dai-team/gemma-4-E4B-wallet-ft";
-const SUBJECT = "fg270m-ft";
+const MODEL_E4B_BASE = "ef-dai-team/gemma-4-E4B-wallet-ft";
+// No single "subject" row for this report — the finding is a lift, not a
+// failure to spotlight — so nothing matches and .is-subject never applies.
+const SUBJECT = "";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
@@ -448,7 +466,10 @@ function axis() {
 /* ---- per-category table ---------------------------------------------- */
 
 function catTable() {
-  const cols = ["fg270m", "fg270m-ft", "e4b", "e4b-ft", "gpt5"];
+  // Data-driven: whatever models actually made it into data.json, in that
+  // order. A model with no run artefact yet (e.g. gpt-5 mid-run) is simply
+  // absent from DATA.models, so it never appears as a column.
+  const cols = DATA.models.map((m) => m.key);
   const byKey = Object.fromEntries(DATA.models.map((m) => [m.key, m]));
   const head = `<thead><tr><th>Category</th><th>Cases</th>`
     + cols.map((k) => `<th style="text-align:right">${esc(byKey[k].display)}</th>`).join("")
@@ -469,10 +490,15 @@ function catTable() {
 
 /* ---- case browser ----------------------------------------------------- */
 
+// Mirrors _band_of() in space/build_static.py — keep the two in sync.
 function bandOf(category) {
+  if (category.startsWith("arithmetic-")) return "arithmetic";
   if (category.startsWith("generated-transfer")) return "transfer";
   if (category.startsWith("generated-swap")) return "swap";
   if (category.startsWith("multiturn")) return "multi-turn";
+  if (category.startsWith("railgun")) return "railgun";
+  if (category.startsWith("aave")) return "aave";
+  if (category.startsWith("safe-")) return "safe";
   if (category.startsWith("ablation")) return "ablation";
   return "refusal";
 }
@@ -582,42 +608,36 @@ function renderCase() {
 function repro() {
   $("repro").innerHTML = `
     <div class="card">
-      <h3>1 · Get the data</h3>
-      <p>1739 SFT examples per target model, disjoint from these 307 cases by construction. Private to <code>ef-dai-team</code> — if you get a 401, ask to be added to the org.</p>
-      <pre>hf download ${DATASET_REPO} \\
-  --repo-type dataset --local-dir ./wallet-ft</pre>
-      <p><a href="https://huggingface.co/datasets/${DATASET_REPO}">Open the dataset &rarr;</a></p>
+      <h3>1 · Get the benchmark</h3>
+      <p>The 593-case set lives in this harness repo, split by construction: <code>pf/tests.app-contract.yaml</code> (transfer/swap, including the 80-case arithmetic slice) plus the RAILGUN/Aave/Safe protocol cases, concatenated by <code>scripts/build_combined_benchmark.py</code> into <code>pf/tests.combined.yaml</code>. Deliberately unpublished — keeping it off the Hub is what stops it leaking into training corpora, and it's the reason the strips above mean anything.</p>
+      <pre>uv run python scripts/build_combined_benchmark.py</pre>
     </div>
     <div class="card">
-      <h3>2 · Or regenerate it</h3>
-      <p>The dataset ships its own generators, seeds and <code>pyproject.toml</code>. Run these from inside the download above — no access to the harness needed. Both JSONLs are byte-stable and verified to reproduce bit for bit.</p>
-      <pre>cd wallet-ft
-uv run python scripts/generate_finetune_data.py \\
-  --out data/functiongemma_train.jsonl
-uv run python scripts/generate_gemma4_finetune_data.py \\
-  --out data/gemma4_train.jsonl</pre>
+      <h3>2 · Regenerate the fine-tune data</h3>
+      <p>The Gemma-4 E4B training set is disjoint from the eval set by construction and reproduces bit for bit from the same seed.</p>
+      <pre>uv run python scripts/generate_gemma4_finetune_data.py \\
+  --out data_for_finetune/gemma4_train.jsonl</pre>
     </div>
     <div class="card">
       <h3>3 · Train and export</h3>
-      <p>LoRA r=16, α=16 via SFTTrainer, then merge and quantise to GGUF. Unsloth needs CUDA, so these run on Modal.</p>
-      <pre>modal run scripts/modal_finetune.py
-modal run scripts/modal_export.py</pre>
+      <p>LoRA r=16, α=16 via SFTTrainer, then merge and quantise to Q4_K_M GGUF. Unsloth needs CUDA, so both run on Modal.</p>
+      <pre>modal run finetune/modal_finetune_gemma4.py
+modal run finetune/modal_export_gemma4.py</pre>
+      <p>The app-contract fine-tune scored on this page is still training and is deliberately <strong>not</strong> published — the published <code>${MODEL_E4B_BASE}</code> repo is content-pinned by the shipping macOS wallet (SHA256, <code>OnboardingSettingsStore.swift</code>), so this run can't overwrite it. It's evaluated from a local export instead.</p>
     </div>
     <div class="card">
-      <h3>4 · Score it — not from here</h3>
-      <p>The 307 cases are deliberately unpublished. Keeping them off the Hub is what stops them leaking into training corpora, and it is the reason the strips above mean anything. Scoring needs the private harness; every model's result on every case is already browsable in the case browser on this page.</p>
+      <h3>4 · Score it</h3>
+      <p>Scoring needs the private harness (<code>promptfooconfig.appcontract.yaml</code>, <code>-j 1</code> so the two local llama.cpp providers don't contend for the same Metal device). Every model's result on every case is already browsable in the case browser on this page.</p>
+      <pre>scripts/eval.sh -c promptfooconfig.appcontract.yaml \\
+  -o gemma4.appcontract.out.json -j 1</pre>
     </div>
     <div class="card">
-      <h3>Get the models</h3>
-      <p>Both fine-tunes are <strong>public</strong> — no org membership needed. Each carries a merged GGUF plus the LoRA adapter.</p>
-      <pre>hf download ${MODEL_270M} \\
-  --include "*.gguf" --local-dir ./model-270m   # 291 MB
-hf download ${MODEL_E4B} \\
+      <h3>Get the shipping model</h3>
+      <p>Gemma-4 E4B base — the exact GGUF <code>local-wallet-mac</code> ships, and the "before" column above — is public, no org membership needed.</p>
+      <pre>hf download ${MODEL_E4B_BASE} \\
   --include "*.gguf" --local-dir ./model-e4b    # 5.3 GB</pre>
       <ul>
-        <li><a href="https://huggingface.co/${MODEL_270M}">${MODEL_270M}</a> — the 270M fine-tune. Scores 8.8%; read its card first.</li>
-        <li><a href="https://huggingface.co/${MODEL_E4B}">${MODEL_E4B}</a> — the E4B fine-tune, 80.1%</li>
-        <li><a href="https://huggingface.co/unsloth/functiongemma-270m-it">unsloth/functiongemma-270m-it</a> — the base</li>
+        <li><a href="https://huggingface.co/${MODEL_E4B_BASE}">${MODEL_E4B_BASE}</a> — 68.3% on this benchmark</li>
       </ul>
     </div>
     <div class="card">
