@@ -99,6 +99,30 @@ scripts/eval.sh -c promptfooconfig.gemma4-ft.yaml -o gemma4.ft.out.json
   `llama-quantize … Q4_K_M`. It sanity-gates on a real tool-call generation before
   uploading.
 
+### App-contract variant — local export, not published
+
+The app-contract fine-tune (human-unit amounts, verbatim recipients, `<think>`
+traces rewritten to never mention wei/base units for the app's own tools — see
+`finetune/README.md`) is an experiment and must not touch
+`ef-dai-team/gemma-4-E4B-wallet-ft`, the repo the shipping wallet content-pins
+by SHA256. It exports with `finetune/modal_export_gemma4_local.py` (same bf16
+merge → f16 GGUF → `llama-quantize Q4_K_M` recipe, same sanity gate — now a
+"refuse to publish as good" exit rather than "refuse to upload"), leaves the
+GGUF in the `gemma4-ft-outputs` Volume under a distinct name
+(`gguf/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf`), and is pulled down with
+`modal volume get` into this repo's `models/` instead of being uploaded
+anywhere:
+
+```bash
+# export (spawns detached; poll `modal app logs` for "[export-local] DONE")
+uv run --with modal modal run finetune/modal_export_gemma4_local.py
+
+# download once it's done
+uv run --with modal modal volume get gemma4-ft-outputs \
+    gguf/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf \
+    models/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf
+```
+
 ## How promptfoo calls the pinned base + the fine-tune
 
 `pf/provider_functiongemma.py` is the single local-GGUF provider (via

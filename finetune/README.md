@@ -149,3 +149,17 @@ Known limitations / next levers: refusals regressed (rebalance the training mix)
 exact base-unit arithmetic + 42-char address reproduction is the 270M's ceiling
 (the harness's main discriminator); base-270m baseline not yet measured, so the
 absolute lift over stock FunctionGemma is unquantified.
+
+## Gemma-4 app-contract fine-tune — local export only, not published
+
+The Gemma-4 E4B pipeline (`README_gemma4.md`) has an **app-contract** variant
+(human-unit amounts, verbatim recipients, no wei/base-unit math in the tool
+call — see `README_gemma4.md` and `scripts/generate_gemma4_finetune_data.py`).
+It is exported with `finetune/modal_export_gemma4_local.py`, **not**
+`modal_export_gemma4.py`, and deliberately never uploads anywhere: the GGUF is
+written into the Modal outputs Volume and pulled down locally with `modal
+volume get`. This is not a preference, it's a guard — `modal_export_gemma4.py`
+uploads to `ef-dai-team/gemma-4-E4B-wallet-ft`, the exact repo local-wallet-mac
+downloads and content-pins by SHA256 in production, so an experimental
+fine-tune must never land there. See the module docstring in
+`modal_export_gemma4_local.py` for the exact export/download commands.
