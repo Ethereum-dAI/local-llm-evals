@@ -1,0 +1,94 @@
+# Gemma-4 E4B three-way: base vs the CURRENTLY SHIPPED fine-tune vs the NEW
+# app-contract fine-tune, all local GGUF at the Q4_K_M quant the wallet runs.
+#
+# This is the config that answers "is the new fine-tune actually better for the
+# wallet". The middle provider is the load-bearing one and was missing from
+# every previous comparison: without it, a jump from base only shows that
+# fine-tuning helps, not that THIS fine-tune beats the one users already have.
+#
+# Read the three columns as a decomposition, not a ranking:
+#   base       -> what an untuned model does with the app's tool contract
+#   ft-old     -> what users get today (trained 2026-07-20 on base-unit executeTx,
+#                 a contract wallet-macos never registers — grep executeTx in
+#                 WalletToolLayer/ToolDefinitions.swift returns nothing)
+#   ft-new     -> this branch's fine-tune, trained on the app's own contract
+#
+# EXPECT ft-new to LOSE to base on the safety-refusal slice, and report that
+# slice separately rather than folding it into the headline. Refusals are 40 of
+# 560 cases here but only ~0.4% of the training data, and the same imbalance
+# already cost the Qwen fine-tune its refusal ability (100% -> 45%). Measuring
+# that honestly is the point of expanding the slice; hiding it in an average
+# would defeat it.
+#
+# Run with the uv venv so the scorer can import wallet_evals:
+#   scripts/eval.sh -c promptfooconfig.gemma4-threeway.yaml -o gemma4.threeway.out.json -j 1
+#
+# -j 1 is required: all three providers are local llama.cpp processes sharing one
+# Metal device, so concurrency contends for the GPU instead of speeding anything up.
+description: Gemma-4 E4B base vs shipped fine-tune vs app-contract fine-tune
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # Baseline: the EXACT GGUF local-wallet-mac ships as the untuned reference. The
+  # file was deleted from the repo's `main` on 2026-07-16, so it is pulled at the
+  # pinned revision that still carries the byte-identical Q4_K_M.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-base
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      # Metal offload: verified verdict-identical to CPU, ~8x faster.
+      n_gpu_layers: -1
+      # The 300 s default silently dropped 14 cases to empty output on the
+      # published run and scored them as failures. Fail slow cases, don't lose them.
+      timeout: 1800000
+
+  # The fine-tune users have TODAY. This is simultaneously the app's pinned
+  # default (OnboardingSettingsStore.swift:198-200) and the 80.1% base-unit model
+  # — one artifact, two roles, which is why a SHA match against the shipped
+  # default is confirmation that this is the right file, not evidence of a mixup.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-old-shipped
+    config:
+      repo_id: ef-dai-team/gemma-4-E4B-wallet-ft
+      filename: "*Q4_K_M.gguf"
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+
+  # This branch's fine-tune. Loaded from a LOCAL path by design: it is
+  # deliberately NOT published to HuggingFace, and the published repo above is
+  # SHA256-pinned by the shipping wallet, so it must not be overwritten.
+  # Retrained 2026-08-14 with RAILGUN removed (local-wallet-mac#86, PR #87);
+  # the file name below must match what finetune/modal_export_gemma4_local.py
+  # wrote for THAT run, not an earlier one.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-new-appcontract
+    config:
+      model_path: models/gemma4-e4b-wallet-ft-appcontract-v2.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"

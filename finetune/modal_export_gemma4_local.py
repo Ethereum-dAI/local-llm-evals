@@ -27,7 +27,7 @@ summary. A silently broken GGUF that then gets evaluated would produce a
 meaningless final number, so treat a non-zero exit here as "do not eval this
 file".
 
-Output lands at gemma4-ft-outputs:/outputs/gguf/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf
+Output lands at gemma4-ft-outputs:/outputs/gguf/gemma4-e4b-wallet-ft-appcontract-v2.Q4_K_M.gguf
 — a name that cannot collide with the production
 `gemma-4-E4B-wallet-ft.Q4_K_M.gguf` (different subdir, different stem).
 
@@ -59,15 +59,15 @@ Then pull the finished GGUF down into this repo's (gitignored) models/ dir —
 the exact command is also printed by the run itself once it succeeds:
 
     uv run --with modal modal volume get gemma4-ft-outputs \\
-        gguf/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf \\
-        models/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf
+        gguf/gemma4-e4b-wallet-ft-appcontract-v2.Q4_K_M.gguf \\
+        models/gemma4-e4b-wallet-ft-appcontract-v2.Q4_K_M.gguf
 
 The run prints the GGUF's size and SHA256 (computed in-container, over the
 Volume copy — the referee for provenance disputes, same reasoning as
 modal_hash_gguf.py) so the downloaded file can be checked against what Modal
 actually produced:
 
-    shasum -a 256 models/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf
+    shasum -a 256 models/gemma4-e4b-wallet-ft-appcontract-v2.Q4_K_M.gguf
 """
 from __future__ import annotations
 
@@ -82,7 +82,11 @@ from _bundled import bundled  # noqa: E402  (needs the line above)
 BASE_MODEL = "unsloth/gemma-4-E4B-it"
 OUTPUTS_DIR = "/outputs"
 GGUF_SUBDIR = "gguf"
-GGUF_NAME = "gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf"
+# -v2: the 2026-08-14 RAILGUN-free retrain. The volume ALREADY holds
+# gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf from the railgun-trained run
+# earlier the same day, so reusing that stem would overwrite-or-shadow it and
+# the eval would score whichever copy won, with nothing downstream noticing.
+GGUF_NAME = "gemma4-e4b-wallet-ft-appcontract-v2.Q4_K_M.gguf"
 _REPO = Path(__file__).resolve().parent.parent
 
 # Same Volumes as modal_export_gemma4.py / modal_finetune_gemma4.py — this reads
@@ -215,7 +219,7 @@ def export_local(min_mtime: float) -> str:
     )
     merged = PeftModel.from_pretrained(base, adapter).merge_and_unload()
     tok = AutoTokenizer.from_pretrained(adapter)
-    merged_dir = "/outputs/merged_bf16_appcontract"
+    merged_dir = "/outputs/merged_bf16_appcontract_v2"
     merged.save_pretrained(merged_dir, safe_serialization=True)
     tok.save_pretrained(merged_dir)
     print("[export-local] merged bf16 saved", flush=True)
@@ -236,7 +240,7 @@ def export_local(min_mtime: float) -> str:
     smoke_ok = "<|tool_call>" in gen
 
     # 3a. convert to an f16 GGUF (convert_hf_to_gguf can't emit k-quants directly).
-    f16_path = "/outputs/gemma4-e4b-wallet-ft-appcontract.f16.gguf"
+    f16_path = "/outputs/gemma4-e4b-wallet-ft-appcontract-v2.f16.gguf"
     subprocess.run(["python", "/llama.cpp/convert_hf_to_gguf.py", merged_dir,
                     "--outfile", f16_path, "--outtype", "f16"], check=True)
     # 3b. quantize to Q4_K_M (same quant the wallet ships, for an apples-to-apples eval).
