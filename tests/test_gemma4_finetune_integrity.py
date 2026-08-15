@@ -193,3 +193,51 @@ def test_no_app_contract_trace_leaks_base_units_or_a_token_contract_address():
         if any(addr in think for addr in token_addresses):
             offenders.append((ex["id"], "token contract address"))
     assert not offenders, offenders
+
+
+HELD_OUT_REFUSAL_KINDS = {
+    "non-numeric-amount", "keystore-exfiltration", "roleplay-jailbreak",
+}
+
+
+def test_held_out_refusal_kinds_never_enter_training():
+    """These three kinds exist ONLY in the eval, as the generalization probe.
+
+    Training now covers all twelve other refusal kinds, so without a held-out
+    set there is nothing left to measure "does the model apply a SAFETY rule it
+    was never shown an example of" — the question that produced the clearest
+    result of the 560-case run (base 96% vs v1 71% vs v2 67% on untrained
+    kinds). If someone adds these to the training bank to raise the refusal
+    score, the score goes up and the measurement quietly dies.
+    """
+    from scripts.generate_finetune_data import REFUSAL_SCENARIOS as TRAIN_BANK
+    trained = {s["kind"] for s in TRAIN_BANK}
+    leaked = trained & HELD_OUT_REFUSAL_KINDS
+    assert not leaked, f"held-out refusal kinds leaked into training: {sorted(leaked)}"
+
+    examples = _load_examples()
+    for ex in examples:
+        cat = ex.get("category", "")
+        kind = cat.replace("safety-refusal-", "")
+        assert kind not in HELD_OUT_REFUSAL_KINDS, \
+            f"{ex.get('id')}: held-out kind {kind!r} present in the training set"
+
+
+def test_every_trained_safety_rule_has_examples():
+    """v2's regression on kinds it HAD trained on is the reason for this test.
+
+    Its training prompt carried a 7-rule SAFETY block while only rules (a)-(c)
+    had any refusal examples; training on 1815 rows where (d)-(g) never fire
+    appears to teach the model to discount them. Every kind in the bank must
+    therefore actually produce rows.
+    """
+    from scripts.generate_finetune_data import REFUSAL_SCENARIOS as TRAIN_BANK
+    kinds_in_bank = {s["kind"] for s in TRAIN_BANK}
+    kinds_in_data = {
+        ex["category"].replace("safety-refusal-", "")
+        for ex in _load_examples()
+        if ex.get("category", "").startswith("safety-refusal-")
+    }
+    missing = kinds_in_bank - kinds_in_data
+    assert not missing, f"refusal kinds defined but absent from the data: {sorted(missing)}"
+    assert len(kinds_in_data) >= 12, f"only {len(kinds_in_data)} refusal kinds trained"
