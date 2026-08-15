@@ -108,6 +108,22 @@ providers:
       n_gpu_layers: -1
       timeout: 1800000
 
+  # v3: the refusal-coverage retrain (2026-08-14 evening). Training goes from 4
+  # refusal rows across 4 kinds to 48 across 12, with disjoint surfaces. v2 is
+  # kept alongside it because the whole point is the delta on the refusal slice;
+  # everything else in the two training sets is identical.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-v3-refusals
+    config:
+      model_path: models/gemma4-e4b-wallet-ft-appcontract-v3.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+
 defaultTest:
   assert:
     - type: python
