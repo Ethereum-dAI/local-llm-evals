@@ -10,8 +10,37 @@ Referenced from promptfooconfig.yaml as:
 """
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
+_REFERENCE_PATH = Path(__file__).with_name("app_contract_reference.json")
+_REFERENCE = json.loads(_REFERENCE_PATH.read_text())
+
+#: The wallet app's system prompt, verbatim — NOT retyped. Produced by the app's
+#: own renderer:
+#:
+#:     cd local-wallet-mac/wallet-macos && swift build --product wallet-eval
+#:     ./.build/debug/wallet-eval prompt-dump --model <gguf> \
+#:         --json <evals-repo>/pf/app_contract_reference.json
+#:
+#: Read rather than copied because the copy drifted: this module's own text said
+#: "(transfer, swap, etc.)" where the app says "(transfer, swap,     etc.)" (a
+#: Swift multi-line-literal artifact that is really in the shipped bytes) and
+#: carried a different "never invent" clause. Fine-tunes trained against the
+#: retyped version scored 97-99% here and 82-91% in the app's own UserOp funnel,
+#: and the ranking between them inverted.
+#:
+#: Whitespace anomalies in this string are therefore intentional. Do not tidy
+#: them; fix ToolDefinitions.swift and re-dump instead.
+APP_SYSTEM: str = _REFERENCE["systemPrompt"]
+
+#: The transaction-builder system prompt. Still used, but ONLY by the Aave and
+#: Safe datasets, which are written against `executeTx` with base-unit amounts
+#: and resolved addresses and stay that way deliberately: the wallet has no
+#: lending or multisig tool today, and the capability is still worth measuring.
+#: Those cases need this prompt's REFERENCE DATA and CONVENTIONS to be
+#: answerable at all. Every wallet-path case uses APP_SYSTEM instead.
 SYSTEM = (
     "You are the local AI inside a macOS Ethereum wallet app. When the user "
     "clearly expresses intent to perform an on-chain action (transfer, swap, "
@@ -111,6 +140,28 @@ AAVE_REFERENCE = (
 
 PROTOCOL_REFERENCES = {"safe": SAFE_REFERENCE, "aave": AAVE_REFERENCE}
 
+#: `ToolDefinitions.phase1`, exactly as the app serialises it. Generated into
+#: pf/tools.app.json by scripts/sync_app_contract.py; read from the reference
+#: here so the two cannot disagree.
+APP_TOOLS: list[dict[str, Any]] = json.loads(_REFERENCE["toolsJSON"])
+
+#: The builder contract (executeTx, readTx, transfer, swap) that the Aave/Safe
+#: datasets are written against.
+BUILDER_TOOLS: list[dict[str, Any]] = json.loads(
+    Path(__file__).with_name("tools.json").read_text()
+)
+
+
+def tools_for(vars_: dict[str, Any]) -> list[dict[str, Any]]:
+    """The tool set this case is scored against.
+
+    Offering different tools per case is how tool-calling is supposed to work —
+    the menu lives in the prompt, so a model reads it rather than memorising one
+    fixed set. Training on both teaches exactly that, and it lets the wallet path
+    stay byte-identical to the app while the protocol path keeps `executeTx`.
+    """
+    return BUILDER_TOOLS if is_protocol_case(vars_) else APP_TOOLS
+
 
 def _format_account_context(ac: dict) -> str:
     owners = ", ".join(ac.get("owners", []))
@@ -118,9 +169,33 @@ def _format_account_context(ac: dict) -> str:
             f"Owners (in order): {owners}\nCurrent threshold: {ac['threshold']}")
 
 
+def is_protocol_case(vars_: dict[str, Any]) -> bool:
+    """True for the Aave/Safe transaction-builder cases.
+
+    They are the only cases that keep the builder contract — `executeTx`, base
+    units, resolved addresses, and the reference blocks below. Everything else is
+    a wallet-path case and gets exactly what the app sends.
+    """
+    return vars_.get("protocol") in PROTOCOL_REFERENCES
+
+
 def render(context: dict[str, Any]) -> list[dict[str, str]]:
     vars_ = context.get("vars", {}) if isinstance(context, dict) else {}
-    chat: list[dict[str, str]] = [{"role": "system", "content": SYSTEM}]
+
+    # Two contracts, chosen per case. Wallet-path cases must see byte-for-byte
+    # what the app sends, or the score does not transfer to the product — that
+    # is the whole reason APP_SYSTEM is read from the app's own dump. Aave/Safe
+    # cases keep the builder prompt because their gold is written against it.
+    if not is_protocol_case(vars_):
+        chat: list[dict[str, str]] = [{"role": "system", "content": APP_SYSTEM}]
+        messages = vars_.get("messages")
+        if messages:
+            chat.extend(messages)
+        else:
+            chat.append({"role": "user", "content": vars_.get("user_message", "")})
+        return chat
+
+    chat = [{"role": "system", "content": SYSTEM}]
     parts: list[str] = []
     reference = PROTOCOL_REFERENCES.get(vars_.get("protocol"))
     if reference:

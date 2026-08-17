@@ -44,12 +44,84 @@ from wallet_evals.functiongemma import (
     decode_prompt,
     json_output_to_scoreable,
     raw_output_to_scoreable,
-    tool_calls_to_scoreable,
 )
 from wallet_evals.gemma_dsl import DIALECTS
 from wallet_evals.llama_serving import sampling_kwargs
 
 _TOOLS_PATH = Path(__file__).with_name("tools.json")
+_REFERENCE_PATH = Path(__file__).with_name("app_contract_reference.json")
+#: Rendered-prompt cache keyed by model identity, alongside `_llms`.
+_templates: dict[tuple, Any] = {}
+
+
+def _chat_template(llm, key: tuple):
+    """The GGUF's own chat template, compiled, plus a one-time parity assertion.
+
+    Why render here instead of calling `create_chat_completion`: llama-cpp-python
+    renders the template WITHOUT `enable_thinking`, which drops the `<|think|>`
+    marker the wallet app emits — 2925 chars against the app's 2935 for the same
+    conversation. Everything downstream (the fine-tune, the wallet funnel) is now
+    aligned on the app's bytes, so a harness that is 10 chars off is measuring a
+    different prompt again, which is the exact failure this whole change exists
+    to remove. Rendering explicitly also makes the divergence assertable, so it
+    cannot drift back silently.
+    """
+    if key in _templates:
+        return _templates[key]
+
+    import jinja2
+
+    source = (llm.metadata or {}).get("tokenizer.chat_template")
+    if not source:
+        raise RuntimeError("GGUF carries no tokenizer.chat_template; cannot render "
+                           "the app's prompt for this model")
+    env = jinja2.Environment(loader=jinja2.BaseLoader(),
+                             trim_blocks=True, lstrip_blocks=True)
+    env.policies["json.dumps_kwargs"] = {"ensure_ascii": False}
+    template = env.from_string(source)
+
+    # Assert against the app's own dump before scoring a single case. Only
+    # meaningful for models whose template is the app's (Gemma-4); a Qwen GGUF
+    # legitimately renders differently, so a mismatch there is reported, not
+    # fatal.
+    reference = json.loads(_REFERENCE_PATH.read_text())
+    ref_tools = json.loads(reference["toolsJSON"])
+    for case in reference["cases"]:
+        got = _render(template, case["messages"], ref_tools)
+        if got != case["rendered"]:
+            print(f"[provider] NOTE prompt differs from the wallet app for "
+                  f"{case['label']}: {len(got)} vs {len(case['rendered'])} chars "
+                  f"(expected for non-Gemma templates)", flush=True)
+            break
+    else:
+        print("[provider] prompt parity OK against the wallet app", flush=True)
+
+    # promptfoo runs providers in a persistent worker and swallows their stdout,
+    # so the line above is invisible in practice. Drop a sentinel next to the
+    # results as well, or the parity guarantee is unverifiable after the fact —
+    # which is how the original drift went unnoticed for weeks.
+    try:
+        verdicts = {case["label"]: _render(template, case["messages"], ref_tools)
+                    == case["rendered"] for case in reference["cases"]}
+        Path("/tmp/pf_prompt_parity.json").write_text(json.dumps(
+            {"model": key[0] or key[1], "parity": verdicts}, indent=2))
+    except OSError:
+        pass  # diagnostics only; never fail a run over the sentinel
+
+    _templates[key] = template
+    return template
+
+
+def _render(template, messages: list[dict], tools: list[dict]) -> str:
+    """Render one conversation the way the app does.
+
+    `enable_thinking=True` mirrors `SamplerOptions.enableThinking`. The leading
+    `<bos>` is stripped because `create_completion` tokenizes with `add_bos`,
+    and llama.cpp likewise adds BOS as a token rather than as text.
+    """
+    text = template.render(messages=messages, tools=tools,
+                           add_generation_prompt=True, enable_thinking=True)
+    return text[len("<bos>"):] if text.startswith("<bos>") else text
 # Cache keyed by model identity, NOT a single global: a base-vs-fine-tuned config
 # has two providers from this same file, and if promptfoo serves them from one
 # worker a single global would make the second silently reuse the first's weights.
@@ -100,9 +172,26 @@ def _load_model(config: dict[str, Any]):
     return llm
 
 
-def _load_tools(config: dict[str, Any]) -> list[dict]:
-    path = config.get("tools_path", _TOOLS_PATH)
-    return json.loads(Path(path).read_text())
+_APP_TOOLS_PATH = Path(__file__).with_name("tools.app.json")
+
+
+def _load_tools(config: dict[str, Any], vars_: dict[str, Any]) -> list[dict]:
+    """The tool menu for this case — the app's two, or the builder's four.
+
+    Mirrors `pf.prompt.tools_for`, duplicated here rather than imported because
+    promptfoo loads this module by path and `pf/` is not reliably importable.
+    Kept honest by both reading the same two files.
+
+    An explicit `tools_path` in the provider config still overrides everything.
+    """
+    override = config.get("tools_path")
+    if override:
+        return json.loads(Path(override).read_text())
+    # Aave/Safe are deliberately still on the transaction-builder contract; every
+    # other case must see exactly what the wallet app offers.
+    if (vars_ or {}).get("protocol") in ("aave", "safe"):
+        return json.loads(_TOOLS_PATH.read_text())
+    return json.loads(_APP_TOOLS_PATH.read_text())
 
 
 def call_api(prompt: str, options: dict, context: dict) -> dict:
@@ -116,32 +205,43 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
     try:
         llm = _load_model(config)
         messages = decode_prompt(prompt, system_role=system_role)
-        tools = _load_tools(config)
+        tools = _load_tools(config, (context or {}).get("vars", {}))
         # top_p/top_k/min_p are passed only when the config names them, so the
         # Gemma-family providers keep llama-cpp's defaults untouched while a
         # model whose card prescribes sampling (Qwen3) can be run the way its
         # authors specify.
         sampling = sampling_kwargs(config)
-        resp = llm.create_chat_completion(
-            messages=messages,
-            tools=tools,
+        # Render the app's exact prompt ourselves rather than letting
+        # create_chat_completion do it — see _chat_template for why.
+        key = (config.get("model_path"), config.get("repo_id"),
+               config.get("filename"), config.get("revision"),
+               int(config.get("n_ctx", 4096)))
+        rendered = _render(_chat_template(llm, key), messages, tools)
+        # Explicit turn-end stops on top of the model's EOS token. The GGUF
+        # declares one eos id (106) and llama-cpp stops on it, but a raw
+        # `create_completion` has none of the chat wrapper's turn awareness, so a
+        # model that emits the turn marker as ordinary text would run to
+        # max_tokens on every case — minutes per case across a 569-case run.
+        # Harmless when EOS already fires, and both markers sit after any tool
+        # call, so nothing scoreable is truncated.
+        stops = list(config.get("stop") or ["<turn|>", "<end_of_turn>"])
+        resp = llm.create_completion(
+            rendered,
             temperature=float(config.get("temperature", 0.2)),
             max_tokens=int(config.get("max_tokens", 1024)),
+            stop=stops,
             **sampling,
         )
     except Exception as e:  # surface as a case error, not a crashed run
         return {"output": "", "error": f"{type(e).__name__}: {e}"}
 
-    message = resp["choices"][0].get("message", {})
-    # Prefer structured tool_calls if the chat template produced them; otherwise
-    # parse the DSL out of the text content.
-    native = message.get("tool_calls")
-    if isinstance(native, list) and native:
-        output = tool_calls_to_scoreable(native)
-    elif tool_format == "json":
-        output = json_output_to_scoreable(message.get("content") or "")
+    text = resp["choices"][0].get("text") or ""
+    # No native `tool_calls` on the raw-completion path: the model's turn is text
+    # and is parsed exactly as the app parses it.
+    if tool_format == "json":
+        output = json_output_to_scoreable(text)
     else:
-        output = raw_output_to_scoreable(message.get("content") or "", dialect)
+        output = raw_output_to_scoreable(text, dialect)
     result: dict[str, Any] = {"output": output}
     if isinstance(resp.get("usage"), dict):
         u = resp["usage"]

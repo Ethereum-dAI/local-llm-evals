@@ -1,9 +1,16 @@
-from pf.prompt import render, SYSTEM
+from pf.prompt import render, SYSTEM, APP_SYSTEM
 
 
 def test_render_single_turn():
+    """A wallet-path case gets the app's own system prompt, not the builder one.
+
+    `SYSTEM` is now reserved for the Aave/Safe transaction-builder cases; every
+    other case must see byte-for-byte what ToolDefinitions.systemNudge produces,
+    which is what APP_SYSTEM is read from.
+    """
     chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth"}})
-    assert chat[0] == {"role": "system", "content": SYSTEM}
+    assert chat[0] == {"role": "system", "content": APP_SYSTEM}
+    assert chat[0]["content"] != SYSTEM
     assert chat[1] == {"role": "user", "content": "Send 0.1 ETH to vitalik.eth"}
     assert len(chat) == 2
 
