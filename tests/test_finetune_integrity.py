@@ -10,6 +10,7 @@ If the JSONL is absent (not generated yet), these tests skip.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -113,7 +114,14 @@ def test_tools_present():
             f"{'builder' if is_protocol else 'app'} tool set"
         )
         seen.add(is_protocol)
-    assert seen == {True, False}, f"only one contract present: {seen}"
+    # The default training set is WALLET-ONLY: mixing the builder contract into
+    # it is what taught v4 a second tool vocabulary opposed to the app's own.
+    # The protocol rows still exist — `--protocol-only` builds them as their own
+    # set — so what this asserts is the separation, not their removal.
+    assert seen == {False}, (
+        "the default fine-tune set must contain no Aave/Safe rows; build those "
+        "with --protocol-only (see generate_finetune_data.INCLUDE_PROTOCOL_ROWS)"
+    )
 
 
 def test_roles_use_developer_not_system():
@@ -153,3 +161,31 @@ def test_disjoint_from_eval_set():
     for ex in _load_examples():
         assert _train_surface(ex) not in eval_surfaces, \
             f"{ex['id']} conversation leaks into the eval set"
+
+
+def test_protocol_rows_are_separated_not_deleted():
+    """`--protocol-only` still builds the Aave/Safe set, on the builder contract.
+
+    The wallet mix dropped these 95 rows because two tool vocabularies in one
+    model is what produced v4's invented `transfer` to `avev3.eth`. Dropping the
+    MIX is not the same as dropping the capability: the fixtures, builders and
+    caps all remain, so the protocol model can be trained the moment the wallet
+    gains lending or multisig tools. This test is what keeps that true.
+    """
+    import subprocess
+    import tempfile
+
+    builder = json.loads((ROOT / "pf" / "tools.json").read_text())
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "protocol.jsonl"
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "generate_finetune_data.py"),
+             "--protocol-only", "--out", str(out)],
+            cwd=ROOT, capture_output=True, text=True)
+        assert proc.returncode == 0, proc.stderr[-1500:]
+        rows = [json.loads(line) for line in out.read_text().splitlines() if line]
+
+    assert rows, "--protocol-only produced nothing"
+    assert all(r["category"].startswith(("aave-", "safe-")) for r in rows)
+    assert all(r.get("tools") == builder for r in rows), \
+        "protocol rows must keep the executeTx builder contract"

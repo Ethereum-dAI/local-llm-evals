@@ -52,4 +52,9 @@ defaultTest:
     - type: python
       value: file://pf/assert.py
 
-tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"
+# Default is the WALLET benchmark (429 cases), not the 569-case combined file.
+# The 140 Aave/Safe cases measure a capability the wallet does not ship, and
+# folding them into a headline drags every model by ~22 points while changing no
+# ranking — base reads 67.7% instead of 89.7%. They are a separate run now:
+#   EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh ...
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.app-contract.yaml') }}"

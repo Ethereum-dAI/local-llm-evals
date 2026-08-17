@@ -41,10 +41,14 @@ def main() -> None:
     ap.add_argument("--reasoning", action=argparse.BooleanOptionalAction, default=True,
                     help="emit a <think> arithmetic trace before transfer/swap calls")
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--protocol-only", action="store_true",
+                    help="build ONLY the Aave/Safe builder rows, as their own "
+                         "training set (see generate_finetune_data."
+                         "INCLUDE_PROTOCOL_ROWS)")
     args = ap.parse_args()
 
     rng = random.Random(fg.SEED)
-    selected = fg._select(fg._collect(rng), rng)
+    selected = fg._select(fg._collect(rng, protocol_only=args.protocol_only), rng)
 
     examples: list[dict] = []
     for test, intent in selected:

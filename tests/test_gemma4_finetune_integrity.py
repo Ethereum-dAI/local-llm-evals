@@ -126,8 +126,14 @@ def test_tools_present():
             f"{'builder' if is_protocol else 'app'} tool set"
         )
         seen.add(is_protocol)
-    # Both contracts must actually be exercised, or this test proves nothing.
-    assert seen == {True, False}, f"only one contract present: {seen}"
+    # The default training set is WALLET-ONLY: mixing the builder contract into
+    # it is what taught v4 a second tool vocabulary opposed to the app's own.
+    # The protocol rows still exist — `--protocol-only` builds them as their own
+    # set — so what this asserts is the separation, not their removal.
+    assert seen == {False}, (
+        "the default fine-tune set must contain no Aave/Safe rows; build those "
+        "with --protocol-only (see generate_finetune_data.INCLUDE_PROTOCOL_ROWS)"
+    )
 
 
 def test_roles_keep_system_not_developer():
