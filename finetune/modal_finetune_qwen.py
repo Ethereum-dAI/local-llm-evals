@@ -35,7 +35,12 @@ BASE_MODEL = "unsloth/Qwen3-8B"
 # Qwen3 targets carry a <think> trace plus the tool call, and the wallet system
 # prompt is ~1.3k tokens; 2048 truncated a visible slice of the Gemma-4 rows, and
 # a truncated row loses its target entirely (silently, as an all-masked row).
-MAX_SEQ_LEN = 4096
+# 2048 since 2026-08-15. The app-contract prompt is far smaller than the old
+# harness scaffold it replaced (two tools and a 533-char systemNudge instead of
+# four tools and ~4 KB of REFERENCE DATA/CONVENTIONS/SAFETY), putting the worst
+# rendered row near ~1.1k tokens. 2048 keeps ~2x headroom and roughly halves
+# step time; the marker assertion below still backstops truncation.
+MAX_SEQ_LEN = 2048
 EPOCHS = 3
 # 8B at 4096 ctx: batch 2 x accum 8 keeps the effective batch at 16 (matching the
 # Gemma-4 run) inside 40 GB.
@@ -46,6 +51,10 @@ LEARNING_RATE = 2e-4
 HF_CACHE_DIR = "/root/.cache/huggingface"
 OUTPUTS_DIR = "/outputs"
 DATA_REMOTE = "/data/qwen_train.jsonl"
+# The app's own prompt dump for a QWEN model. The wallet renders through each
+# model's own chat template, so Qwen's app-prompt bytes are not Gemma's — this
+# is produced by `wallet-eval prompt-dump --model <qwen gguf>`.
+REFERENCE_REMOTE = "/data/app_contract_reference.qwen.json"
 ADAPTER_OUT = f"{OUTPUTS_DIR}/adapter"
 
 # Qwen3 uses ChatML. If these markers are wrong every row is masked (zero
@@ -81,6 +90,8 @@ if modal.is_local():
     _DATA_LOCAL = bundled(_REPO, "data_for_finetune/qwen_train.jsonl",
                                  "data/qwen_train.jsonl")
     image = image.add_local_file(str(_DATA_LOCAL), DATA_REMOTE)
+    image = image.add_local_file(
+        str(_REPO / "pf" / "app_contract_reference.qwen.json"), REFERENCE_REMOTE)
 
 app = modal.App("qwen-finetune")
 
@@ -146,14 +157,31 @@ def train() -> str:
         byte-identical to what the model sees at inference, which templating the
         whole conversation does not guarantee.
         """
+        # enable_thinking mirrors SamplerOptions.enableThinking, which the app
+        # leaves on. Qwen3's template branches on it, so omitting it trains on a
+        # prompt the app never sends — the same defect found in the Gemma path.
         prompt = tokenizer.apply_chat_template(
             ex["messages"][:-1], tools=ex["tools"], tokenize=False,
-            add_generation_prompt=True)
+            add_generation_prompt=True, enable_thinking=True)
         target = ex["messages"][-1]["content"]
         text = f"{prompt}{target}<|im_end|>"
         assert target in text, f"target vanished: {ex['id']}"
         assert RESPONSE_PART in text, f"no assistant marker: {ex['id']}"
         return {"text": text}
+
+    # Fail before GPU spend if training-time rendering has drifted from the bytes
+    # the wallet app sends for THIS model family.
+    reference = json.loads(Path(REFERENCE_REMOTE).read_text())
+    ref_tools = json.loads(reference["toolsJSON"])
+    for ref_case in reference["cases"]:
+        rendered = tokenizer.apply_chat_template(
+            ref_case["messages"], tools=ref_tools, tokenize=False,
+            add_generation_prompt=True, enable_thinking=True)
+        assert rendered == ref_case["rendered"], (
+            f"PROMPT PARITY FAILED for {ref_case['label']}: "
+            f"{len(rendered)} vs {len(ref_case['rendered'])} chars")
+    print(f"[train] prompt parity OK against the app renderer "
+          f"({len(reference['cases'])} shapes)", flush=True)
 
     ds = Dataset.from_list([to_text(r) for r in rows])
     print(f"[train] rendered sample head:\n{ds[0]['text'][:600]}", flush=True)

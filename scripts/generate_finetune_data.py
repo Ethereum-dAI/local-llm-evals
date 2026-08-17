@@ -37,12 +37,15 @@ from wallet_evals.protocols import (  # noqa: E402
     safe as safe_mod, aave as aave_mod,
 )
 from wallet_evals.finetune import case_to_example  # noqa: E402
-from pf.prompt import render  # noqa: E402
+from pf.prompt import render, tools_for  # noqa: E402
 
 SEED = 20260710
 SEEDS = ROOT / "datasets" / "finetune_seeds.yaml"
 SAFE_FIXTURES = ROOT / "datasets" / "protocols" / "safe.finetune.fixtures.json"
 AAVE_FIXTURES = ROOT / "datasets" / "protocols" / "aave.finetune.fixtures.json"
+# The builder superset, kept for callers that want one fixed menu. Rows now
+# select their own tool set per case via `pf.prompt.tools_for` — wallet-path
+# cases get exactly the app's two tools, Aave/Safe keep executeTx/readTx.
 TOOLS = json.loads((ROOT / "pf" / "tools.json").read_text())
 OUT = ROOT / "data_for_finetune" / "functiongemma_train.jsonl"
 
@@ -294,7 +297,8 @@ def main() -> None:
         md["id"] = f"ft-{md['id']}"  # keep the id-space disjoint from the eval set
         reasoning = _reasoning_text(intent) if (args.reasoning and intent) else None
         messages = render({"vars": test["vars"]})
-        examples.append(case_to_example(md, messages, TOOLS, reasoning_text=reasoning))
+        examples.append(case_to_example(md, messages, tools_for(test["vars"]),
+                                        reasoning_text=reasoning))
 
     examples.sort(key=lambda e: e["id"])  # byte-stable output
     args.out.parent.mkdir(parents=True, exist_ok=True)

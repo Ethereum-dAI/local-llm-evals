@@ -97,9 +97,24 @@ def test_encoder_roundtrips_each_call():
 
 
 def test_tools_present():
-    tools = json.loads((ROOT / "pf" / "tools.json").read_text())
+    """Each row carries the tool menu its own contract offers, not one global set.
+
+    Wallet-path rows offer exactly the app's two tools so training matches the
+    bytes the app sends; Aave/Safe rows stay on the transaction-builder superset
+    their `executeTx` gold is written against.
+    """
+    builder = json.loads((ROOT / "pf" / "tools.json").read_text())
+    app = json.loads((ROOT / "pf" / "tools.app.json").read_text())
+    seen = set()
     for ex in _load():
-        assert ex.get("tools") == tools, f"{ex['id']}: tools must equal tools.json"
+        is_protocol = ex["category"].startswith(("aave-", "safe-"))
+        expected = builder if is_protocol else app
+        assert ex.get("tools") == expected, (
+            f"{ex['id']}: expected the "
+            f"{'builder' if is_protocol else 'app'} tool set"
+        )
+        seen.add(is_protocol)
+    assert seen == {True, False}, f"only one contract present: {seen}"
 
 
 def test_roles_keep_system_not_developer():

@@ -37,14 +37,15 @@ from _bundled import bundled  # noqa: E402  (needs the line above)
 # to the Q4_K_M GGUF it ships). We train from unsloth's ungated mirror of those
 # exact weights — same model, no google/* license gate on Modal, unsloth-optimized.
 BASE_MODEL = "unsloth/gemma-4-E4B-it"
-# 4096, not 2048: every example carries a constant ~6.3k-char `tools` JSON
-# payload on top of its messages, and the app-contract reasoning traces are
-# longer than the base-unit ones they replaced, putting the rendered example
-# at ~2.8k tokens median / ~3.1k tokens worst case. 2048 truncated the
-# `<|turn>model\n` response marker off of nearly every row, which made
-# train_on_responses_only mask all labels to -100 and abort. 4096 clears the
-# ~3.1k-token worst case with headroom.
-MAX_SEQ_LEN = 4096
+# 2048 since 2026-08-15, down from 4096. The old figure was sized for a
+# ~6.3k-char `tools` payload and a ~4k-char system scaffold, which put rendered
+# examples at ~2.8k tokens median / ~3.1k worst case; 2048 truncated the
+# `<|turn>model\n` response marker off nearly every row, masking all labels to
+# -100. Both shrank when the prompt moved to the app's own contract: two tools
+# instead of four (2.9k chars) and the app's 533-char systemNudge instead of the
+# scaffold, putting the worst case near ~1.0k tokens. 2048 keeps 2x headroom and
+# roughly halves step time. The all-masked guard below still backstops it.
+MAX_SEQ_LEN = 2048
 EPOCHS = 3
 # E4B is ~15x FunctionGemma-270m: small per-device batch + accumulation to reach
 # an effective batch of 16 without exceeding 40 GB.
@@ -55,6 +56,9 @@ LEARNING_RATE = 2e-4
 HF_CACHE_DIR = "/root/.cache/huggingface"
 OUTPUTS_DIR = "/outputs"
 DATA_REMOTE = "/data/gemma4_train.jsonl"
+# The app's own prompt dump, mounted so training can assert parity in-container
+# before spending the GPU hour. Regenerate with `wallet-eval prompt-dump`.
+REFERENCE_REMOTE = "/data/app_contract_reference.json"
 ADAPTER_OUT = f"{OUTPUTS_DIR}/adapter"
 
 # Gemma-4 chat-template turn markers — response-only loss masks everything up to
@@ -94,6 +98,8 @@ if modal.is_local():
     _DATA_LOCAL = bundled(_REPO, "data_for_finetune/gemma4_train.jsonl",
                                  "data/gemma4_train.jsonl")
     image = image.add_local_file(str(_DATA_LOCAL), DATA_REMOTE)
+    image = image.add_local_file(
+        str(_REPO / "pf" / "app_contract_reference.json"), REFERENCE_REMOTE)
 
 app = modal.App("gemma4-finetune")
 
@@ -141,11 +147,36 @@ def train() -> str:
             if l.strip()]
     print(f"[train] {len(rows)} examples", flush=True)
 
+    # `enable_thinking=True` is NOT optional. The app renders with thinking on
+    # (SamplerOptions.enableThinking defaults true), which puts a `<|think|>`
+    # marker right after `<|turn>system`. Without this kwarg the template omits
+    # it, and every fine-tune before 2026-08-15 was trained on a prompt the app
+    # never sends. finetune/modal_verify_prompt_parity.py asserts the equality.
     def to_text(ex: dict) -> dict:
         text = tokenizer.apply_chat_template(ex["messages"], tools=ex["tools"],
-                                             tokenize=False)
+                                             tokenize=False, enable_thinking=True)
         assert ex["messages"][-1]["content"] in text, f"target vanished: {ex['id']}"
         return {"text": text}
+
+    # Fail before the GPU spend if training-time rendering has drifted from the
+    # bytes the app sends. The reference is produced by the app's own renderer
+    # (`wallet-eval prompt-dump`); see modal_verify_prompt_parity.py.
+    reference = json.loads(Path(REFERENCE_REMOTE).read_text())
+    ref_tools = json.loads(reference["toolsJSON"])
+    for ref_case in reference["cases"]:
+        rendered = tokenizer.apply_chat_template(
+            ref_case["messages"], tools=ref_tools, tokenize=False,
+            add_generation_prompt=True, enable_thinking=True,
+        )
+        if rendered.startswith("<bos>"):      # HF emits BOS as text, llama.cpp as a token
+            rendered = rendered[len("<bos>"):]
+        assert rendered == ref_case["rendered"], (
+            f"PROMPT PARITY FAILED for {ref_case['label']}: training-time rendering "
+            f"does not match what the wallet app sends "
+            f"({len(rendered)} vs {len(ref_case['rendered'])} chars)"
+        )
+    print(f"[train] prompt parity OK against the app renderer "
+          f"({len(reference['cases'])} shapes)", flush=True)
 
     ds = Dataset.from_list([to_text(r) for r in rows])
     # Eyeball the exact turn markers the template produced (so INSTRUCTION_PART /
