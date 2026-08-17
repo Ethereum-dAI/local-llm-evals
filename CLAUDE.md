@@ -149,6 +149,7 @@ Everything lives under the org now — the models were **moved** out of
 | --- | --- | --- |
 | [`functiongemma-270m-wallet-ft`](https://huggingface.co/ef-dai-team/functiongemma-270m-wallet-ft) | public | `license: gemma` (inherited). The failed fine-tune. |
 | [`gemma-4-E4B-wallet-ft`](https://huggingface.co/ef-dai-team/gemma-4-E4B-wallet-ft) | public | `license: apache-2.0`. The 80.1% one. |
+| [`qwen3-8b-wallet-ft`](https://huggingface.co/ef-dai-team/qwen3-8b-wallet-ft) | public | `license: apache-2.0`. The 86.0% one — best on-device. |
 | [`wallet-tool-calling-ft`](https://huggingface.co/datasets/ef-dai-team/wallet-tool-calling-ft) | private | Both training JSONLs + the Modal jobs. Apache-2.0. |
 | [`wallet-tool-calling-eval`](https://huggingface.co/spaces/ef-dai-team/wallet-tool-calling-eval) | private | Static report Space. |
 
@@ -158,8 +159,13 @@ Everything lives under the org now — the models were **moved** out of
   307 cases, plus a browser showing every model's recorded output and the
   scorer's verdict. `build_static.py` bakes `data.json` from the `*.out.json`
   runs, so **`space/static/data.json` is the only committed record of those runs**
-  (the `*.out.json` files themselves are gitignored) — don't ignore it.
-- `space/app.py` — a Gradio playground doing live inference over the three local
+  (the `*.out.json` files themselves are gitignored) — don't ignore it. Every
+  column is drawn from ONE run vintage (the 2026-08-10/11 relaunch, the first runs
+  made with the 5-tool `pf/tools.json`), which is why the 2026-07-09 columns —
+  gpt-4o-mini, Gemma-4 26B-A4B and both FunctionGemma-270M models — are no longer
+  on it. Adding a model to `build_static.py:MODELS` means having a run of the same
+  vintage, not just any export.
+- `space/app.py` — a Gradio playground doing live inference over the local
   GGUFs, reusing the harness's own prompt/tools/scorer so it scores identically.
   **Not deployed:** Gradio and Docker Spaces are 402-gated behind a Team plan for
   orgs (and PRO for personal accounts) — Static is the only free SDK. Ship it
@@ -175,7 +181,17 @@ on demand from one source each, into the gitignored `space/build/`:
 ```bash
 uv run python space/stage.py gradio     # pf/ + src/wallet_evals/ + space/app.py
 uv run python space/stage.py dataset    # generators + seeds + finetune/ + the data
+uv run python space/stage.py static     # the report + its charts, from charts/
 ```
+
+**The report tree is staged too, and that is load-bearing.** `hf upload` runs with
+`--delete "*"`, so anything living only in the deployed Space is destroyed by the
+next deploy. That already happened once: `overall-accuracy.jpg` was uploaded
+straight to the Space, existed nowhere in this repo, and a later redeploy of
+`space/static/` removed it along with the section that displayed it. Both charts
+are now manifest entries pointing at `charts/`, which is also where
+`scripts/export_chart_images.py` writes them — one source, and a redeploy
+reproduces them.
 
 Adding an import to `space/app.py` means adding the module to
 `WALLET_EVALS_MODULES` in `stage.py` — nowhere else. `tests/test_space_staging.py`

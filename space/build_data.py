@@ -42,16 +42,18 @@ QUOTA = {
     "safety-refusal-approve-unknown-spender": 2,
 }
 
-# (file, provider label) -> display name. Each entry is a real promptfoo run
-# already committed to the repo root; nothing here is re-measured or estimated.
+# (file, provider label) -> display name. Each entry is a real promptfoo run;
+# nothing here is re-measured or estimated. Kept in step with
+# `build_static.py:MODELS` on purpose — the playground's scoreboard and the
+# report's strips describing different model sets is worse than either being
+# incomplete. Same one-vintage rule: all of these are the 2026-08-10/11 relaunch,
+# the first runs made with the 5-tool `pf/tools.json`.
 SCOREBOARD = [
-    ("functiongemma-all.out.json", "functiongemma-270m-it", "FunctionGemma-270M (base)"),
-    ("functiongemma.ft.out.json", "functiongemma-ft", "FunctionGemma-270M wallet-ft"),
-    ("gemma4.ft.out.json", "gemma4-e4b-base", "Gemma-4 E4B (base, wallet-shipped)"),
-    ("gemma4ft.fresh.out.json", "gemma4-e4b-ft", "Gemma-4 E4B wallet-ft"),
-    ("functiongemma-all.out.json", "openrouter:openai/gpt-4o-mini", "gpt-4o-mini"),
-    ("functiongemma-all.out.json", "openrouter:google/gemma-4-26b-a4b-it", "Gemma-4 26B-A4B"),
-    ("gpt5.fresh.out.json", "openrouter:openai/gpt-5", "gpt-5 (anchor)"),
+    ("relaunch/gemma4-base.final.json", "gemma4-e4b-base", "Gemma-4 E4B (base, wallet-shipped)"),
+    ("relaunch/gemma4-ft.final.json", "gemma4-e4b-ft", "Gemma-4 E4B wallet-ft"),
+    ("relaunch/qwen3-8b.out.json", "qwen3-8b", "Qwen3-8B (base)"),
+    ("relaunch/qwen3-ft.out.json", "qwen3-8b-ft", "Qwen3-8B wallet-ft"),
+    ("relaunch/gpt5.final.json", "openrouter:openai/gpt-5", "gpt-5 (anchor)"),
 ]
 
 

@@ -48,6 +48,17 @@ if [[ "$MODE" == "--gradio" ]]; then
     exit 0
 fi
 
+# The two training JSONLs are gitignored (regenerable, and large), so on any
+# machine that has not run the generators they are simply absent — and stage.py
+# hard-fails on a missing source. Without this the deploy died here, taking the
+# report Space with it, even though the report does not use them.
+echo "==> Regenerating any missing training data"
+(cd "$ROOT"
+ [ -f data_for_finetune/functiongemma_train.jsonl ] || \
+     uv run python scripts/generate_finetune_data.py
+ [ -f data_for_finetune/gemma4_train.jsonl ] || \
+     uv run python scripts/generate_gemma4_finetune_data.py)
+
 echo "==> Staging the dataset tree"
 (cd "$ROOT" && uv run python space/stage.py dataset)
 
@@ -59,10 +70,14 @@ hf upload "$DATASET" "$HERE/build/dataset" . --repo-type dataset \
     --exclude "**/__pycache__/**" --delete "*" \
     --commit-message "Wallet tool-calling SFT data + training scripts"
 
-# space/static/ duplicates nothing, so it uploads straight from the tree.
+# The report tree is staged too: index.html shows charts/chart-scores.jpg, which
+# lives outside space/ and must not be committed twice.
+echo "==> Staging the report tree"
+(cd "$ROOT" && uv run python space/stage.py static)
+
 echo "==> Report Space: $REPORT (static)"
 hf repos create "$REPORT" --repo-type space --space-sdk static --private --exist-ok
-hf upload "$REPORT" "$HERE/static" . --repo-type space \
+hf upload "$REPORT" "$HERE/build/static" . --repo-type space \
     --exclude "**/__pycache__/**" --delete "*" \
     --commit-message "Eval report: 307 cases x 7 models, exact-match scoring"
 
