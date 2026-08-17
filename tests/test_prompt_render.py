@@ -1,4 +1,6 @@
-from pf.prompt import render, SYSTEM, APP_SYSTEM
+import json
+
+from pf.prompt import render, SYSTEM, APP_SYSTEM, APP_TOOLS
 
 
 def test_render_single_turn():
@@ -73,17 +75,35 @@ def test_expected_summary_var_is_not_leaked_to_model():
     assert all("0xSECRETGOLD" not in m["content"] for m in chat)
 
 
-def test_system_states_the_app_contract():
-    assert "HUMAN units" in SYSTEM
-    assert "thousands separators" in SYSTEM
-    assert "NOT resolve it to an address yourself" in SYSTEM
-    assert "Never convert to wei or base units" in SYSTEM
+def test_app_contract_lives_in_the_app_prompt_not_the_builder_one():
+    """The human-units/verbatim-recipient rules belong to the WALLET path.
+
+    The app states them in its TOOL SCHEMAS, not its system prompt — APP_SYSTEM
+    is 533 characters and says nothing about units or resolution, because the
+    app leans on the `transfer`/`swap` parameter descriptions instead. That is
+    the contract the product actually ships, so it is what the wallet path must
+    carry.
+
+    They must NOT be in SYSTEM, which after the prompt split is reached only by
+    Aave/Safe, whose gold is base units and resolved addresses. Asserting them
+    on SYSTEM is how the contradiction got in.
+    """
+    app_tools = json.dumps(APP_TOOLS)
+    assert "human units" in app_tools
+    assert "do not attempt to resolve ENS yourself" in app_tools
+
+    assert "HUMAN units" not in SYSTEM
+    assert "Never convert to wei or base units" not in SYSTEM
+    assert "NOT resolve it to an address yourself" not in SYSTEM
+    assert "never by contract address" not in SYSTEM
 
 
-def test_system_no_longer_demands_base_units_or_ens_resolution():
-    # These two conventions are what made the model do the wallet's job in Swift.
-    assert "Convert every human amount to base units" not in SYSTEM
-    assert "Resolve any ENS name or token symbol to its address" not in SYSTEM
+def test_builder_system_keeps_the_contract_its_gold_is_written_against():
+    """Aave/Safe gold is executeTx with base units and resolved addresses, so
+    the only prompt those cases see has to ask for exactly that."""
+    assert "Convert every human amount to base units" in SYSTEM
+    assert "Resolve any ENS name or token symbol to its address" in SYSTEM
+    assert "executeTx" in SYSTEM
 
 
 def test_aave_reference_still_carries_the_base_unit_rule():

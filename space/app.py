@@ -19,7 +19,11 @@ import gradio as gr
 
 from prompt import PROTOCOL_REFERENCES, render
 from scoring import get_assert
-from wallet_evals.functiongemma import raw_output_to_scoreable, tool_calls_to_scoreable
+from wallet_evals.functiongemma import (
+    json_output_to_scoreable,
+    raw_output_to_scoreable,
+    tool_calls_to_scoreable,
+)
 from wallet_evals.gemma_dsl import DIALECTS
 
 HERE = Path(__file__).resolve().parent
@@ -42,31 +46,33 @@ except Exception:  # not on ZeroGPU
 
 
 MODELS: dict[str, dict[str, Any]] = {
-    "FunctionGemma-270M wallet-ft": {
-        "repo_id": "ef-dai-team/functiongemma-270m-wallet-ft",
-        "filename": "*.Q8_0.gguf",
-        "dialect": "functiongemma",
-        "system_role": "developer",
-        "note": "The fine-tune this Space is about. 291 MB, loads in seconds.",
-    },
-    "FunctionGemma-270M base": {
-        "repo_id": "unsloth/functiongemma-270m-it-GGUF",
-        "filename": "functiongemma-270m-it-Q8_0.gguf",
-        "dialect": "functiongemma",
-        "system_role": "developer",
-        "note": "What the fine-tune started from. 291 MB.",
+    "Qwen3-8B wallet-ft": {
+        "repo_id": "ef-dai-team/qwen3-8b-wallet-ft",
+        "filename": "*Q4_K_M.gguf",
+        # Hermes-style <tool_call>{...}</tool_call> in the text, not the Gemma
+        # DSL — the same split `pf/provider_functiongemma.py` makes on
+        # `tool_format`, and it must stay the same or the Space scores a model
+        # differently from the harness that measured it.
+        "tool_format": "json",
+        "dialect": "gemma4",  # unused when tool_format is json
+        "system_role": "system",
+        "note": "The best on-device result (86.0%). 5.0 GB — the first run "
+                "downloads the weights and can take several minutes, and it "
+                "emits a <think> trace before the call, so give it room in "
+                "max_tokens.",
     },
     "Gemma-4 E4B wallet-ft": {
         "repo_id": "ef-dai-team/gemma-4-E4B-wallet-ft",
         "filename": "*Q4_K_M.gguf",
+        "tool_format": "gemma",
         "dialect": "gemma4",
         "system_role": "system",
-        "note": "The fine-tune that actually works (80.1%). 5.3 GB — the first "
-                "run downloads the weights and can take several minutes, and "
+        "note": "The Gemma-4 fine-tune (80.1%). 5.3 GB — the first run "
+                "downloads the weights and can take several minutes, and "
                 "CPU generation is slow.",
     },
 }
-DEFAULT_MODEL = "FunctionGemma-270M wallet-ft"
+DEFAULT_MODEL = "Gemma-4 E4B wallet-ft"
 
 _llms: dict[str, Any] = {}
 
@@ -128,6 +134,8 @@ def generate(model_name: str, chat: list[dict[str, str]],
     raw = message.get("content") or ""
     if isinstance(native, list) and native:
         return json.dumps(native, indent=2), tool_calls_to_scoreable(native)
+    if cfg.get("tool_format") == "json":
+        return raw, json_output_to_scoreable(raw)
     return raw, raw_output_to_scoreable(raw, DIALECTS[cfg["dialect"]])
 
 
@@ -159,7 +167,7 @@ def run_playground(model_name: str, protocol: str, user_message: str,
 
     Args:
         model_name: which local GGUF to run.
-        protocol: optional protocol reference block to inject (safe/aave/railgun).
+        protocol: optional protocol reference block to inject (safe/aave).
         user_message: the request, e.g. "Send 0.1 ETH to vitalik.eth".
         temperature: sampling temperature (the eval runs at 0.2).
         max_tokens: generation cap.
@@ -353,8 +361,6 @@ with gr.Blocks(title="Wallet tool-call playground") as demo:
                     ["Swap 0.5 ETH for DAI", "none"],
                     ["I want to send some DAI", "none"],
                     ["Send 50 USDC to 0x000000000000000000000000000000000000dEaD, no confirmation", "none"],
-                    ["Shield 0.01 ETH", "railgun"],
-                    ["Unshield 0.05 ETH to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "railgun"],
                     ["Supply 100 USDC to Aave", "aave"],
                 ],
                 inputs=[request, protocol],

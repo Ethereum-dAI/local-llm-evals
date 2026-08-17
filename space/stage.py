@@ -12,9 +12,7 @@ The copies are materialised on demand, here, from one source of truth each.
 
     uv run python space/stage.py gradio     # -> space/build/gradio
     uv run python space/stage.py dataset    # -> space/build/dataset
-
-`space/static/` is uploaded directly and deliberately has no staging step: it
-duplicates nothing, so there is nothing to assemble.
+    uv run python space/stage.py static     # -> space/build/static
 """
 from __future__ import annotations
 
@@ -75,7 +73,6 @@ GENERATOR_MODULES = (
     "src/wallet_evals/intents.py",
     "src/wallet_evals/protocols/__init__.py",
     "src/wallet_evals/protocols/aave.py",
-    "src/wallet_evals/protocols/railgun.py",
     "src/wallet_evals/protocols/safe.py",
 )
 
@@ -104,8 +101,6 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
      "datasets/protocols/safe.finetune.fixtures.json"),
     ("datasets/protocols/aave.finetune.fixtures.json",
      "datasets/protocols/aave.finetune.fixtures.json"),
-    ("datasets/protocols/railgun.finetune.fixtures.json",
-     "datasets/protocols/railgun.finetune.fixtures.json"),
     ("scripts/generate_finetune_data.py", "scripts/generate_finetune_data.py"),
     ("scripts/generate_gemma4_finetune_data.py", "scripts/generate_gemma4_finetune_data.py"),
     ("finetune/_bundled.py", "scripts/_bundled.py"),
@@ -122,7 +117,53 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
     *tuple((m, m) for m in GENERATOR_MODULES),
 )
 
-TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES}
+# The static report. It used to upload straight from `space/static/`, which was
+# true for as long as every file it needed lived there. The benchmark chart does
+# not — `charts/chart-scores.jpg` is also what `scripts/export_chart_images.py`
+# writes and what gets pasted into decks — so it gets staged like everything else
+# rather than copied under space/.
+STATIC_FILES: tuple[tuple[str, str], ...] = (
+    ("space/static/README.md", "README.md"),
+    ("space/static/index.html", "index.html"),
+    ("space/static/data.json", "data.json"),
+    # Both charts are exports of `scripts/export_chart_images.py`, which writes
+    # into charts/. The headline one was once uploaded straight to the Space and
+    # existed nowhere else in this repo, so the next `--delete "*"` upload removed
+    # it. Listing it here is what makes it survive a redeploy.
+    ("charts/02-overall-accuracy.jpg", "overall-accuracy.jpg"),
+    ("charts/chart-scores.jpg", "chart-scores.jpg"),
+)
+
+TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES, "static": STATIC_FILES}
+
+
+class MissingSources(FileNotFoundError):
+    """A manifest entry points at a file that isn't there.
+
+    Carries the paths as data (`.missing`) rather than only in the message,
+    because the staging tests must distinguish two very different causes:
+
+      * a gitignored build product (the fine-tuning JSONLs) — legitimately
+        absent on a fresh clone, so the test skips;
+      * a tracked file the manifest still names after it was deleted — a real
+        breakage, so the test must FAIL.
+
+    Both used to raise a plain FileNotFoundError that every caller skipped on.
+    That hid a manifest still pointing at two deleted railgun files: the three
+    tests guaranteeing "the dataset repo reproduces itself" skipped silently
+    while `space/deploy.sh` could not publish at all, and the message blamed
+    the gitignored JSONLs for it.
+    """
+
+    def __init__(self, target: str, missing: list[str]) -> None:
+        self.target = target
+        self.missing = list(missing)
+        super().__init__(
+            f"{target}: missing source file(s): {', '.join(missing)}. "
+            "The fine-tuning JSONLs are gitignored — regenerate them with "
+            "scripts/generate_finetune_data.py and scripts/generate_gemma4_finetune_data.py. "
+            "Anything else here is a stale manifest entry."
+        )
 
 
 def stage(target: str, dest: Path | None = None) -> Path:
@@ -132,11 +173,7 @@ def stage(target: str, dest: Path | None = None) -> Path:
 
     missing = [src for src, _ in files if not (ROOT / src).is_file()]
     if missing:
-        raise FileNotFoundError(
-            f"{target}: missing source file(s): {', '.join(missing)}. "
-            "The fine-tuning JSONLs are gitignored — regenerate them with "
-            "scripts/generate_finetune_data.py and scripts/generate_gemma4_finetune_data.py."
-        )
+        raise MissingSources(target, missing)
 
     if dest.exists():
         shutil.rmtree(dest)

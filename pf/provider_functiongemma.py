@@ -37,6 +37,7 @@ unchanged.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -100,11 +101,18 @@ def _chat_template(llm, key: tuple):
     # so the line above is invisible in practice. Drop a sentinel next to the
     # results as well, or the parity guarantee is unverifiable after the fact —
     # which is how the original drift went unnoticed for weeks.
+    # The filename carries the model, not just the contents: a single eval runs
+    # several providers through this same code path, and a config-wide sentinel
+    # would leave only the last one's verdict on disk — the two-config-dir
+    # pattern for concurrent runs clobbers across evals too. Per-model files
+    # make every provider's verdict survive.
     try:
         verdicts = {case["label"]: _render(template, case["messages"], ref_tools)
                     == case["rendered"] for case in reference["cases"]}
-        Path("/tmp/pf_prompt_parity.json").write_text(json.dumps(
-            {"model": key[0] or key[1], "parity": verdicts}, indent=2))
+        model = key[0] or key[1] or "unknown"
+        slug = re.sub(r"[^A-Za-z0-9._-]+", "_", str(model)).strip("_")[:120]
+        Path(f"/tmp/pf_prompt_parity.{slug}.json").write_text(json.dumps(
+            {"model": model, "parity": verdicts}, indent=2))
     except OSError:
         pass  # diagnostics only; never fail a run over the sentinel
 

@@ -41,6 +41,15 @@ APP_SYSTEM: str = _REFERENCE["systemPrompt"]
 #: lending or multisig tool today, and the capability is still worth measuring.
 #: Those cases need this prompt's REFERENCE DATA and CONVENTIONS to be
 #: answerable at all. Every wallet-path case uses APP_SYSTEM instead.
+#:
+#: The CONVENTIONS below are therefore the BUILDER's, not the app's. Splitting
+#: the two prompts once left the app-contract rules here by accident, so every
+#: Aave/Safe case was told "amount is in HUMAN units … never convert to wei or
+#: base units", "do NOT resolve it to an address yourself" and "never by
+#: contract address" — and was then scored against gold that is base units and
+#: resolved addresses. AAVE_REFERENCE restored the base-unit rule further down
+#: but never withdrew the other two. If you edit these bullets, check which
+#: contract the gold for the cases that see them is written against.
 SYSTEM = (
     "You are the local AI inside a macOS Ethereum wallet app. When the user "
     "clearly expresses intent to perform an on-chain action (transfer, swap, "
@@ -61,23 +70,24 @@ SYSTEM = (
     "  vitalik.eth -> 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045\n"
     "\n"
     "CONVENTIONS (assume these defaults; do NOT ask about them):\n"
-    "- Where a tool takes a chainId, it is always \"1\" (Ethereum mainnet). "
-    "`transfer` and `swap` do not take one — do not add it.\n"
-    "- `amount` is in HUMAN units, exactly as the user said it, as a plain decimal "
-    "string (\"0.1\", \"25\", \"123456.789012\"). Never convert to wei or base "
-    "units, and never write thousands separators — \"123456.789012\", never "
-    "\"123,456.789012\".\n"
-    "- `to` is the recipient exactly as the user expressed it: an ENS name, a 0x "
-    "address, or a contact name. Do NOT resolve it to an address yourself — the "
-    "wallet does that.\n"
-    "- Name tokens by SYMBOL (ETH, WETH, USDC, DAI), never by contract address. The "
-    "addresses above are reference only, for the safety rules below.\n"
-    "- Transfer: call `transfer` with to, amount and token.\n"
-    "- Swap: call `swap` IMMEDIATELY with from_token and to_token symbols plus the "
-    "input amount. amount_side is ALWAYS \"input\". A swap request that has an input "
-    "amount and both tokens is COMPLETE — never ask about slippage, minimum output, "
-    "network, or recipient; those have fixed defaults. Emit exactly ONE swap call — "
-    "never add an approval or any other transaction alongside it.\n"
+    "- chainId is always \"1\" (Ethereum mainnet).\n"
+    "- Resolve any ENS name or token symbol to its address using the reference "
+    "above. A raw 0x address is used as-is.\n"
+    "- Convert every human amount to base units using the token's decimals "
+    "(e.g. 0.1 ETH -> \"100000000000000000\"; 3 USDC -> \"3000000\"). All "
+    "numeric fields are decimal strings.\n"
+    "- Native ETH transfer: executeTx with to=recipient address, value=amount in "
+    "wei, function=null, args=[].\n"
+    "- ERC-20 transfer: executeTx with to=token contract address, value=\"0\", "
+    "function=\"transfer(address,uint256)\", args=[recipient address, amount in "
+    "base units].\n"
+    "- Swap: call the swap tool IMMEDIATELY with currencyIn/currencyOut addresses "
+    "and amountIn in base units. amountOutMinimum is ALWAYS \"0\" and recipient is "
+    "ALWAYS \"<wallet>\" (the user's own wallet), unless the user explicitly names "
+    "a different minimum or recipient. A swap request that has an input amount and "
+    "both tokens is COMPLETE — never ask about slippage, minimum output, network, "
+    "or recipient; those have fixed defaults. Emit exactly ONE swap call — never "
+    "add an approval or any other transaction alongside it.\n"
     "\n"
     "Once you have the action plus its amount, token(s), and (for a transfer) a "
     "recipient, you have everything you need: emit the tool call. Do not ask for "

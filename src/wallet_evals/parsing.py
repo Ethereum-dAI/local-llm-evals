@@ -30,17 +30,96 @@ def _normalize_function(value: Any) -> str | None:
     return s
 
 
+# The quote sequences a Gemma DSL dialect can wrap a value in. Gemma-4's own
+# chat template serializes an ARRAY argument element-wise in these markers
+# (`format_argument` -> `[<|"|>a<|"|>,<|"|>b<|"|>]`), so they appear inside the
+# bracketed substring `gemma_dsl._parse_args` hands over intact.
+_DSL_QUOTES = ('<|"|>', "<escape>")
+
+
 def _coerce_args(value: Any) -> list[Any]:
-    """args may arrive as a real list (native) or a JSON-encoded string (DSL)."""
+    """args may arrive as a real list (native) or a JSON-encoded string (DSL).
+
+    The DSL string is not always valid JSON. The stock on-device Gemma-4 emits the
+    element-quoted form its own template documents:
+
+        args:[<|"|>0xrecipient<|"|>,<|"|>3000000<|"|>]
+
+    which `json.loads` rejects. Returning [] there scores a byte-perfect call as
+    wrong — and it is not a symmetric mistake: on the Jul-20 run the stock model
+    emitted this form 95 times and the fine-tune (trained to emit a bare JSON
+    array) zero, so the failure only ever cost the baseline. Decoding the markers
+    erases an ENCODING difference, not a capability difference: the model still
+    has to get the recipient and the base-unit amount right to score.
+    """
     if isinstance(value, list):
         return value
     if isinstance(value, str):
         try:
             decoded = json.loads(value)
         except (ValueError, TypeError):
-            return []
-        return decoded if isinstance(decoded, list) else []
+            decoded = _decode_dsl_quoted_array(value)
+        if isinstance(decoded, list):
+            return decoded
+        # Neither JSON nor the DSL form. Returning [] here would score a parser
+        # miss identically to "the model emitted no args", which is how the
+        # element-quoted array cost the baseline 130 protocol cases while the
+        # report read `args: expected [...] got []` — indistinguishable from the
+        # model simply not answering. Carry the raw text instead: the comparison
+        # still fails (it must — nothing was understood), but the reason names
+        # what could not be decoded, so the next such wrapper is visible in the
+        # report rather than silent.
+        if value.strip():
+            return [UndecodableArgs(value)]
     return []
+
+
+class UndecodableArgs(str):
+    """An `args` payload no decoder understood, carried through as a value.
+
+    Subclasses `str` so every downstream comparison, repr and JSON dump keeps
+    working unchanged; the type only exists so a report can tell "unparsed" from
+    "absent", and so `repr()` says so out loud.
+    """
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:  # pragma: no cover - diagnostics only
+        return f"<undecodable args: {str.__repr__(self)}>"
+
+
+def _decode_dsl_quoted_array(value: str) -> list[Any] | None:
+    """Decode `[<|"|>a<|"|>,<|"|>b<|"|>]` into ["a", "b"].
+
+    Splits on the marker rather than rewriting it to a JSON quote: the GEMMA4
+    marker <|"|> itself contains a double quote, so any escape-then-substitute
+    pass mangles it. Splitting is also immune to commas and quotes inside a
+    value, since element boundaries are the markers themselves — for
+    `[<|"|>a<|"|>,<|"|>b<|"|>]` the split yields ['', 'a', ',', 'b', ''] and the
+    values are exactly the odd positions.
+
+    Returns None when the text is not a marker-quoted array, leaving the
+    caller's [].
+    """
+    text = value.strip()
+    if not (text.startswith("[") and text.endswith("]")):
+        return None
+    inner = text[1:-1].strip()
+    if not inner:
+        return None
+    for quote in _DSL_QUOTES:
+        if quote not in inner:
+            continue
+        parts = inner.split(quote)
+        # A well-formed run is marker-delimited, so the split must have an odd
+        # length (empty head and tail) and the even slots must be only the commas
+        # between elements. Anything else is malformed — refuse rather than guess.
+        if len(parts) % 2 == 0:
+            return None
+        if any(p.strip(" \t\r\n,") for p in parts[::2]):
+            return None
+        return parts[1::2]
+    return None
 
 
 def _build_call(name: str, fields: dict[str, Any]) -> ParsedToolCall:

@@ -158,6 +158,23 @@ REFUSAL_SCENARIOS = [
 TARGETS = {"transfer": 650, "swap": 650, "multiturn": 250, "ablation": 90,
            "safe": 40, "aave": 55, "refusal": 60, "separator": 80}
 
+#: Whether the Aave/Safe transaction-builder rows (95: the `safe`/`aave` caps
+#: above) join the WALLET training mix.
+#:
+#: OFF, and that is a separation rather than a deletion. v4 and qwen-v4 both
+#: trained on a mix that included these 95, and it taught a second tool
+#: vocabulary — `executeTx`, base units, resolved addresses — directly opposed
+#: to the app's own contract. On v4 that surfaced as an invented `transfer` to
+#: `avev3.eth` on Aave prompts: a fabricated recipient, the worst failure a
+#: wallet model has available.
+#:
+#: The rows, their fixtures and their generators all stay. `--protocol-only`
+#: builds a protocol training set from exactly the same code, so the capability
+#: keeps its own artifact and its own model whenever the wallet gains lending or
+#: multisig tools, and `pf/tests.protocols.yaml` keeps measuring it. What is
+#: gone is only the MIXING of two contracts into one model.
+INCLUDE_PROTOCOL_ROWS = False
+
 # A 4+ digit integer part is the threshold at which the surface renders
 # comma-grouped in real usage (matches the eval's own arithmetic-separator
 # slice, datasets/seeds.arithmetic.yaml) — the trigger for a `separator` case.
@@ -218,8 +235,14 @@ def _reasoning_text(intent: dict) -> str:
     raise ValueError(f"no reasoning trace defined for action: {action!r}")
 
 
-def _collect(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
-    """Build (test-dict, intent-or-None, bucket) triples from every source."""
+def _collect(rng: random.Random, protocol_only: bool = False,
+             include_protocol: bool = False) -> list[tuple[dict, dict | None, str]]:
+    """Build (test-dict, intent-or-None, bucket) triples from every source.
+
+    `protocol_only` returns JUST the Aave/Safe builder rows, for training the
+    protocol capability as its own model rather than mixing two tool contracts
+    into one.
+    """
     triples: list[tuple[dict, dict | None, str]] = []
     counters: dict[str, int] = {}
 
@@ -256,6 +279,21 @@ def _collect(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
             triples.append((build_refusal_case(scenario, template, rng, nxt("refusal")),
                             None, "refusal"))
 
+    if protocol_only:
+        return [t for t in _collect_protocol(rng)]
+    if INCLUDE_PROTOCOL_ROWS or include_protocol:
+        triples.extend(_collect_protocol(rng))
+    return triples
+
+
+def _collect_protocol(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
+    """The Aave/Safe transaction-builder rows, on their own.
+
+    Split out of `_collect` so the protocol capability can be trained as its own
+    artifact instead of being mixed into the wallet model. Same fixtures, same
+    builders, same caps — only the destination changes.
+    """
+    triples: list[tuple[dict, dict | None, str]] = []
     safe_fx = json.loads(SAFE_FIXTURES.read_text())
     for test in safe_mod.build_cases(safe_fx, rng, start_idx=1):
         triples.append((test, None, "safe"))
@@ -286,10 +324,18 @@ def main() -> None:
     ap.add_argument("--reasoning", action="store_true",
                     help="emit a <think> arithmetic trace before transfer/swap calls")
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--protocol-only", action="store_true",
+                    help="build ONLY the Aave/Safe builder rows, as their own "
+                         "training set (see INCLUDE_PROTOCOL_ROWS)")
+    ap.add_argument("--include-protocol-rows", action="store_true",
+                    help="mix the 95 Aave/Safe rows into the wallet set, "
+                         "reproducing the 1863-row mix v4 and qwen-v4 trained "
+                         "on. Off by default; see INCLUDE_PROTOCOL_ROWS.")
     args = ap.parse_args()
 
     rng = random.Random(SEED)
-    selected = _select(_collect(rng), rng)
+    selected = _select(_collect(rng, protocol_only=args.protocol_only,
+                                include_protocol=args.include_protocol_rows), rng)
 
     examples: list[dict] = []
     for test, intent in selected:
