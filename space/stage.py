@@ -49,6 +49,9 @@ GRADIO_FILES: tuple[tuple[str, str], ...] = (
     ("space/data/eval_cases.json", "data/eval_cases.json"),
     ("pf/prompt.py", "prompt.py"),
     ("pf/tools.json", "tools.json"),
+    ("pf/tools.app.json", "tools.app.json"),
+    # prompt.py reads the app's contract dump at import time.
+    ("pf/app_contract_reference.json", "app_contract_reference.json"),
     # app.py imports `scoring`; `assert` is a Python keyword so the harness file
     # can only be imported by path. Renaming on copy is the whole difference.
     ("pf/assert.py", "scoring.py"),
@@ -91,6 +94,8 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
     ("space/dataset_pyproject.toml", "pyproject.toml"),
     ("pf/prompt.py", "pf/prompt.py"),
     ("pf/tools.json", "pf/tools.json"),
+    ("pf/tools.app.json", "pf/tools.app.json"),
+    ("pf/app_contract_reference.json", "pf/app_contract_reference.json"),
     # Read at import time by wallet_evals/intents.py — invisible to an import
     # trace, and the first thing that broke when this tree was tested standalone.
     ("datasets/lookup.json", "datasets/lookup.json"),

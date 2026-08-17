@@ -124,9 +124,75 @@ providers:
       n_gpu_layers: -1
       timeout: 1800000
 
+  # v4: the first fine-tune trained on the bytes the wallet app actually sends.
+  # Every earlier row in this list was trained under the harness's own ~4 KB
+  # scaffold (a REFERENCE DATA table, CONVENTIONS, seven lettered SAFETY rules)
+  # and WITHOUT the `<|think|>` marker the app emits, because
+  # apply_chat_template omits it unless enable_thinking is passed. v4 fixes both,
+  # and splits the contract per case: wallet rows carry the app's verbatim system
+  # prompt and its two tools, Aave/Safe rows keep the builder prompt and
+  # executeTx. See finetune/modal_verify_prompt_parity.py.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-v4-appprompt
+    config:
+      model_path: models/gemma4-e4b-wallet-ft-appcontract-v4.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+
+  # Qwen3-8B on the same v3 refusal-coverage dataset. Kept in the same config so
+  # it is scored by the identical prompt, scorer and 569-case benchmark as the
+  # gemma line; the earlier qwen fine-tune (86.3%) trained on the pre-refusal
+  # data and is a different artifact entirely.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-ft-v3
+    config:
+      # Byte-identical to promptfooconfig.qwen3-ft-appcontract.yaml apart from
+      # model_path and label. Qwen is NOT a `dialect` — there is no hermes entry
+      # in wallet_evals.gemma_dsl.DIALECTS; it goes through `tool_format: json`,
+      # and its sampling (0.6 / 0.95 / 20, n_ctx 8192, max_tokens 2048) is
+      # Qwen3's own recommended thinking-mode configuration. Reusing gemma's
+      # 0.2/4096/1024 here would have measured a mis-configured model and read
+      # as a fine-tuning result.
+      model_path: models/qwen3-8b-wallet-ft-appcontract-v3.Q4_K_M.gguf
+      tool_format: json
+      system_role: system
+      n_ctx: 8192
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 2048
+      n_gpu_layers: -1
+      timeout: 1800000
+
+  # Qwen3-8B trained on the SAME app-contract dataset as gemma4 v4: the app's
+  # verbatim system prompt (rendered through Qwen's own template, so its bytes
+  # differ from gemma's), per-case tool menus, and enable_thinking on. Sampling
+  # is Qwen3's own recommended thinking-mode config, unchanged from v3 — using
+  # gemma's 0.2/4096/1024 would measure a mis-configured model and read as a
+  # fine-tuning result.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-ft-v4
+    config:
+      model_path: models/qwen3-8b-wallet-ft-appcontract-v4.Q4_K_M.gguf
+      tool_format: json
+      system_role: system
+      n_ctx: 8192
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 2048
+      n_gpu_layers: -1
+      timeout: 1800000
+
 defaultTest:
   assert:
     - type: python
       value: file://pf/assert.py
+
 
 tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"
