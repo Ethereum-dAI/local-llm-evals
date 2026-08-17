@@ -28,7 +28,11 @@ Design notes live under `docs/` (gitignored).
 | `src/wallet_evals/protocols/aave.py` | Aave v3 module (supply/withdraw/borrow/repay) → `executeTx` gold |
 | `src/wallet_evals/protocols/railgun.py` | RAILGUN privacy module (shield/unshield) → dedicated intent-tool gold |
 | `scripts/generate_protocol_cases.py` | builds `pf/tests.protocols.yaml` from protocol fixtures |
-| `pf/tests.protocols.yaml` | generated protocol-transaction eval cases (Safe, Aave, RAILGUN) |
+| `pf/tests.protocols.yaml` | generated protocol-transaction eval cases (Safe, Aave) — **not** in the benchmark |
+| `src/wallet_evals/conversations.py` | multi-round conversation builders (progressive / correction / distractor / switch) |
+| `scripts/generate_conversation_cases.py` | builds `pf/tests.conversations.yaml` (571 cases, 2-6 rounds) |
+| `scripts/build_combined_benchmark.py` | concatenates app-contract + conversations → `pf/tests.combined.yaml` (1000 cases) |
+| `scripts/dataset_census.py` | prints a dataset's categories, counts and round distribution (`--csv`, `--cases-csv`) |
 
 ## Setup
 
@@ -85,7 +89,34 @@ scripted multi-turn cases. Gold is **computed** from each seed intent, so every
 generated case self-scores to 1 (`tests/test_generated_integrity.py`). Output is
 deterministic for a fixed seed.
 
-## Protocol-transaction evals (Safe + Aave + RAILGUN)
+## The benchmark: `pf/tests.combined.yaml` (1000 cases)
+
+```bash
+uv run python scripts/generate_cases.py --extra-seeds datasets/seeds.arithmetic.yaml
+uv run python scripts/generate_conversation_cases.py
+uv run python scripts/build_combined_benchmark.py
+uv run python scripts/dataset_census.py            # the review table
+```
+
+429 app-contract cases (single-turn transfer/swap, the arithmetic slice, the
+refusal banks) plus 571 multi-round conversation cases. A **round** is one user
+turn plus the assistant's reply, and only the model's reply to the last user turn
+is scored:
+
+| rounds | 1 | 2 | 3 | 4 | 5 | 6 |
+| --- | --- | --- | --- | --- | --- | --- |
+| cases | 337 | 272 | 150 | 110 | 80 | 51 |
+
+66% of the benchmark is multi-round. The four conversation mechanisms —
+`progressive` disclosure, mid-conversation `correction`, `distractor`
+interruptions and intent `switch` — are described in CLAUDE.md; gold is computed
+from the final effective intent, so a conversation may revise a value freely.
+
+Aave/Safe are **not** part of this benchmark (the wallet ships no lending or
+multisig tool). They still generate and still pass their own integrity tests —
+run them directly, as below.
+
+## Protocol-transaction evals (Safe + Aave), run separately
 
 ```bash
 uv run python scripts/generate_protocol_cases.py

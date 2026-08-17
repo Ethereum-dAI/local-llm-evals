@@ -55,12 +55,14 @@ For a prompt change, do a small A/B: run a subset, toggle the prompt, compare.
 
 ## Datasets are generated — don't hand-edit
 
-`pf/tests.generated.yaml` and `pf/tests.protocols.yaml` are byte-stable outputs of
-seeded scripts. Edit the source, then regenerate:
+Every `pf/tests.*.yaml` is a byte-stable output of a seeded script. Edit the
+source, then regenerate:
 
 ```bash
-uv run python scripts/generate_cases.py            # from datasets/seeds.yaml
-uv run python scripts/generate_protocol_cases.py   # from datasets/protocols/*.fixtures.json
+uv run python scripts/generate_cases.py --extra-seeds datasets/seeds.arithmetic.yaml
+uv run python scripts/generate_conversation_cases.py   # from datasets/seeds.conversations.yaml
+uv run python scripts/build_combined_benchmark.py      # -> the 1000-case benchmark
+uv run python scripts/generate_protocol_cases.py       # aave/safe, no longer in the benchmark
 ```
 
 - Surface phrasings: `TRANSFER_TEMPLATES` / `SWAP_TEMPLATES` (+ narrative) in
@@ -81,6 +83,94 @@ uv run python scripts/generate_protocol_cases.py   # from datasets/protocols/*.f
   proof + the wallet's own broadcaster), so it scores the app's own `shield`/
   `unshield` intent tools instead — see below. Prefer `executeTx` for anything new;
   only break the rule when there is genuinely no transaction to encode.
+
+## The benchmark is `pf/tests.combined.yaml` — 1000 cases, two thirds multi-round
+
+`scripts/build_combined_benchmark.py` concatenates exactly two generated files:
+
+| Source | Cases | What it is |
+| --- | --- | --- |
+| `pf/tests.app-contract.yaml` | 429 | single-turn transfer/swap + arithmetic slice + refusals + 92 legacy 2-round cases |
+| `pf/tests.conversations.yaml` | 571 | 2-6 round conversations, four mechanisms |
+
+Round distribution (a round = one user turn + the assistant's reply; only the
+model's reply to the LAST user turn is scored): **337 / 272 / 150 / 110 / 80 / 51**
+for 1-6 rounds — 66.3% multi-round, 131 cases at 5+ rounds.
+`scripts/dataset_census.py` prints the whole census (also `--csv` / `--cases-csv`).
+Both the size and the distribution are **asserted** in
+`tests/test_combined_benchmark_integrity.py`, so a source file that silently grows
+or collapses the long conversations fails the suite rather than quietly changing
+what a score means.
+
+**Aave/Safe are no longer in the benchmark** — the wallet ships no lending or
+multisig tool, so `executeTx` gold for Aave's Pool or a Safe self-call scored a
+capability the product does not expose, and it was ~25% of the old 569-case
+number. This is a removal from the BENCHMARK ONLY: `pf/tests.protocols.yaml`,
+`scripts/generate_protocol_cases.py`, `src/wallet_evals/protocols/` and
+`pf/prompt.py`'s `AAVE_REFERENCE`/`SAFE_REFERENCE` all still exist and still pass
+`tests/test_protocol_integrity.py`. Run them directly:
+
+```bash
+EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh -o protocols.out.json
+```
+
+**No published score is comparable to a run of this file.** It is 1000 cases, not
+569, drops 140 aave/safe cases and adds 571 harder ones. The 429 app-contract
+cases inside it are byte-identical to before (asserted against the frozen
+base-unit dataset), so a per-case-id comparison on that subset is still honest —
+a headline-number comparison is not. `space/build_static.py` needs a full new run
+vintage before the report roster can move.
+
+### The conversation slice — `src/wallet_evals/conversations.py`
+
+Four mechanisms, each a distinct failure mode with computed gold:
+
+- **`progressive`** (2-4 rounds) — the action's three fields revealed one per
+  round in a seeded permutation. Capped at 4 rounds: there are only three fields.
+- **`correction`** (2-6 rounds) — one field withheld so the assistant has a
+  standing reason to keep asking, and every later round revises an
+  already-stated field, naming the old value ("actually make it 7.77, not 6.02").
+  Gold takes the LATEST value, so a model that keeps the first number fails.
+- **`distractor`** (3-6 rounds) — non-actionable interruptions between the ask
+  and the answer. Some canned replies carry a **number** ("around 12 gwei", "6
+  decimals") that must not reach the call. Starts at 3 rounds: a 2-round
+  distractor case has no distractor in it.
+- **`switch`** (2-6 rounds) — a completed request, then abandonment for a
+  different one. Gold is the final intent ALONE, so re-emitting the stale call or
+  emitting both scores 0.
+
+Four constraints that are load-bearing, not stylistic:
+
+1. **Every canned assistant turn is on-policy for `APP_SYSTEM`.** That prompt says
+   to emit the call as soon as the values are known and never to ask for
+   confirmation, so only three assistant moves are used: ask for a genuinely
+   missing field, answer a non-actionable question in prose, or report a completed
+   request as prepared. A scripted assistant stalling on a *complete* request
+   would be showing the model an example of the behaviour we score it for not doing.
+2. **A revision may never return a field to its original value.** With a
+   4-symbol token bank, `USDC -> ETH -> USDC` is a plausible two-revision
+   sequence whose gold equals the seed intent — a model that ignored every
+   correction would score 1, and the case would measure nothing. `_revised_value`
+   excludes the original as well as the current value;
+   `test_correction_never_revises_a_field_back_to_its_original_value` sweeps seeds
+   for it because it is probabilistic.
+3. **The cancellation verb is never mutated.** A typo'd "Forget that one." →
+   "Forgte that one." leaves nothing telling the model to abandon the first
+   request, making the case unanswerable rather than harder — the same rule
+   `_PROTECTED_WORDS` applies to the privacy verbs. It really fired before the fix.
+4. **The `punctuation` mutator is excluded from this slice entirely.** It
+   comma-groups amounts, so a conversation case could fail because the model
+   reread "260,000.5" as "260.0005" rather than because it lost track of a value
+   — and separator handling already has its own labelled slice
+   (`arithmetic-*`). The other four mutators never touch digits.
+
+`ROUND_PLAN` in `scripts/generate_conversation_cases.py` fixes how many cases each
+(rounds, mechanism) pair contributes, so the distribution is declared rather than
+a by-product of pool sizes. Amount literals in
+`datasets/seeds.conversations.yaml` **and** the revision targets in `ALT_AMOUNTS`
+are disjoint from `seeds.yaml`, `seeds.arithmetic.yaml` and
+`finetune_seeds.yaml` — asserted on the GOLD amounts, so the slice stays honestly
+held out.
 
 ## RAILGUN shield/unshield — the human-unit exception
 

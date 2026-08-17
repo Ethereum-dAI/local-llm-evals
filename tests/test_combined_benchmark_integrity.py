@@ -1,13 +1,16 @@
 """Integrity of the combined benchmark: app-contract (transfer/swap + the
-arithmetic slice) concatenated with the protocol families (aave/safe).
+arithmetic slice + the refusal banks) concatenated with the multi-round
+conversation slice.
 
-Mirrors test_app_contract_integrity.py / test_protocol_integrity.py, which
+Mirrors test_app_contract_integrity.py / test_conversation_integrity.py, which
 guard the two source files this one is built from.
 """
 from __future__ import annotations
 
 import collections
 from pathlib import Path
+
+import yaml
 
 from wallet_evals.promptfoo import load_cases
 from wallet_evals.schema import ParsedTurn
@@ -16,11 +19,33 @@ from wallet_evals.scorer import score_case
 ROOT = Path(__file__).resolve().parents[1]
 COMBINED = ROOT / "pf" / "tests.combined.yaml"
 APP_CONTRACT = ROOT / "pf" / "tests.app-contract.yaml"
-PROTOCOLS = ROOT / "pf" / "tests.protocols.yaml"
+CONVERSATIONS = ROOT / "pf" / "tests.conversations.yaml"
+
+#: The benchmark's declared size. A round number, and deliberately asserted: the
+#: two source generators can each grow independently, and a benchmark that
+#: quietly became 987 or 1043 cases would make run-to-run comparisons wrong in a
+#: way no other test would catch.
+EXPECTED_TOTAL = 1000
+
+#: The declared round distribution (user turns per case -> count). 1 = the
+#: single-turn cases; 2 = the app-contract slice's 92 legacy 2-round cases plus
+#: the conversation slice's 180.
+EXPECTED_ROUNDS = {1: 337, 2: 272, 3: 150, 4: 110, 5: 80, 6: 51}
 
 
 def _load():
     return load_cases(COMBINED)
+
+
+def _raw() -> list[dict]:
+    return yaml.safe_load(COMBINED.read_text())
+
+
+def _rounds(case: dict) -> int:
+    messages = case["vars"].get("messages")
+    if not messages:
+        return 1
+    return sum(1 for m in messages if m.get("role") == "user")
 
 
 def test_every_case_self_scores_one():
@@ -32,6 +57,10 @@ def test_every_case_self_scores_one():
 def test_ids_unique_across_the_whole_file():
     ids = [c.id for c in _load()]
     assert len(ids) == len(set(ids))
+
+
+def test_the_benchmark_is_exactly_its_declared_size():
+    assert len(_load()) == EXPECTED_TOTAL
 
 
 def test_arithmetic_slice_is_present_and_non_empty():
@@ -52,6 +81,26 @@ def test_railgun_is_absent():
     assert not any(c.protocol == "railgun" for c in cases)
 
 
+def test_aave_and_safe_are_absent():
+    """Removed from the benchmark for the same reason RAILGUN was: the wallet
+    ships no lending or multisig tool, so `executeTx` gold for Aave's Pool or a
+    Safe self-call scored a capability the product does not expose, and it was
+    ~25% of the headline number.
+
+    Deliberately a REMOVAL FROM THE BENCHMARK ONLY. pf/tests.protocols.yaml, its
+    generator and src/wallet_evals/protocols/ all still exist and still pass
+    test_protocol_integrity.py — run that file directly
+    (EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh) if you want the
+    numbers. This test guards the benchmark, not the repo.
+    """
+    cases = _load()
+    assert not any(c.protocol in ("aave", "safe") for c in cases)
+    assert not any(c.category.startswith(("aave-", "safe-")) for c in cases)
+    # The builder contract is what those cases needed; nothing left should use it.
+    assert not any(call.tool in ("executeTx", "readTx")
+                   for c in cases for call in c.expected_calls)
+
+
 def test_safety_refusals_are_powered_enough_to_detect_a_regression():
     """Refusal is the ONLY failure category the app-contract migration left on
     the model's plate (unit conversion and ENS resolution both moved into the
@@ -63,17 +112,38 @@ def test_safety_refusals_are_powered_enough_to_detect_a_regression():
     assert len(kinds) >= 10, f"only {len(kinds)} distinct refusal kinds: {sorted(kinds)}"
 
 
-def test_aave_and_safe_are_present():
-    protos = {c.protocol for c in _load()}
-    assert "aave" in protos
-    assert "safe" in protos
-
-
 def test_combined_count_equals_sum_of_its_two_sources():
     combined = _load()
     app_contract = load_cases(APP_CONTRACT)
-    protocols = load_cases(PROTOCOLS)
-    assert len(combined) == len(app_contract) + len(protocols)
+    conversations = load_cases(CONVERSATIONS)
+    assert len(combined) == len(app_contract) + len(conversations)
+
+
+def test_round_distribution_matches_the_declared_shape():
+    """The point of the conversation slice: two thirds of the benchmark is now
+    multi-round, spanning 1-6 rounds. Asserted rather than printed so a
+    regenerated source file that collapses the long conversations fails here."""
+    counts = collections.Counter(_rounds(c) for c in _raw())
+    assert dict(counts) == EXPECTED_ROUNDS
+    multi = sum(v for k, v in counts.items() if k > 1)
+    assert multi / len(_raw()) > 0.6, f"only {multi} multi-round cases"
+
+
+def test_long_conversations_carry_enough_weight_to_move_the_score():
+    """5- and 6-round cases are the ones a model degrading on context length will
+    fail first. If they were a handful of cases, that degradation would round to
+    nothing in the headline number."""
+    long_cases = [c for c in _raw() if _rounds(c) >= 5]
+    assert len(long_cases) >= 100, f"only {len(long_cases)} cases of 5+ rounds"
+
+
+def test_every_conversation_mechanism_is_represented():
+    mechanisms = collections.Counter(
+        c["metadata"].get("mechanism") for c in _raw()
+        if c["metadata"].get("mechanism"))
+    assert set(mechanisms) == {"progressive", "correction", "distractor", "switch"}
+    for mechanism, count in mechanisms.items():
+        assert count >= 100, f"{mechanism} has only {count} cases"
 
 
 def test_per_family_census_is_visible_and_every_family_present():
@@ -84,15 +154,16 @@ def test_per_family_census_is_visible_and_every_family_present():
     protos = collections.Counter(c.protocol for c in cases)
     print(f"\ncombined benchmark per-protocol census: {dict(sorted(protos.items()))}")
 
-    # transfer/uniswap = app-contract (incl. arithmetic), safety = refusals;
-    # aave/safe = the protocol families this benchmark adds.
-    for family in ("transfer", "uniswap", "aave", "safe"):
+    # transfer/uniswap = app-contract + conversations, safety = refusals. Those
+    # three are the whole benchmark now that aave/safe are out.
+    assert set(protos) == {"transfer", "uniswap", "safety"}
+    for family in ("transfer", "uniswap", "safety"):
         assert protos[family] > 0, f"{family} has zero cases in the combined benchmark"
 
     arithmetic_count = sum(1 for c in cases if c.category.startswith("arithmetic-"))
     refusal_count = sum(1 for c in cases if c.category.startswith("safety-refusal-"))
-    aave_count = sum(1 for c in cases if c.protocol == "aave")
-    safe_count = sum(1 for c in cases if c.protocol == "safe")
+    conversation_count = sum(1 for c in cases
+                             if c.category.startswith("conversation-"))
     print(f"arithmetic slice: {arithmetic_count}, refusals: {refusal_count}, "
-         f"aave: {aave_count}, safe: {safe_count}")
-    assert arithmetic_count > 0 and refusal_count > 0 and aave_count > 0 and safe_count > 0
+          f"conversations: {conversation_count}")
+    assert arithmetic_count > 0 and refusal_count > 0 and conversation_count > 0
