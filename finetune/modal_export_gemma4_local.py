@@ -27,7 +27,7 @@ summary. A silently broken GGUF that then gets evaluated would produce a
 meaningless final number, so treat a non-zero exit here as "do not eval this
 file".
 
-Output lands at gemma4-ft-outputs:/outputs/gguf/gemma4-e4b-wallet-ft-appcontract-v3.Q4_K_M.gguf
+Output lands at gemma4-ft-outputs:/outputs/gguf/gemma4-e4b-wallet-ft-appcontract-v4.Q4_K_M.gguf
 — a name that cannot collide with the production
 `gemma-4-E4B-wallet-ft.Q4_K_M.gguf` (different subdir, different stem).
 
@@ -59,15 +59,15 @@ Then pull the finished GGUF down into this repo's (gitignored) models/ dir —
 the exact command is also printed by the run itself once it succeeds:
 
     uv run --with modal modal volume get gemma4-ft-outputs \\
-        gguf/gemma4-e4b-wallet-ft-appcontract-v3.Q4_K_M.gguf \\
-        models/gemma4-e4b-wallet-ft-appcontract-v3.Q4_K_M.gguf
+        gguf/gemma4-e4b-wallet-ft-appcontract-v4.Q4_K_M.gguf \\
+        models/gemma4-e4b-wallet-ft-appcontract-v4.Q4_K_M.gguf
 
 The run prints the GGUF's size and SHA256 (computed in-container, over the
 Volume copy — the referee for provenance disputes, same reasoning as
 modal_hash_gguf.py) so the downloaded file can be checked against what Modal
 actually produced:
 
-    shasum -a 256 models/gemma4-e4b-wallet-ft-appcontract-v3.Q4_K_M.gguf
+    shasum -a 256 models/gemma4-e4b-wallet-ft-appcontract-v4.Q4_K_M.gguf
 """
 from __future__ import annotations
 
@@ -86,7 +86,7 @@ GGUF_SUBDIR = "gguf"
 # gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf from the railgun-trained run
 # earlier the same day, so reusing that stem would overwrite-or-shadow it and
 # the eval would score whichever copy won, with nothing downstream noticing.
-GGUF_NAME = "gemma4-e4b-wallet-ft-appcontract-v3.Q4_K_M.gguf"
+GGUF_NAME = "gemma4-e4b-wallet-ft-appcontract-v4.Q4_K_M.gguf"
 _REPO = Path(__file__).resolve().parent.parent
 
 # Same Volumes as modal_export_gemma4.py / modal_finetune_gemma4.py — this reads
@@ -219,7 +219,7 @@ def export_local(min_mtime: float) -> str:
     )
     merged = PeftModel.from_pretrained(base, adapter).merge_and_unload()
     tok = AutoTokenizer.from_pretrained(adapter)
-    merged_dir = "/outputs/merged_bf16_appcontract_v3"
+    merged_dir = "/outputs/merged_bf16_appcontract_v4"
     merged.save_pretrained(merged_dir, safe_serialization=True)
     tok.save_pretrained(merged_dir)
     print("[export-local] merged bf16 saved", flush=True)
@@ -229,18 +229,57 @@ def export_local(min_mtime: float) -> str:
     # gate as modal_export_gemma4.py, repurposed: there is nothing to upload, so
     # a failure here means "do not trust/evaluate this GGUF", not "do not upload".
     diag = [json.loads(l) for l in Path("/data/train.jsonl").read_text().splitlines() if l.strip()]
-    ex = next(r for r in diag if "<|tool_call>" in r["messages"][-1]["content"])
+    # Gate on a WALLET-path row specifically. The file is sorted by id, so a bare
+    # `next(... "<|tool_call>" in target)` picks `ft-aave-*` — the transaction-
+    # builder contract, which is NOT what this model is for. v4 was rejected
+    # twice on one alphabetically-first Aave row while emitting a byte-perfect
+    # call on every wallet row. The wallet contract is the product; protocol
+    # behaviour is measured in the benchmark, not used as a publish gate.
+    ex = next(r for r in diag
+              if "<|tool_call>" in r["messages"][-1]["content"]
+              and not r["category"].startswith(("aave-", "safe-")))
+    protocol_ex = next((r for r in diag
+                        if r["category"].startswith(("aave-", "safe-"))
+                        and "<|tool_call>" in r["messages"][-1]["content"]), None)
+    # `enable_thinking=True` is required, for the same reason the trainer needs
+    # it: it is what emits the `<|think|>` marker the wallet app sends. Without
+    # it this gate probes the model with a prompt 10 chars different from every
+    # row it was trained on, and a model trained WITH the marker can legitimately
+    # fail — which is exactly what happened on the first v4 export.
+    #
+    # 512, not 220: these fine-tunes narrate a <think> block before the call, and
+    # 220 tokens can end mid-reasoning, so the gate would score truncation as
+    # "emitted no tool call".
     enc = tok.apply_chat_template(ex["messages"][:-1], tools=ex["tools"],
-                                  add_generation_prompt=True, return_tensors="pt",
-                                  return_dict=True)
+                                  add_generation_prompt=True, enable_thinking=True,
+                                  return_tensors="pt", return_dict=True)
     enc = {k: v.to(merged.device) for k, v in enc.items() if hasattr(v, "to")}
-    out = merged.generate(**enc, max_new_tokens=220, do_sample=False)
+    out = merged.generate(**enc, max_new_tokens=512, do_sample=False)
     gen = tok.decode(out[0][enc["input_ids"].shape[1]:], skip_special_tokens=False)
-    print(f"[export-local] sanity ({ex['id']}) gen: {gen[:240]!r}", flush=True)
+    # Print generously: when this gate fails the log is the only evidence, and
+    # Modal truncates a completed app's logs, so a 240-char slice that ends
+    # mid-<think> leaves nothing to diagnose from.
+    print(f"[export-local] sanity ({ex['id']}) gen: {gen[:1200]!r}", flush=True)
+    print(f"[export-local] sanity: len={len(gen)} has_think={'<think>' in gen} "
+          f"has_tool_call={'<|tool_call>' in gen}", flush=True)
     smoke_ok = "<|tool_call>" in gen
 
+    # Informational only — a protocol regression is a benchmark result, not a
+    # reason to withhold a wallet model.
+    if protocol_ex is not None:
+        p_enc = tok.apply_chat_template(protocol_ex["messages"][:-1],
+                                        tools=protocol_ex["tools"],
+                                        add_generation_prompt=True,
+                                        enable_thinking=True,
+                                        return_tensors="pt", return_dict=True)
+        p_enc = {k: v.to(merged.device) for k, v in p_enc.items() if hasattr(v, "to")}
+        p_out = merged.generate(**p_enc, max_new_tokens=512, do_sample=False)
+        p_gen = tok.decode(p_out[0][p_enc["input_ids"].shape[1]:], skip_special_tokens=False)
+        print(f"[export-local] protocol probe ({protocol_ex['id']}): "
+              f"has_tool_call={'<|tool_call>' in p_gen} gen={p_gen[:300]!r}", flush=True)
+
     # 3a. convert to an f16 GGUF (convert_hf_to_gguf can't emit k-quants directly).
-    f16_path = "/outputs/gemma4-e4b-wallet-ft-appcontract-v3.f16.gguf"
+    f16_path = "/outputs/gemma4-e4b-wallet-ft-appcontract-v4.f16.gguf"
     subprocess.run(["python", "/llama.cpp/convert_hf_to_gguf.py", merged_dir,
                     "--outfile", f16_path, "--outtype", "f16"], check=True)
     # 3b. quantize to Q4_K_M (same quant the wallet ships, for an apples-to-apples eval).

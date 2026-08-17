@@ -55,7 +55,12 @@ from _bundled import bundled  # noqa: E402  (needs the line above)
 
 BASE_MODEL = "unsloth/Qwen3-8B"
 OUTPUTS_DIR = "/outputs"
-GGUF_NAME = "qwen3-8b-wallet-ft-appcontract.Q4_K_M.gguf"
+# -v3: the refusal-coverage dataset (48 refusal rows across 12 kinds). The volume
+# already holds qwen3-8b-wallet-ft.Q4_K_M.gguf (2026-08-11, base-unit contract)
+# AND qwen3-8b-wallet-ft-appcontract.Q4_K_M.gguf (2026-08-14, the 86.3% model),
+# so a third run reusing either stem would shadow a real artifact and be scored
+# as this one. Distinct name + --min-mtime are both required.
+GGUF_NAME = "qwen3-8b-wallet-ft-appcontract-v4.Q4_K_M.gguf"
 _REPO = Path(__file__).resolve().parent.parent
 
 hf_cache = modal.Volume.from_name("qwen-hf-cache", create_if_missing=True)
@@ -173,7 +178,7 @@ def export(min_mtime: float) -> str:
         BASE_MODEL, dtype=torch.bfloat16, device_map="cuda")
     merged = PeftModel.from_pretrained(base, adapter).merge_and_unload()
     tok = AutoTokenizer.from_pretrained(adapter)
-    merged_dir = f"{OUTPUTS_DIR}/merged_bf16_appcontract"
+    merged_dir = f"{OUTPUTS_DIR}/merged_bf16_appcontract_v4"
     merged.save_pretrained(merged_dir, safe_serialization=True)
     tok.save_pretrained(merged_dir)
     print("[export] merged bf16 saved", flush=True)
@@ -185,17 +190,27 @@ def export(min_mtime: float) -> str:
     # quarantined under a REJECTED- name below, matching modal_export_gemma4_local.py.
     rows = [json.loads(l) for l in Path("/data/train.jsonl").read_text().splitlines()
             if l.strip()]
-    ex = next(r for r in rows if "<tool_call>" in r["messages"][-1]["content"])
+    # Gate on a WALLET-path row. Rows are id-sorted, so a bare next() picks
+    # `ft-aave-*` — the transaction-builder contract, which is not what this
+    # model is for. The Gemma export was rejected twice on exactly that row
+    # while emitting byte-perfect wallet calls.
+    ex = next(r for r in rows
+              if "<tool_call>" in r["messages"][-1]["content"]
+              and not r["category"].startswith(("aave-", "safe-")))
+    # enable_thinking mirrors the app (SamplerOptions.enableThinking); without
+    # it this probes a prompt the model never trained on. 512 tokens because the
+    # fine-tunes narrate a <think> block before the call.
     enc = tok.apply_chat_template(ex["messages"][:-1], tools=ex["tools"],
+                                  enable_thinking=True,
                                   add_generation_prompt=True, return_tensors="pt",
                                   return_dict=True)
     enc = {k: v.to(merged.device) for k, v in enc.items() if hasattr(v, "to")}
-    out = merged.generate(**enc, max_new_tokens=320, do_sample=False)
+    out = merged.generate(**enc, max_new_tokens=512, do_sample=False)
     gen = tok.decode(out[0][enc["input_ids"].shape[1]:], skip_special_tokens=False)
     print(f"[export] sanity ({ex['id']}) gen: {gen[:300]!r}", flush=True)
     smoke_ok = "<tool_call>" in gen
 
-    f16_path = f"{OUTPUTS_DIR}/qwen3-8b-wallet-ft-appcontract.f16.gguf"
+    f16_path = f"{OUTPUTS_DIR}/qwen3-8b-wallet-ft-appcontract-v4.f16.gguf"
     subprocess.run(["python", "/llama.cpp/convert_hf_to_gguf.py", merged_dir,
                     "--outfile", f16_path, "--outtype", "f16"], check=True)
     gguf_path = f"{OUTPUTS_DIR}/{GGUF_NAME}"
