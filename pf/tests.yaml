@@ -3,8 +3,7 @@
 # Each test: vars.user_message (input) + metadata (gold expected_calls + slices).
 - vars:
     user_message: Send 0.1 ETH to vitalik.eth
-    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=100000000000000000
-      (native)
+    expected_summary: transfer 0.1 ETH to vitalik.eth
   metadata:
     id: transfer-en-001
     language: english
@@ -17,16 +16,54 @@
     requires:
     - ens_resolution
     expected_calls:
-    - tool: executeTx
+    - tool: transfer
       chainId: '1'
-      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
-      value: '100000000000000000'
-      function: null
-      args: []
+      to: vitalik.eth
+      amount: '0.1'
+      token: ETH
+- vars:
+    user_message: Please transfer 25 USDC to bob.eth
+    expected_summary: transfer 25 USDC to bob.eth
+  metadata:
+    id: transfer-en-002
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: transfer
+      chainId: '1'
+      to: bob.eth
+      amount: '25'
+      token: USDC
+- vars:
+    user_message: Pay alice.eth 5 DAI from my wallet
+    expected_summary: transfer 5 DAI to alice.eth
+  metadata:
+    id: transfer-en-003
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: transfer
+      chainId: '1'
+      to: alice.eth
+      amount: '5'
+      token: DAI
 - vars:
     user_message: Move 1.25 ETH to 0x1111111111111111111111111111111111111111
-    expected_summary: executeTx to 0x1111111111111111111111111111111111111111 value=1250000000000000000
-      (native)
+    expected_summary: transfer 1.25 ETH to 0x1111111111111111111111111111111111111111
   metadata:
     id: transfer-en-004
     language: english
@@ -38,16 +75,14 @@
     query_type: one_shot
     requires: []
     expected_calls:
-    - tool: executeTx
+    - tool: transfer
       chainId: '1'
       to: '0x1111111111111111111111111111111111111111'
-      value: '1250000000000000000'
-      function: null
-      args: []
+      amount: '1.25'
+      token: ETH
 - vars:
     user_message: Could you send 0.02 ETH over to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?
-    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=20000000000000000
-      (native)
+    expected_summary: transfer 0.02 ETH to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
   metadata:
     id: transfer-en-005
     language: english
@@ -59,17 +94,35 @@
     query_type: one_shot
     requires: []
     expected_calls:
-    - tool: executeTx
+    - tool: transfer
       chainId: '1'
       to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
-      value: '20000000000000000'
-      function: null
-      args: []
+      amount: '0.02'
+      token: ETH
+- vars:
+    user_message: Transfer 100 WETH to bob.eth
+    expected_summary: transfer 100 WETH to bob.eth
+  metadata:
+    id: transfer-en-007
+    language: english
+    category: truePositiveTransfer
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: transfer
+      chainId: '1'
+      to: bob.eth
+      amount: '100'
+      token: WETH
 - vars:
     user_message: I want to send 3 USDC to 0x2222222222222222222222222222222222222222
       now
-    expected_summary: executeTx to 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 transfer(address,uint256)
-      args=['0x2222222222222222222222222222222222222222', '3000000']
+    expected_summary: transfer 3 USDC to 0x2222222222222222222222222222222222222222
   metadata:
     id: transfer-en-008
     language: english
@@ -82,18 +135,14 @@
     requires:
     - token_address_lookup
     expected_calls:
-    - tool: executeTx
+    - tool: transfer
       chainId: '1'
-      to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-      value: '0'
-      function: transfer(address,uint256)
-      args:
-      - '0x2222222222222222222222222222222222222222'
-      - '3000000'
+      to: '0x2222222222222222222222222222222222222222'
+      amount: '3'
+      token: USDC
 - vars:
     user_message: Swap 100 USDC for ETH
-    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
-      amountIn=100000000 minOut=0 recipient=<wallet>
+    expected_summary: swap 100 USDC -> ETH
   metadata:
     id: swap-en-001
     language: english
@@ -108,15 +157,13 @@
     expected_calls:
     - tool: swap
       chainId: '1'
-      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-      currencyOut: '0x0000000000000000000000000000000000000000'
-      amountIn: '100000000'
-      amountOutMinimum: '0'
-      recipient: <wallet>
+      amount: '100'
+      from_token: USDC
+      to_token: ETH
+      amount_side: input
 - vars:
     user_message: Convert 0.5 ETH to USDC
-    expected_summary: swap 0x0000000000000000000000000000000000000000 -> 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-      amountIn=500000000000000000 minOut=0 recipient=<wallet>
+    expected_summary: swap 0.5 ETH -> USDC
   metadata:
     id: swap-en-002
     language: english
@@ -131,15 +178,13 @@
     expected_calls:
     - tool: swap
       chainId: '1'
-      currencyIn: '0x0000000000000000000000000000000000000000'
-      currencyOut: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-      amountIn: '500000000000000000'
-      amountOutMinimum: '0'
-      recipient: <wallet>
+      amount: '0.5'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
 - vars:
     user_message: Trade 250 DAI into WETH
-    expected_summary: swap 0x6B175474E89094C44Da98b954EedeAC495271d0F -> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
-      amountIn=250000000000000000000 minOut=0 recipient=<wallet>
+    expected_summary: swap 250 DAI -> WETH
   metadata:
     id: swap-en-003
     language: english
@@ -154,15 +199,13 @@
     expected_calls:
     - tool: swap
       chainId: '1'
-      currencyIn: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
-      currencyOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-      amountIn: '250000000000000000000'
-      amountOutMinimum: '0'
-      recipient: <wallet>
+      amount: '250'
+      from_token: DAI
+      to_token: WETH
+      amount_side: input
 - vars:
     user_message: Exchange 40 USDC into DAI
-    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x6B175474E89094C44Da98b954EedeAC495271d0F
-      amountIn=40000000 minOut=0 recipient=<wallet>
+    expected_summary: swap 40 USDC -> DAI
   metadata:
     id: swap-en-005
     language: english
@@ -177,11 +220,10 @@
     expected_calls:
     - tool: swap
       chainId: '1'
-      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-      currencyOut: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
-      amountIn: '40000000'
-      amountOutMinimum: '0'
-      recipient: <wallet>
+      amount: '40'
+      from_token: USDC
+      to_token: DAI
+      amount_side: input
 - vars:
     user_message: What is an Ethereum transfer?
     expected_summary: (no tool call)
@@ -310,8 +352,7 @@
     expected_calls: []
 - vars:
     user_message: Invia 0.1 ETH a vitalik.eth
-    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=100000000000000000
-      (native)
+    expected_summary: transfer 0.1 ETH to vitalik.eth
   metadata:
     id: transfer-it-001
     language: italian
@@ -324,16 +365,54 @@
     requires:
     - ens_resolution
     expected_calls:
-    - tool: executeTx
+    - tool: transfer
       chainId: '1'
-      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
-      value: '100000000000000000'
-      function: null
-      args: []
+      to: vitalik.eth
+      amount: '0.1'
+      token: ETH
+- vars:
+    user_message: Manda 12 USDC a bob.eth
+    expected_summary: transfer 12 USDC to bob.eth
+  metadata:
+    id: transfer-it-002
+    language: italian
+    category: multilingualTransfer
+    protocol: transfer
+    difficulty: medium
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: transfer
+      chainId: '1'
+      to: bob.eth
+      amount: '12'
+      token: USDC
+- vars:
+    user_message: Envia 2 DAI a alice.eth
+    expected_summary: transfer 2 DAI to alice.eth
+  metadata:
+    id: transfer-es-001
+    language: spanish
+    category: multilingualTransfer
+    protocol: transfer
+    difficulty: medium
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: transfer
+      chainId: '1'
+      to: alice.eth
+      amount: '2'
+      token: DAI
 - vars:
     user_message: Envoie 0.05 ETH a 0x3333333333333333333333333333333333333333
-    expected_summary: executeTx to 0x3333333333333333333333333333333333333333 value=50000000000000000
-      (native)
+    expected_summary: transfer 0.05 ETH to 0x3333333333333333333333333333333333333333
   metadata:
     id: transfer-fr-001
     language: french
@@ -345,16 +424,14 @@
     query_type: one_shot
     requires: []
     expected_calls:
-    - tool: executeTx
+    - tool: transfer
       chainId: '1'
       to: '0x3333333333333333333333333333333333333333'
-      value: '50000000000000000'
-      function: null
-      args: []
+      amount: '0.05'
+      token: ETH
 - vars:
     user_message: /transfer 0.1 ETH to vitalik.eth
-    expected_summary: executeTx to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 value=100000000000000000
-      (native)
+    expected_summary: transfer 0.1 ETH to vitalik.eth
   metadata:
     id: slash-001
     language: english
@@ -367,16 +444,34 @@
     requires:
     - ens_resolution
     expected_calls:
-    - tool: executeTx
+    - tool: transfer
       chainId: '1'
-      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
-      value: '100000000000000000'
-      function: null
-      args: []
+      to: vitalik.eth
+      amount: '0.1'
+      token: ETH
+- vars:
+    user_message: /transfer to=bob.eth amount=3 token=USDC
+    expected_summary: transfer 3 USDC to bob.eth
+  metadata:
+    id: slash-002
+    language: english
+    category: slashCommand
+    protocol: transfer
+    difficulty: easy
+    notes: null
+    level: payload
+    query_type: one_shot
+    requires:
+    - token_address_lookup
+    expected_calls:
+    - tool: transfer
+      chainId: '1'
+      to: bob.eth
+      amount: '3'
+      token: USDC
 - vars:
     user_message: /swap 50 USDC to ETH
-    expected_summary: swap 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -> 0x0000000000000000000000000000000000000000
-      amountIn=50000000 minOut=0 recipient=<wallet>
+    expected_summary: swap 50 USDC -> ETH
   metadata:
     id: slash-003
     language: english
@@ -391,8 +486,7 @@
     expected_calls:
     - tool: swap
       chainId: '1'
-      currencyIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-      currencyOut: '0x0000000000000000000000000000000000000000'
-      amountIn: '50000000'
-      amountOutMinimum: '0'
-      recipient: <wallet>
+      amount: '50'
+      from_token: USDC
+      to_token: ETH
+      amount_side: input

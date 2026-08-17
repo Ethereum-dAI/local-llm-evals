@@ -31,7 +31,7 @@ sys.path.insert(0, str(ROOT / "scripts"))  # reuse the FunctionGemma generator
 import generate_finetune_data as fg  # noqa: E402  (shared collection/selection)
 from wallet_evals.finetune import case_to_example  # noqa: E402
 from wallet_evals.gemma_dsl import GEMMA4  # noqa: E402
-from pf.prompt import render  # noqa: E402
+from pf.prompt import render, tools_for  # noqa: E402
 
 OUT = ROOT / "data_for_finetune" / "gemma4_train.jsonl"
 
@@ -41,10 +41,18 @@ def main() -> None:
     ap.add_argument("--reasoning", action=argparse.BooleanOptionalAction, default=True,
                     help="emit a <think> arithmetic trace before transfer/swap calls")
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--protocol-only", action="store_true",
+                    help="build ONLY the Aave/Safe builder rows, as their own "
+                         "training set (see generate_finetune_data."
+                         "INCLUDE_PROTOCOL_ROWS)")
+    ap.add_argument("--include-protocol-rows", action="store_true",
+                    help="mix the 95 Aave/Safe rows into the wallet set, "
+                         "reproducing the 1863-row mix v4/qwen-v4 trained on")
     args = ap.parse_args()
 
     rng = random.Random(fg.SEED)
-    selected = fg._select(fg._collect(rng), rng)
+    selected = fg._select(fg._collect(rng, protocol_only=args.protocol_only,
+                                      include_protocol=args.include_protocol_rows), rng)
 
     examples: list[dict] = []
     for test, intent in selected:
@@ -52,7 +60,8 @@ def main() -> None:
         md["id"] = f"ft-{md['id']}"  # keep the id-space disjoint from the eval set
         reasoning = fg._reasoning_text(intent) if (args.reasoning and intent) else None
         messages = render({"vars": test["vars"]})
-        examples.append(case_to_example(md, messages, fg.TOOLS, reasoning_text=reasoning,
+        examples.append(case_to_example(md, messages, tools_for(test["vars"]),
+                                        reasoning_text=reasoning,
                                         dialect=GEMMA4, to_developer=False))
 
     examples.sort(key=lambda e: e["id"])  # byte-stable output

@@ -1,9 +1,18 @@
-from pf.prompt import render, SYSTEM
+import json
+
+from pf.prompt import render, SYSTEM, APP_SYSTEM, APP_TOOLS
 
 
 def test_render_single_turn():
+    """A wallet-path case gets the app's own system prompt, not the builder one.
+
+    `SYSTEM` is now reserved for the Aave/Safe transaction-builder cases; every
+    other case must see byte-for-byte what ToolDefinitions.systemNudge produces,
+    which is what APP_SYSTEM is read from.
+    """
     chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth"}})
-    assert chat[0] == {"role": "system", "content": SYSTEM}
+    assert chat[0] == {"role": "system", "content": APP_SYSTEM}
+    assert chat[0]["content"] != SYSTEM
     assert chat[1] == {"role": "user", "content": "Send 0.1 ETH to vitalik.eth"}
     assert len(chat) == 2
 
@@ -45,21 +54,13 @@ def test_render_aave_protocol_adds_reference():
     assert "<wallet>" in ref
 
 
-def test_render_railgun_protocol_adds_reference():
+def test_railgun_protocol_no_longer_resolves_to_a_reference():
+    """RAILGUN was removed from the app (local-wallet-mac#86, PR #87). An
+    unknown protocol key must fall through silently rather than inject a
+    reference for tools that no longer exist."""
     chat = render({"vars": {"user_message": "Shield 0.01 ETH.", "protocol": "railgun"}})
-    assert [m["role"] for m in chat] == ["system", "system", "user"]
-    ref = chat[1]["content"]
-    assert "shield" in ref and "unshield" in ref
-    # The privacy tools are the one exception to the global base-unit rule.
-    assert "HUMAN units" in ref and "do NOT convert to wei" in ref
-    assert "0x000...dEaD" in ref, "unshield burn-address refusal must be stated"
-
-
-def test_railgun_reference_is_not_rendered_for_other_cases():
-    for vars_ in ({"user_message": "Send 0.1 ETH to vitalik.eth"},
-                  {"user_message": "Supply 3 USDC to Aave v3.", "protocol": "aave"}):
-        chat = render({"vars": vars_})
-        assert all("do NOT convert to wei" not in m["content"] for m in chat)
+    assert [m["role"] for m in chat] == ["system", "user"]
+    assert all("unshield" not in m["content"] for m in chat)
 
 
 def test_render_no_protocol_unchanged():
@@ -72,3 +73,42 @@ def test_expected_summary_var_is_not_leaked_to_model():
     chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth",
                             "expected_summary": "executeTx to 0xSECRETGOLD (native)"}})
     assert all("0xSECRETGOLD" not in m["content"] for m in chat)
+
+
+def test_app_contract_lives_in_the_app_prompt_not_the_builder_one():
+    """The human-units/verbatim-recipient rules belong to the WALLET path.
+
+    The app states them in its TOOL SCHEMAS, not its system prompt — APP_SYSTEM
+    is 533 characters and says nothing about units or resolution, because the
+    app leans on the `transfer`/`swap` parameter descriptions instead. That is
+    the contract the product actually ships, so it is what the wallet path must
+    carry.
+
+    They must NOT be in SYSTEM, which after the prompt split is reached only by
+    Aave/Safe, whose gold is base units and resolved addresses. Asserting them
+    on SYSTEM is how the contradiction got in.
+    """
+    app_tools = json.dumps(APP_TOOLS)
+    assert "human units" in app_tools
+    assert "do not attempt to resolve ENS yourself" in app_tools
+
+    assert "HUMAN units" not in SYSTEM
+    assert "Never convert to wei or base units" not in SYSTEM
+    assert "NOT resolve it to an address yourself" not in SYSTEM
+    assert "never by contract address" not in SYSTEM
+
+
+def test_builder_system_keeps_the_contract_its_gold_is_written_against():
+    """Aave/Safe gold is executeTx with base units and resolved addresses, so
+    the only prompt those cases see has to ask for exactly that."""
+    assert "Convert every human amount to base units" in SYSTEM
+    assert "Resolve any ENS name or token symbol to its address" in SYSTEM
+    assert "executeTx" in SYSTEM
+
+
+def test_aave_reference_still_carries_the_base_unit_rule():
+    # The protocol datasets keep executeTx + base units, so the rule must survive
+    # in the reference block that renders only for them.
+    chat = render({"vars": {"user_message": "Supply 3 USDC to Aave v3.",
+                            "protocol": "aave"}})
+    assert "base units" in chat[1]["content"]

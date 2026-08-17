@@ -1,0 +1,60 @@
+# 2026-08-14 — Qwen3-8B FINE-TUNED app-contract (Q4_K_M), local, 593-case combined benchmark.
+#
+# This config scores the app-contract Qwen fine-tune against the 593-case combined
+# benchmark (pf/tests.combined.yaml). The GGUF is loaded from a local path because
+# it is deliberately NOT published to HuggingFace — it trains on a different tool
+# contract (app-unit `executeTx` payloads) than the base-unit fine-tune trained
+# 2026-08-11.
+#
+# The "-appcontract" suffix in the model filename and label exists specifically to
+# avoid silent confusion with the older base-unit fine-tune of nearly the same name
+# (qwen3-8b-wallet-ft.Q4_K_M.gguf). The Modal volume qwen-ft-outputs still contains
+# both; the distinct names are the guard against accidentally scoring the wrong one.
+#
+#   uv run --with modal modal volume get qwen-ft-outputs \
+#       qwen3-8b-wallet-ft-appcontract.Q4_K_M.gguf models/
+#   scripts/eval.sh -c promptfooconfig.qwen3-ft-appcontract.yaml -j 1 --no-cache \
+#       -o relaunch/qwen3-ft-appcontract.out.json
+#
+# Run LOCALLY and at Q4_K_M on purpose: that is exactly how the base-unit fine-tune
+# was measured. Run with -j 1 because a local llama.cpp provider must not share the GPU.
+#
+# tool_format: json — the fine-tune is trained to emit Hermes-style
+# <tool_call>{"name": ..., "arguments": {...}}</tool_call>, the same shape stock
+# Qwen3 emits and the same parser reads (src/wallet_evals/json_tool_calls.py).
+#
+# temperature 0.6 / top_p 0.95 / top_k 20: Qwen3's card settings, identical to
+# promptfooconfig.qwen3.yaml so base and fine-tune are sampled the same way. The
+# <think> trace the fine-tune emits is why max_tokens is 2048, not 1024.
+#
+description: Qwen3-8B wallet fine-tune app-contract (local Q4_K_M) — 593-case combined benchmark
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-ft-appcontract
+    config:
+      model_path: models/qwen3-8b-wallet-ft-appcontract.Q4_K_M.gguf
+      tool_format: json
+      system_role: system
+      n_ctx: 8192
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 2048
+      n_gpu_layers: -1
+      timeout: 1800000
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+# Default is the WALLET benchmark (429 cases), not the 569-case combined file.
+# The 140 Aave/Safe cases measure a capability the wallet does not ship, and
+# folding them into a headline drags every model by ~22 points while changing no
+# ranking — base reads 67.7% instead of 89.7%. They are a separate run now:
+#   EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh ...
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.app-contract.yaml') }}"

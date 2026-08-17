@@ -10,6 +10,7 @@ If the JSONL is absent (not generated yet), these tests skip.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -96,9 +97,31 @@ def test_encoder_roundtrips_each_call():
 
 
 def test_tools_present():
-    tools = json.loads((ROOT / "pf" / "tools.json").read_text())
+    """Each row carries the tool menu its own contract offers, not one global set.
+
+    Wallet-path rows offer exactly the app's two tools so training matches the
+    bytes the app sends; Aave/Safe rows stay on the transaction-builder superset
+    their `executeTx` gold is written against.
+    """
+    builder = json.loads((ROOT / "pf" / "tools.json").read_text())
+    app = json.loads((ROOT / "pf" / "tools.app.json").read_text())
+    seen = set()
     for ex in _load_examples():
-        assert ex.get("tools") == tools, f"{ex['id']}: tools must equal tools.json"
+        is_protocol = ex["category"].startswith(("aave-", "safe-"))
+        expected = builder if is_protocol else app
+        assert ex.get("tools") == expected, (
+            f"{ex['id']}: expected the "
+            f"{'builder' if is_protocol else 'app'} tool set"
+        )
+        seen.add(is_protocol)
+    # The default training set is WALLET-ONLY: mixing the builder contract into
+    # it is what taught v4 a second tool vocabulary opposed to the app's own.
+    # The protocol rows still exist — `--protocol-only` builds them as their own
+    # set — so what this asserts is the separation, not their removal.
+    assert seen == {False}, (
+        "the default fine-tune set must contain no Aave/Safe rows; build those "
+        "with --protocol-only (see generate_finetune_data.INCLUDE_PROTOCOL_ROWS)"
+    )
 
 
 def test_roles_use_developer_not_system():
@@ -138,3 +161,57 @@ def test_disjoint_from_eval_set():
     for ex in _load_examples():
         assert _train_surface(ex) not in eval_surfaces, \
             f"{ex['id']} conversation leaks into the eval set"
+
+
+def test_protocol_rows_are_separated_not_deleted():
+    """`--protocol-only` still builds the Aave/Safe set, on the builder contract.
+
+    The wallet mix dropped these 95 rows because two tool vocabularies in one
+    model is what produced v4's invented `transfer` to `avev3.eth`. Dropping the
+    MIX is not the same as dropping the capability: the fixtures, builders and
+    caps all remain, so the protocol model can be trained the moment the wallet
+    gains lending or multisig tools. This test is what keeps that true.
+    """
+    import subprocess
+    import tempfile
+
+    builder = json.loads((ROOT / "pf" / "tools.json").read_text())
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "protocol.jsonl"
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "generate_finetune_data.py"),
+             "--protocol-only", "--out", str(out)],
+            cwd=ROOT, capture_output=True, text=True)
+        assert proc.returncode == 0, proc.stderr[-1500:]
+        rows = [json.loads(line) for line in out.read_text().splitlines() if line]
+
+    assert rows, "--protocol-only produced nothing"
+    assert all(r["category"].startswith(("aave-", "safe-")) for r in rows)
+    assert all(r.get("tools") == builder for r in rows), \
+        "protocol rows must keep the executeTx builder contract"
+
+
+def test_the_published_v4_mix_is_reproducible():
+    """`--include-protocol-rows` rebuilds the 1863-row mix v4 was trained on.
+
+    The published gemma-4/qwen3 v4 artifacts trained on 1768 wallet rows PLUS 95
+    Aave/Safe builder rows. The default set is wallet-only now, so without this
+    flag the repo could no longer rebuild what those weights came from — the
+    card would describe a mix nothing in the tree produces. Reproducibility of a
+    shipped artifact should not require editing a module constant.
+    """
+    import subprocess
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "v4mix.jsonl"
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "generate_finetune_data.py"),
+             "--include-protocol-rows", "--out", str(out)],
+            cwd=ROOT, capture_output=True, text=True)
+        assert proc.returncode == 0, proc.stderr[-1500:]
+        rows = [json.loads(line) for line in out.read_text().splitlines() if line]
+
+    protocol = [r for r in rows if r["category"].startswith(("aave-", "safe-"))]
+    assert len(rows) == 1863, f"v4 mix was 1863 rows, got {len(rows)}"
+    assert len(protocol) == 95, f"v4 mix had 95 protocol rows, got {len(protocol)}"

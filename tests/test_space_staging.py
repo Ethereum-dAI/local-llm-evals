@@ -23,6 +23,26 @@ sys.path.insert(0, str(ROOT / "space"))
 import stage as staging  # noqa: E402
 
 
+def _skip_if_only_gitignored(e: "staging.MissingSources") -> None:
+    """Skip only when every missing source is a gitignored build product.
+
+    The fine-tuning JSONLs are generated and gitignored, so they are absent on a
+    fresh clone and a skip is right. A TRACKED path that the manifest still names
+    after the file was deleted is a real breakage, and skipping on it silently
+    retires the guarantee these tests exist to provide — which is exactly what
+    happened when two deleted railgun paths lingered in the manifest.
+    """
+    tracked = [m for m in e.missing
+               if subprocess.run(["git", "check-ignore", "-q", m], cwd=ROOT).returncode != 0]
+    if tracked:
+        pytest.fail(
+            f"{e.target}: manifest names {len(tracked)} file(s) that are not "
+            f"gitignored and do not exist — stale entries, not a fresh clone:\n  "
+            + "\n  ".join(tracked)
+        )
+    pytest.skip(str(e))
+
+
 def _tracked_files() -> list[Path]:
     out = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT,
                          capture_output=True, text=True, check=True).stdout
@@ -63,8 +83,8 @@ def test_staged_tree_matches_its_sources(target, tmp_path):
     """Every staged file is byte-identical to the source it was copied from."""
     try:
         dest = staging.stage(target, tmp_path / target)
-    except FileNotFoundError as e:
-        pytest.skip(str(e))  # the gitignored JSONLs aren't present
+    except staging.MissingSources as e:
+        _skip_if_only_gitignored(e)
 
     for src, rel in staging.TARGETS[target]:
         out = dest / rel
@@ -108,8 +128,8 @@ def test_published_dataset_regenerates_its_own_data(tmp_path):
     """
     try:
         dest = staging.stage("dataset", tmp_path / "dataset")
-    except FileNotFoundError as e:
-        pytest.skip(str(e))
+    except staging.MissingSources as e:
+        _skip_if_only_gitignored(e)
 
     env = {**os.environ, "PYTHONPATH": str(dest / "src")}
     for script, published in (("generate_finetune_data.py", "data/functiongemma_train.jsonl"),
@@ -143,8 +163,8 @@ def test_published_modal_jobs_find_their_data_in_both_layouts(tmp_path):
     )
     try:
         dest = staging.stage("dataset", tmp_path / "dataset")
-    except FileNotFoundError as e:
-        pytest.skip(str(e))
+    except staging.MissingSources as e:
+        _skip_if_only_gitignored(e)
 
     for layout in (ROOT, dest):
         for cands in candidates:

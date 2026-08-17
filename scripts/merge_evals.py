@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Merge several single-provider promptfoo eval exports into ONE eval.
+"""Merge several promptfoo eval exports into ONE eval.
 
 Why: promptfoo's UI shows one eval at a time, and a provider becomes a *column*
 only if it lives in the same eval. We deliberately ran gpt-5 (network-bound,
@@ -14,6 +14,12 @@ than silently shifting every row beneath it.
 
     uv run python scripts/merge_evals.py -o merged.out.json \
         gpt5.fresh.out.json gemma4ft.fresh.out.json
+
+Inputs may each carry more than one provider (e.g. a file where base and
+fine-tuned local models ran together in one eval) — every provider in every
+input file becomes its own column, so a file with two providers contributes
+two columns.
+
     npx promptfoo import merged.out.json --new-id
 
 Nothing is synthesized: a cell is either a real recorded result or absent.
@@ -29,7 +35,8 @@ import yaml
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("inputs", nargs="+", help="single-provider *.out.json exports")
+    ap.add_argument("inputs", nargs="+",
+                     help="*.out.json exports; each may contain one or more providers")
     ap.add_argument("-o", "--out", required=True)
     ap.add_argument("--dataset", default="pf/tests.generated.yaml",
                     help="source of canonical row order")
@@ -43,24 +50,28 @@ def main() -> None:
 
     docs = [json.loads(Path(p).read_text()) for p in args.inputs]
 
-    # Guard: same prompt, or the comparison is meaningless.
-    pids = {d["results"]["prompts"][0].get("id") for d in docs}
+    # Guard: same prompt, or the comparison is meaningless. Every provider in
+    # every file must share the one promptId — not just the first provider of
+    # each file, now that a file can carry more than one provider.
+    pids = {p.get("id") for d in docs for p in d["results"]["prompts"]}
     if len(pids) != 1:
         raise SystemExit(f"refusing to merge: differing promptIds {pids}")
 
+    # One column per (file, provider) pair, not per file: a file whose eval
+    # ran multiple providers together (e.g. base + fine-tune) contributes one
+    # column per provider it contains.
     merged_prompts, merged_results = [], []
-    for idx, (path, doc) in enumerate(zip(args.inputs, docs)):
+    for path, doc in zip(args.inputs, docs):
         res = doc["results"]
-        if len(res["prompts"]) != 1:
-            raise SystemExit(f"{path}: expected 1 provider, got {len(res['prompts'])}")
-        merged_prompts.append(res["prompts"][0])
+        offset = len(merged_prompts)      # column index of this doc's provider 0
+        merged_prompts.extend(res["prompts"])
         for r in res["results"]:
             cid = r["testCase"]["metadata"]["id"]
             if cid not in order:
                 raise SystemExit(f"{path}: case {cid} not in {args.dataset}")
             r = dict(r)
-            r["promptIdx"] = idx          # provider -> column
-            r["testIdx"] = order[cid]     # case id -> row
+            r["promptIdx"] = offset + r["promptIdx"]  # provider -> column
+            r["testIdx"] = order[cid]                 # case id -> row
             merged_results.append(r)
 
     merged_results.sort(key=lambda r: (r["testIdx"], r["promptIdx"]))
@@ -98,12 +109,18 @@ def main() -> None:
     }
     Path(args.out).write_text(json.dumps(out))
 
+    # Map each column back to the file it came from, since a file can now
+    # contribute more than one column.
+    col_source = []
+    for path, doc in zip(args.inputs, docs):
+        col_source.extend([path] * len(doc["results"]["prompts"]))
+
     print(f"merged {len(docs)} evals -> {args.out}")
-    for i, (p, path) in enumerate(zip(merged_prompts, args.inputs)):
+    for i, p in enumerate(merged_prompts):
         n = sum(1 for r in merged_results if r["promptIdx"] == i)
         ok = sum(1 for r in merged_results if r["promptIdx"] == i and r.get("success"))
         prov = p.get("provider")
-        print(f"  col {i}: {prov:34s} {ok:3d}/{n:<3d} pass   ({Path(path).name})")
+        print(f"  col {i}: {prov:34s} {ok:3d}/{n:<3d} pass   ({Path(col_source[i]).name})")
     print(f"  rows: {len({r['testIdx'] for r in merged_results})} of {len(cases)} dataset cases")
 
 

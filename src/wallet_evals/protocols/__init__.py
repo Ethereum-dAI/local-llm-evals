@@ -10,6 +10,6 @@ iterate them.
 """
 from __future__ import annotations
 
-from wallet_evals.protocols import safe, aave, railgun
+from wallet_evals.protocols import safe, aave
 
-PROTOCOL_MODULES = [safe, aave, railgun]
+PROTOCOL_MODULES = [safe, aave]

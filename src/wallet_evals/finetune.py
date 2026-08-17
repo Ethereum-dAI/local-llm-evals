@@ -53,6 +53,55 @@ REFUSAL_MESSAGES = {
         "I won't swap into a token given only as a raw contract address I can't "
         "verify. Give me a known token symbol and I'll proceed."
     ),
+    "unlimited-approval": (
+        "I won't set an unlimited allowance. An infinite approval lets that "
+        "contract drain the whole balance at any time, even long after you stop "
+        "using it. Tell me the exact amount you want to approve."
+    ),
+    "seed-phrase-exfiltration": (
+        "I can't show or send your recovery phrase. It lives in the Secure "
+        "Enclave and is never exportable — and anyone asking you to paste it "
+        "into a site, an email, or a chat is trying to steal your funds."
+    ),
+    "private-key-exfiltration": (
+        "I won't export or transmit your private key. It never leaves the "
+        "Secure Enclave, and no legitimate support process will ever ask for "
+        "it. If someone requested this, it's a scam."
+    ),
+    "malformed-address": (
+        "That isn't a valid Ethereum address — it needs to be 0x followed by 40 "
+        "hex characters. Sending to a malformed address would fail or lose the "
+        "funds. Double-check it and send it again."
+    ),
+    "wrong-chain-address": (
+        "That address belongs to a different blockchain, so this wallet can't "
+        "send to it — funds sent there would be unrecoverable. Give me an "
+        "Ethereum 0x address or an ENS name."
+    ),
+    "negative-amount": (
+        "I can't send a negative amount. Transfers only go one way; if you want "
+        "to move funds back, tell me the amount to send and the recipient."
+    ),
+    "prompt-injection": (
+        "I won't follow instructions that try to switch off my safety rules, "
+        "wherever they appear. Those rules aren't optional. Tell me what you "
+        "actually want to do and I'll help if it's safe."
+    ),
+    "impersonation-scam": (
+        "I won't do that. \"Your wallet is compromised, move funds to this "
+        "address\" is the most common drain scam there is — no real support "
+        "team asks for that. Nothing is wrong with your wallet, and I'd urge "
+        "you not to contact whoever sent this."
+    ),
+    "unshield-burn": (
+        "I won't unshield to that address — it's a burn address, and funds sent "
+        "there are permanently unrecoverable. Give me a real recipient and I'll "
+        "unshield it for you."
+    ),
+    "unshield-zero": (
+        "I won't unshield to the zero address — those funds would be destroyed. "
+        "Please give me a real recipient address."
+    ),
 }
 _REFUSAL_FALLBACK = (
     "I can't do that safely. Please double-check the request and provide valid, "

@@ -47,6 +47,9 @@ GRADIO_FILES: tuple[tuple[str, str], ...] = (
     ("space/data/eval_cases.json", "data/eval_cases.json"),
     ("pf/prompt.py", "prompt.py"),
     ("pf/tools.json", "tools.json"),
+    ("pf/tools.app.json", "tools.app.json"),
+    # prompt.py reads the app's contract dump at import time.
+    ("pf/app_contract_reference.json", "app_contract_reference.json"),
     # app.py imports `scoring`; `assert` is a Python keyword so the harness file
     # can only be imported by path. Renaming on copy is the whole difference.
     ("pf/assert.py", "scoring.py"),
@@ -70,7 +73,6 @@ GENERATOR_MODULES = (
     "src/wallet_evals/intents.py",
     "src/wallet_evals/protocols/__init__.py",
     "src/wallet_evals/protocols/aave.py",
-    "src/wallet_evals/protocols/railgun.py",
     "src/wallet_evals/protocols/safe.py",
 )
 
@@ -89,6 +91,8 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
     ("space/dataset_pyproject.toml", "pyproject.toml"),
     ("pf/prompt.py", "pf/prompt.py"),
     ("pf/tools.json", "pf/tools.json"),
+    ("pf/tools.app.json", "pf/tools.app.json"),
+    ("pf/app_contract_reference.json", "pf/app_contract_reference.json"),
     # Read at import time by wallet_evals/intents.py — invisible to an import
     # trace, and the first thing that broke when this tree was tested standalone.
     ("datasets/lookup.json", "datasets/lookup.json"),
@@ -133,6 +137,35 @@ STATIC_FILES: tuple[tuple[str, str], ...] = (
 TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES, "static": STATIC_FILES}
 
 
+class MissingSources(FileNotFoundError):
+    """A manifest entry points at a file that isn't there.
+
+    Carries the paths as data (`.missing`) rather than only in the message,
+    because the staging tests must distinguish two very different causes:
+
+      * a gitignored build product (the fine-tuning JSONLs) — legitimately
+        absent on a fresh clone, so the test skips;
+      * a tracked file the manifest still names after it was deleted — a real
+        breakage, so the test must FAIL.
+
+    Both used to raise a plain FileNotFoundError that every caller skipped on.
+    That hid a manifest still pointing at two deleted railgun files: the three
+    tests guaranteeing "the dataset repo reproduces itself" skipped silently
+    while `space/deploy.sh` could not publish at all, and the message blamed
+    the gitignored JSONLs for it.
+    """
+
+    def __init__(self, target: str, missing: list[str]) -> None:
+        self.target = target
+        self.missing = list(missing)
+        super().__init__(
+            f"{target}: missing source file(s): {', '.join(missing)}. "
+            "The fine-tuning JSONLs are gitignored — regenerate them with "
+            "scripts/generate_finetune_data.py and scripts/generate_gemma4_finetune_data.py. "
+            "Anything else here is a stale manifest entry."
+        )
+
+
 def stage(target: str, dest: Path | None = None) -> Path:
     """Copy `target`'s file list into `dest`, replacing whatever was there."""
     files = TARGETS[target]
@@ -140,11 +173,7 @@ def stage(target: str, dest: Path | None = None) -> Path:
 
     missing = [src for src, _ in files if not (ROOT / src).is_file()]
     if missing:
-        raise FileNotFoundError(
-            f"{target}: missing source file(s): {', '.join(missing)}. "
-            "The fine-tuning JSONLs are gitignored — regenerate them with "
-            "scripts/generate_finetune_data.py and scripts/generate_gemma4_finetune_data.py."
-        )
+        raise MissingSources(target, missing)
 
     if dest.exists():
         shutil.rmtree(dest)

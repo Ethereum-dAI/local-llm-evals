@@ -1,0 +1,79 @@
+# Gemma-4 E4B lift comparison: base vs the NEW app-contract fine-tune, LOCAL only
+# (no OpenRouter, no API cost). E4B is the on-device model local-wallet-mac ships,
+# evaluated at the Q4_K_M quant it actually runs, over the COMBINED benchmark
+# (app-contract incl. the human-units arithmetic slice, plus the railgun/aave/safe
+# protocol cases).
+#
+# The fine-tune here is loaded from a LOCAL GGUF file, not a HuggingFace repo, by
+# design: this fine-tune is still training and is deliberately NOT published to
+# HuggingFace. The published `ef-dai-team/gemma-4-E4B-wallet-ft` repo (used by
+# promptfooconfig.gemma4-ft.yaml) is content-pinned by the shipping macOS wallet
+# (SHA256-pinned in OnboardingSettingsStore.swift), so this newer, unpublished
+# app-contract fine-tune cannot overwrite it without breaking that pin. Export it
+# to the path below (finetune/modal_export_gemma4.py) before running this config:
+#   models/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf
+#
+# Run with the uv venv so the scorer can import wallet_evals:
+#   scripts/eval.sh -c promptfooconfig.appcontract.yaml -o gemma4.appcontract.out.json -j 1
+#
+# -j 1 is required: both providers are local llama.cpp processes sharing one GPU
+# (Metal), so running them concurrently would contend for the same device instead
+# of speeding anything up.
+description: Gemma-4 E4B base vs app-contract fine-tune (local GGUF, Q4_K_M)
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # Baseline: the EXACT GGUF local-wallet-mac ships. The wallet content-pins this
+  # file by SHA256 (90ce9812…, see OnboardingSettingsStore.swift). It was deleted
+  # from the repo's `main` on 2026-07-16, so we pull it at the pinned revision that
+  # still carries the byte-identical Q4_K_M (verified: sha256 matches the wallet).
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-base
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      # Metal offload: verified verdict-identical to CPU, ~8x faster.
+      n_gpu_layers: -1
+      # The 300 s default silently dropped 14 cases to empty output on the
+      # published run and scored them as failures. Fail slow cases, don't lose them.
+      timeout: 1800000
+  # Fine-tuned: the NEW app-contract fine-tune, loaded from a local GGUF because it
+  # is intentionally NOT published to HuggingFace (still training; the published
+  # repo above stays pinned to the wallet's currently-shipping fine-tune). Labeled
+  # distinctly from `gemma4-e4b-ft` so it can never be confused with the previously
+  # published fine-tune in reports or result JSON.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-appcontract
+    config:
+      model_path: models/gemma4-e4b-wallet-ft-appcontract.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      # Metal offload: verified verdict-identical to CPU, ~8x faster.
+      n_gpu_layers: -1
+      # Both providers carry the 30-minute timeout so neither loses cases to the 300 s
+      # default. The base run lost 14 cases silently to that timeout, so both providers
+      # now fail slow cases instead of losing them from their denominator.
+      timeout: 1800000
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+# Default is the WALLET benchmark (429 cases), not the 569-case combined file.
+# The 140 Aave/Safe cases measure a capability the wallet does not ship, and
+# folding them into a headline drags every model by ~22 points while changing no
+# ranking — base reads 67.7% instead of 89.7%. They are a separate run now:
+#   EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh ...
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.app-contract.yaml') }}"

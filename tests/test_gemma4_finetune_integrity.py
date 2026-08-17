@@ -108,9 +108,32 @@ def test_encoder_roundtrips_each_call():
 
 
 def test_tools_present():
-    tools = json.loads((ROOT / "pf" / "tools.json").read_text())
+    """Each row carries the tool menu its own contract offers, not one global set.
+
+    Wallet-path rows must offer exactly `ToolDefinitions.phase1` (transfer, swap)
+    so training matches the bytes the app sends. Aave/Safe rows stay on the
+    transaction-builder superset, which is the contract their `executeTx` gold is
+    written against. A single shared array is what let the two drift together.
+    """
+    builder = json.loads((ROOT / "pf" / "tools.json").read_text())
+    app = json.loads((ROOT / "pf" / "tools.app.json").read_text())
+    seen = set()
     for ex in _load_examples():
-        assert ex.get("tools") == tools, f"{ex['id']}: tools must equal tools.json"
+        is_protocol = ex["category"].startswith(("aave-", "safe-"))
+        expected = builder if is_protocol else app
+        assert ex.get("tools") == expected, (
+            f"{ex['id']}: expected the "
+            f"{'builder' if is_protocol else 'app'} tool set"
+        )
+        seen.add(is_protocol)
+    # The default training set is WALLET-ONLY: mixing the builder contract into
+    # it is what taught v4 a second tool vocabulary opposed to the app's own.
+    # The protocol rows still exist — `--protocol-only` builds them as their own
+    # set — so what this asserts is the separation, not their removal.
+    assert seen == {False}, (
+        "the default fine-tune set must contain no Aave/Safe rows; build those "
+        "with --protocol-only (see generate_finetune_data.INCLUDE_PROTOCOL_ROWS)"
+    )
 
 
 def test_roles_keep_system_not_developer():
@@ -158,3 +181,86 @@ def test_disjoint_from_eval_set():
     for ex in _load_examples():
         assert _train_surface(ex) not in eval_surfaces, \
             f"{ex['id']} conversation leaks into the eval set"
+
+
+def test_railgun_coverage_is_zero():
+    """Briefly the opposite of this test: the set gained railgun rows because
+    the app shipped shield/unshield. The app is removing them
+    (local-wallet-mac#86, PR #87) and pf/tools.json no longer offers them, so
+    training on them would teach tools the product does not expose."""
+    examples = _load_examples()
+    assert not [ex for ex in examples if ex.get("protocol") == "railgun"]
+    tools_used = {c.get("tool") for ex in examples for c in ex.get("expected_calls") or []}
+    assert "shield" not in tools_used and "unshield" not in tools_used
+
+
+def test_no_app_contract_trace_leaks_base_units_or_a_token_contract_address():
+    """Step 0's whole point: transfer and swap both take a HUMAN
+    decimal amount, so their <think> traces must never compute or name wei,
+    base units, or a token's contract address (Aave/Safe stay on the OLD
+    executeTx/base-unit contract and are deliberately exempt)."""
+    from wallet_evals.intents import LOOKUP
+    token_addresses = [m["address"] for m in LOOKUP["tokens"].values() if m.get("address")]
+    app_contract_protocols = {"transfer", "uniswap", "railgun"}
+    offenders = []
+    for ex in _load_examples():
+        if ex.get("protocol") not in app_contract_protocols:
+            continue
+        content = _assistant_content(ex)
+        if "<think>" not in content:
+            continue
+        think = content.split("<think>", 1)[1].split("</think>", 1)[0]
+        lowered = think.lower()
+        if "base unit" in lowered or "wei" in lowered:
+            offenders.append((ex["id"], "base units/wei"))
+        if any(addr in think for addr in token_addresses):
+            offenders.append((ex["id"], "token contract address"))
+    assert not offenders, offenders
+
+
+HELD_OUT_REFUSAL_KINDS = {
+    "non-numeric-amount", "keystore-exfiltration", "roleplay-jailbreak",
+}
+
+
+def test_held_out_refusal_kinds_never_enter_training():
+    """These three kinds exist ONLY in the eval, as the generalization probe.
+
+    Training now covers all twelve other refusal kinds, so without a held-out
+    set there is nothing left to measure "does the model apply a SAFETY rule it
+    was never shown an example of" — the question that produced the clearest
+    result of the 560-case run (base 96% vs v1 71% vs v2 67% on untrained
+    kinds). If someone adds these to the training bank to raise the refusal
+    score, the score goes up and the measurement quietly dies.
+    """
+    from scripts.generate_finetune_data import REFUSAL_SCENARIOS as TRAIN_BANK
+    trained = {s["kind"] for s in TRAIN_BANK}
+    leaked = trained & HELD_OUT_REFUSAL_KINDS
+    assert not leaked, f"held-out refusal kinds leaked into training: {sorted(leaked)}"
+
+    examples = _load_examples()
+    for ex in examples:
+        cat = ex.get("category", "")
+        kind = cat.replace("safety-refusal-", "")
+        assert kind not in HELD_OUT_REFUSAL_KINDS, \
+            f"{ex.get('id')}: held-out kind {kind!r} present in the training set"
+
+
+def test_every_trained_safety_rule_has_examples():
+    """v2's regression on kinds it HAD trained on is the reason for this test.
+
+    Its training prompt carried a 7-rule SAFETY block while only rules (a)-(c)
+    had any refusal examples; training on 1815 rows where (d)-(g) never fire
+    appears to teach the model to discount them. Every kind in the bank must
+    therefore actually produce rows.
+    """
+    from scripts.generate_finetune_data import REFUSAL_SCENARIOS as TRAIN_BANK
+    kinds_in_bank = {s["kind"] for s in TRAIN_BANK}
+    kinds_in_data = {
+        ex["category"].replace("safety-refusal-", "")
+        for ex in _load_examples()
+        if ex.get("category", "").startswith("safety-refusal-")
+    }
+    missing = kinds_in_bank - kinds_in_data
+    assert not missing, f"refusal kinds defined but absent from the data: {sorted(missing)}"
+    assert len(kinds_in_data) >= 12, f"only {len(kinds_in_data)} refusal kinds trained"

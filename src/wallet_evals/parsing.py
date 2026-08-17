@@ -59,8 +59,33 @@ def _coerce_args(value: Any) -> list[Any]:
             decoded = json.loads(value)
         except (ValueError, TypeError):
             decoded = _decode_dsl_quoted_array(value)
-        return decoded if isinstance(decoded, list) else []
+        if isinstance(decoded, list):
+            return decoded
+        # Neither JSON nor the DSL form. Returning [] here would score a parser
+        # miss identically to "the model emitted no args", which is how the
+        # element-quoted array cost the baseline 130 protocol cases while the
+        # report read `args: expected [...] got []` — indistinguishable from the
+        # model simply not answering. Carry the raw text instead: the comparison
+        # still fails (it must — nothing was understood), but the reason names
+        # what could not be decoded, so the next such wrapper is visible in the
+        # report rather than silent.
+        if value.strip():
+            return [UndecodableArgs(value)]
     return []
+
+
+class UndecodableArgs(str):
+    """An `args` payload no decoder understood, carried through as a value.
+
+    Subclasses `str` so every downstream comparison, repr and JSON dump keeps
+    working unchanged; the type only exists so a report can tell "unparsed" from
+    "absent", and so `repr()` says so out loud.
+    """
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:  # pragma: no cover - diagnostics only
+        return f"<undecodable args: {str.__repr__(self)}>"
 
 
 def _decode_dsl_quoted_array(value: str) -> list[Any] | None:
@@ -112,6 +137,9 @@ def _build_call(name: str, fields: dict[str, Any]) -> ParsedToolCall:
         recipient=_as_str(fields.get("recipient")),
         amount=_as_str(fields.get("amount")),
         token=_as_str(fields.get("token")),
+        from_token=_as_str(fields.get("from_token")),
+        to_token=_as_str(fields.get("to_token")),
+        amount_side=_as_str(fields.get("amount_side")),
     )
 
 

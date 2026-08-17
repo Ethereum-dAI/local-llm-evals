@@ -32,11 +32,11 @@ def test_convert_native_transfer():
     case, manual = convert_case(raw)
     assert manual is None
     call = case["expected_calls"][0]
-    assert call["tool"] == "executeTx"
-    assert call["to"] == LOOKUP["ens"]["vitalik.eth"]
-    assert call["value"] == "100000000000000000"
-    assert call["function"] is None
-    assert call["args"] == []
+    assert call["tool"] == "transfer"
+    assert "chainId" not in call  # app tools declare none
+    assert call["to"] == "vitalik.eth"
+    assert call["amount"] == "0.1"
+    assert call["token"] == "ETH"
 
 
 def test_convert_erc20_transfer():
@@ -47,9 +47,11 @@ def test_convert_erc20_transfer():
                              "token": {"kind": "exact", "value": "USDC"}}, "notes": None}
     case, manual = convert_case(raw)
     call = case["expected_calls"][0]
-    assert call["to"] == LOOKUP["tokens"]["USDC"]["address"]
-    assert call["function"] == "transfer(address,uint256)"
-    assert call["args"] == [LOOKUP["ens"]["vitalik.eth"], "100000000"]
+    assert call["tool"] == "transfer"
+    assert "chainId" not in call  # app tools declare none
+    assert call["to"] == "vitalik.eth"
+    assert call["amount"] == "100"
+    assert call["token"] == "USDC"
 
 
 def test_incomplete_swap_routed_to_manual():
@@ -73,14 +75,14 @@ def test_convert_swap_exact_in():
     assert case["protocol"] == "uniswap"
     call = case["expected_calls"][0]
     assert call["tool"] == "swap"
-    assert call["currencyIn"] == LOOKUP["tokens"]["USDC"]["address"]
-    assert call["currencyOut"] == LOOKUP["tokens"]["DAI"]["address"]
-    assert call["amountIn"] == "100000000"
-    assert call["amountOutMinimum"] == "0"
-    assert call["recipient"] == "<wallet>"
+    assert "chainId" not in call  # app tools declare none
+    assert call["from_token"] == "USDC"
+    assert call["to_token"] == "DAI"
+    assert call["amount"] == "100"
+    assert call["amount_side"] == "input"
 
 
-def test_convert_swap_native_eth_uses_zero_address():
+def test_convert_swap_native_eth_from_token():
     raw = {"id": "swap-en-002", "user_message": "Swap 1 ETH for USDC", "category": "truePositiveSwap",
            "language": "english", "expected_tool": "swap",
            "expected_args": {"from_token": {"kind": "exact", "value": "ETH"},
@@ -89,8 +91,8 @@ def test_convert_swap_native_eth_uses_zero_address():
                              "amount_side": {"kind": "exact", "value": "input"}}, "notes": None}
     case, manual = convert_case(raw)
     call = case["expected_calls"][0]
-    assert call["currencyIn"] == "0x0000000000000000000000000000000000000000"
-    assert call["amountIn"] == "1000000000000000000"
+    assert call["from_token"] == "ETH"
+    assert call["amount"] == "1"
 
 
 def test_convert_swap_exact_output_to_manual():
@@ -146,15 +148,19 @@ def test_raw_address_recipient_has_no_ens_flag():
     assert case["requires"] == []
 
 
-def test_unknown_ens_routed_to_manual():
+def test_unknown_ens_accepted_as_unresolved():
     raw = {"id": "transfer-en-005", "user_message": "Send 1 ETH to bob.eth",
            "category": "truePositiveTransfer", "language": "english", "expected_tool": "transfer",
            "expected_args": {"to": {"kind": "exact", "value": "bob.eth"},
                              "amount": {"kind": "exact", "value": "1"},
                              "token": {"kind": "exact", "value": "ETH"}}, "notes": None}
     case, manual = convert_case(raw)
-    assert case is None
-    assert manual == "transfer-en-005"
+    # App contract: unresolved recipients (including unknown ENS) are accepted
+    assert manual is None
+    call = case["expected_calls"][0]
+    assert call["to"] == "bob.eth"
+    # bob.eth is not in LOOKUP, so no ens_resolution flag (only known ENS names get it)
+    assert case["requires"] == []
 
 
 def test_difficulty_derived_swap_and_multilingual_medium():
@@ -182,3 +188,23 @@ def test_difficulty_derived_swap_and_multilingual_medium():
                                 "token": {"kind": "exact", "value": "ETH"}}, "notes": None}
     case, _ = convert_case(en_raw)
     assert case["difficulty"] == "easy"
+
+
+def test_convert_transfer_emits_app_contract_gold():
+    raw = {
+        "id": "transfer-en-001", "user_message": "Send 0.1 ETH to vitalik.eth",
+        "category": "truePositiveTransfer", "language": "english",
+        "expected_tool": "transfer",
+        "expected_args": {
+            "to": {"kind": "exact", "value": "vitalik.eth"},
+            "amount": {"kind": "exact", "value": "0.1"},
+            "token": {"kind": "exact", "value": "ETH"},
+        },
+        "notes": None,
+    }
+    case, manual = convert_case(raw)
+    assert manual is None
+    assert case["expected_calls"] == [{
+        "tool": "transfer", "to": "vitalik.eth",
+        "amount": "0.1", "token": "ETH",
+    }]
