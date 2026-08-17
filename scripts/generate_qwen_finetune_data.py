@@ -48,10 +48,14 @@ def main() -> None:
                     help="build ONLY the Aave/Safe builder rows, as their own "
                          "training set (see generate_finetune_data."
                          "INCLUDE_PROTOCOL_ROWS)")
+    ap.add_argument("--include-protocol-rows", action="store_true",
+                    help="mix the 95 Aave/Safe rows into the wallet set, "
+                         "reproducing the 1863-row mix v4/qwen-v4 trained on")
     args = ap.parse_args()
 
     rng = random.Random(fg.SEED)
-    selected = fg._select(fg._collect(rng, protocol_only=args.protocol_only), rng)
+    selected = fg._select(fg._collect(rng, protocol_only=args.protocol_only,
+                                      include_protocol=args.include_protocol_rows), rng)
 
     examples: list[dict] = []
     for test, intent in selected:

@@ -189,3 +189,29 @@ def test_protocol_rows_are_separated_not_deleted():
     assert all(r["category"].startswith(("aave-", "safe-")) for r in rows)
     assert all(r.get("tools") == builder for r in rows), \
         "protocol rows must keep the executeTx builder contract"
+
+
+def test_the_published_v4_mix_is_reproducible():
+    """`--include-protocol-rows` rebuilds the 1863-row mix v4 was trained on.
+
+    The published gemma-4/qwen3 v4 artifacts trained on 1768 wallet rows PLUS 95
+    Aave/Safe builder rows. The default set is wallet-only now, so without this
+    flag the repo could no longer rebuild what those weights came from — the
+    card would describe a mix nothing in the tree produces. Reproducibility of a
+    shipped artifact should not require editing a module constant.
+    """
+    import subprocess
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "v4mix.jsonl"
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "generate_finetune_data.py"),
+             "--include-protocol-rows", "--out", str(out)],
+            cwd=ROOT, capture_output=True, text=True)
+        assert proc.returncode == 0, proc.stderr[-1500:]
+        rows = [json.loads(line) for line in out.read_text().splitlines() if line]
+
+    protocol = [r for r in rows if r["category"].startswith(("aave-", "safe-"))]
+    assert len(rows) == 1863, f"v4 mix was 1863 rows, got {len(rows)}"
+    assert len(protocol) == 95, f"v4 mix had 95 protocol rows, got {len(protocol)}"

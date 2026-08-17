@@ -235,7 +235,8 @@ def _reasoning_text(intent: dict) -> str:
     raise ValueError(f"no reasoning trace defined for action: {action!r}")
 
 
-def _collect(rng: random.Random, protocol_only: bool = False) -> list[tuple[dict, dict | None, str]]:
+def _collect(rng: random.Random, protocol_only: bool = False,
+             include_protocol: bool = False) -> list[tuple[dict, dict | None, str]]:
     """Build (test-dict, intent-or-None, bucket) triples from every source.
 
     `protocol_only` returns JUST the Aave/Safe builder rows, for training the
@@ -280,7 +281,7 @@ def _collect(rng: random.Random, protocol_only: bool = False) -> list[tuple[dict
 
     if protocol_only:
         return [t for t in _collect_protocol(rng)]
-    if INCLUDE_PROTOCOL_ROWS:
+    if INCLUDE_PROTOCOL_ROWS or include_protocol:
         triples.extend(_collect_protocol(rng))
     return triples
 
@@ -326,10 +327,15 @@ def main() -> None:
     ap.add_argument("--protocol-only", action="store_true",
                     help="build ONLY the Aave/Safe builder rows, as their own "
                          "training set (see INCLUDE_PROTOCOL_ROWS)")
+    ap.add_argument("--include-protocol-rows", action="store_true",
+                    help="mix the 95 Aave/Safe rows into the wallet set, "
+                         "reproducing the 1863-row mix v4 and qwen-v4 trained "
+                         "on. Off by default; see INCLUDE_PROTOCOL_ROWS.")
     args = ap.parse_args()
 
     rng = random.Random(SEED)
-    selected = _select(_collect(rng, protocol_only=args.protocol_only), rng)
+    selected = _select(_collect(rng, protocol_only=args.protocol_only,
+                                include_protocol=args.include_protocol_rows), rng)
 
     examples: list[dict] = []
     for test, intent in selected:
