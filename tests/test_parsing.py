@@ -1,4 +1,4 @@
-from wallet_evals.parsing import parse_turn
+from wallet_evals.parsing import UndecodableArgs, parse_turn
 from wallet_evals.schema import Case, ExpectedCall
 from wallet_evals.scorer import score_case
 
@@ -39,8 +39,26 @@ def test_no_call_returns_empty_tool_calls():
     assert turn.content == "I need more info."
 
 
-def test_malformed_args_json_falls_back_to_empty_list():
+def test_undecodable_args_are_reported_not_silently_emptied():
+    """A parser miss must not look like "the model emitted no args".
+
+    Those two were the same value ([]) until the element-quoted Gemma array
+    showed what it costs: 130 protocol cases where the base model answered
+    correctly were reported as `args: expected [...] got []`, indistinguishable
+    from no answer at all, and the one-directional loss landed entirely on the
+    baseline the fine-tune was being compared against.
+    """
     native = [{"name": "executeTx", "arguments": '{"chainId":"1","to":"0xABC","args":"not-json"}'}]
+    turn = parse_turn(content=None, native_tool_calls=native, raw_text="")
+    args = turn.tool_calls[0].args
+
+    assert args != [], "an undecodable payload must not read as an empty list"
+    assert len(args) == 1 and isinstance(args[0], UndecodableArgs)
+    assert "not-json" in repr(args[0])
+
+
+def test_genuinely_absent_args_are_still_an_empty_list():
+    native = [{"name": "executeTx", "arguments": '{"chainId":"1","to":"0xABC","args":""}'}]
     turn = parse_turn(content=None, native_tool_calls=native, raw_text="")
     assert turn.tool_calls[0].args == []
 

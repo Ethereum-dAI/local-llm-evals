@@ -73,7 +73,6 @@ GENERATOR_MODULES = (
     "src/wallet_evals/intents.py",
     "src/wallet_evals/protocols/__init__.py",
     "src/wallet_evals/protocols/aave.py",
-    "src/wallet_evals/protocols/railgun.py",
     "src/wallet_evals/protocols/safe.py",
 )
 
@@ -102,8 +101,6 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
      "datasets/protocols/safe.finetune.fixtures.json"),
     ("datasets/protocols/aave.finetune.fixtures.json",
      "datasets/protocols/aave.finetune.fixtures.json"),
-    ("datasets/protocols/railgun.finetune.fixtures.json",
-     "datasets/protocols/railgun.finetune.fixtures.json"),
     ("scripts/generate_finetune_data.py", "scripts/generate_finetune_data.py"),
     ("scripts/generate_gemma4_finetune_data.py", "scripts/generate_gemma4_finetune_data.py"),
     ("finetune/_bundled.py", "scripts/_bundled.py"),
@@ -140,6 +137,35 @@ STATIC_FILES: tuple[tuple[str, str], ...] = (
 TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES, "static": STATIC_FILES}
 
 
+class MissingSources(FileNotFoundError):
+    """A manifest entry points at a file that isn't there.
+
+    Carries the paths as data (`.missing`) rather than only in the message,
+    because the staging tests must distinguish two very different causes:
+
+      * a gitignored build product (the fine-tuning JSONLs) — legitimately
+        absent on a fresh clone, so the test skips;
+      * a tracked file the manifest still names after it was deleted — a real
+        breakage, so the test must FAIL.
+
+    Both used to raise a plain FileNotFoundError that every caller skipped on.
+    That hid a manifest still pointing at two deleted railgun files: the three
+    tests guaranteeing "the dataset repo reproduces itself" skipped silently
+    while `space/deploy.sh` could not publish at all, and the message blamed
+    the gitignored JSONLs for it.
+    """
+
+    def __init__(self, target: str, missing: list[str]) -> None:
+        self.target = target
+        self.missing = list(missing)
+        super().__init__(
+            f"{target}: missing source file(s): {', '.join(missing)}. "
+            "The fine-tuning JSONLs are gitignored — regenerate them with "
+            "scripts/generate_finetune_data.py and scripts/generate_gemma4_finetune_data.py. "
+            "Anything else here is a stale manifest entry."
+        )
+
+
 def stage(target: str, dest: Path | None = None) -> Path:
     """Copy `target`'s file list into `dest`, replacing whatever was there."""
     files = TARGETS[target]
@@ -147,11 +173,7 @@ def stage(target: str, dest: Path | None = None) -> Path:
 
     missing = [src for src, _ in files if not (ROOT / src).is_file()]
     if missing:
-        raise FileNotFoundError(
-            f"{target}: missing source file(s): {', '.join(missing)}. "
-            "The fine-tuning JSONLs are gitignored — regenerate them with "
-            "scripts/generate_finetune_data.py and scripts/generate_gemma4_finetune_data.py."
-        )
+        raise MissingSources(target, missing)
 
     if dest.exists():
         shutil.rmtree(dest)

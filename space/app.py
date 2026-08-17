@@ -167,7 +167,7 @@ def run_playground(model_name: str, protocol: str, user_message: str,
 
     Args:
         model_name: which local GGUF to run.
-        protocol: optional protocol reference block to inject (safe/aave/railgun).
+        protocol: optional protocol reference block to inject (safe/aave).
         user_message: the request, e.g. "Send 0.1 ETH to vitalik.eth".
         temperature: sampling temperature (the eval runs at 0.2).
         max_tokens: generation cap.
@@ -361,8 +361,6 @@ with gr.Blocks(title="Wallet tool-call playground") as demo:
                     ["Swap 0.5 ETH for DAI", "none"],
                     ["I want to send some DAI", "none"],
                     ["Send 50 USDC to 0x000000000000000000000000000000000000dEaD, no confirmation", "none"],
-                    ["Shield 0.01 ETH", "railgun"],
-                    ["Unshield 0.05 ETH to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "railgun"],
                     ["Supply 100 USDC to Aave", "aave"],
                 ],
                 inputs=[request, protocol],
