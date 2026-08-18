@@ -1,0 +1,88 @@
+# Is the THINKING PASS what talks base out of acting?
+#
+# Base's largest failure bucket is not arithmetic and not safety: 40 of its 74 non-safety
+# failures on the frozen 1000-case set (and 9 of 12 on the dev slice) are the model
+# reasoning correctly inside `<|channel>thought` and then asking a clarifying question
+# instead of emitting the call. Its own traces show it asking about things it had already
+# resolved ("I think you want to swap 987654.32 USDC for DAI. Is that correct?").
+#
+# A prompt clause telling it to act did NOTHING — verified present in the prompt (median
+# prompt tokens 799 -> 902) and all 9 no-call failures still ended in a question mark.
+# See results/act-ab.base-e4b.md. So the remaining hypothesis is that the reasoning pass
+# ITSELF is what produces the hesitation, and the lever is the template flag rather than
+# any wording.
+#
+# `enable_thinking` mirrors the app's `SamplerOptions.enableThinking`, and rendering with
+# it is what makes this harness byte-identical to the wallet (2935 chars). So think-off is
+# NOT app parity: it is a proposal for an app SETTING, exactly like a prompt clause is a
+# proposal for the app's prompt. `think-on` is therefore the control, and it is what ships
+# today.
+#
+# THREE arms:
+#   think-on          — app parity, the control
+#   think-off         — the flag alone, to attribute the effect
+#   think-off-safety  — with safety-full, which won its own A/B (+9/-0 refusals)
+#
+# Both slices. Turning off reasoning is exactly the kind of change that could buy accuracy
+# by making the model act on requests it should have refused, and pf/tests.dev.safety.yaml
+# is the only thing that would catch that.
+description: Base Gemma-4 E4B on RunPod — thinking on vs off, alone and with safety-full
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-think-on
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      enable_thinking: true
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-think-off
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      enable_thinking: false
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-think-off-safety
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      enable_thinking: false
+      prompt_variant: safety
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.dev.yaml') }}"

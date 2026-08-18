@@ -595,6 +595,133 @@ PROMPTFOO_CONFIG_DIR=.promptfoo-a scripts/eval.sh -c … -o relaunch/a.json &
 PROMPTFOO_CONFIG_DIR=.promptfoo-b scripts/eval.sh -c … -o relaunch/b.json &
 ```
 
+## Renting a GPU on RunPod (4.8x wall clock, and four traps)
+
+`scripts/runpod_serve_gguf.py up` rents the cheapest 20GB+ card, serves the pinned GGUF
+over llama.cpp's HTTP server, and prints `RUNPOD_LLAMA_URL`. Pair it with
+`remote_url: env:RUNPOD_LLAMA_URL` in a provider config (`*.remote.yaml`). **Always
+`down --all` afterwards** — it bills by the hour.
+
+```bash
+uv run --with runpod python scripts/runpod_serve_gguf.py up --wait 2400 --keep-on-failure
+RUNPOD_LLAMA_URL=https://<pod>-8080.proxy.runpod.net \
+  PROMPTFOO_CONFIG_DIR=.promptfoo-remote scripts/eval.sh \
+  -c promptfooconfig.act-ab.remote.yaml -j 8 --no-cache -o runs/x.out.json
+uv run --with runpod python scripts/runpod_serve_gguf.py down --all
+```
+
+Only **generation** moves. Prompt rendering (from the same GGUF's own chat template via
+a `vocab_only` handle), tool injection, output translation and scoring all stay local,
+and the provider POSTs a fully-rendered prompt to `/completion` rather than messages to
+`/v1/chat/completions` — so the remote cannot re-apply a template and silently change
+the prompt. A scorer or parser change therefore needs no redeploy.
+
+**Measured: 230s vs 1107s on the same 90 generations — 4.8x.** The win is entirely
+concurrency (`-j 8` against `--parallel 8` slots); **per-case latency is WORSE remotely**
+(17.1s vs 11.2s median), so quote wall clock and never per-case latency.
+
+**Batched inference is not bitwise reproducible.** A device A/B on one slice agreed on
+82/90 cases, with flips in BOTH directions and arm totals intact (none 17→18, full 26→27,
+min 27→25). Continuous batching changes floating-point reduction order, so aggregate
+numbers are stable but individual verdicts are not. Run both arms of any comparison on
+the SAME device, and never compare a remote run case-by-case against a local one.
+
+Four traps, each of which looks exactly like "the pod is broken":
+
+- **Cloudflare 403s urllib.** Every pod port is fronted by Cloudflare, which rejects the
+  default `Python-urllib/3.x` User-Agent with `403` + body `error code: 1010`, while the
+  identical curl request returns 200. This cost a pod: `_wait_healthy` probed a healthy
+  server for 1500s, timed out, and terminated it along with its 5GB download. Every
+  urllib call in the script sends `_UA`; `_remote_completion` does too.
+- **No model specified ⇒ ROUTER mode.** llama-server starts as a router whenever no
+  model is given, and `--model-url` does NOT count as giving one. `/health` returns
+  `{"status":"ok"}` for the router while `/completion` fails "model name is missing from
+  the request" and `/v1/models` is empty. Download the GGUF in-container and pass
+  `-m <path>`. `-hf` cannot work here — the Q4_K_M was deleted from the repo's main
+  branch and exists only at the pinned revision.
+- **`-c` is TOTAL context, divided across `--parallel` slots.** `-c 4096 --parallel 8`
+  serves **512 tokens per slot**; our prompts reach 1133 plus 1024 of generation, so
+  every case would have been silently truncated. `--n-ctx` in this script means PER-SLOT
+  and is multiplied by `--parallel`. `_served_model` refuses a slot under `MIN_SLOT_CTX`.
+- **`/health` is not readiness.** It reports on a process, never on the right model being
+  loaded and usable. `_wait_healthy` requires `_served_model()`, which checks the model
+  path AND its slot context. RunPod's proxy also answers **200 with an HTML page** when
+  nothing is listening, so status-code-only checks pass while nothing works.
+
+Two signals that look diagnostic and are worthless: `uptime=None` from the legacy SDK
+persisted for the entire life of a pod that was serving fine, and `ports=[...]` comes
+from the pod CONFIGURATION rather than from any listening process. Pod creation goes
+through **REST v1** (`dockerEntrypoint`/`dockerStartCmd` as separate arrays) — kept
+because it is explicit, NOT because `docker_args` was broken; that hypothesis was
+investigated and is false, since the first pod did start and serve.
+
+RunPod's REST API has **no logs endpoint** (checked against its own `openapi.json`), so
+the container serves `/tmp` on port 8081 for its whole life: `curl <pod>-8081.../llama.log`
+works even while llama-server is UP and misconfigured. A crash-only log server could not
+have diagnosed router mode, because nothing had crashed.
+
+## The dev slice has a MEASURED noise floor — put a duplicate arm in every A/B
+
+`pf/tests.dev.yaml` (145 cases) cannot resolve differences below about **5 points**, and this
+is measured, not estimated. In one run two **byte-identical** provider arms both scored
+129/145 while **disagreeing on 12 individual cases**; in another, three materially different
+prompts all scored exactly 133/145. Control scores across runs with an unchanged prompt have
+been 132, 133, 128 and 129.
+
+With ~12 cases flipping between identical runs, the SD of a score *difference* is about
+sqrt(12) ~= 3.5 cases, so a difference must clear roughly **7 cases (2 sigma)** to mean
+anything.
+
+**So: add a duplicate control arm to every A/B on this slice.** It costs one arm and it is the
+only way to tell a result from a coin flip. Two claims have already had to be withdrawn for
+lack of it — see `results/temp-sweep.base-e4b.md` and `results/act-ab.base-e4b.md`.
+
+Note the flips are not purely sampling: at `-j 8` llama-server batches continuously, which
+changes floating-point reduction order, so even **temperature 0.0 is not bitwise
+reproducible**. Greedy removes sampling, not batching.
+
+A corollary for reading any result here: a **one-directional** flip pattern is much stronger
+evidence than a net delta. `safety-full`'s refusal gain (+9/-0 local, +8/-0 remote) survives
+because nothing regressed; its apparent accuracy gain (+7/-2, net +5) did not survive,
+because +5 is inside the floor.
+
+## What has been RULED OUT for the base model (do not re-run these)
+
+Base Gemma-4 E4B scores **90.7% overall / 92.2% task / 61.2% safety** on the frozen
+1000-case set. Its failures are 40 "expected a call, made NONE" (it reasons correctly then
+asks a clarifying question), 30 wrong-argument, 4 spurious-call. Tested and rejected:
+
+| lever | result |
+| --- | --- |
+| `ACT_NOT_ASK` prompt clause | **no effect** on accuracy; -2 refusals alone. Verified in the prompt (799->902 tokens); all 9 no-call failures still ended in "?" |
+| `enable_thinking=false` | **much worse**: 88.3% -> 72.4%, refusals 63.3% -> 56.7%, completions 180 -> 43 tokens. The reasoning pass is load-bearing |
+| temperature 0.0 / 0.8 | **inert** across 0.0-0.8; keep 0.2 (app parity) |
+| Qwen3-8B base (same Q4_K_M class) | **equal** accuracy, refusals **33.3% vs 60.0%**, 2.4x longer generations |
+| few-shot exemplars | **backfired**: -11 accuracy (+1/-12), no-call 9 -> 20. Lifted refusals (+6/-0) only by refusing more, and `safety-full` dominates it |
+| `retry_on_no_call` | halved no-call on its own (9/10 -> 4) at zero refusal cost, but adds **NOTHING** on top of `safety-full` (identical 138/145, same shapes). Do not ship the extra turn |
+
+**95% overall is not reachable on base by configuration.** The frozen-set result is
+`results/testset-safety-full.md`: control **90.8%** (task 92.4%, safety 59.2%) vs
+`safety-full` **91.0%** (task 91.0%, safety **91.8%**). The total does not move — the clause
+REALLOCATES errors, converting 17 spurious calls into non-actions while pushing 20 more task
+cases into "asked instead of acting". Ship it anyway: a spurious call on a burn-address send
+destroys funds, a clarifying question does not. **Judge this change on error classes, not on
+the overall percentage.**
+
+The one lever that WORKS is `safety-full` (`pf/prompt_candidates.py`): refusals 56.7% ->
+86.7% on dev (+9/-0, +8/-0, +10/-0 across three runs) and **59.2% -> 91.8% on the frozen
+set**, where burn-send and zero-send go from 0/8 combined to 8/8. Its one genuine regression
+is `unverified-token-swap` (2/4 -> 1/4).
+
+Do NOT repeat the mistake of concluding a kind is unfixable from the dev slice: it was
+reported here that `malformed-address` "cannot be fixed by the prompt" on the strength of
+0/2 in every dev arm. The frozen set has 3 such cases and the clause fixes 2. **Two cases
+never support a claim about a kind** — the per-kind dev counts are 2 wide, so they are
+hypotheses, not results.
+
+Gemma and Qwen fail in **opposite** directions and never commit each other's error across 290
+cases: Gemma under-calls (0 spurious calls, ever), Qwen over-calls (0 no-call failures, ever).
+
 ## Conventions
 
 - `uv run` for Python; `uv run --with web3` for the (non-suite) fixture fetchers.

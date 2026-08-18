@@ -1,0 +1,72 @@
+# Qwen3-8B base as an ON-DEVICE competitor to the wallet's Gemma-4 E4B.
+#
+# Same quantization (Q4_K_M, 5.03 GB vs gemma4's 5.34 GB), same app-contract prompt, same
+# scorer, same dev slices. This is deliberately the GGUF rather than the hosted bf16 model
+# the earlier qwen3 column used (promptfooconfig.qwen3.yaml, OpenRouter): the question here
+# is what the WALLET could ship on a phone, and a hosted full-precision run would flatter
+# the comparison.
+#
+# SAMPLING IS QWEN'S OWN CARD, NOT THE HARNESS'S 0.2 — temperature 0.6, top_p 0.95,
+# top_k 20. The card is emphatic that greedy decoding degrades this model and causes endless
+# repetition, so forcing gemma4's settings onto it would measure a configuration its authors
+# warn against rather than the model. Sampling is therefore NOT constant across this
+# comparison, which is the same convention the four-model relaunch used.
+#
+# tool_format: json — Qwen emits Hermes-style <tool_call>{...}</tool_call> as text, decoded
+# by wallet_evals/json_tool_calls.py (wrappers only; it will not repair malformed JSON,
+# because that would erase a real failure).
+#
+# prompt_reference: qwen asserts the rendered prompt against the wallet's OWN Qwen dump
+# rather than the Gemma one. Without it this would silently compare against the wrong
+# family's dump — a bug that has already happened here once and was waved through with a
+# NOTE.
+#
+# max_tokens 2048, not gemma4's 1024: Qwen3 thinks at length and truncating its trace would
+# measure the budget instead of the model. Prompt (~800-1300) + 2048 still fits the pod's
+# 4096-token slots.
+#
+# Duplicate arms again, so Qwen's own run-to-run noise is visible rather than assumed.
+description: Qwen3-8B base (Q4_K_M, on-device) on RunPod — competitor to Gemma-4 E4B
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-base-a
+    config:
+      repo_id: Qwen/Qwen3-8B-GGUF
+      filename: Qwen3-8B-Q4_K_M.gguf
+      tool_format: json
+      prompt_reference: qwen
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 2048
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-base-b
+    config:
+      repo_id: Qwen/Qwen3-8B-GGUF
+      filename: Qwen3-8B-Q4_K_M.gguf
+      tool_format: json
+      prompt_reference: qwen
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 2048
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.dev.yaml') }}"

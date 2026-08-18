@@ -1,0 +1,90 @@
+# Temperature sweep on base Gemma-4 E4B, with the noise floor measured in the same run.
+#
+# The harness has always run this model at 0.2. This asks whether that is leaving accuracy
+# on the table in either direction: 0.0 (greedy, no sampling at all) and 0.8 (much more
+# sampling) against the 0.2 incumbent.
+#
+# ARMS 1 AND 2 ARE IDENTICAL ON PURPOSE. Control scores on this slice have come in at 132,
+# 133 and 128 of 145 with an unchanged prompt, so the run-to-run floor is around +/-5 cases
+# and a smaller difference is not a result. Measuring that floor inside this run is the only
+# way to know whether a temperature effect clears it. This is the check whose absence forced
+# the earlier withdrawal of safety-full's accuracy claim.
+#
+# Note greedy is not automatically the safe choice for reasoning models: Qwen3's card
+# explicitly forbids it ("DO NOT use greedy decoding ... endless repetitions"). Gemma-4's
+# does not, but the 0.0 arm is a measurement rather than an assumption.
+#
+# Everything else is held fixed and at app parity: same GGUF at the pinned revision, same
+# prompt (no candidate clauses), thinking ON, max_tokens 1024.
+description: Base Gemma-4 E4B on RunPod — temperature 0.0 vs 0.2 vs 0.8
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-t02-a
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-t02-b
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-t00
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.0
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-t08
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.8
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      prompt_variant: none
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.dev.yaml') }}"

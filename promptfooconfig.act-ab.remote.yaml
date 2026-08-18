@@ -1,0 +1,86 @@
+# REMOTE twin of promptfooconfig.act-ab.yaml — see that file for the rationale.
+# Only `remote_url` differs; generation moves to a rented GPU while rendering,
+# tool injection, output translation and scoring all stay local. Measured 4.8x
+# faster in wall clock (230s vs 1107s on the same 90 generations) — the win is
+# concurrency at -j 8, NOT a faster card: per-case latency is actually worse
+# (17.1s vs 11.2s median).
+#
+# All three arms run on the SAME device, so the comparison between them is clean.
+# Do NOT compare these numbers case-by-case against a local run: continuous
+# batching changes floating-point reduction order, and a device A/B on the same
+# slice agreed on only 82/90 cases (flips in both directions, arm totals intact).
+# ACT_NOT_ASK A/B on the untuned base — the largest single lever found so far.
+#
+# 40 of base's 74 non-safety failures on the frozen 1000-case set, and 11 of its 13 dev
+# failures, are one behaviour: it reasons to the right answer then asks a clarifying
+# question instead of emitting the call. All 11 dev failures end in a question mark.
+#
+# Designed and selected on DEV on purpose. The behaviour was first noticed in the
+# test-set export, so choosing wording against those cases would overfit the frozen
+# benchmark; the same shape is present on dev (11/13), which is where it gets tuned.
+#
+# THREE arms so the effect is attributable:
+#   none        — what the wallet sends today
+#   act         — ACT_NOT_ASK alone, to see its own cost/benefit
+#   safety+act  — the intended shipping config, since safety-full already won its own A/B
+#
+# Both slices, both bars: a clause that wins accuracy by emitting calls it should have
+# refused is a regression, and pf/tests.dev.safety.yaml is the only thing that catches
+# it. ACT_NOT_ASK ends with an explicit refusal carve-out for exactly this reason.
+description: Base Gemma-4 E4B on RunPod — act-not-ask alone and combined with safety-full
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-act-none
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-act-only
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      prompt_variant: act
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-act-safety
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_LLAMA_URL
+      prompt_variant: safety+act
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.dev.yaml') }}"
