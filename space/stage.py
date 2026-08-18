@@ -113,7 +113,28 @@ DATASET_FILES: tuple[tuple[str, str], ...] = (
     # which broke the export job outright.
     ("finetune/diag_sample.jsonl", "data/diag_sample.jsonl"),
     ("data_for_finetune/functiongemma_train.jsonl", "data/functiongemma_train.jsonl"),
+    # FOUR app-contract variants, because "the training data" is genuinely four
+    # files and publishing one of them is how the repo ended up shipping the
+    # superseded base-unit set for months:
+    #
+    #   *_train.jsonl                1768 rows, WALLET ONLY — the default mix
+    #   *_train.with-protocol.jsonl  1863 rows, + 95 Aave/Safe builder rows
+    #
+    # The with-protocol files are what gemma-4-E4B-wallet-ft-v4 and
+    # qwen3-8b-wallet-ft-v4 actually trained on, so without them neither published
+    # model is reproducible. The wallet-only files are the current default, because
+    # the builder rows teach a second tool contract (executeTx, base units) opposed
+    # to the app's own. Both are published and labelled rather than leaving the
+    # reader to guess which produced which artifact.
     ("data_for_finetune/gemma4_train.jsonl", "data/gemma4_train.jsonl"),
+    ("data_for_finetune/gemma4_train.with-protocol.jsonl",
+     "data/gemma4_train.with-protocol.jsonl"),
+    ("data_for_finetune/qwen_train.jsonl", "data/qwen_train.jsonl"),
+    ("data_for_finetune/qwen_train.with-protocol.jsonl",
+     "data/qwen_train.with-protocol.jsonl"),
+    # Qwen's encoder. Its absence made qwen3-8b-wallet-ft-v4 unreproducible from the
+    # published tree even though its data was byte-identical to gemma's in content.
+    ("scripts/generate_qwen_finetune_data.py", "scripts/generate_qwen_finetune_data.py"),
     *tuple((m, m) for m in GENERATOR_MODULES),
 )
 

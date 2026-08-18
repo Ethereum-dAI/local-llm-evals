@@ -132,16 +132,29 @@ def test_published_dataset_regenerates_its_own_data(tmp_path):
         _skip_if_only_gitignored(e)
 
     env = {**os.environ, "PYTHONPATH": str(dest / "src")}
-    for script, published in (("generate_finetune_data.py", "data/functiongemma_train.jsonl"),
-                              ("generate_gemma4_finetune_data.py", "data/gemma4_train.jsonl")):
-        out = tmp_path / f"regen-{script}.jsonl"
+    # (script, published path, extra flags). Every published JSONL must be
+    # reproducible, INCLUDING the with-protocol variants — those are what the two
+    # v4 models actually trained on, so an unreproducible one makes a published
+    # model unreproducible, which is the whole claim this test defends.
+    cases = (
+        ("generate_finetune_data.py", "data/functiongemma_train.jsonl", []),
+        ("generate_gemma4_finetune_data.py", "data/gemma4_train.jsonl", []),
+        ("generate_gemma4_finetune_data.py", "data/gemma4_train.with-protocol.jsonl",
+         ["--include-protocol-rows"]),
+        ("generate_qwen_finetune_data.py", "data/qwen_train.jsonl", []),
+        ("generate_qwen_finetune_data.py", "data/qwen_train.with-protocol.jsonl",
+         ["--include-protocol-rows"]),
+    )
+    for script, published, flags in cases:
+        label = f"{script}{' ' + ' '.join(flags) if flags else ''}"
+        out = tmp_path / f"regen-{published.replace('/', '_')}"
         proc = subprocess.run(
-            [sys.executable, str(dest / "scripts" / script), "--out", str(out)],
+            [sys.executable, str(dest / "scripts" / script), "--out", str(out), *flags],
             cwd=dest, env=env, capture_output=True, text=True)
         assert proc.returncode == 0, \
-            f"published tree cannot run {script}:\n{proc.stderr[-1500:]}"
+            f"published tree cannot run {label}:\n{proc.stderr[-1500:]}"
         assert _digest(out) == _digest(dest / published), \
-            f"{script} did not reproduce {published} byte-for-byte"
+            f"{label} did not reproduce {published} byte-for-byte"
 
 
 def test_published_modal_jobs_find_their_data_in_both_layouts(tmp_path):
