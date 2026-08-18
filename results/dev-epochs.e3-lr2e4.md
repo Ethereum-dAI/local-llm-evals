@@ -14,6 +14,14 @@ Training run: 1768 rows, 1592 train / 176 holdout (10%), LR 2e-4, 3 epochs.
 | epoch 1 (`checkpoint-100`) | 0.0068 | **67.6%** (98/145) |
 | epoch 2 (`checkpoint-200`) | 0.0022 | 57.2% (83/145) |
 | epoch 3 (`checkpoint-300`) | 0.0016 | 53.1% (77/145) |
+| `adapter-e3-lr2e4` (the shipped artifact) | 0.0016 | 53.1% (77/145) |
+
+The last row is a consistency check, and it passed to the case: the saved adapter
+reproduces `checkpoint-300` exactly (77/145). Two independent paths to the same
+weights — a raw trainer checkpoint vs. the saved adapter directory — give
+identical verdicts across all 145 cases, so the curve is not an artifact of how
+adapters are loaded, and `load_best_model_at_end` did genuinely restore epoch 3.
+The artifact the pipeline would have shipped is therefore the *worst* of the three.
 
 `eval_loss` falls monotonically; dev accuracy falls monotonically. Every epoch of
 apparent improvement cost real capability — **14.5 points across the run**.
