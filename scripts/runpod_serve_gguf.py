@@ -16,6 +16,35 @@ of the run time we are trying to save.
     uv run --with runpod python scripts/runpod_serve_gguf.py down --pod-id <id>
     uv run --with runpod python scripts/runpod_serve_gguf.py down --all
 
+STATUS: NOT WORKING YET. The pod launches and the price/capacity logic is sound, but
+llama-server never starts serving — `/health` returns 403 from the proxy indefinitely
+while `get_pod` reports `desired=RUNNING uptime=None ports=[(8080, False), ...]`.
+
+Read that state carefully, because it is the whole diagnosis: the PORTS come from the
+pod configuration, not from a listening process, so ports appearing means nothing.
+`uptime=None` persisting is the real signal — the container is not staying up. A 403
+from `*.proxy.runpod.net` is likewise not a rejection by our server; it is what the
+proxy returns when nothing is registered on the port.
+
+LEADING HYPOTHESIS, untested: RunPod's `docker_args` overrides the image ENTRYPOINT
+rather than appending to it, so the argument string (`--model-url …`) is executed as if
+it were the binary and the container dies immediately. The image's entrypoint is
+`/app/llama-server`. The fix is one of:
+
+  * `docker_args='bash -c "/app/llama-server --model-url … --host 0.0.0.0 …"'`
+    if docker_args replaces the entrypoint;
+  * leave the args bare (current behaviour) if it appends.
+
+The two are mutually exclusive and cannot both be right, so DO NOT guess: create one
+pod with `--keep-on-failure` and read the container log in the RunPod console, which
+settles it in one attempt instead of alternating blindly. Everything else in this file
+is already verified working.
+
+NOT A BLOCKER for any measurement. The same eval runs locally against the same GGUF —
+see promptfooconfig.safety-ab.yaml — and the local path is what produced every number
+in results/. This exists only to make the LARGER runs (the 1000-case benchmark, the
+fine-tune verification) minutes instead of hours.
+
 COST. Defaults to the cheapest 24 GB card (RTX A5000, ~$0.16/hr). A 525-generation
 A/B is minutes of GPU time, so the bill is cents — but only if the pod is terminated.
 `down --all` kills every pod this script created, and is safe to run repeatedly.
@@ -64,7 +93,8 @@ def _api_key() -> str:
     raise SystemExit("RUNPOD_API_KEY not in the environment or any parent .env")
 
 
-def _pick_gpu(runpod, prefer: str | None = None) -> str:
+def _rank_gpus(runpod, prefer: str | None = None,
+               max_price: float = 0.60) -> list[tuple]:
     """The cheapest launchable GPU with enough VRAM.
 
     Prices come from `get_gpu()` per card; both secure and community are considered
@@ -82,22 +112,17 @@ def _pick_gpu(runpod, prefer: str | None = None) -> str:
                   if p]
         if vram >= MIN_VRAM_GB and prices:
             candidates.append((min(prices), vram, detail["displayName"], entry["id"]))
+    candidates = [c for c in candidates if c[0] <= max_price]
     if not candidates:
-        raise SystemExit(f"no launchable GPU with >={MIN_VRAM_GB}GB VRAM")
+        raise SystemExit(f"no launchable GPU with >={MIN_VRAM_GB}GB VRAM under "
+                         f"${max_price:.2f}/hr — raise --max-price deliberately "
+                         f"rather than letting this pick an H200")
     candidates.sort()
     if prefer:
-        for price, vram, name, gid in candidates:
-            if prefer.lower() in name.lower():
-                print(f"[runpod] gpu: {name} {vram}GB ${price:.2f}/hr (requested)",
-                      flush=True)
-                return gid
-        print(f"[runpod] {prefer!r} not available, falling back to cheapest",
-              flush=True)
-    price, vram, name, gid = candidates[0]
-    others = ", ".join(f"{n} ${p:.2f}" for p, v, n, _ in candidates[1:4])
-    print(f"[runpod] gpu: {name} {vram}GB ${price:.2f}/hr  (next: {others})",
-          flush=True)
-    return gid
+        candidates.sort(key=lambda c: (prefer.lower() not in c[2].lower(), c[0]))
+    shown = ", ".join(f"{n} ${p:.2f}" for p, v, n, _ in candidates[:5])
+    print(f"[runpod] candidates in price order: {shown}", flush=True)
+    return candidates
 
 
 def _pod_state(runpod, pod_id: str) -> str:
@@ -173,17 +198,34 @@ def up(args) -> None:
         f"--model-url {model_url} --host 0.0.0.0 --port {PORT} "
         f"-ngl 99 -c {args.n_ctx} --parallel {args.parallel} --cont-batching"
     )
-    pod = runpod.create_pod(
-        name=f"{NAME_PREFIX}-{int(time.time())}",
-        image_name=IMAGE,
-        gpu_type_id=_pick_gpu(runpod, args.gpu),
-        cloud_type="ALL",
-        gpu_count=1,
-        container_disk_in_gb=args.disk,
-        ports=f"{PORT}/http",
-        docker_args=cmd,
-        env={"HF_HUB_ENABLE_HF_TRANSFER": "1"},
-    )
+    # Walk the price-ordered list. "There are no longer any instances available with
+    # the requested specifications" is routine for the cheap cards — capacity comes
+    # and goes minute to minute — so failing on the first choice would make this
+    # script work only by luck. Any card here runs a 5 GB Q4_K_M identically; only
+    # the price differs.
+    pod = None
+    errors: list[str] = []
+    for price, vram, name, gid in _rank_gpus(runpod, args.gpu, args.max_price):
+        try:
+            pod = runpod.create_pod(
+                name=f"{NAME_PREFIX}-{int(time.time())}",
+                image_name=IMAGE,
+                gpu_type_id=gid,
+                cloud_type="ALL",
+                gpu_count=1,
+                container_disk_in_gb=args.disk,
+                ports=f"{PORT}/http",
+                docker_args=cmd,
+                env={"HF_HUB_ENABLE_HF_TRANSFER": "1"},
+            )
+            print(f"[runpod] got {name} {vram}GB at ${price:.2f}/hr", flush=True)
+            break
+        except Exception as e:
+            errors.append(f"{name} (${price:.2f}): {e}")
+            print(f"[runpod] {name} unavailable, trying next", flush=True)
+    if pod is None:
+        raise SystemExit("[runpod] no capacity on any candidate:\n  "
+                         + "\n  ".join(errors))
     pod_id = pod["id"]
     url = f"https://{pod_id}-{PORT}.proxy.runpod.net"
     print(f"[runpod] pod {pod_id} created", flush=True)
@@ -237,6 +279,10 @@ def main() -> None:
                    help="concurrent slots; the point of renting a GPU is that "
                         "promptfoo can then run -j >1 instead of serialised")
     u.add_argument("--disk", type=int, default=30)
+    u.add_argument("--max-price", type=float, default=0.60,
+                   help="hard ceiling in $/hr. Any of these cards runs a 5 GB "
+                        "Q4_K_M the same, so there is no reason to fall back onto "
+                        "an H200 because the cheap ones were busy.")
     u.add_argument("--gpu", default=None,
                    help="substring of a preferred GPU name; falls back to the "
                         "cheapest with enough VRAM if it is unavailable")
