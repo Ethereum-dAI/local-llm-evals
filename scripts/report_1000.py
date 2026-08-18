@@ -219,11 +219,13 @@ def build_report(runs: list[Run]) -> list[str]:
     lines.extend(table(runs, "by family", lambda c: c["family"], width=30))
     lines.extend(table(
         runs, "by conversation mechanism (571 cases)", lambda c: c["mechanism"],
-        order=["progressive", "correction", "distractor", "switch"], width=30))
+        order=["progressive", "correction", "distractor", "switch",
+               "exact_output", "token_address"], width=30))
 
     # Rounds within each mechanism — the degradation curve, which is the whole
     # reason the slice spans 2-6 rounds rather than sitting at one length.
-    for mech in ("progressive", "correction", "distractor", "switch"):
+    for mech in ("progressive", "correction", "distractor", "switch",
+                 "exact_output", "token_address"):
         has = any(any(c["mechanism"] == mech for c in r.scored()) for r in runs)
         if not has:
             continue
@@ -231,10 +233,43 @@ def build_report(runs: list[Run]) -> list[str]:
             runs, f"  {mech}: accuracy by round",
             lambda c, m=mech: c["rounds"] if c["mechanism"] == m else None,
             order=[2, 3, 4, 5, 6], width=30))
+    lines.extend(table(runs, "by conversation mechanism x call/no-call",
+                       lambda c: (f"{c['mechanism']} "
+                                  f"({'call' if c['wants_call'] else 'NO call'})")
+                       if c["mechanism"] else None, width=34))
 
-    if len(runs) == 2:
+    # Pairwise where it is informative. With four runs the interesting pairs are
+    # each base-vs-fine-tune (what training did) and fine-tune-vs-fine-tune (what
+    # the base model did, on identical training data) — not all six combinations.
+    pairs = _pairs_of_interest(runs)
+    for a, b in pairs:
+        lines.extend(disagreement(a, b))
+    if not pairs and len(runs) == 2:
         lines.extend(disagreement(runs[0], runs[1]))
     return lines
+
+
+def _pairs_of_interest(runs: list[Run]) -> list[tuple[Run, Run]]:
+    """base->fine-tune within a family, then fine-tune across families.
+
+    Matched on the label, which is why the configs use stable labels: a run whose
+    label does not say which family and whether it is tuned cannot be paired, and
+    silently dropping it is better than guessing wrong.
+    """
+    def find(pred):
+        return [r for r in runs if pred(r.label)]
+
+    out: list[tuple[Run, Run]] = []
+    for family in ("gemma", "qwen"):
+        base = find(lambda l, f=family: f in l and "ft" not in l and "base" in l)
+        tuned = find(lambda l, f=family: f in l and "ft" in l)
+        if base and tuned:
+            out.append((base[0], tuned[0]))
+    gft = find(lambda l: "gemma" in l and "ft" in l)
+    qft = find(lambda l: "qwen" in l and "ft" in l)
+    if gft and qft:
+        out.append((gft[0], qft[0]))
+    return out
 
 
 def as_json(runs: list[Run]) -> dict:
@@ -303,6 +338,19 @@ def main() -> None:
         ap.error("give at least one export or --run LABEL=GLOB")
 
     print("\n".join(build_report(runs)))
+
+    # Compact per-model summary — the form that goes into a commit message.
+    print("\n" + "=" * 78)
+    print("SUMMARY (overall | tool-call cases | no-call cases)")
+    print("=" * 78)
+    for r in runs:
+        p, t = r.rate()
+        cp, ct = r.rate([c for c in r.scored() if c["wants_call"]])
+        np_, nt = r.rate([c for c in r.scored() if not c["wants_call"]])
+        flag = "  << TRUNCATED, DO NOT QUOTE" if r.truncated else ""
+        print(f"  {r.label:<30} {_pct(p, t)} ({p}/{t})   "
+              f"call {_pct(cp, ct)} ({cp}/{ct})   "
+              f"no-call {_pct(np_, nt)} ({np_}/{nt}){flag}")
     if args.json:
         args.json.write_text(json.dumps(as_json(runs), indent=2))
         print(f"\nWrote {args.json}")
