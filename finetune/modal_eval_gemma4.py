@@ -71,7 +71,13 @@ outputs = modal.Volume.from_name("gemma4-ft-outputs", create_if_missing=True)
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("git")
-    .pip_install("unsloth", "huggingface_hub", "pyyaml", "pydantic")
+    .pip_install("unsloth", "huggingface_hub", "pyyaml")
+    # LAST, and pinned: an unpinned `pydantic` in the line above resolved to the
+    # compiled 1.10 wheel, and wallet_evals.schema needs v2 (`model_validator`,
+    # `ConfigDict`) — the run died at import after paying for GPU startup. Keeping
+    # this as its own trailing layer means a future dep that drags in v1 gets
+    # overridden here rather than silently winning the resolve.
+    .pip_install("pydantic>=2.7")
     .env({"HF_HOME": "/root/.cache/huggingface"})
     .add_local_dir(str(_REPO / "src"), "/repo/src")
     .add_local_dir(str(_REPO / "pf"), "/repo/pf")
@@ -249,6 +255,23 @@ def _score_one(adapter: str, tests: list, tools_for) -> dict:
     return summary
 
 
+@app.function(image=image, timeout=600)
+def preflight() -> str:
+    """Import everything the GPU job needs, on CPU, for ~nothing.
+
+    An unpinned pydantic once resolved to 1.10 and the run died at
+    `from wallet_evals.parsing import parse_turn` — after paying A100 startup.
+    CPU seconds are free by comparison, so the cheap import check runs first and
+    an environment break fails before any GPU is allocated.
+    """
+    import sys
+    sys.path.insert(0, "/repo/src")
+    import pydantic
+    from wallet_evals.parsing import parse_turn  # noqa: F401
+    from wallet_evals.scorer import score_case  # noqa: F401
+    return f"pydantic {pydantic.VERSION}"
+
+
 @app.local_entrypoint()
 def main(dataset: str = "pf/tests.dev.yaml", tag: str = "",
          all_checkpoints: bool = True) -> None:
@@ -256,7 +279,12 @@ def main(dataset: str = "pf/tests.dev.yaml", tag: str = "",
 
         modal run finetune/modal_eval_gemma4.py --tag e3-lr2e4
         modal run finetune/modal_eval_gemma4.py \
-            --dataset pf/tests.generated.yaml --all-checkpoints False
+            --dataset pf/tests.generated.yaml --no-all-checkpoints
+
+    `all_checkpoints` is a bool, so Modal's CLI exposes it as the bare flag pair
+    `--all-checkpoints / --no-all-checkpoints`. Passing a value
+    (`--all-checkpoints True`) is read as a stray positional and exits non-zero
+    before anything runs.
 
     Defaults to pf/tests.dev.yaml because that is the selector of record. It is
     disjoint from pf/tests.combined.yaml by construction, so scoring it never
@@ -265,6 +293,7 @@ def main(dataset: str = "pf/tests.dev.yaml", tag: str = "",
     # spawn + --detach so a dropped client connection can't cancel the job. The
     # summary is printed to the logs ("[eval] SUMMARY: {...}"); read it with
     # `modal app logs <app-id>` if the client disconnects before it returns.
+    print(f"[eval] preflight: {preflight.remote()}", flush=True)
     call = evaluate.spawn(dataset=dataset, tag=tag,
                           all_checkpoints=all_checkpoints)
     print(f"SPAWNED evaluate call_id={call.object_id} — poll logs for '[eval] SUMMARY'.")
