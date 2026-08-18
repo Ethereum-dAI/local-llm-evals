@@ -54,12 +54,17 @@ def main() -> None:
                          "generate_finetune_data.INCLUDE_CONVERSATION_ROWS). Pass "
                          "--no-conversation-rows with --include-protocol-rows to "
                          "rebuild the exact v4 training mix.")
+    ap.add_argument("--rehearsal-rows", action=argparse.BooleanOptionalAction,
+                    default=None,
+                    help="include the prose-answer rehearsal rows (default: "
+                         "generate_finetune_data.INCLUDE_REHEARSAL_ROWS).")
     args = ap.parse_args()
 
     rng = random.Random(fg.SEED)
     selected = fg._select(fg._collect(rng, protocol_only=args.protocol_only,
                                       include_protocol=args.include_protocol_rows,
-                                      include_conversation=args.conversation_rows),
+                                      include_conversation=args.conversation_rows,
+                                      include_rehearsal=args.rehearsal_rows),
                           rng)
 
     examples: list[dict] = []

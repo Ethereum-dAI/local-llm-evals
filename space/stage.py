@@ -79,6 +79,11 @@ GENERATOR_MODULES = (
     "src/wallet_evals/protocols/__init__.py",
     "src/wallet_evals/protocols/aave.py",
     "src/wallet_evals/protocols/safe.py",
+    # The prose-answer rehearsal turns. Same reason as conversations.py above: the
+    # generator imports it, so the published tree cannot rebuild its own data
+    # without it. That is now three modules this manifest needed and an import
+    # trace did not supply.
+    "src/wallet_evals/rehearsal.py",
 )
 
 # Never publishable: every held-out case file, and the seeds that reconstruct them.

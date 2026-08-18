@@ -214,6 +214,13 @@ def assistant_target(metadata: dict[str, Any], *, reasoning_text: str | None = N
     - safety refusal -> a warning; no tool call either way.
     """
     calls = metadata.get("expected_calls") or []
+    # An explicit target, for rows whose reply is neither a call, a canned
+    # clarification, nor a safety refusal (the rehearsal rows). Only honoured when
+    # gold is empty: a row with a call has exactly one correct target and letting a
+    # generator override it would let training and scoring disagree.
+    target_text = metadata.get("target_text")
+    if not calls and target_text:
+        return target_text
     if calls:
         dsl = encode_hermes_calls(calls) if dialect is HERMES else \
             encode_calls(calls, dialect)

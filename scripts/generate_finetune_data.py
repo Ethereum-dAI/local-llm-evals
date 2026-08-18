@@ -42,6 +42,9 @@ from wallet_evals.conversations import (  # noqa: E402
     build_progressive_case, build_token_address_case,
 )
 from wallet_evals.finetune import case_to_example  # noqa: E402
+from wallet_evals.rehearsal import (  # noqa: E402
+    REHEARSAL_TURNS, build_rehearsal_case,
+)
 from pf.prompt import render, tools_for  # noqa: E402
 
 SEED = 20260710
@@ -218,7 +221,11 @@ REFUSAL_SCENARIOS = [
 TARGETS = {"transfer": 650, "swap": 650, "multiturn": 250, "ablation": 90,
            "safe": 40, "aave": 55, "refusal": 60, "separator": 80,
            # Multi-round buckets, one per mechanism (see CONVERSATION_TARGETS).
-           **{f"conversation-{m}": n for m, n in CONVERSATION_TARGETS.items()}}
+           **{f"conversation-{m}": n for m, n in CONVERSATION_TARGETS.items()},
+           # Every rehearsal turn, once. Small on purpose: it is a counterweight, and
+           # over-weighting "answer in prose" would trade premature calls for missed
+           # ones — the failure users would notice more.
+           "rehearsal": len(REHEARSAL_TURNS)}
 
 #: Whether the Aave/Safe transaction-builder rows (95: the `safe`/`aave` caps
 #: above) join the WALLET training mix.
@@ -243,6 +250,12 @@ INCLUDE_PROTOCOL_ROWS = False
 #: the wallet set teaches (app-side `transfer`/`swap`), so there is no second tool
 #: vocabulary to confuse. Turning it off reproduces the v4 training mix.
 INCLUDE_CONVERSATION_ROWS = True
+
+#: Whether the rehearsal rows join the mix (see wallet_evals/rehearsal.py). ON: the
+#: mix is otherwise ~97% call-emitting, and every measured regression is a case of
+#: calling when it should not have — premature calls on distractors, false refusals
+#: on unfamiliar ENS names, a call for an inexpressible exact-output swap.
+INCLUDE_REHEARSAL_ROWS = True
 
 # A 4+ digit integer part is the threshold at which the surface renders
 # comma-grouped in real usage (matches the eval's own arithmetic-separator
@@ -307,6 +320,7 @@ def _reasoning_text(intent: dict) -> str:
 def _collect(rng: random.Random, protocol_only: bool = False,
              include_protocol: bool = False,
              include_conversation: bool | None = None,
+             include_rehearsal: bool | None = None,
              ) -> list[tuple[dict, dict | None, str]]:
     """Build (test-dict, intent-or-None, bucket) triples from every source.
 
@@ -357,6 +371,9 @@ def _collect(rng: random.Random, protocol_only: bool = False,
     if INCLUDE_CONVERSATION_ROWS if include_conversation is None \
             else include_conversation:
         triples.extend(_collect_conversations(rng))
+    if INCLUDE_REHEARSAL_ROWS if include_rehearsal is None else include_rehearsal:
+        for i, turn in enumerate(REHEARSAL_TURNS, start=1):
+            triples.append((build_rehearsal_case(turn, rng, i), None, "rehearsal"))
     if INCLUDE_PROTOCOL_ROWS or include_protocol:
         triples.extend(_collect_protocol(rng))
     return triples
@@ -510,12 +527,17 @@ def main() -> None:
                          "INCLUDE_CONVERSATION_ROWS, currently on). Pass "
                          "--no-conversation-rows together with "
                          "--include-protocol-rows to rebuild the exact v4 mix.")
+    ap.add_argument("--rehearsal-rows", action=argparse.BooleanOptionalAction,
+                    default=None,
+                    help="include the prose-answer rehearsal rows (default: "
+                         "INCLUDE_REHEARSAL_ROWS, currently on).")
     args = ap.parse_args()
 
     rng = random.Random(SEED)
     selected = _select(_collect(rng, protocol_only=args.protocol_only,
                                 include_protocol=args.include_protocol_rows,
-                                include_conversation=args.conversation_rows), rng)
+                                include_conversation=args.conversation_rows,
+                                include_rehearsal=args.rehearsal_rows), rng)
 
     examples: list[dict] = []
     for test, intent in selected:

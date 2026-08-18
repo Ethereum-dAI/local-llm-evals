@@ -337,12 +337,20 @@ def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
         seen: set[str] = set()
         probes = [ex for ex in rows if not (ex["category"] in seen or seen.add(ex["category"]))]
         probed = len(probes)
+        # Render to TEXT, then encode with the underlying text tokenizer — the same
+        # two-step the eval script uses. E4B is multimodal, so `tokenizer` here is a
+        # PROCESSOR: asking it to tokenize directly (return_tensors/return_dict)
+        # sends it down the image-aware path, which expects content to be a list of
+        # parts and dies on a plain string with
+        # `AttributeError: 'str' object has no attribute 'items'`.
+        tk = getattr(tokenizer, "tokenizer", tokenizer)
         for ex in probes:
-            enc = tokenizer.apply_chat_template(
+            text_in = tokenizer.apply_chat_template(
                 ex["messages"][:-1], tools=ex["tools"], add_generation_prompt=True,
-                return_tensors="pt", return_dict=True,
+                tokenize=False,
             )
-            enc = {k: v.to(model.device) for k, v in enc.items() if hasattr(v, "to")}
+            enc = tk(text_in, return_tensors="pt",
+                     add_special_tokens=False).to(model.device)
             gen = model.generate(**enc, max_new_tokens=220, do_sample=False)
             text = tokenizer.decode(gen[0][enc["input_ids"].shape[1]:],
                                     skip_special_tokens=False)
@@ -353,7 +361,15 @@ def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
                   flush=True)
         print(f"[train] call-presence agreement: {hits}/{probed} probes", flush=True)
     except Exception as e:  # diagnostics only — adapter is already saved
-        print(f"[train] probe loop skipped ({type(e).__name__}: {e})", flush=True)
+        # Deliberately non-fatal: the adapter is on the volume and losing it over a
+        # broken diagnostic would be the worse outcome. But print the TRACEBACK, not
+        # just the message — this handler hid a one-line tokenizer bug behind
+        # "probe loop skipped" for an entire run, and a diagnostic that fails
+        # silently is indistinguishable from one that passes.
+        import traceback
+        print(f"[train] probe loop FAILED ({type(e).__name__}: {e}) — adapter is "
+              f"saved, but this check did not run:", flush=True)
+        traceback.print_exc()
 
     return (f"final_loss={stats.training_loss:.4f} "
             f"best_eval_loss=e{best[0]:.0f}/{best[1]:.4f} "
