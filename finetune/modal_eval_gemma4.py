@@ -87,10 +87,17 @@ image = (
 app = modal.App("gemma4-eval")
 
 
+#: The wallet's on-device base model, for the no-adapter arm of a prompt A/B. Must
+#: match modal_finetune_gemma4.BASE_MODEL or the comparison is against a different
+#: model rather than a different prompt.
+BASE_MODEL = "unsloth/gemma-4-E4B-it"
+
+
 @app.function(image=image, gpu="A100", timeout=7200,
               volumes={"/root/.cache/huggingface": hf_cache, "/outputs": outputs})
 def evaluate(dataset: str = "pf/tests.generated.yaml", tag: str = "",
-             all_checkpoints: bool = False, alpha_scales: str = "1.0") -> dict:
+             all_checkpoints: bool = False, alpha_scales: str = "1.0",
+             base_only: bool = False, prompt_variants: str = "none") -> dict:
     import json
     import sys
     from collections import defaultdict
@@ -120,25 +127,44 @@ def evaluate(dataset: str = "pf/tests.generated.yaml", tag: str = "",
     def tools_for(md: dict) -> list:
         return builder_tools if md.get("protocol") in ("aave", "safe") else app_tools
 
-    tests = yaml.safe_load(Path(f"/repo/{dataset}").read_text())
-    print(f"[eval] dataset = {dataset} ({len(tests)} cases)", flush=True)
+    # Comma-separated: one job can score the accuracy slice and the safety slice
+    # together. They answer different questions and a change must clear BOTH — the
+    # dev set has no safety cases of its own, which is why pf/tests.dev.safety.yaml
+    # exists.
+    tests = []
+    for name in [d.strip() for d in dataset.split(",") if d.strip()]:
+        part = yaml.safe_load(Path(f"/repo/{name}").read_text())
+        print(f"[eval] dataset = {name} ({len(part)} cases)", flush=True)
+        tests.extend(part)
+    print(f"[eval] {len(tests)} cases total", flush=True)
 
-    adapters = _adapters(tag, all_checkpoints)
+    adapters = [BASE_MODEL] if base_only else _adapters(tag, all_checkpoints)
     # Comma-separated so one job can sweep the load-time alpha scalar without a
     # redeploy. 1.0 is the trained adapter; below 1.0 softens its contribution.
     scales = [float(x) for x in alpha_scales.split(",") if x.strip()]
+    if base_only and scales != [1.0]:
+        raise SystemExit(
+            "base_only has no LoRA layers to rescale — alpha_scales must be 1.0"
+        )
+    variants = [v.strip() for v in prompt_variants.split(",") if v.strip()] or ["none"]
     print(f"[eval] scoring {len(adapters)} adapter(s) x {len(scales)} alpha scale(s) "
           f"{scales}: {adapters}", flush=True)
     per_adapter: dict[str, dict] = {}
 
     for adapter in adapters:
         for scale in scales:
-            # The key carries the scale, so a swept run cannot report two different
-            # configurations under one label.
-            label = adapter if scale == 1.0 else f"{adapter}@alpha{scale}"
-            print(f"\n[eval] ===== {label} =====", flush=True)
-            per_adapter[label] = _score_one(adapter, tests, tools_for,
-                                            alpha_scale=scale)
+            for variant in variants:
+                # The key carries BOTH knobs, so a swept run can never report two
+                # different configurations under one label.
+                label = adapter
+                if scale != 1.0:
+                    label = f"{label}@alpha{scale}"
+                if variant != "none":
+                    label = f"{label}+prompt:{variant}"
+                print(f"\n[eval] ===== {label} =====", flush=True)
+                per_adapter[label] = _score_one(adapter, tests, tools_for,
+                                                alpha_scale=scale,
+                                                prompt_variant=variant)
 
     best = max(per_adapter.items(), key=lambda kv: kv[1]["overall_pct"])
     print("\n[eval] ===== dev-set accuracy by checkpoint =====", flush=True)
@@ -176,7 +202,7 @@ def _rescale_lora(model, alpha_scale: float) -> int:
 
 
 def _score_one(adapter: str, tests: list, tools_for,
-               alpha_scale: float = 1.0) -> dict:
+               alpha_scale: float = 1.0, prompt_variant: str = "none") -> dict:
     """Generate and score one adapter over `tests`.
 
     Split out so the checkpoint loop reloads weights cleanly rather than trying to
@@ -227,7 +253,19 @@ def _score_one(adapter: str, tests: list, tools_for,
     if tk.pad_token is None:
         tk.pad_token = tk.eos_token
     tk.padding_side = "left"
-    texts = [tokenizer.apply_chat_template(render({"vars": t["vars"]}),
+    from pf.prompt_candidates import augment
+    if prompt_variant != "none":
+        # Rendered by the SAME renderer, then augmented — so the only difference
+        # between the arms of an A/B is the appended sentences. This is explicitly
+        # NOT prompt parity with the app; a winner has to land in the wallet and be
+        # re-dumped before it means anything about the product.
+        print(f"[eval] prompt variant {prompt_variant!r} appended to the system turn "
+              f"— NOT app parity", flush=True)
+
+    def _render(t):
+        return augment(render({"vars": t["vars"]}), prompt_variant)
+
+    texts = [tokenizer.apply_chat_template(_render(t),
                                            tools=tools_for(t["metadata"]),
                                            add_generation_prompt=True,
                                            tokenize=False) for t in tests]
@@ -318,7 +356,8 @@ def preflight() -> str:
 
 @app.local_entrypoint()
 def main(dataset: str = "pf/tests.dev.yaml", tag: str = "",
-         all_checkpoints: bool = True, alpha_scales: str = "1.0") -> None:
+         all_checkpoints: bool = True, alpha_scales: str = "1.0",
+         base_only: bool = False, prompt_variants: str = "none") -> None:
     """Score the DEV set on every per-epoch checkpoint (Phase 0c).
 
         modal run finetune/modal_eval_gemma4.py --tag e3-lr2e4
@@ -351,5 +390,6 @@ def main(dataset: str = "pf/tests.dev.yaml", tag: str = "",
               f"relying on evaluate()'s own imports", flush=True)
     call = evaluate.spawn(dataset=dataset, tag=tag,
                           all_checkpoints=all_checkpoints,
-                          alpha_scales=alpha_scales)
+                          alpha_scales=alpha_scales, base_only=base_only,
+                          prompt_variants=prompt_variants)
     print(f"SPAWNED evaluate call_id={call.object_id} — poll logs for '[eval] SUMMARY'.")
