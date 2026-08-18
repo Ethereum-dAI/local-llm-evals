@@ -300,6 +300,22 @@ def _load_tools(config: dict[str, Any], vars_: dict[str, Any]) -> list[dict]:
     return json.loads(_APP_TOOLS_PATH.read_text())
 
 
+def _augment_fn():
+    """Load prompt_candidates.augment from the file next to this one.
+
+    promptfoo loads this provider by PATH (`file://pf/provider_functiongemma.py`),
+    so the top-level `pf` package is not necessarily importable and
+    `from pf.prompt_candidates import ...` can fail depending on how the run was
+    launched. Resolving the sibling file directly works under every entrypoint.
+    """
+    import importlib.util
+    path = Path(__file__).with_name("prompt_candidates.py")
+    spec = importlib.util.spec_from_file_location("pf_prompt_candidates", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.augment
+
+
 def call_api(prompt: str, options: dict, context: dict) -> dict:
     config = (options or {}).get("config", {}) or {}
     # `tool_format` selects how the model's OUTPUT is read: the Gemma DSL (default,
@@ -311,6 +327,14 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
     try:
         llm = _load_model(config)
         messages = decode_prompt(prompt, system_role=system_role)
+        # A/B ONLY, and off unless a config names it. `prompt_variant` appends
+        # candidate sentences to the system turn so a wallet-prompt change can be
+        # measured before it is made. It reuses pf/prompt_candidates.py rather than
+        # restating the sentences, so the local arm and the Modal arm can never drift
+        # into testing different text. A run with this set is NOT app parity.
+        variant = config.get("prompt_variant", "none")
+        if variant and variant != "none":
+            messages = _augment_fn()(messages, variant)
         tools = _load_tools(config, (context or {}).get("vars", {}))
         # top_p/top_k/min_p are passed only when the config names them, so the
         # Gemma-family providers keep llama-cpp's defaults untouched while a

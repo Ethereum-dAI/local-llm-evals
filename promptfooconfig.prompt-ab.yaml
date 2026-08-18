@@ -1,0 +1,77 @@
+# PROMPT A/B on the untuned base model: does changing the WALLET's system prompt
+# fix what we have been trying to fix by fine-tuning?
+#
+# Both providers are the SAME GGUF at the same quant, template and sampling as the
+# published base run (90.7% on the 1000-case benchmark) — the config below is copied
+# from promptfooconfig.v4-vs-base.yaml deliberately, so the only difference between
+# the two rows is the four candidate sentences appended to the system turn. Any
+# delta is the prompt.
+#
+# Run BOTH slices (accuracy and safety); a prompt change has to clear both, and the
+# dev set has no safety cases of its own:
+#
+#   PROMPTFOO_CONFIG_DIR=.promptfoo-ab EVAL_DATASET=pf/tests.dev.yaml \
+#       scripts/eval.sh -c promptfooconfig.prompt-ab.yaml -j 1 --no-cache \
+#       -o runs/ab-dev.out.json
+#   PROMPTFOO_CONFIG_DIR=.promptfoo-ab EVAL_DATASET=pf/tests.dev.safety.yaml \
+#       scripts/eval.sh -c promptfooconfig.prompt-ab.yaml -j 1 --no-cache \
+#       -o runs/ab-safety.out.json
+#
+# -j 1 is required: both providers are local llama.cpp processes sharing one Metal
+# device, so concurrency contends for the GPU instead of speeding anything up.
+#
+# NOT app parity. `prompt_variant` appends text that the wallet does not send. A
+# winner has to land in the wallet, be re-dumped with `wallet-eval prompt-dump`, and
+# have every training JSONL regenerated — the rendered prompt is part of every
+# training row's input.
+description: Base Gemma-4 E4B — app prompt vs app prompt + four candidate sentences
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # ---- ARM A: the prompt the wallet actually sends, unchanged -----------------
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-prompt-current
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+      # Explicit rather than omitted, so the control arm's behaviour is stated
+      # rather than inferred from a default.
+      prompt_variant: none
+
+  # ---- ARM B: the same model, four sentences added ----------------------------
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-prompt-four
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+      prompt_variant: four
+
+# The real scorer. Omitting this does not fail loudly — promptfoo simply runs the
+# cases with NO assertion and reports 100% pass, which is how a first smoke run of
+# this config "passed" 2/2 while scoring nothing at all.
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+# Defaults to the dev set (the selector), not the frozen benchmark: this A/B must
+# not be iterated against the number we report.
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.dev.yaml') }}"
