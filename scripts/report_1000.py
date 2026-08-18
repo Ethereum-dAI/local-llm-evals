@@ -33,6 +33,22 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATASET_SIZE = 1000
 
+#: Case ids that are BYTE-IDENTICAL (vars + gold) to the published v4 429-case set
+#: on the Hub. Written by the comparability check; absent is fine.
+#:
+#: This is the ONLY subset on which a per-case comparison against the published
+#: numbers (base 89.7% / gemma-ft-v4 96.5% / qwen-ft-v4 94.4%) is honest. It comes
+#: to 349 cases — the frozen 307 plus the 42 extra refusals. The arithmetic slice
+#: is excluded because it was regenerated to fix a constant recipient, which both
+#: changed 12 shared cases and reshuffled which 40-per-action were drawn.
+_COMPARABLE = ROOT / "runs" / "comparable_case_ids.json"
+
+
+def comparable_ids() -> set[str]:
+    if not _COMPARABLE.exists():
+        return set()
+    return set(json.loads(_COMPARABLE.read_text()).get("identical", []))
+
 
 def _rounds(md: dict, vars_: dict) -> int:
     """User turns in the prompt. Prefer the metadata the generator declared; fall
@@ -222,6 +238,15 @@ def build_report(runs: list[Run]) -> list[str]:
     lines.extend(table(runs, "by rounds (1 = single-turn)",
                        lambda c: c["rounds"], order=[1, 2, 3, 4, 5, 6], width=30))
     lines.extend(table(runs, "by family", lambda c: c["family"], width=30))
+
+    # The subset a published-number comparison may legitimately use.
+    shared = comparable_ids()
+    if shared:
+        lines.extend(table(
+            runs,
+            f"vs the published v4 set: the {len(shared)} byte-identical cases only",
+            lambda c: ("byte-identical to published v4" if c["id"] in shared
+                       else "new or regenerated"), width=34))
     lines.extend(table(
         runs, "by conversation mechanism (571 cases)", lambda c: c["mechanism"],
         order=["progressive", "correction", "distractor", "switch",
