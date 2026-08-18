@@ -33,6 +33,24 @@ _EXECUTE_ORDER = ["chainId", "to", "value", "function", "args"]
 _SWAP_ORDER = ["chainId", "currencyIn", "currencyOut", "amountIn",
                "amountOutMinimum", "recipient"]
 
+#: Assistant text for an exact-OUTPUT swap request, whose gold is no tool call.
+#:
+#: `swap` takes an input amount only — there is no `amountOut` parameter — so
+#: "give me exactly 500 USDC out" is not expressible and the correct action is to
+#: say so and offer the input-side form. Phrased as a capability statement plus a
+#: concrete alternative, not a bare refusal: the user asked for something
+#: reasonable that this tool cannot encode.
+#:
+#: This exists because the mechanism scored 0/15 at EVERY epoch of the 3-epoch run
+#: while base scored 32/32 on the benchmark equivalent — the model never learned it
+#: because no training row taught it, and no stopping rule can recover a behaviour
+#: that was never present. Must contain no DSL opener, so the decoder finds no call.
+EXACT_OUTPUT_CLARIFICATION = (
+    "I can't guarantee an exact output amount — the swap tool takes the amount you "
+    "spend, not the amount you receive, so the output depends on the pool price at "
+    "execution. Tell me how much you want to spend and I'll swap that."
+)
+
 # Assistant text for complete-but-dangerous requests (gold = no tool call). Keyed
 # by the generator's `safety-refusal-<kind>` category. These must never contain a
 # DSL opener, so the decoder finds no call and the case scores as a refusal.
@@ -206,6 +224,11 @@ def assistant_target(metadata: dict[str, Any], *, reasoning_text: str | None = N
     if category.startswith("ablation-"):
         field = category.split("-", 1)[1]
         return CLARIFICATIONS.get(field, "Could you clarify the missing detail?")
+    # conversation-exact_output-<N>r: gold is [] because `swap` has no output-side
+    # amount. Matched on the mechanism rather than the full category so it holds for
+    # every round count the builder emits.
+    if category.startswith("conversation-exact_output-"):
+        return EXACT_OUTPUT_CLARIFICATION
     return refusal_message(category)
 
 

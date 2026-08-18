@@ -90,7 +90,7 @@ app = modal.App("gemma4-eval")
 @app.function(image=image, gpu="A100", timeout=7200,
               volumes={"/root/.cache/huggingface": hf_cache, "/outputs": outputs})
 def evaluate(dataset: str = "pf/tests.generated.yaml", tag: str = "",
-             all_checkpoints: bool = False) -> dict:
+             all_checkpoints: bool = False, alpha_scales: str = "1.0") -> dict:
     import json
     import sys
     from collections import defaultdict
@@ -124,12 +124,21 @@ def evaluate(dataset: str = "pf/tests.generated.yaml", tag: str = "",
     print(f"[eval] dataset = {dataset} ({len(tests)} cases)", flush=True)
 
     adapters = _adapters(tag, all_checkpoints)
-    print(f"[eval] scoring {len(adapters)} adapter(s): {adapters}", flush=True)
+    # Comma-separated so one job can sweep the load-time alpha scalar without a
+    # redeploy. 1.0 is the trained adapter; below 1.0 softens its contribution.
+    scales = [float(x) for x in alpha_scales.split(",") if x.strip()]
+    print(f"[eval] scoring {len(adapters)} adapter(s) x {len(scales)} alpha scale(s) "
+          f"{scales}: {adapters}", flush=True)
     per_adapter: dict[str, dict] = {}
 
     for adapter in adapters:
-        print(f"\n[eval] ===== {adapter} =====", flush=True)
-        per_adapter[adapter] = _score_one(adapter, tests, tools_for)
+        for scale in scales:
+            # The key carries the scale, so a swept run cannot report two different
+            # configurations under one label.
+            label = adapter if scale == 1.0 else f"{adapter}@alpha{scale}"
+            print(f"\n[eval] ===== {label} =====", flush=True)
+            per_adapter[label] = _score_one(adapter, tests, tools_for,
+                                            alpha_scale=scale)
 
     best = max(per_adapter.items(), key=lambda kv: kv[1]["overall_pct"])
     print("\n[eval] ===== dev-set accuracy by checkpoint =====", flush=True)
@@ -143,7 +152,31 @@ def evaluate(dataset: str = "pf/tests.generated.yaml", tag: str = "",
     return summary
 
 
-def _score_one(adapter: str, tests: list, tools_for) -> dict:
+def _rescale_lora(model, alpha_scale: float) -> int:
+    """Multiply every LoRA layer's scaling factor by `alpha_scale`, in place.
+
+    Unsloth's guide suggests softening a trained adapter by halving alpha. That is
+    a pure load-time scalar — no retraining — so it is the cheapest available probe
+    of "is the forgetting just the adapter shouting over the base model?".
+
+    Returns the number of layers touched. The caller MUST check it: PEFT's internals
+    move around, and a rename would turn this into a silent no-op that reports the
+    unscaled model's score under a scaled label — the same class of bug as an
+    inert selector.
+    """
+    touched = 0
+    for module in model.modules():
+        scaling = getattr(module, "scaling", None)
+        if isinstance(scaling, dict) and scaling:
+            for key, value in scaling.items():
+                if isinstance(value, (int, float)):
+                    scaling[key] = value * alpha_scale
+                    touched += 1
+    return touched
+
+
+def _score_one(adapter: str, tests: list, tools_for,
+               alpha_scale: float = 1.0) -> dict:
     """Generate and score one adapter over `tests`.
 
     Split out so the checkpoint loop reloads weights cleanly rather than trying to
@@ -174,6 +207,17 @@ def _score_one(adapter: str, tests: list, tools_for) -> dict:
         load_in_4bit=False, full_finetuning=False,
     )
     FastModel.for_inference(model)
+
+    if alpha_scale != 1.0:
+        touched = _rescale_lora(model, alpha_scale)
+        if touched == 0:
+            raise SystemExit(
+                f"alpha_scale={alpha_scale} requested but no LoRA scaling factors "
+                f"were found — refusing to report an unscaled score under a scaled "
+                f"label (PEFT internals moved; fix _rescale_lora)"
+            )
+        print(f"[eval] alpha_scale={alpha_scale} applied to {touched} LoRA layers",
+              flush=True)
 
     # Gemma-4 E4B is multimodal: FastModel returns a PROCESSOR, whose __call__
     # expects text=/images= (a positional batch misroutes to images -> text=None).
@@ -274,7 +318,7 @@ def preflight() -> str:
 
 @app.local_entrypoint()
 def main(dataset: str = "pf/tests.dev.yaml", tag: str = "",
-         all_checkpoints: bool = True) -> None:
+         all_checkpoints: bool = True, alpha_scales: str = "1.0") -> None:
     """Score the DEV set on every per-epoch checkpoint (Phase 0c).
 
         modal run finetune/modal_eval_gemma4.py --tag e3-lr2e4
@@ -293,7 +337,19 @@ def main(dataset: str = "pf/tests.dev.yaml", tag: str = "",
     # spawn + --detach so a dropped client connection can't cancel the job. The
     # summary is printed to the logs ("[eval] SUMMARY: {...}"); read it with
     # `modal app logs <app-id>` if the client disconnects before it returns.
-    print(f"[eval] preflight: {preflight.remote()}", flush=True)
+    # Best-effort. `--detach` stops the ephemeral app as soon as the entrypoint's
+    # work is dispatched, which races `.remote()` and surfaces as
+    # `ConflictError: function ... is stopped` even though the container ran fine.
+    # A failure to COLLECT the preflight result is not evidence of a broken image,
+    # so it must not block the run. The real guard is that `evaluate` imports the
+    # scorer at its top, before any model is loaded — the preflight only makes that
+    # failure cheaper, it is not the thing preventing it.
+    try:
+        print(f"[eval] preflight: {preflight.remote()}", flush=True)
+    except Exception as exc:  # noqa: BLE001 - any client-side failure is tolerable
+        print(f"[eval] preflight skipped ({type(exc).__name__}: {exc}) — "
+              f"relying on evaluate()'s own imports", flush=True)
     call = evaluate.spawn(dataset=dataset, tag=tag,
-                          all_checkpoints=all_checkpoints)
+                          all_checkpoints=all_checkpoints,
+                          alpha_scales=alpha_scales)
     print(f"SPAWNED evaluate call_id={call.object_id} — poll logs for '[eval] SUMMARY'.")

@@ -52,7 +52,20 @@ MAX_SEQ_LEN = 2048
 #: 90.7%, collapsing from 95.8% at one round to 49.0% at six. Base is flat across
 #: depth, so the capability was trained AWAY — which points at over-training on a
 #: narrow set rather than at missing data.
-EPOCHS = 3
+#:
+#: 1, not 3, since 2026-08-18. Phase 0c scored all three per-epoch checkpoints of
+#: the 3-epoch run on the 145-case OOD dev set and the curve is monotonically
+#: DOWN while eval_loss is monotonically down too:
+#:
+#:     epoch 1  eval_loss 0.0068  ->  67.6% (98/145)
+#:     epoch 2  eval_loss 0.0022  ->  57.2% (83/145)
+#:     epoch 3  eval_loss 0.0016  ->  53.1% (77/145)
+#:
+#: So epochs 2-3 cost 14.5 points of out-of-distribution accuracy while looking
+#: like an improvement from the inside. `distractor` takes nearly all of it
+#: (29/40 -> 14/40) — over-training specifically destroys the ability to ignore
+#: irrelevant conversational content. See results/dev-epochs.e3-lr2e4.md.
+EPOCHS = 1
 # E4B is ~15x FunctionGemma-270m: small per-device batch + accumulation to reach
 # an effective batch of 16 without exceeding 40 GB.
 BATCH = 4
@@ -65,11 +78,15 @@ LEARNING_RATE = 2e-4
 #: selector is pf/tests.dev.yaml scored by the harness's own scorer
 #: (finetune/modal_eval_gemma4.py), which is out-of-distribution by construction.
 HOLDOUT_FRAC = 0.10
-#: Stop if eval_loss has not improved for this many evaluations. Evaluation and
-#: saving both run per EPOCH, so with EPOCHS=3 this rarely fires — that is
-#: deliberate for the sweep, where the point is to keep every epoch's checkpoint
-#: and score them all rather than to stop early.
-EARLY_STOPPING_PATIENCE = 2
+#: NO early stopping, deliberately, and no `metric_for_best_model`. Phase 0c
+#: measured eval_loss to be ANTI-correlated with task accuracy over the range that
+#: matters (see EPOCHS above): selecting the minimum reliably picks the WORST of
+#: the three checkpoints. An EarlyStoppingCallback watching eval_loss is therefore
+#: not a safety net here, it is a mechanism for shipping the wrong weights while
+#: appearing principled. eval_loss is still computed and logged, purely as a
+#: diagnostic that training ran — never as a selector. The selector of record is
+#: pf/tests.dev.yaml scored by the harness's own scorer
+#: (finetune/modal_eval_gemma4.py), which is out-of-distribution by construction.
 
 HF_CACHE_DIR = "/root/.cache/huggingface"
 OUTPUTS_DIR = "/outputs"
@@ -155,7 +172,6 @@ def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
     from unsloth import FastModel
     from unsloth.chat_templates import train_on_responses_only
     from datasets import Dataset
-    from transformers import EarlyStoppingCallback
     from trl import SFTConfig, SFTTrainer
 
     model, tokenizer = FastModel.from_pretrained(
@@ -232,17 +248,18 @@ def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
             logging_steps=5, optim="adamw_8bit", weight_decay=0.01,
             lr_scheduler_type="linear", seed=3407, output_dir=run_dir,
             report_to="none",
-            # Evaluate and save PER EPOCH, and keep every epoch. The sweep needs all
-            # of them on disk: eval_loss picks one checkpoint, dev-set accuracy may
-            # pick another, and that disagreement is itself the result we are after.
-            # `load_best_model_at_end` additionally requires the two strategies to
-            # match, which is why both are "epoch".
+            # Evaluate and save PER EPOCH, and keep every epoch. Every checkpoint
+            # stays on disk so modal_eval_gemma4.py can score them all — that
+            # disagreement between eval_loss and dev accuracy was the Phase 0c
+            # result, and keeping the checkpoints is what made it measurable.
             eval_strategy="epoch",
             save_strategy="epoch",
             save_total_limit=epochs,
-            load_best_model_at_end=True,
-            metric_for_best_model="eval_loss",
-            greater_is_better=False,
+            # NO load_best_model_at_end / metric_for_best_model. Phase 0c showed
+            # eval_loss is anti-correlated with dev accuracy here, so "best by
+            # eval_loss" restored the worst checkpoint of three. The adapter saved
+            # below is therefore the FINAL weights, and checkpoint selection is a
+            # separate, explicit step against pf/tests.dev.yaml.
             # Unsloth's documented settings for the eval loop, which OOMs readily:
             # keep the eval batch at 2 and accumulate. bf16 (not fp16) because this
             # is an A100.
@@ -250,8 +267,6 @@ def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
             per_device_eval_batch_size=2,
             eval_accumulation_steps=4,
         ),
-        callbacks=[EarlyStoppingCallback(
-            early_stopping_patience=EARLY_STOPPING_PATIENCE)],
     )
     # Mask everything up to each model turn: loss only on the assistant response.
     trainer = train_on_responses_only(
@@ -277,27 +292,29 @@ def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
     # PROVE eval_loss was actually produced. Unsloth issue #1019 ("No Validation
     # Loss logged (possibly related to train_on_responses_only?)") is still labelled
     # "fixed - pending confirmation", and this script does use
-    # train_on_responses_only — so a silently absent eval_loss would leave
-    # load_best_model_at_end and EarlyStoppingCallback selecting on nothing while
-    # appearing to work. Fail loudly instead: a sweep whose selector is inert is
-    # worse than no sweep, because the numbers still look meaningful.
+    # train_on_responses_only. Nothing SELECTS on eval_loss any more, so an absent
+    # value can no longer ship the wrong weights — but it is still the only evidence
+    # the eval loop ran at all, and a run that silently stopped evaluating is a run
+    # whose diagnostics are fiction. Fail loudly rather than print nothing.
     evals = [(e.get("epoch"), e["eval_loss"])
              for e in trainer.state.log_history if "eval_loss" in e]
     if not evals:
         raise SystemExit(
             "no eval_loss in trainer.state.log_history — the evaluation loop did "
-            "not report. Do not trust load_best_model_at_end or early stopping "
-            "until this is resolved (see unslothai/unsloth#1019)."
+            "not report (see unslothai/unsloth#1019). Nothing selects on it, but "
+            "its absence means the holdout was never scored."
         )
     print("[train] eval_loss by epoch: "
           + "  ".join(f"e{ep:.0f}={loss:.4f}" for ep, loss in evals), flush=True)
     best = min(evals, key=lambda t: t[1])
-    print(f"[train] best eval_loss epoch={best[0]:.0f} loss={best[1]:.4f} "
-          f"(load_best_model_at_end restored this one)", flush=True)
-    # NOTE: best-by-eval_loss is NOT necessarily best-by-task-accuracy. The holdout
-    # is in-distribution (85.9% single-turn), so it cannot see a multi-round
-    # collapse. finetune/modal_eval_gemma4.py scores every checkpoint below against
-    # pf/tests.dev.yaml, and that is the selector of record.
+    print(f"[train] lowest eval_loss epoch={best[0]:.0f} loss={best[1]:.4f} "
+          f"— DIAGNOSTIC ONLY, not the selector and not restored", flush=True)
+    # MEASURED, not merely suspected: best-by-eval_loss is ANTI-correlated with
+    # task accuracy here. Phase 0c scored every checkpoint of the 3-epoch run on
+    # pf/tests.dev.yaml and eval_loss's pick (epoch 3, 0.0016) came last at 53.1%
+    # while epoch 1 (0.0068) led at 67.6%. The holdout is in-distribution (85.9%
+    # single-turn) and already solved by epoch 1, so its remaining headroom is all
+    # memorization. finetune/modal_eval_gemma4.py is the selector of record.
 
     # Save the LoRA adapter to a STABLE path FIRST (export/eval read this — no
     # checkpoint number to track), then commit — so nothing below can cost us the

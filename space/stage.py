@@ -67,6 +67,11 @@ GRADIO_FILES: tuple[tuple[str, str], ...] = (
 # `pyproject.toml` (space/dataset_pyproject.toml) puts `src` on the path.
 GENERATOR_MODULES = (
     "src/wallet_evals/__init__.py",
+    # The multi-round conversation builders. generate_finetune_data.py imports these
+    # for the 500 training rows that close the depth collapse, so the published tree
+    # cannot regenerate its own data without them —
+    # test_published_dataset_regenerates_its_own_data caught exactly that.
+    "src/wallet_evals/conversations.py",
     "src/wallet_evals/finetune.py",
     "src/wallet_evals/gemma_dsl.py",
     "src/wallet_evals/generation.py",
@@ -76,13 +81,30 @@ GENERATOR_MODULES = (
     "src/wallet_evals/protocols/safe.py",
 )
 
-# Never publishable: the 307 held-out cases and the seeds/scorer that reconstruct
-# them. `test_space_staging.py` enforces this list against the manifest.
+# Never publishable: every held-out case file, and the seeds that reconstruct them.
+# `test_space_staging.py` enforces this list against the manifest, by path AND by
+# content hash, so a rename cannot slip through.
+#
+# This list used to name only the original 307-case set. The benchmark has since
+# grown to 1000 cases across several files and gained a dev set, and neither was
+# covered — so the guard was silently protecting the least important of them. The
+# two that matter most are the newest: `tests.combined.yaml` is the number we
+# REPORT, and `tests.dev.yaml` is the selector every checkpoint decision runs
+# through. Publishing either would invalidate the results rather than merely leak
+# some data.
 EVAL_SET_FILES = (
     "pf/tests.generated.yaml",
     "pf/tests.protocols.yaml",
     "pf/tests.yaml",
+    "pf/tests.combined.yaml",
+    "pf/tests.conversations.yaml",
+    "pf/tests.app-contract.yaml",
+    "pf/tests.refusals.yaml",
+    "pf/tests.dev.yaml",
     "datasets/seeds.yaml",
+    "datasets/seeds.conversations.yaml",
+    "datasets/seeds.arithmetic.yaml",
+    "datasets/seeds.dev.yaml",
 )
 
 DATASET_FILES: tuple[tuple[str, str], ...] = (

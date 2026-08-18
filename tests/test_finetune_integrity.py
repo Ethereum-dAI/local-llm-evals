@@ -208,6 +208,12 @@ def test_the_published_v4_mix_is_reproducible():
     flag the repo could no longer rebuild what those weights came from — the
     card would describe a mix nothing in the tree produces. Reproducibility of a
     shipped artifact should not require editing a module constant.
+
+    `--no-conversation-rows` is the second half of that: the default set gained 500
+    multi-round rows after v4 shipped (see CONVERSATION_TARGETS), so reproducing v4
+    now means switching both additions off. Two flags, both explicit — a shipped
+    artifact whose training mix cannot be rebuilt is undocumented in practice
+    however carefully the card is written.
     """
     import subprocess
     import tempfile
@@ -216,7 +222,8 @@ def test_the_published_v4_mix_is_reproducible():
         out = Path(td) / "v4mix.jsonl"
         proc = subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "generate_finetune_data.py"),
-             "--include-protocol-rows", "--out", str(out)],
+             "--include-protocol-rows", "--no-conversation-rows",
+             "--out", str(out)],
             cwd=ROOT, capture_output=True, text=True)
         assert proc.returncode == 0, proc.stderr[-1500:]
         rows = [json.loads(line) for line in out.read_text().splitlines() if line]
