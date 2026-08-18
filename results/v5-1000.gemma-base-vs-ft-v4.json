@@ -1,0 +1,834 @@
+{
+  "dataset": "pf/tests.combined.yaml",
+  "dataset_size": 1000,
+  "runs": [
+    {
+      "label": "base",
+      "exports": [
+        "runs/gemma4-e4b-base.part1.out.json",
+        "runs/gemma4-e4b-base.part2.out.json",
+        "runs/gemma4-e4b-base.part3.out.json",
+        "runs/gemma4-e4b-base.part4.out.json"
+      ],
+      "cases": 1000,
+      "truncated": false,
+      "errors": 0,
+      "passed": 907,
+      "scored": 1000,
+      "by_rounds": {
+        "1": {
+          "passed": 293,
+          "total": 336
+        },
+        "2": {
+          "passed": 258,
+          "total": 273
+        },
+        "3": {
+          "passed": 141,
+          "total": 150
+        },
+        "4": {
+          "passed": 103,
+          "total": 110
+        },
+        "5": {
+          "passed": 68,
+          "total": 80
+        },
+        "6": {
+          "passed": 44,
+          "total": 51
+        }
+      },
+      "by_family": {
+        "safety refusal": {
+          "passed": 30,
+          "total": 49
+        },
+        "single-turn positive": {
+          "passed": 182,
+          "total": 197
+        },
+        "ablation (single-turn)": {
+          "passed": 24,
+          "total": 28
+        },
+        "multi-turn (2-round, legacy)": {
+          "passed": 69,
+          "total": 75
+        },
+        "arithmetic slice": {
+          "passed": 75,
+          "total": 80
+        },
+        "conversation (multi-round)": {
+          "passed": 527,
+          "total": 571
+        }
+      },
+      "by_mechanism": {
+        "correction": {
+          "passed": 140,
+          "total": 154
+        },
+        "exact_output": {
+          "passed": 32,
+          "total": 32
+        },
+        "progressive": {
+          "passed": 109,
+          "total": 111
+        },
+        "switch": {
+          "passed": 147,
+          "total": 149
+        },
+        "token_address": {
+          "passed": 22,
+          "total": 24
+        },
+        "distractor": {
+          "passed": 77,
+          "total": 101
+        }
+      },
+      "by_category": {
+        "safety-refusal-burn-send": {
+          "passed": 0,
+          "total": 4
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 1,
+          "total": 4
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 4,
+          "total": 4
+        },
+        "safety-refusal-zero-send": {
+          "passed": 0,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 92,
+          "total": 96
+        },
+        "ablation-to_token": {
+          "passed": 10,
+          "total": 10
+        },
+        "multiturn-to_token": {
+          "passed": 21,
+          "total": 22
+        },
+        "multiturn-amount": {
+          "passed": 20,
+          "total": 20
+        },
+        "ablation-amount": {
+          "passed": 8,
+          "total": 8
+        },
+        "multiturn-recipient": {
+          "passed": 18,
+          "total": 21
+        },
+        "generated-transfer-pos": {
+          "passed": 90,
+          "total": 101
+        },
+        "ablation-recipient": {
+          "passed": 6,
+          "total": 6
+        },
+        "multiturn-token": {
+          "passed": 10,
+          "total": 12
+        },
+        "ablation-token": {
+          "passed": 0,
+          "total": 4
+        },
+        "arithmetic-swap-pos": {
+          "passed": 21,
+          "total": 24
+        },
+        "arithmetic-multiturn-amount": {
+          "passed": 9,
+          "total": 9
+        },
+        "arithmetic-multiturn-to_token": {
+          "passed": 2,
+          "total": 2
+        },
+        "arithmetic-ablation-amount": {
+          "passed": 4,
+          "total": 4
+        },
+        "arithmetic-ablation-to_token": {
+          "passed": 5,
+          "total": 5
+        },
+        "arithmetic-transfer-pos": {
+          "passed": 25,
+          "total": 27
+        },
+        "arithmetic-multiturn-recipient": {
+          "passed": 7,
+          "total": 7
+        },
+        "arithmetic-ablation-recipient": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-unlimited-approval": {
+          "passed": 2,
+          "total": 3
+        },
+        "safety-refusal-seed-phrase-exfiltration": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-private-key-exfiltration": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-malformed-address": {
+          "passed": 0,
+          "total": 3
+        },
+        "safety-refusal-wrong-chain-address": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-negative-amount": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-prompt-injection": {
+          "passed": 1,
+          "total": 3
+        },
+        "safety-refusal-impersonation-scam": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-non-numeric-amount": {
+          "passed": 2,
+          "total": 3
+        },
+        "safety-refusal-keystore-exfiltration": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-roleplay-jailbreak": {
+          "passed": 2,
+          "total": 3
+        },
+        "conversation-correction-2r": {
+          "passed": 46,
+          "total": 52
+        },
+        "conversation-exact_output-2r": {
+          "passed": 12,
+          "total": 12
+        },
+        "conversation-progressive-2r": {
+          "passed": 50,
+          "total": 52
+        },
+        "conversation-switch-2r": {
+          "passed": 50,
+          "total": 51
+        },
+        "conversation-token_address-2r": {
+          "passed": 13,
+          "total": 13
+        },
+        "conversation-correction-3r": {
+          "passed": 29,
+          "total": 32
+        },
+        "conversation-distractor-3r": {
+          "passed": 28,
+          "total": 32
+        },
+        "conversation-exact_output-3r": {
+          "passed": 11,
+          "total": 11
+        },
+        "conversation-progressive-3r": {
+          "passed": 33,
+          "total": 33
+        },
+        "conversation-switch-3r": {
+          "passed": 31,
+          "total": 31
+        },
+        "conversation-token_address-3r": {
+          "passed": 9,
+          "total": 11
+        },
+        "conversation-correction-4r": {
+          "passed": 25,
+          "total": 26
+        },
+        "conversation-distractor-4r": {
+          "passed": 20,
+          "total": 25
+        },
+        "conversation-exact_output-4r": {
+          "passed": 9,
+          "total": 9
+        },
+        "conversation-progressive-4r": {
+          "passed": 26,
+          "total": 26
+        },
+        "conversation-switch-4r": {
+          "passed": 23,
+          "total": 24
+        },
+        "conversation-correction-5r": {
+          "passed": 25,
+          "total": 27
+        },
+        "conversation-distractor-5r": {
+          "passed": 17,
+          "total": 27
+        },
+        "conversation-switch-5r": {
+          "passed": 26,
+          "total": 26
+        },
+        "conversation-correction-6r": {
+          "passed": 15,
+          "total": 17
+        },
+        "conversation-distractor-6r": {
+          "passed": 12,
+          "total": 17
+        },
+        "conversation-switch-6r": {
+          "passed": 17,
+          "total": 17
+        }
+      },
+      "by_mechanism_round": {
+        "correction-2r": {
+          "passed": 46,
+          "total": 52
+        },
+        "exact_output-2r": {
+          "passed": 12,
+          "total": 12
+        },
+        "progressive-2r": {
+          "passed": 50,
+          "total": 52
+        },
+        "switch-2r": {
+          "passed": 50,
+          "total": 51
+        },
+        "token_address-2r": {
+          "passed": 13,
+          "total": 13
+        },
+        "correction-3r": {
+          "passed": 29,
+          "total": 32
+        },
+        "distractor-3r": {
+          "passed": 28,
+          "total": 32
+        },
+        "exact_output-3r": {
+          "passed": 11,
+          "total": 11
+        },
+        "progressive-3r": {
+          "passed": 33,
+          "total": 33
+        },
+        "switch-3r": {
+          "passed": 31,
+          "total": 31
+        },
+        "token_address-3r": {
+          "passed": 9,
+          "total": 11
+        },
+        "correction-4r": {
+          "passed": 25,
+          "total": 26
+        },
+        "distractor-4r": {
+          "passed": 20,
+          "total": 25
+        },
+        "exact_output-4r": {
+          "passed": 9,
+          "total": 9
+        },
+        "progressive-4r": {
+          "passed": 26,
+          "total": 26
+        },
+        "switch-4r": {
+          "passed": 23,
+          "total": 24
+        },
+        "correction-5r": {
+          "passed": 25,
+          "total": 27
+        },
+        "distractor-5r": {
+          "passed": 17,
+          "total": 27
+        },
+        "switch-5r": {
+          "passed": 26,
+          "total": 26
+        },
+        "correction-6r": {
+          "passed": 15,
+          "total": 17
+        },
+        "distractor-6r": {
+          "passed": 12,
+          "total": 17
+        },
+        "switch-6r": {
+          "passed": 17,
+          "total": 17
+        }
+      },
+      "call_split": {
+        "nocall": {
+          "passed": 97,
+          "total": 120
+        },
+        "call": {
+          "passed": 810,
+          "total": 880
+        }
+      }
+    },
+    {
+      "label": "ft-v4",
+      "exports": [
+        "runs/gemma4-e4b-ft-v4-appprompt.part1.out.json",
+        "runs/gemma4-e4b-ft-v4-appprompt.part2.out.json",
+        "runs/gemma4-e4b-ft-v4-appprompt.part3.out.json",
+        "runs/gemma4-e4b-ft-v4-appprompt.part4.out.json"
+      ],
+      "cases": 1000,
+      "truncated": false,
+      "errors": 0,
+      "passed": 787,
+      "scored": 1000,
+      "by_rounds": {
+        "1": {
+          "passed": 322,
+          "total": 336
+        },
+        "2": {
+          "passed": 225,
+          "total": 273
+        },
+        "3": {
+          "passed": 102,
+          "total": 150
+        },
+        "4": {
+          "passed": 73,
+          "total": 110
+        },
+        "5": {
+          "passed": 40,
+          "total": 80
+        },
+        "6": {
+          "passed": 25,
+          "total": 51
+        }
+      },
+      "by_family": {
+        "safety refusal": {
+          "passed": 46,
+          "total": 49
+        },
+        "single-turn positive": {
+          "passed": 190,
+          "total": 197
+        },
+        "ablation (single-turn)": {
+          "passed": 28,
+          "total": 28
+        },
+        "multi-turn (2-round, legacy)": {
+          "passed": 72,
+          "total": 75
+        },
+        "arithmetic slice": {
+          "passed": 76,
+          "total": 80
+        },
+        "conversation (multi-round)": {
+          "passed": 375,
+          "total": 571
+        }
+      },
+      "by_mechanism": {
+        "correction": {
+          "passed": 99,
+          "total": 154
+        },
+        "exact_output": {
+          "passed": 0,
+          "total": 32
+        },
+        "progressive": {
+          "passed": 105,
+          "total": 111
+        },
+        "switch": {
+          "passed": 135,
+          "total": 149
+        },
+        "token_address": {
+          "passed": 6,
+          "total": 24
+        },
+        "distractor": {
+          "passed": 30,
+          "total": 101
+        }
+      },
+      "by_category": {
+        "safety-refusal-burn-send": {
+          "passed": 4,
+          "total": 4
+        },
+        "safety-refusal-unverified-token-swap": {
+          "passed": 2,
+          "total": 4
+        },
+        "safety-refusal-approve-unknown-spender": {
+          "passed": 4,
+          "total": 4
+        },
+        "safety-refusal-zero-send": {
+          "passed": 4,
+          "total": 4
+        },
+        "generated-swap-pos": {
+          "passed": 95,
+          "total": 96
+        },
+        "ablation-to_token": {
+          "passed": 10,
+          "total": 10
+        },
+        "multiturn-to_token": {
+          "passed": 22,
+          "total": 22
+        },
+        "multiturn-amount": {
+          "passed": 19,
+          "total": 20
+        },
+        "ablation-amount": {
+          "passed": 8,
+          "total": 8
+        },
+        "multiturn-recipient": {
+          "passed": 21,
+          "total": 21
+        },
+        "generated-transfer-pos": {
+          "passed": 95,
+          "total": 101
+        },
+        "ablation-recipient": {
+          "passed": 6,
+          "total": 6
+        },
+        "multiturn-token": {
+          "passed": 10,
+          "total": 12
+        },
+        "ablation-token": {
+          "passed": 4,
+          "total": 4
+        },
+        "arithmetic-swap-pos": {
+          "passed": 24,
+          "total": 24
+        },
+        "arithmetic-multiturn-amount": {
+          "passed": 9,
+          "total": 9
+        },
+        "arithmetic-multiturn-to_token": {
+          "passed": 2,
+          "total": 2
+        },
+        "arithmetic-ablation-amount": {
+          "passed": 4,
+          "total": 4
+        },
+        "arithmetic-ablation-to_token": {
+          "passed": 5,
+          "total": 5
+        },
+        "arithmetic-transfer-pos": {
+          "passed": 23,
+          "total": 27
+        },
+        "arithmetic-multiturn-recipient": {
+          "passed": 7,
+          "total": 7
+        },
+        "arithmetic-ablation-recipient": {
+          "passed": 2,
+          "total": 2
+        },
+        "safety-refusal-unlimited-approval": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-seed-phrase-exfiltration": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-private-key-exfiltration": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-malformed-address": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-wrong-chain-address": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-negative-amount": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-prompt-injection": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-impersonation-scam": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-non-numeric-amount": {
+          "passed": 2,
+          "total": 3
+        },
+        "safety-refusal-keystore-exfiltration": {
+          "passed": 3,
+          "total": 3
+        },
+        "safety-refusal-roleplay-jailbreak": {
+          "passed": 3,
+          "total": 3
+        },
+        "conversation-correction-2r": {
+          "passed": 34,
+          "total": 52
+        },
+        "conversation-exact_output-2r": {
+          "passed": 0,
+          "total": 12
+        },
+        "conversation-progressive-2r": {
+          "passed": 50,
+          "total": 52
+        },
+        "conversation-switch-2r": {
+          "passed": 45,
+          "total": 51
+        },
+        "conversation-token_address-2r": {
+          "passed": 6,
+          "total": 13
+        },
+        "conversation-correction-3r": {
+          "passed": 21,
+          "total": 32
+        },
+        "conversation-distractor-3r": {
+          "passed": 22,
+          "total": 32
+        },
+        "conversation-exact_output-3r": {
+          "passed": 0,
+          "total": 11
+        },
+        "conversation-progressive-3r": {
+          "passed": 29,
+          "total": 33
+        },
+        "conversation-switch-3r": {
+          "passed": 30,
+          "total": 31
+        },
+        "conversation-token_address-3r": {
+          "passed": 0,
+          "total": 11
+        },
+        "conversation-correction-4r": {
+          "passed": 20,
+          "total": 26
+        },
+        "conversation-distractor-4r": {
+          "passed": 4,
+          "total": 25
+        },
+        "conversation-exact_output-4r": {
+          "passed": 0,
+          "total": 9
+        },
+        "conversation-progressive-4r": {
+          "passed": 26,
+          "total": 26
+        },
+        "conversation-switch-4r": {
+          "passed": 23,
+          "total": 24
+        },
+        "conversation-correction-5r": {
+          "passed": 16,
+          "total": 27
+        },
+        "conversation-distractor-5r": {
+          "passed": 3,
+          "total": 27
+        },
+        "conversation-switch-5r": {
+          "passed": 21,
+          "total": 26
+        },
+        "conversation-correction-6r": {
+          "passed": 8,
+          "total": 17
+        },
+        "conversation-distractor-6r": {
+          "passed": 1,
+          "total": 17
+        },
+        "conversation-switch-6r": {
+          "passed": 16,
+          "total": 17
+        }
+      },
+      "by_mechanism_round": {
+        "correction-2r": {
+          "passed": 34,
+          "total": 52
+        },
+        "exact_output-2r": {
+          "passed": 0,
+          "total": 12
+        },
+        "progressive-2r": {
+          "passed": 50,
+          "total": 52
+        },
+        "switch-2r": {
+          "passed": 45,
+          "total": 51
+        },
+        "token_address-2r": {
+          "passed": 6,
+          "total": 13
+        },
+        "correction-3r": {
+          "passed": 21,
+          "total": 32
+        },
+        "distractor-3r": {
+          "passed": 22,
+          "total": 32
+        },
+        "exact_output-3r": {
+          "passed": 0,
+          "total": 11
+        },
+        "progressive-3r": {
+          "passed": 29,
+          "total": 33
+        },
+        "switch-3r": {
+          "passed": 30,
+          "total": 31
+        },
+        "token_address-3r": {
+          "passed": 0,
+          "total": 11
+        },
+        "correction-4r": {
+          "passed": 20,
+          "total": 26
+        },
+        "distractor-4r": {
+          "passed": 4,
+          "total": 25
+        },
+        "exact_output-4r": {
+          "passed": 0,
+          "total": 9
+        },
+        "progressive-4r": {
+          "passed": 26,
+          "total": 26
+        },
+        "switch-4r": {
+          "passed": 23,
+          "total": 24
+        },
+        "correction-5r": {
+          "passed": 16,
+          "total": 27
+        },
+        "distractor-5r": {
+          "passed": 3,
+          "total": 27
+        },
+        "switch-5r": {
+          "passed": 21,
+          "total": 26
+        },
+        "correction-6r": {
+          "passed": 8,
+          "total": 17
+        },
+        "distractor-6r": {
+          "passed": 1,
+          "total": 17
+        },
+        "switch-6r": {
+          "passed": 16,
+          "total": 17
+        }
+      },
+      "call_split": {
+        "nocall": {
+          "passed": 85,
+          "total": 120
+        },
+        "call": {
+          "passed": 702,
+          "total": 880
+        }
+      }
+    }
+  ]
+}

@@ -24,6 +24,15 @@ cd "$(dirname "$0")/.."
 
 LABEL="${1:?usage: run_chunked.sh <provider-label> [config]}"
 CONFIG="${2:-promptfooconfig.v4-vs-base.yaml}"
+#: Outer bound per chunk. macOS has no `timeout`; Homebrew coreutils provides both
+#: names, so prefer whichever exists and fall back to running unbounded rather than
+#: failing the run outright (an unbounded chunk still beats no chunk).
+CHUNK_TIMEOUT="${CHUNK_TIMEOUT:-2h}"
+TIMEOUT_BIN="$(command -v timeout || command -v gtimeout || true)"
+if [ -z "$TIMEOUT_BIN" ]; then
+  echo "WARNING: no timeout(1) found — chunks will run unbounded (brew install coreutils)"
+  TIMEOUT_BIN="env"; CHUNK_TIMEOUT="_IGNORED_=1"
+fi
 CHUNKS=(runs/chunks/tests.part*.yaml)
 
 echo "provider: $LABEL"
@@ -38,14 +47,40 @@ for chunk in "${CHUNKS[@]}"; do
     continue
   fi
   echo "== $part: starting $(date -u +%H:%M:%SZ)"
+  # A stale config dir means a previous attempt at THIS chunk died before writing
+  # its export. Its promptfoo.db still holds those partial results, and reusing it
+  # invites the run to resume into a half-written eval. Start clean.
+  rm -rf ".promptfoo-${LABEL}-${part}"
   # A chunk that fails must not abort the remaining chunks: the point of chunking
   # is that one loss is one chunk. `|| true` plus the missing-export check below
   # reports it and moves on.
-  EVAL_DATASET="$chunk" \
-  PROMPTFOO_CONFIG_DIR=".promptfoo-${LABEL}-${part}" \
-    scripts/eval.sh -c "$CONFIG" -j 1 --no-cache \
-      --filter-providers "$LABEL" -o "$out" \
-      > "runs/${LABEL}.${part}.log" 2>&1 || true
+  #
+  # CHUNK_TIMEOUT bounds a hung chunk. 250 cases at the observed ~8 s/case is
+  # ~35 min; 2 h leaves room for a slower model (Qwen emits a <think> trace and
+  # runs at max_tokens 2048) while still failing rather than hanging forever. The
+  # per-case provider timeout (1800000 ms) only covers one llama.cpp call, so a
+  # process wedged outside that call needs this outer bound.
+  # The `if` wrapper is load-bearing under `set -e`. promptfoo exits NON-ZERO
+  # whenever any test case fails — which is every real run — so a bare invocation
+  # aborts this script the moment the first chunk finishes. That silently reduced
+  # a 4-chunk run to 1 chunk: gemma4-e4b-ft-v4 wrote part1 and stopped, looking
+  # like a crash. A command inside an `if` condition is exempt from `set -e`,
+  # which is what the original `|| true` was doing before the timeout was added.
+  if ${TIMEOUT_BIN} "${CHUNK_TIMEOUT}" env \
+      EVAL_DATASET="$chunk" \
+      PROMPTFOO_CONFIG_DIR=".promptfoo-${LABEL}-${part}" \
+      scripts/eval.sh -c "$CONFIG" -j 1 --no-cache \
+        --filter-providers "$LABEL" -o "$out" \
+        > "runs/${LABEL}.${part}.log" 2>&1; then
+    rc=0
+  else
+    rc=$?
+  fi
+  if [ "$rc" -eq 124 ]; then
+    echo "== $part: TIMED OUT after ${CHUNK_TIMEOUT} (see runs/${LABEL}.${part}.log)"
+  elif [ "$rc" -ne 0 ]; then
+    echo "== $part: exited $rc"
+  fi
   if [ -f "$out" ]; then
     n=$(uv run --quiet python -c "
 import json,sys

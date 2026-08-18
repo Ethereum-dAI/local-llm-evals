@@ -1,0 +1,144 @@
+==============================================================================
+1000-case benchmark — pf/tests.combined.yaml
+==============================================================================
+
+run integrity
+  base                          1000 cases
+  ft-v4                         1000 cases
+
+headline (provider errors excluded from the denominator)
+  base                          90.7%  (907/1000)
+  ft-v4                         78.7%  (787/1000)
+
+call vs no-call
+                                                        base                     ft-v4
+  ------------------------------------------------------------------------------------
+  wants NO call (refusal/ablation)            80.8% (97/120)            70.8% (85/120)
+  wants a tool call                          92.0% (810/880)           79.8% (702/880)
+
+by rounds (1 = single-turn)
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  1                                        87.2% (293/336)           95.8% (322/336)
+  2                                        94.5% (258/273)           82.4% (225/273)
+  3                                        94.0% (141/150)           68.0% (102/150)
+  4                                        93.6% (103/110)            66.4% (73/110)
+  5                                          85.0% (68/80)             50.0% (40/80)
+  6                                          86.3% (44/51)             49.0% (25/51)
+
+by family
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  ablation (single-turn)                     85.7% (24/28)            100.0% (28/28)
+  arithmetic slice                           93.8% (75/80)             95.0% (76/80)
+  conversation (multi-round)               92.3% (527/571)           65.7% (375/571)
+  multi-turn (2-round, legacy)               92.0% (69/75)             96.0% (72/75)
+  safety refusal                             61.2% (30/49)             93.9% (46/49)
+  single-turn positive                     92.4% (182/197)           96.4% (190/197)
+
+vs the published v4 set: the 349 byte-identical cases only
+                                                          base                     ft-v4
+  --------------------------------------------------------------------------------------
+  byte-identical to published v4               87.4% (305/349)           96.3% (336/349)
+  new or regenerated                           92.5% (602/651)           69.3% (451/651)
+
+by conversation mechanism (571 cases)
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  progressive                              98.2% (109/111)           94.6% (105/111)
+  correction                               90.9% (140/154)            64.3% (99/154)
+  distractor                                76.2% (77/101)            29.7% (30/101)
+  switch                                   98.7% (147/149)           90.6% (135/149)
+  exact_output                              100.0% (32/32)               0.0% (0/32)
+  token_address                              91.7% (22/24)              25.0% (6/24)
+
+  progressive: accuracy by round
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  2                                          96.2% (50/52)             96.2% (50/52)
+  3                                         100.0% (33/33)             87.9% (29/33)
+  4                                         100.0% (26/26)            100.0% (26/26)
+
+  correction: accuracy by round
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  2                                          88.5% (46/52)             65.4% (34/52)
+  3                                          90.6% (29/32)             65.6% (21/32)
+  4                                          96.2% (25/26)             76.9% (20/26)
+  5                                          92.6% (25/27)             59.3% (16/27)
+  6                                          88.2% (15/17)              47.1% (8/17)
+
+  distractor: accuracy by round
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  3                                          87.5% (28/32)             68.8% (22/32)
+  4                                          80.0% (20/25)              16.0% (4/25)
+  5                                          63.0% (17/27)              11.1% (3/27)
+  6                                          70.6% (12/17)               5.9% (1/17)
+
+  switch: accuracy by round
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  2                                          98.0% (50/51)             88.2% (45/51)
+  3                                         100.0% (31/31)             96.8% (30/31)
+  4                                          95.8% (23/24)             95.8% (23/24)
+  5                                         100.0% (26/26)             80.8% (21/26)
+  6                                         100.0% (17/17)             94.1% (16/17)
+
+  exact_output: accuracy by round
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  2                                         100.0% (12/12)               0.0% (0/12)
+  3                                         100.0% (11/11)               0.0% (0/11)
+  4                                           100.0% (9/9)                0.0% (0/9)
+
+  token_address: accuracy by round
+                                                      base                     ft-v4
+  ----------------------------------------------------------------------------------
+  2                                         100.0% (13/13)              46.2% (6/13)
+  3                                           81.8% (9/11)               0.0% (0/11)
+
+by conversation mechanism x call/no-call
+                                                          base                     ft-v4
+  --------------------------------------------------------------------------------------
+  correction (call)                            90.9% (140/154)            64.3% (99/154)
+  distractor (call)                             76.2% (77/101)            29.7% (30/101)
+  exact_output (NO call)                        100.0% (32/32)               0.0% (0/32)
+  progressive (call)                           98.2% (109/111)           94.6% (105/111)
+  switch (call)                                98.7% (147/149)           90.6% (135/149)
+  token_address (call)                           91.7% (22/24)              25.0% (6/24)
+
+per-case agreement over 1000 cases scored by both
+  both pass                           731
+  only base passes                    176
+  only ft-v4 passes                    56
+  neither passes                       37
+  net ft-v4 - base                   -120
+
+  categories only base gets right (top 8)
+    conversation-correction-2r                   16
+    conversation-distractor-4r                   16
+    conversation-distractor-5r                   15
+    conversation-exact_output-2r                 12
+    conversation-exact_output-3r                 11
+    conversation-distractor-6r                   11
+    conversation-correction-3r                   10
+    conversation-correction-5r                   10
+
+  categories only ft-v4 gets right (top 8)
+    generated-transfer-pos                       9
+    safety-refusal-burn-send                     4
+    safety-refusal-zero-send                     4
+    generated-swap-pos                           4
+    ablation-token                               4
+    conversation-correction-2r                   4
+    multiturn-recipient                          3
+    arithmetic-swap-pos                          3
+
+==============================================================================
+SUMMARY (overall | tool-call cases | no-call cases)
+==============================================================================
+  base                            90.7% (907/1000)   call  92.0% (810/880)   no-call  80.8% (97/120)
+  ft-v4                           78.7% (787/1000)   call  79.8% (702/880)   no-call  70.8% (85/120)
+
+Wrote results/v5-1000.gemma-base-vs-ft-v4.json
