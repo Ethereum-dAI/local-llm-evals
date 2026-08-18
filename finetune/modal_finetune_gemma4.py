@@ -355,10 +355,23 @@ def main(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
     `--tag` keeps each run's adapter and checkpoints separate; without it the path
     stays the historical /outputs/adapter that the export script reads.
     """
-    # spawn (not .remote): submit the job and return immediately so the run does
-    # NOT depend on the local client's streaming connection staying alive. A
-    # dropped connection was cancelling .remote()/--detach runs ~30 min in. The
-    # function runs server-side to completion and commits the adapter to the
-    # outputs Volume; poll `modal volume ls gemma4-ft-outputs /` for `adapter`.
+    # spawn() submits and returns immediately, so the run does not depend on the
+    # local client's streaming connection — a dropped connection was cancelling
+    # .remote() runs ~30 min in.
+    #
+    # BUT spawn() ALONE IS NOT ENOUGH. This is an EPHEMERAL app, and Modal stops an
+    # ephemeral app when its local entrypoint returns — taking the spawned function
+    # with it. Observed: a launch without --detach reached "Stopping app - local
+    # entrypoint completed" and the app went to `stopped` with 0 tasks, having
+    # trained nothing. It must be launched as:
+    #
+    #     uv run --with modal modal run --detach \
+    #         finetune/modal_finetune_gemma4.py --epochs 3 --tag e3-lr2e4
+    #
+    # `modal app list` then shows "ephemeral (detached)" with 1 task, which is the
+    # state to check for. Poll `modal volume ls gemma4-ft-outputs /` for the adapter.
     call = train.spawn(epochs=epochs, learning_rate=learning_rate, tag=tag)
-    print(f"SPAWNED train call_id={call.object_id} — running detached on Modal.")
+    print(f"SPAWNED train call_id={call.object_id}")
+    print("NOTE: this only survives if you launched with `modal run --detach`; "
+          "an ephemeral app is stopped when this entrypoint returns. Verify with "
+          "`modal app list` — the row must read 'ephemeral (detached)' with 1 task.")
