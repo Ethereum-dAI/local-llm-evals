@@ -46,12 +46,30 @@ BASE_MODEL = "unsloth/gemma-4-E4B-it"
 # scaffold, putting the worst case near ~1.0k tokens. 2048 keeps 2x headroom and
 # roughly halves step time. The all-masked guard below still backstops it.
 MAX_SEQ_LEN = 2048
+#: Defaults. Both are overridable per run from the entrypoint, because the Phase 1
+#: sweep exists to test exactly these two: gemma-4-E4B-wallet-ft-v4 was trained at
+#: 3 epochs / 2e-4 and scored 78.7% on the 1000-case benchmark against base's
+#: 90.7%, collapsing from 95.8% at one round to 49.0% at six. Base is flat across
+#: depth, so the capability was trained AWAY — which points at over-training on a
+#: narrow set rather than at missing data.
 EPOCHS = 3
 # E4B is ~15x FunctionGemma-270m: small per-device batch + accumulation to reach
 # an effective batch of 16 without exceeding 40 GB.
 BATCH = 4
 GRAD_ACCUM = 4
 LEARNING_RATE = 2e-4
+#: Fraction of the training rows held back for the in-training `eval_loss` guard.
+#: This split is IN-DISTRIBUTION and therefore weak on its own: the rows are 85.9%
+#: single-turn and 0% three-plus, so falling eval_loss here is consistent with the
+#: depth collapse above. It is the cheap inner signal only. The real checkpoint
+#: selector is pf/tests.dev.yaml scored by the harness's own scorer
+#: (finetune/modal_eval_gemma4.py), which is out-of-distribution by construction.
+HOLDOUT_FRAC = 0.10
+#: Stop if eval_loss has not improved for this many evaluations. Evaluation and
+#: saving both run per EPOCH, so with EPOCHS=3 this rarely fires — that is
+#: deliberate for the sweep, where the point is to keep every epoch's checkpoint
+#: and score them all rather than to stop early.
+EARLY_STOPPING_PATIENCE = 2
 
 HF_CACHE_DIR = "/root/.cache/huggingface"
 OUTPUTS_DIR = "/outputs"
@@ -110,9 +128,19 @@ app = modal.App("gemma4-finetune")
     timeout=10800,
     volumes={HF_CACHE_DIR: hf_cache, OUTPUTS_DIR: outputs},
 )
-def train() -> str:
+def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
+          tag: str = "") -> str:
     import json
+    import random
     from collections import Counter
+
+    # A non-empty tag writes to /outputs/adapter-<tag> so a sweep does not
+    # overwrite itself. Empty keeps the historical /outputs/adapter path that
+    # modal_export_gemma4.py and modal_eval_gemma4.py already read.
+    adapter_out = f"{ADAPTER_OUT}-{tag}" if tag else ADAPTER_OUT
+    run_dir = f"{OUTPUTS_DIR}/run-{tag}" if tag else OUTPUTS_DIR
+    print(f"[train] epochs={epochs} lr={learning_rate} tag={tag or '(none)'} "
+          f"-> adapter={adapter_out}", flush=True)
 
     # Warm the HF cache first so unsloth's forced hf-offline load finds weights.
     from huggingface_hub import snapshot_download
@@ -127,6 +155,7 @@ def train() -> str:
     from unsloth import FastModel
     from unsloth.chat_templates import train_on_responses_only
     from datasets import Dataset
+    from transformers import EarlyStoppingCallback
     from trl import SFTConfig, SFTTrainer
 
     model, tokenizer = FastModel.from_pretrained(
@@ -178,21 +207,51 @@ def train() -> str:
     print(f"[train] prompt parity OK against the app renderer "
           f"({len(reference['cases'])} shapes)", flush=True)
 
-    ds = Dataset.from_list([to_text(r) for r in rows])
+    # Seeded holdout for the in-training eval_loss guard. Shuffled before slicing
+    # because the JSONL is grouped by category — a tail slice would hold out one
+    # category entirely and measure something else.
+    shuffled = list(rows)
+    random.Random(3407).shuffle(shuffled)
+    n_hold = max(16, int(len(shuffled) * HOLDOUT_FRAC))
+    hold_rows, train_rows = shuffled[:n_hold], shuffled[n_hold:]
+    print(f"[train] split: {len(train_rows)} train / {len(hold_rows)} holdout "
+          f"({HOLDOUT_FRAC:.0%})", flush=True)
+
+    ds = Dataset.from_list([to_text(r) for r in train_rows])
+    eval_ds = Dataset.from_list([to_text(r) for r in hold_rows])
     # Eyeball the exact turn markers the template produced (so INSTRUCTION_PART /
     # RESPONSE_PART can be corrected if the template ever changes).
     print(f"[train] rendered sample head:\n{ds[0]['text'][:600]}", flush=True)
 
     trainer = SFTTrainer(
-        model=model, tokenizer=tokenizer, train_dataset=ds,
+        model=model, tokenizer=tokenizer, train_dataset=ds, eval_dataset=eval_ds,
         args=SFTConfig(
             dataset_text_field="text", max_seq_length=MAX_SEQ_LEN,
             per_device_train_batch_size=BATCH, gradient_accumulation_steps=GRAD_ACCUM,
-            warmup_ratio=0.05, num_train_epochs=EPOCHS, learning_rate=LEARNING_RATE,
+            warmup_ratio=0.05, num_train_epochs=epochs, learning_rate=learning_rate,
             logging_steps=5, optim="adamw_8bit", weight_decay=0.01,
-            lr_scheduler_type="linear", seed=3407, output_dir=OUTPUTS_DIR,
+            lr_scheduler_type="linear", seed=3407, output_dir=run_dir,
             report_to="none",
+            # Evaluate and save PER EPOCH, and keep every epoch. The sweep needs all
+            # of them on disk: eval_loss picks one checkpoint, dev-set accuracy may
+            # pick another, and that disagreement is itself the result we are after.
+            # `load_best_model_at_end` additionally requires the two strategies to
+            # match, which is why both are "epoch".
+            eval_strategy="epoch",
+            save_strategy="epoch",
+            save_total_limit=epochs,
+            load_best_model_at_end=True,
+            metric_for_best_model="eval_loss",
+            greater_is_better=False,
+            # Unsloth's documented settings for the eval loop, which OOMs readily:
+            # keep the eval batch at 2 and accumulate. bf16 (not fp16) because this
+            # is an A100.
+            bf16_full_eval=True,
+            per_device_eval_batch_size=2,
+            eval_accumulation_steps=4,
         ),
+        callbacks=[EarlyStoppingCallback(
+            early_stopping_patience=EARLY_STOPPING_PATIENCE)],
     )
     # Mask everything up to each model turn: loss only on the assistant response.
     trainer = train_on_responses_only(
@@ -204,24 +263,54 @@ def train() -> str:
     # markers are wrong — abort before wasting the GPU hour.
     dropped = [i for i, ex in enumerate(trainer.train_dataset)
                if all(t == -100 for t in ex["labels"])]
-    print(f"[train] all-masked rows: {len(dropped)}/{len(rows)} "
-          f"-> {dict(Counter(rows[i]['category'] for i in dropped))}", flush=True)
-    if len(dropped) > 0.5 * len(rows):
+    print(f"[train] all-masked rows: {len(dropped)}/{len(train_rows)} "
+          f"-> {dict(Counter(train_rows[i]['category'] for i in dropped))}", flush=True)
+    if len(dropped) > 0.5 * len(train_rows):
         raise SystemExit(
-            f"{len(dropped)}/{len(rows)} rows fully masked — response markers "
+            f"{len(dropped)}/{len(train_rows)} rows fully masked — response markers "
             f"({INSTRUCTION_PART!r}/{RESPONSE_PART!r}) do not match the template"
         )
 
     stats = trainer.train()
     print(f"[train] final loss: {stats.training_loss:.4f}", flush=True)
 
+    # PROVE eval_loss was actually produced. Unsloth issue #1019 ("No Validation
+    # Loss logged (possibly related to train_on_responses_only?)") is still labelled
+    # "fixed - pending confirmation", and this script does use
+    # train_on_responses_only — so a silently absent eval_loss would leave
+    # load_best_model_at_end and EarlyStoppingCallback selecting on nothing while
+    # appearing to work. Fail loudly instead: a sweep whose selector is inert is
+    # worse than no sweep, because the numbers still look meaningful.
+    evals = [(e.get("epoch"), e["eval_loss"])
+             for e in trainer.state.log_history if "eval_loss" in e]
+    if not evals:
+        raise SystemExit(
+            "no eval_loss in trainer.state.log_history — the evaluation loop did "
+            "not report. Do not trust load_best_model_at_end or early stopping "
+            "until this is resolved (see unslothai/unsloth#1019)."
+        )
+    print("[train] eval_loss by epoch: "
+          + "  ".join(f"e{ep:.0f}={loss:.4f}" for ep, loss in evals), flush=True)
+    best = min(evals, key=lambda t: t[1])
+    print(f"[train] best eval_loss epoch={best[0]:.0f} loss={best[1]:.4f} "
+          f"(load_best_model_at_end restored this one)", flush=True)
+    # NOTE: best-by-eval_loss is NOT necessarily best-by-task-accuracy. The holdout
+    # is in-distribution (85.9% single-turn), so it cannot see a multi-round
+    # collapse. finetune/modal_eval_gemma4.py scores every checkpoint below against
+    # pf/tests.dev.yaml, and that is the selector of record.
+
     # Save the LoRA adapter to a STABLE path FIRST (export/eval read this — no
     # checkpoint number to track), then commit — so nothing below can cost us the
     # trained weights. GGUF is produced separately by the bf16 export (merge trap).
-    model.save_pretrained(ADAPTER_OUT)
-    tokenizer.save_pretrained(ADAPTER_OUT)
+    model.save_pretrained(adapter_out)
+    tokenizer.save_pretrained(adapter_out)
+    # Commit the per-epoch checkpoints too — modal_eval_gemma4.py scores each of
+    # them against the dev set, and an uncommitted checkpoint dies with the
+    # container.
     outputs.commit()
-    print(f"[train] adapter saved -> {ADAPTER_OUT}", flush=True)
+    ckpts = sorted(str(p) for p in Path(run_dir).glob("checkpoint-*"))
+    print(f"[train] adapter saved -> {adapter_out}", flush=True)
+    print(f"[train] per-epoch checkpoints: {ckpts or '(none)'}", flush=True)
 
     # Sanity: greedy-decode one probe per category and compare call-presence to
     # gold. Best-effort — a tokenizer/generate quirk must never block the save.
@@ -249,15 +338,27 @@ def train() -> str:
     except Exception as e:  # diagnostics only — adapter is already saved
         print(f"[train] probe loop skipped ({type(e).__name__}: {e})", flush=True)
 
-    return f"final_loss={stats.training_loss:.4f} probes={hits}/{probed} adapter={ADAPTER_OUT}"
+    return (f"final_loss={stats.training_loss:.4f} "
+            f"best_eval_loss=e{best[0]:.0f}/{best[1]:.4f} "
+            f"probes={hits}/{probed} adapter={adapter_out}")
 
 
 @app.local_entrypoint()
-def main() -> None:
+def main(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
+         tag: str = "") -> None:
+    """Phase 1 sweep is one command per point, e.g.
+
+        modal run finetune/modal_finetune_gemma4.py --epochs 3 --tag e3-lr2e4
+        modal run finetune/modal_finetune_gemma4.py \
+            --epochs 3 --learning-rate 5e-5 --tag e3-lr5e5
+
+    `--tag` keeps each run's adapter and checkpoints separate; without it the path
+    stays the historical /outputs/adapter that the export script reads.
+    """
     # spawn (not .remote): submit the job and return immediately so the run does
     # NOT depend on the local client's streaming connection staying alive. A
     # dropped connection was cancelling .remote()/--detach runs ~30 min in. The
     # function runs server-side to completion and commits the adapter to the
     # outputs Volume; poll `modal volume ls gemma4-ft-outputs /` for `adapter`.
-    call = train.spawn()
+    call = train.spawn(epochs=epochs, learning_rate=learning_rate, tag=tag)
     print(f"SPAWNED train call_id={call.object_id} — running detached on Modal.")
