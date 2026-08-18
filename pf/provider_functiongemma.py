@@ -50,12 +50,50 @@ from wallet_evals.gemma_dsl import DIALECTS
 from wallet_evals.llama_serving import sampling_kwargs
 
 _TOOLS_PATH = Path(__file__).with_name("tools.json")
-_REFERENCE_PATH = Path(__file__).with_name("app_contract_reference.json")
+
+#: The wallet's own rendered-prompt dumps, one per chat template family, emitted by
+#: `wallet-eval prompt-dump`. `systemPrompt` and `toolsJSON` are byte-identical
+#: across them (asserted by test_prompt_reference_dumps_agree_on_the_contract) —
+#: only `rendered` differs, because each family serializes the same tools its own
+#: way (Gemma's FunctionGemma DSL vs Qwen's Hermes JSON).
+_REFERENCE_PATHS = {
+    "gemma": Path(__file__).with_name("app_contract_reference.json"),
+    "qwen": Path(__file__).with_name("app_contract_reference.qwen.json"),
+}
+_REFERENCE_PATH = _REFERENCE_PATHS["gemma"]  # back-compat for importers
+
+
+def _reference_for(config: dict) -> tuple[str, Path | None]:
+    """Which app dump this model's rendered prompt must match.
+
+    Explicit rather than inferred, because `tool_format: json` alone cannot tell
+    Qwen from Phi-4-mini or SmolLM3: all three emit JSON-in-text, but only Qwen has
+    a dump from the wallet to compare against. Guessing would either skip Qwen's
+    assertion (the bug this replaces — a Qwen GGUF was compared to the GEMMA dump,
+    failed, and was waved through with a NOTE) or invent a parity claim for a model
+    the app does not ship.
+
+    `prompt_reference: none` states that no dump applies, which is the honest
+    answer for Phi/SmolLM3 and keeps "unchecked" distinguishable from "checked and
+    matching".
+    """
+    name = config.get("prompt_reference")
+    if name is None:
+        # Gemma-family providers keep their existing behaviour untouched.
+        name = "gemma" if config.get("tool_format", "gemma") == "gemma" else "none"
+    if name == "none":
+        return "none", None
+    if name not in _REFERENCE_PATHS:
+        raise ValueError(
+            f"prompt_reference={name!r} is not one of "
+            f"{sorted(_REFERENCE_PATHS) + ['none']}")
+    return name, _REFERENCE_PATHS[name]
 #: Rendered-prompt cache keyed by model identity, alongside `_llms`.
 _templates: dict[tuple, Any] = {}
 
 
-def _chat_template(llm, key: tuple):
+def _chat_template(llm, key: tuple, reference_name: str = "gemma",
+                   reference_path: Path | None = None):
     """The GGUF's own chat template, compiled, plus a one-time parity assertion.
 
     Why render here instead of calling `create_chat_completion`: llama-cpp-python
@@ -79,23 +117,49 @@ def _chat_template(llm, key: tuple):
     env = jinja2.Environment(loader=jinja2.BaseLoader(),
                              trim_blocks=True, lstrip_blocks=True)
     env.policies["json.dumps_kwargs"] = {"ensure_ascii": False}
+    # Jinja's built-in `tojson` is `htmlsafe_json_dumps`, which escapes <, >, & and
+    # ' to \uXXXX AFTER dumping — so `json.dumps_kwargs` cannot switch it off. The
+    # wallet renders through llama.cpp's C++ minja, which does no HTML escaping, so
+    # any apostrophe in a tool description diverged: the app sends
+    # "from the user's smart account", Jinja sent "from the user\u0027s smart
+    # account". Both app tool descriptions contain "user's", which is exactly the
+    # 10-character gap (2 x 5) between our 3309 and the app's 3299 for Qwen.
+    #
+    # Gemma was unaffected only by luck — its template serializes tools into the
+    # FunctionGemma DSL and emits descriptions as raw text, never through `tojson`
+    # — which is why this hid until a Hermes/JSON template was checked against its
+    # own dump. Overriding the filter fixes Qwen and leaves Gemma byte-identical
+    # (asserted for both in tests/test_prompt_parity.py).
+    env.filters["tojson"] = lambda value, indent=None: json.dumps(
+        value, ensure_ascii=False, indent=indent)
     template = env.from_string(source)
 
-    # Assert against the app's own dump before scoring a single case. Only
-    # meaningful for models whose template is the app's (Gemma-4); a Qwen GGUF
-    # legitimately renders differently, so a mismatch there is reported, not
-    # fatal.
-    reference = json.loads(_REFERENCE_PATH.read_text())
-    ref_tools = json.loads(reference["toolsJSON"])
-    for case in reference["cases"]:
-        got = _render(template, case["messages"], ref_tools)
-        if got != case["rendered"]:
-            print(f"[provider] NOTE prompt differs from the wallet app for "
-                  f"{case['label']}: {len(got)} vs {len(case['rendered'])} chars "
-                  f"(expected for non-Gemma templates)", flush=True)
-            break
+    # Assert against the app's own dump for THIS template family before scoring a
+    # single case. Previously only the Gemma dump existed here, so a Qwen GGUF was
+    # compared against Gemma's rendered bytes, failed by construction, and was
+    # waved through with "expected for non-Gemma templates" — leaving Qwen's prompt
+    # unverified while the wallet's own Qwen dump sat unused in this directory.
+    reference = None
+    if reference_path is not None:
+        reference = json.loads(reference_path.read_text())
+        ref_tools = json.loads(reference["toolsJSON"])
+        mismatches = []
+        for case in reference["cases"]:
+            got = _render(template, case["messages"], ref_tools)
+            if got != case["rendered"]:
+                mismatches.append(
+                    f"{case['label']}: {len(got)} vs {len(case['rendered'])} chars")
+        if mismatches:
+            print(f"[provider] WARNING prompt DIFFERS from the wallet app "
+                  f"({reference_name} dump {reference_path.name}): "
+                  f"{'; '.join(mismatches)} — scores from this run do not "
+                  f"transfer to the product", flush=True)
+        else:
+            print(f"[provider] prompt parity OK against the wallet app "
+                  f"({reference_name} dump)", flush=True)
     else:
-        print("[provider] prompt parity OK against the wallet app", flush=True)
+        print("[provider] NOTE no wallet prompt dump applies to this model "
+              "(prompt_reference: none) — prompt is UNVERIFIED", flush=True)
 
     # promptfoo runs providers in a persistent worker and swallows their stdout,
     # so the line above is invisible in practice. Drop a sentinel next to the
@@ -107,12 +171,17 @@ def _chat_template(llm, key: tuple):
     # pattern for concurrent runs clobbers across evals too. Per-model files
     # make every provider's verdict survive.
     try:
-        verdicts = {case["label"]: _render(template, case["messages"], ref_tools)
-                    == case["rendered"] for case in reference["cases"]}
+        if reference is not None:
+            ref_tools = json.loads(reference["toolsJSON"])
+            verdicts = {case["label"]: _render(template, case["messages"], ref_tools)
+                        == case["rendered"] for case in reference["cases"]}
+        else:
+            verdicts = None  # not false: nothing was compared
         model = key[0] or key[1] or "unknown"
         slug = re.sub(r"[^A-Za-z0-9._-]+", "_", str(model)).strip("_")[:120]
         Path(f"/tmp/pf_prompt_parity.{slug}.json").write_text(json.dumps(
-            {"model": model, "parity": verdicts}, indent=2))
+            {"model": model, "reference": reference_name, "parity": verdicts},
+            indent=2))
     except OSError:
         pass  # diagnostics only; never fail a run over the sentinel
 
@@ -253,7 +322,10 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
         key = (config.get("model_path"), config.get("repo_id"),
                config.get("filename"), config.get("revision"),
                int(config.get("n_ctx", 4096)))
-        rendered = _render(_chat_template(llm, key), messages, tools)
+        reference_name, reference_path = _reference_for(config)
+        rendered = _render(
+            _chat_template(llm, key, reference_name, reference_path),
+            messages, tools)
         # Explicit turn-end stops on top of the model's EOS token. The GGUF
         # declares one eos id (106) and llama-cpp stops on it, but a raw
         # `create_completion` has none of the chat wrapper's turn awareness, so a

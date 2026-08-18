@@ -1,0 +1,114 @@
+# Qwen3-8B: the v4 app-prompt fine-tune vs the untuned base, over the 1000-case
+# benchmark (pf/tests.combined.yaml). The Qwen half of the four-model comparison;
+# promptfooconfig.v4-vs-base.yaml is the Gemma half.
+#
+# A SEPARATE file from the Gemma config on purpose: that one is re-read by
+# scripts/run_chunked.sh once per chunk, so editing it mid-run would change the
+# config underneath a live eval.
+#
+# Both rows are the same base model at the same Q4_K_M quant, the same chat
+# template, and the SAME sampling — only the weights differ, so the delta is the
+# fine-tune. That mirrors the Gemma pair exactly, which is what makes the
+# four-way comparison a comparison of base models rather than of setups.
+#
+# qwen3-8b-wallet-ft-v4 trains on the SAME 1863 rows as gemma-4-E4B-wallet-ft-v4
+# (1768 wallet + 95 Aave/Safe builder), verified independently rather than taken
+# from the model card: identical row ids, identical gold, identical user turns,
+# with 1725/1863 targets differing only in encoding (Hermes vs Gemma DSL). The
+# 138 that match are refusal rows, whose target is prose in both.
+#
+# Run (never a bare `npx promptfoo eval` — see CLAUDE.md):
+#   scripts/run_chunked.sh qwen3-8b-base          promptfooconfig.qwen-v4-vs-base.yaml
+#   scripts/run_chunked.sh qwen3-8b-ft-v4         promptfooconfig.qwen-v4-vs-base.yaml
+#
+# -j 1 is required: a local llama.cpp process must not share the Metal device.
+description: Qwen3-8B v4 app-prompt fine-tune vs base — 1000-case benchmark
+
+prompts:
+  - file://pf/prompt.py:render
+
+# The two provider blocks below are IDENTICAL except for the model source.
+# Kept inline rather than behind a YAML anchor because promptfoo validates
+# top-level keys and would reject a stray one; the sameness is asserted by
+# tests/test_qwen_config.py instead of trusted to review.
+providers:
+  # Baseline: the official Qwen GGUF at the same quant as the fine-tune. Local and
+  # Q4_K_M deliberately — promptfooconfig.qwen3.yaml scores base Qwen through
+  # OpenRouter at full precision, which would confound quantization and device
+  # with training in the base-vs-ft delta.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-base
+    config:
+      tool_format: json          # Hermes <tool_call>{...}</tool_call>, read by json_tool_calls.py
+      # Assert the rendered prompt against the WALLET'S OWN QWEN DUMP
+      # (pf/app_contract_reference.qwen.json), not the Gemma one. Before this key
+      # existed the provider compared every model to the Gemma dump, so Qwen failed
+      # by construction and was waved through with "expected for non-Gemma
+      # templates" -- hiding a real 10-character divergence: Jinja's `tojson` is
+      # htmlsafe_json_dumps, which escapes an apostrophe to a backslash-u escape
+      # AFTER dumping, while llama.cpp's C++ minja emits it literally. Both app
+      # tool descriptions contain "user's", so the harness sent 3309 chars where
+      # the app sends 3299. Now verified byte-identical: 3299 single-turn, 3456
+      # multi-turn (tests/test_prompt_parity.py).
+      prompt_reference: qwen
+      system_role: system
+      # Qwen emits a <think> trace before the call, so it needs far more room than
+      # Gemma's 1024. n_ctx 8192 covers the longest prompt (1133 tokens) plus that.
+      n_ctx: 8192
+      max_tokens: 2048
+      # Qwen3's own model card: temperature 0.6, top_p 0.95, top_k 20. Its card
+      # explicitly forbids greedy decoding, so this column does NOT share the Gemma
+      # pair's 0.2 -- each family is run the way its authors specify.
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      n_gpu_layers: -1
+      # The 300 s default silently dropped 14 cases to empty output on an earlier
+      # published run and scored them as failures. Fail slow cases, don't lose them.
+      timeout: 1800000
+      repo_id: Qwen/Qwen3-8B-GGUF
+      filename: Qwen3-8B-Q4_K_M.gguf
+
+  # v4: published at ef-dai-team/qwen3-8b-wallet-ft-v4 (private). Loaded from the
+  # local file, whose sha256 was verified against the one on the model card
+  # (a412579572095f37af1f37f5542161c9775bcf490c534c3d8d2873de64ddee07) — CLAUDE.md
+  # records a `modal volume get` that corrupted a 5 GB GGUF while preserving its
+  # byte count, so the hash is checked rather than the size.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: qwen3-8b-ft-v4
+    config:
+      tool_format: json          # Hermes <tool_call>{...}</tool_call>, read by json_tool_calls.py
+      # Assert the rendered prompt against the WALLET'S OWN QWEN DUMP
+      # (pf/app_contract_reference.qwen.json), not the Gemma one. Before this key
+      # existed the provider compared every model to the Gemma dump, so Qwen failed
+      # by construction and was waved through with "expected for non-Gemma
+      # templates" -- hiding a real 10-character divergence: Jinja's `tojson` is
+      # htmlsafe_json_dumps, which escapes an apostrophe to a backslash-u escape
+      # AFTER dumping, while llama.cpp's C++ minja emits it literally. Both app
+      # tool descriptions contain "user's", so the harness sent 3309 chars where
+      # the app sends 3299. Now verified byte-identical: 3299 single-turn, 3456
+      # multi-turn (tests/test_prompt_parity.py).
+      prompt_reference: qwen
+      system_role: system
+      # Qwen emits a <think> trace before the call, so it needs far more room than
+      # Gemma's 1024. n_ctx 8192 covers the longest prompt (1133 tokens) plus that.
+      n_ctx: 8192
+      max_tokens: 2048
+      # Qwen3's own model card: temperature 0.6, top_p 0.95, top_k 20. Its card
+      # explicitly forbids greedy decoding, so this column does NOT share the Gemma
+      # pair's 0.2 -- each family is run the way its authors specify.
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      n_gpu_layers: -1
+      # The 300 s default silently dropped 14 cases to empty output on an earlier
+      # published run and scored them as failures. Fail slow cases, don't lose them.
+      timeout: 1800000
+      model_path: models/qwen3-8b-wallet-ft-appcontract-v4.Q4_K_M.gguf
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"
