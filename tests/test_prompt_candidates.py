@@ -107,3 +107,54 @@ def test_safety_full_keeps_the_known_token_address_carve_out():
     m = _mod()
     text = " ".join(m.PROMPT_CANDIDATES["safety"]).lower()
     assert "known token given as its address is fine" in text
+
+
+def test_act_not_ask_keeps_its_refusal_carve_out():
+    """The whole clause hinges on this sentence.
+
+    "Always emit a call" would destroy the refusal slice — the other half of this
+    effort — and would also break the conversation-exact_output cases whose gold is
+    deliberately no call. The clause must scope itself to already-determined requests
+    AND restate that a refusal wins.
+    """
+    m = _mod()
+    text = m.ACT_NOT_ASK.lower()
+    assert "already determines" in text, "clause must be scoped, not unconditional"
+    assert "refuse it and make no tool call" in text, "missing refusal precedence"
+    assert "genuinely absent" in text, "must still allow a real clarifying question"
+
+
+def test_act_not_ask_addresses_typos_since_the_dataset_mutates_them():
+    """`mutate_typos` is applied on purpose, so treating a misspelling as unresolvable
+    converts a solvable case into a question — which is exactly what base did."""
+    m = _mod()
+    assert "misspelling" in m.ACT_NOT_ASK.lower()
+
+
+def test_composite_variant_concatenates_its_parts_in_order():
+    m = _mod()
+    msgs = [{"role": "system", "content": "BASE."}, {"role": "user", "content": "hi"}]
+    composed = m.augment(msgs, "safety+act")[0]["content"]
+    safety_only = m.augment(msgs, "safety")[0]["content"]
+    assert composed.startswith(safety_only), "composite must preserve part order"
+    assert m.ACT_NOT_ASK in composed
+
+
+def test_registered_composite_wins_over_the_split_spelling():
+    """`safety+act` is registered explicitly so its ORDER is pinned rather than left to
+    however a caller spelled it — sentence order has changed behaviour in this prompt
+    before."""
+    m = _mod()
+    assert "safety+act" in m.PROMPT_CANDIDATES
+    assert m.PROMPT_CANDIDATES["safety+act"] == [m.SAFETY_FULL, m.ACT_NOT_ASK]
+
+
+def test_unknown_part_in_a_composite_is_rejected_by_name():
+    m = _mod()
+    msgs = [{"role": "system", "content": "BASE."}]
+    try:
+        m.augment(msgs, "safety+nope")
+    except SystemExit as exc:
+        assert "nope" in str(exc), "error must name the offending part"
+    else:
+        raise AssertionError("unknown composite part must raise")
