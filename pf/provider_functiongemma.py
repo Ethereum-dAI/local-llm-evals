@@ -37,6 +37,7 @@ unchanged.
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -189,15 +190,29 @@ def _chat_template(llm, key: tuple, reference_name: str = "gemma",
     return template
 
 
-def _render(template, messages: list[dict], tools: list[dict]) -> str:
+def _render(template, messages: list[dict], tools: list[dict],
+            enable_thinking: bool = True) -> str:
     """Render one conversation the way the app does.
 
-    `enable_thinking=True` mirrors `SamplerOptions.enableThinking`. The leading
-    `<bos>` is stripped because `create_completion` tokenizes with `add_bos`,
+    `enable_thinking=True` is the DEFAULT because it mirrors the app's
+    `SamplerOptions.enableThinking`, and that parity is load-bearing — it is what makes
+    the harness's bytes match the wallet's 2935 (see `_chat_template`). Do not change
+    the default to win an eval.
+
+    It is a knob because thinking is implicated in base's single largest failure bucket:
+    40 of its 74 non-safety failures on the frozen set are the model reasoning correctly
+    inside `<|channel>thought` and then asking a clarifying question instead of emitting
+    the call. A prompt clause telling it to act did nothing (verified in the prompt, 9/9
+    failures still ended in a question), so the next question is whether the reasoning
+    pass itself is what talks it out of acting. `enable_thinking=False` is A/B ONLY until
+    the app changes the same setting.
+
+    The leading `<bos>` is stripped because `create_completion` tokenizes with `add_bos`,
     and llama.cpp likewise adds BOS as a token rather than as text.
     """
     text = template.render(messages=messages, tools=tools,
-                           add_generation_prompt=True, enable_thinking=True)
+                           add_generation_prompt=True,
+                           enable_thinking=enable_thinking)
     return text[len("<bos>"):] if text.startswith("<bos>") else text
 # Cache keyed by model identity, NOT a single global: a base-vs-fine-tuned config
 # has two providers from this same file, and if promptfoo serves them from one
@@ -309,6 +324,34 @@ def _load_tools(config: dict[str, Any], vars_: dict[str, Any]) -> list[dict]:
     return json.loads(_APP_TOOLS_PATH.read_text())
 
 
+def _resolve_remote_url(config: dict) -> str | None:
+    """`remote_url`, with an explicit `env:NAME` form.
+
+    The pod URL is only known once a GPU has been rented, so it cannot be a literal in
+    a committed config. `env:NAME` reads it here instead of relying on promptfoo to
+    interpolate `{{ env.NAME }}` inside a PROVIDER config block (it does so for
+    prompts and vars; provider config is a different code path and this is not worth
+    discovering at the cost of a rented GPU-hour). An unresolved value raises rather
+    than silently falling back to local generation, which would report laptop numbers
+    under a remote label.
+    """
+    raw = config.get("remote_url")
+    if not raw:
+        return None
+    raw = str(raw).strip()
+    if raw.startswith("env:"):
+        name = raw[4:]
+        value = os.environ.get(name)
+        if not value:
+            raise RuntimeError(f"remote_url is 'env:{name}' but ${name} is unset — "
+                               f"run `scripts/runpod_serve_gguf.py up` and export it")
+        return value.strip().rstrip("/")
+    if "{{" in raw:
+        raise RuntimeError(f"remote_url was not interpolated ({raw!r}) — use the "
+                           f"explicit 'env:NAME' form instead")
+    return raw.rstrip("/")
+
+
 def _remote_completion(base_url: str, rendered: str, kwargs: dict,
                        timeout_s: float = 600.0) -> dict:
     """POST a fully-rendered prompt to a llama.cpp server's /completion endpoint.
@@ -343,7 +386,13 @@ def _remote_completion(base_url: str, rendered: str, kwargs: dict,
     req = urllib.request.Request(
         base_url.rstrip("/") + "/completion",
         data=_json.dumps(payload).encode(),
-        headers={"Content-Type": "application/json"},
+        # The User-Agent is REQUIRED, not cosmetic. RunPod fronts pod ports with
+        # Cloudflare, which rejects urllib's default `Python-urllib/3.x` signature with
+        # HTTP 403 and body `error code: 1010` — every case errors while the identical
+        # request via curl returns 200, so this reads as "the pod is broken" rather than
+        # as a blocked client. Any ordinary UA string is accepted.
+        headers={"Content-Type": "application/json",
+                 "User-Agent": "wallet-evals/1.0"},
     )
     with urllib.request.urlopen(req, timeout=timeout_s) as fh:
         body = _json.loads(fh.read().decode())
@@ -353,6 +402,31 @@ def _remote_completion(base_url: str, rendered: str, kwargs: dict,
     }
     usage["total_tokens"] = (usage["prompt_tokens"] or 0) + (usage["completion_tokens"] or 0)
     return {"choices": [{"text": body.get("content", "")}], "usage": usage}
+
+
+def _has_call(scoreable: str) -> bool:
+    """Did the translated output contain a tool call?
+
+    `raw_output_to_scoreable` / `json_output_to_scoreable` return an OpenAI-shaped JSON
+    LIST when a call was parsed and the prose verbatim otherwise, so this is a check on
+    the translator's own contract rather than a second parse of the model's text.
+    """
+    try:
+        parsed = json.loads(scoreable)
+    except Exception:
+        return False
+    return (isinstance(parsed, list) and bool(parsed)
+            and all(isinstance(c, dict) and "name" in c for c in parsed))
+
+
+#: The nudge used by `retry_on_no_call`. Phrased as a user turn because that is what an
+#: app can actually do — it cannot edit the model's own turn — and it deliberately repeats
+#: the refusal escape hatch, because the whole risk of this mechanism is converting a
+#: correct refusal into a call on the second attempt.
+RETRY_NUDGE = (
+    "Do not ask me anything. If you can act, emit the tool call now. "
+    "If this request must be refused, say so and make no tool call."
+)
 
 
 def _augment_fn():
@@ -402,9 +476,11 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
                config.get("filename"), config.get("revision"),
                int(config.get("n_ctx", 4096)))
         reference_name, reference_path = _reference_for(config)
+        # Default True = app parity; see _render.
         rendered = _render(
             _chat_template(llm, key, reference_name, reference_path),
-            messages, tools)
+            messages, tools,
+            enable_thinking=bool(config.get("enable_thinking", True)))
         # Explicit turn-end stops on top of the model's EOS token. The GGUF
         # declares one eos id (106) and llama-cpp stops on it, but a raw
         # `create_completion` has none of the chat wrapper's turn awareness, so a
@@ -423,7 +499,7 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
         # still fails, clear and retry ONCE before giving up. Both halves matter:
         # the pre-clear stops one bad case from poisoning the rest of the run, and
         # the retry keeps a transient allocation failure from costing a case.
-        remote_url = config.get("remote_url")
+        remote_url = _resolve_remote_url(config)
         if remote_url:
             # Same rendered bytes, same sampling, same stops — only the arithmetic
             # moves. Everything downstream (output translation, scoring) stays here,
@@ -443,11 +519,48 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
     text = resp["choices"][0].get("text") or ""
     # No native `tool_calls` on the raw-completion path: the model's turn is text
     # and is parsed exactly as the app parses it.
-    if tool_format == "json":
-        output = json_output_to_scoreable(text)
-    else:
-        output = raw_output_to_scoreable(text, dialect)
+    def _translate(raw: str) -> str:
+        return (json_output_to_scoreable(raw) if tool_format == "json"
+                else raw_output_to_scoreable(raw, dialect))
+
+    output = _translate(text)
+    retried = False
+    # ONE extra turn when the model answered without calling anything. This targets the
+    # largest measured failure bucket — 40 of base's 74 non-safety failures are it
+    # reasoning correctly and then asking a clarifying question — which a prompt clause
+    # provably did NOT fix (results/act-ab.base-e4b.md).
+    #
+    # It is an app-level mechanism, not a prompt tweak, and it is DANGEROUS in a specific
+    # way: refusal cases legitimately produce no call, so this fires on them too and a
+    # second attempt could talk the model into acting. That is why RETRY_NUDGE restates
+    # the refusal option, and why any run using this must report the safety slice
+    # alongside the accuracy slice. Exactly one retry: a loop would keep pushing until it
+    # got a call, which would score well by destroying the refusals.
+    if config.get("retry_on_no_call") and not _has_call(output):
+        try:
+            followup = list(messages) + [
+                {"role": "assistant", "content": text},
+                {"role": "user", "content": RETRY_NUDGE},
+            ]
+            rendered2 = _render(
+                _chat_template(llm, key, reference_name, reference_path),
+                followup, tools,
+                enable_thinking=bool(config.get("enable_thinking", True)))
+            resp2 = (_remote_completion(remote_url, rendered2, completion_kwargs,
+                                        timeout_s=float(config.get("remote_timeout", 600)))
+                     if remote_url else llm.create_completion(rendered2, **completion_kwargs))
+            text2 = resp2["choices"][0].get("text") or ""
+            output2 = _translate(text2)
+            # Keep the retry ONLY if it produced a call. If the model declined again, the
+            # first answer is the honest one and replacing it would hide a refusal behind
+            # a second helping of prose.
+            if _has_call(output2):
+                output, resp, retried = output2, resp2, True
+        except Exception:
+            pass  # a failed retry must not lose the first, valid answer
     result: dict[str, Any] = {"output": output}
+    if retried:
+        result["metadata"] = {"retried_on_no_call": True}
     if isinstance(resp.get("usage"), dict):
         u = resp["usage"]
         result["tokenUsage"] = {
