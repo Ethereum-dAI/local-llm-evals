@@ -358,7 +358,8 @@ def _pick(choices: list[str], blocked: set[str], rng: random.Random,
     return rng.choice(remaining)
 
 
-def _revised_value(intent: dict, field: str, original: str, rng: random.Random) -> str:
+def _revised_value(intent: dict, field: str, original: str, rng: random.Random,
+                   ens_bank: tuple[str, ...] = ENS_NAMES) -> str:
     """A new value for `field`: different from the CURRENT value and from the
     ORIGINAL one.
 
@@ -384,7 +385,12 @@ def _revised_value(intent: dict, field: str, original: str, rng: random.Random) 
         blocked = {current, original}
         if rng.random() < 0.5:
             return random_address(rng)
-        return _pick(list(ENS_NAMES), blocked, rng, field)
+        # `ens_bank` is a parameter, not a constant, because a REVISED recipient
+        # lands in gold. The dev set must draw from its own bank: sharing names with
+        # the frozen test set would mean selecting checkpoints partly on values that
+        # appear in the reported number. Caught by test_dev_set.py after exactly that
+        # slipped through.
+        return _pick(list(ens_bank), blocked, rng, field)
     if field == "token":
         return _pick(list(ALT_TOKENS), {current, original}, rng, field)
     other = "to_token" if field == "from_token" else "from_token"
@@ -494,7 +500,8 @@ def build_progressive_case(intent: dict, order: tuple[str, ...], rounds: int,
 
 
 def build_correction_case(intent: dict, withheld: str, rounds: int,
-                          rng: random.Random, idx: int) -> dict:
+                          rng: random.Random, idx: int,
+                          ens_bank: tuple[str, ...] = ENS_NAMES) -> dict:
     """Withhold one field, then revise an already-stated field every round.
 
     `rounds - 1` revisions in total: one per intermediate round plus one riding
@@ -517,7 +524,7 @@ def build_correction_case(intent: dict, withheld: str, rounds: int,
         """Apply one revision to `current` and return the user's phrasing."""
         field = rng.choice(stated)
         old = current[field]
-        new = _revised_value(current, field, intent[field], rng)
+        new = _revised_value(current, field, intent[field], rng, ens_bank)
         current[field] = new
         trace.append(f"{field} {old}->{new}")
         return render_surface(rng.choice(REVISIONS[(action, field)]),
