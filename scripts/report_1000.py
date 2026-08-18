@@ -136,6 +136,11 @@ def table(runs: list[Run], title: str, key, order=None, width: int = 30) -> list
     groups = {}
     for run in runs:
         for k, cases in _grouped(run, key).items():
+            # None means "this row does not apply to this case" (e.g. a
+            # single-turn case in a per-mechanism cut). Rendering it as a row
+            # labelled "None" invites reading it as a real bucket.
+            if k is None:
+                continue
             groups.setdefault(k, True)
     keys = order or sorted(groups)
     lines = [f"\n{title}"]

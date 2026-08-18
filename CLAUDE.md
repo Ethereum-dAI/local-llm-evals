@@ -461,6 +461,89 @@ across samples rather than drifting — see the "known weaknesses" section of th
 published model card. Safety refusals sit at 5/7, unchanged from the Gemma-4
 fine-tune and for the same reason: training holds ~1 example per safety category.
 
+## Prompt parity is per TEMPLATE FAMILY, and Jinja will lie to you
+
+Wallet-path cases must reach the model as the **exact bytes the app sends**, or the
+score does not transfer to the product. The provider renders the template itself
+(not via `create_chat_completion`, which omits `enable_thinking` and drops the
+`<|think|>` marker — 2925 chars against the app's 2935) and asserts the result
+against the wallet's own `wallet-eval prompt-dump` output.
+
+**There is one dump per template family, and the right one must be selected.**
+
+| `config.prompt_reference` | asserted against | for |
+| --- | --- | --- |
+| `gemma` (default when `tool_format: gemma`) | `pf/app_contract_reference.json` | Gemma-4 base + fine-tunes |
+| `qwen` | `pf/app_contract_reference.qwen.json` | Qwen3 base + fine-tunes |
+| `none` (default when `tool_format: json`) | nothing — prompt is UNVERIFIED | Phi-4-mini, SmolLM3 |
+
+It is **explicit, not inferred**: `tool_format: json` cannot tell Qwen from
+Phi-4-mini or SmolLM3, which also emit JSON-in-text but have no dump to compare
+against. `none` keeps "unchecked" distinguishable from "checked and matching"
+instead of quietly claiming parity for a model the app does not ship.
+
+Before this existed the provider compared **every** model against the Gemma dump,
+so a Qwen GGUF failed by construction, printed "expected for non-Gemma templates",
+and ran anyway. That hid a real defect:
+
+```
+harness:  "...from the user\u0027s smart account..."     3309 chars
+wallet:   "...from the user's smart account..."          3299 chars
+```
+
+Jinja's `tojson` is `htmlsafe_json_dumps`, which escapes `'` `<` `>` `&` **after**
+dumping — so `env.policies["json.dumps_kwargs"] = {"ensure_ascii": False}` does
+nothing about it. Both app tool descriptions contain `user's`, so 2 x 5 = the
+10-char gap. llama.cpp's C++ minja does no HTML escaping. The fix overrides the
+`tojson` filter with plain `json.dumps`.
+
+**Gemma was never affected, by luck rather than design** — its template emits
+descriptions as raw text in the FunctionGemma DSL, never through `tojson`. So this
+class of bug is invisible until a JSON-shaped template is checked against its own
+dump. All three of base Gemma, Gemma ft-v4 and Qwen ft-v4 are now asserted, plus
+Qwen base, in `tests/test_prompt_parity.py` (skipped when the 5 GB GGUFs are
+absent, so the suite stays offline).
+
+Diagnostics: the provider writes `/tmp/pf_prompt_parity.<model>.json` per model,
+recording which dump was used and the verdict — promptfoo swallows provider stdout,
+so without the sentinel the guarantee is unverifiable after the fact. `parity: null`
+means nothing was compared, which is not the same as `false`.
+
+To check a template without a full model load, `Llama(model_path=..., vocab_only=True)`
+reads the metadata in a second or two — safe to run while another eval holds the GPU.
+
+## The four-model comparison
+
+Two base/fine-tune pairs, so the benchmark answers two different questions:
+
+| | base | fine-tune |
+| --- | --- | --- |
+| Gemma-4 E4B | `ggml-org/gemma-4-E4B-it-GGUF` @ `1762c8e8713f` | `ef-dai-team/gemma-4-E4B-wallet-ft-v4` |
+| Qwen3-8B | `Qwen/Qwen3-8B-GGUF` | `ef-dai-team/qwen3-8b-wallet-ft-v4` |
+
+Within a pair, **only the weights differ** — same quant (Q4_K_M), same device, same
+template, same sampling — so the delta is training.
+`tests/test_eval_config_pairs.py` asserts that, allowing only the keys that name
+which weights to load. Across the pairs, the two fine-tunes trained on the **same
+1863 rows** (1768 wallet + 95 Aave/Safe builder), so ft-vs-ft is a comparison of
+base models. That is verified rather than taken from the model cards: identical row
+ids, identical gold, identical user turns, with 1725/1863 targets differing only in
+encoding (Hermes vs Gemma DSL — the 138 that match are refusal rows, whose target
+is prose in both).
+
+The two families do **not** share a temperature: Gemma runs at the harness's 0.2,
+Qwen at its card's 0.6/0.95/20, because Qwen3's card forbids greedy decoding. Each
+family is run the way its authors specify; the comparison that matters is within a
+pair, and each pair is internally consistent.
+
+`scripts/run_all_four.sh` chains them — sequential because they share one Metal
+device and because promptfoo races its own SQLite DB under concurrency. Resumable
+per 250-case chunk.
+
+Local GGUFs are checked against the **sha256 on their model cards** before use, not
+their size: `modal volume get` once produced a 5 GB file with the right byte count
+and the wrong hash that loaded and ran without error.
+
 ## A local GGUF run dies silently after ~150 cases without an explicit KV clear
 
 `Llama.reset()` does NOT free the llama.cpp KV cache. Read its source: it sets
