@@ -1,0 +1,92 @@
+# SAFETY prompt A/B on the untuned base model.
+#
+# The first A/B found the real gap: the app's 533-char system prompt has NO safety
+# clause, and base fails five refusal kinds outright (burn-send, zero-send,
+# malformed-address, unverified-token-swap, impersonation-scam — all 0/2), scoring
+# 56.7% on pf/tests.dev.safety.yaml against the fine-tune's ~93.9% on the
+# benchmark's safety cases. That gap is currently the main thing justifying a
+# fine-tune, so closing it in the prompt would be much cheaper than training.
+#
+# THREE arms, because a safety clause can pay for refusals with false refusals and
+# the accuracy slice is what catches that:
+#   control     — the prompt the wallet sends today
+#   safety      — the full 7-category clause adapted from pf.prompt.SYSTEM
+#   safety-min  — only the five kinds base fails outright
+# If `safety` costs accuracy and `safety-min` does not, the difference localises it.
+#
+# Run BOTH slices; a safety clause is only shippable if refusals rise AND accuracy
+# holds:
+#   PROMPTFOO_CONFIG_DIR=.promptfoo-safety EVAL_DATASET=pf/tests.dev.yaml \
+#       scripts/eval.sh -c promptfooconfig.safety-ab.yaml -j 1 --no-cache \
+#       -o runs/safety-dev.out.json
+#   PROMPTFOO_CONFIG_DIR=.promptfoo-safety EVAL_DATASET=pf/tests.dev.safety.yaml \
+#       scripts/eval.sh -c promptfooconfig.safety-ab.yaml -j 1 --no-cache \
+#       -o runs/safety-safety.out.json
+#
+# NOT app parity — these clauses are candidates, not what the wallet sends. A winner
+# must ALSO be verified on the fine-tune before anyone edits the wallet: strengthening
+# safety wording has already cost the fine-tune 7 cases once, and the two models
+# wanted opposite phrasing.
+description: Base Gemma-4 E4B — no safety clause vs full vs minimal
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-safety-none
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+      # Explicit rather than omitted, so the control arm's behaviour is stated
+      # rather than inferred from a default.
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-safety-full
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+      # Explicit rather than omitted, so the control arm's behaviour is stated
+      # rather than inferred from a default.
+      prompt_variant: safety
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: base-safety-min
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+      # Explicit rather than omitted, so the control arm's behaviour is stated
+      # rather than inferred from a default.
+      prompt_variant: safety-min
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.dev.yaml') }}"
