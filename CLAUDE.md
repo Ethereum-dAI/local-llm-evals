@@ -41,6 +41,18 @@ for r in d["results"]["results"]:
 This only works if the **prompt** is unchanged (outputs would differ otherwise).
 For a prompt change, do a small A/B: run a subset, toggle the prompt, compare.
 
+### The exported gold is REDACTED — never analyse fields out of an `-o` JSON
+
+promptfoo redacts any metadata field **named** `token`, treating it as a secret, and
+truncates long `to` values. `metadata.expected_calls[].token` comes back as the literal
+string `"[REDACTED]"` in 459 of the benchmark's 1000 cases. Re-scoring (above) is fine —
+it hands the whole metadata blob back to the scorer, which was never comparing the
+export's copy. **Field-level failure analysis is not fine**: comparing an emitted
+argument against the export's gold invents mismatches that are not there. It reported 52
+wrong `token` values against a true 22, and hid 21 of 27 recipient errors by mangling the
+right answer. Re-join to `pf/tests.combined.yaml` by `metadata.id` and use the gold on
+disk — see `results/v4-failure-anatomy.md`, which was rewritten twice because of this.
+
 ## Scoring rules (don't break these)
 
 - Binary, deterministic. Gold = `metadata.expected_calls`, **computed** from a
