@@ -4,7 +4,7 @@
 ablated turn 1, a canned clarification, a completing turn 3 — so every
 multi-turn case in the app-contract dataset is 2 rounds long and tests one
 thing: can the model carry a single missing field across one exchange. This
-module generalises that to 2-6 rounds across four distinct failure modes.
+module generalises that to 2-6 rounds across six distinct failure modes.
 
 A ROUND is one user turn plus the assistant's reply. An R-round case therefore
 carries R user messages and R-1 canned assistant messages, and only the model's
@@ -22,7 +22,7 @@ are used, and each is something the prompt actually sanctions:
   * answer a non-actionable question in prose (no tool applies),
   * report that a completed request was prepared (what the app does after a call).
 
-The four mechanisms:
+The four conversational-memory mechanisms:
 
 `progressive` (2-4 rounds) — the action's three fields are revealed one per
   round in a seeded permutation. Tests state accumulation. Round count is capped
@@ -46,6 +46,20 @@ The four mechanisms:
   FINAL intent ALONE, so both re-emitting the stale call and emitting the pair
   score 0.
 
+The last two mechanisms test the CONTRACT BOUNDARY rather than conversational
+memory — what the wallet can and cannot execute — and both were added because a
+field the scorer checked had become degenerate or untested:
+
+`exact_output` (2-4 rounds) — the user answers "how much?" with an amount of the
+  DESTINATION token. The wallet only does exact-input swaps, so gold is NO CALL.
+  Fixes `amount_side` being `"input"` in all 436 swap golds, which made it a free
+  field any model could hardcode.
+
+`token_address` (2-3 rounds) — the withheld token field arrives as a 0x contract
+  address, which `pf/tools.app.json` documents and the wallet's registry really
+  does resolve. Gold carries the address verbatim. Tests 42-char hex pass-through,
+  a failure mode nothing else in the benchmark exercises.
+
 Everything here is a pure function of its inputs plus an explicit
 `random.Random`, so a fixed seed yields byte-identical output.
 """
@@ -54,8 +68,8 @@ from __future__ import annotations
 import random
 
 from wallet_evals.generation import (
-    MUTATORS, SWAP_TEMPLATES, TRANSFER_TEMPLATES, gold_calls, random_address,
-    render_surface,
+    ENS_NAMES, MUTATORS, SWAP_TEMPLATES, TRANSFER_TEMPLATES, gold_calls,
+    random_address, render_surface,
 )
 from wallet_evals.intents import LOOKUP, format_expected_summary
 
@@ -69,6 +83,7 @@ ACTION_FIELDS: dict[str, tuple[str, ...]] = {
 #: Short id fragment per mechanism. Ids read `conv-corr-5r-0012`.
 MECHANISM_ABBREV: dict[str, str] = {
     "progressive": "pd", "correction": "corr", "distractor": "dist", "switch": "switch",
+    "exact_output": "xout", "token_address": "addr",
 }
 
 #: Rounds each mechanism can produce. `progressive` stops at 4 because it
@@ -80,6 +95,12 @@ MECHANISM_ROUNDS: dict[str, tuple[int, ...]] = {
     "correction": (2, 3, 4, 5, 6),
     "distractor": (3, 4, 5, 6),
     "switch": (2, 3, 4, 5, 6),
+    # Both contract-boundary mechanisms stay short. Their point is a single
+    # property of the FINAL turn (an output-side amount; an address in place of a
+    # symbol), and stretching that over six rounds would re-test `distractor`'s
+    # interruption-survival rather than the boundary itself.
+    "exact_output": (2, 3, 4),
+    "token_address": (2, 3),
 }
 
 # --------------------------------------------------------------------------
@@ -270,6 +291,49 @@ SWITCH_LEADINS: tuple[str, ...] = (
     "Instead, ", "What I actually want is this: ", "Let's do this one instead — ",
 )
 
+#: The user answering "how much?" with an amount of the DESTINATION token — an
+#: exact-OUTPUT swap. The wallet cannot execute one: `amount_side` is
+#: `enum: ["input"]` in pf/tools.app.json, the `amount` description says "Do not
+#: use this tool when the user specifies only the desired output amount", and two
+#: independent guards enforce it (ChatDashboardView.swift:3335 and
+#: SlashCommandParser.swift:66, the latter throwing
+#: `malformedArgument("amount_side", "only input is supported")`). So gold is NO
+#: CALL, and the wallet's own error text spells out the correct reply: "Only
+#: exact-input swaps are supported. Say how much of the input token to spend."
+#:
+#: Every phrasing must be unambiguously output-side. "Buy {to_token} with
+#: {amount} {from_token}" is already in SWAP_TEMPLATES as *input*-side
+#: output-FIRST phrasing, and reading these as input-side would make the case
+#: unanswerable rather than hard — so each one pins the amount to the received
+#: token with "out"/"end up with"/"receive", and names the input token only as an
+#: open quantity ("whatever that takes").
+EXACT_OUTPUT_ASKS: tuple[str, ...] = (
+    "I need exactly {amount} {to_token} out — spend whatever {from_token} that takes.",
+    "I want to end up with exactly {amount} {to_token}, however much {from_token} it costs.",
+    "Make the output exactly {amount} {to_token}, whatever {from_token} is needed.",
+    "Buy precisely {amount} {to_token}; take however much {from_token} that requires.",
+    "I need to receive exactly {amount} {to_token} — spend as much {from_token} as needed.",
+)
+
+#: Token symbol -> contract address, for the tokens that HAVE one. Native ETH is
+#: excluded: `datasets/lookup.json` gives it `address: null` (the app models it as
+#: `.native`), so there is no address form of ETH to name. These are the mainnet
+#: addresses, matching both lookup.json and the mainnet rows of the wallet's
+#: PortedAppEncoding table.
+TOKEN_ADDRESSES: dict[str, str] = {
+    symbol: meta["address"] for symbol, meta in LOOKUP["tokens"].items()
+    if meta.get("address")
+}
+
+#: How the user names a token by its contract address. The bare-address variant
+#: matters most: it is the surface with nothing but 42 characters of hex to copy.
+ADDRESS_ANSWERS: tuple[str, ...] = (
+    "{address}",
+    "this one: {address}",
+    "the token at {address}",
+    "use {address}",
+)
+
 _FULL_TEMPLATES: dict[str, list[str]] = {
     "transfer": TRANSFER_TEMPLATES, "swap": SWAP_TEMPLATES,
 }
@@ -313,12 +377,14 @@ def _revised_value(intent: dict, field: str, original: str, rng: random.Random) 
     if field == "amount":
         return _pick(list(ALT_AMOUNTS), {current, original}, rng, field)
     if field == "recipient":
-        # A fresh random address is new by construction; the one known ENS name
-        # is only available if it is neither the current nor the original value.
+        # A fresh random address is new by construction; an ENS name has to be
+        # checked, since the bank is finite. Coin-flip between the two forms so a
+        # revised recipient is as likely to be an ENS name as an address —
+        # otherwise corrections would quietly push the slice towards addresses.
         blocked = {current, original}
-        if "vitalik.eth" in blocked:
+        if rng.random() < 0.5:
             return random_address(rng)
-        return rng.choice(["vitalik.eth", random_address(rng)])
+        return _pick(list(ENS_NAMES), blocked, rng, field)
     if field == "token":
         return _pick(list(ALT_TOKENS), {current, original}, rng, field)
     other = "to_token" if field == "from_token" else "from_token"
@@ -351,9 +417,13 @@ def _mutated(text: str, rng: random.Random) -> tuple[str, list[str]]:
 
 def _build_case(*, final_intent: dict, mechanism: str, rounds: int,
                 messages: list[dict], mutators: list[str], idx: int,
-                notes: str) -> dict:
+                notes: str, expected_calls: list[dict] | None = None) -> dict:
+    """`expected_calls` overrides the computed gold, and is only ever passed as
+    `[]` — by `build_exact_output_case`, whose request the wallet cannot execute at
+    all. Gold is still never PARSED from a surface; an override just states that
+    the correct action is to make no call."""
     action = final_intent["action"]
-    calls = gold_calls(final_intent)
+    calls = gold_calls(final_intent) if expected_calls is None else expected_calls
     md = {
         "id": f"conv-{MECHANISM_ABBREV[mechanism]}-{rounds}r-{idx:04d}",
         "source": "generated-conversation",
@@ -554,3 +624,115 @@ def build_switch_case(first: dict, second: dict, rounds: int,
     return _build_case(final_intent=second, mechanism="switch", rounds=rounds,
                        messages=messages, mutators=sorted(set(mutators)), idx=idx,
                        notes=notes)
+
+
+def build_exact_output_case(intent: dict, rounds: int, rng: random.Random,
+                            idx: int) -> dict:
+    """A swap the wallet cannot execute: the user pins the OUTPUT amount.
+
+    The conversation withholds `amount`, so the assistant asks how much to swap
+    (its own on-policy clarifying question), and the user answers with an amount
+    of the DESTINATION token instead of the source. Gold is NO CALL.
+
+    This exists because `amount_side` was constant across all 436 swap golds —
+    every one `"input"` — so a model that hardcoded it scored those cases for free
+    and the field measured nothing. Adding gold with `amount_side: "output"` would
+    have been worse than useless: the wallet rejects that value outright, so it
+    would score models on emitting a call the app throws on. Withholding the call
+    instead tests the same boundary against what the wallet actually does — a
+    model that hardcodes `"input"` now fails, and one that emits `"output"` still
+    fails.
+
+    3- and 4-round variants put distractor exchanges between the ask and the
+    answer, so length is tested here too rather than only at 2 rounds.
+    """
+    action = intent["action"]
+    assert action == "swap", f"exact_output is swap-only, got {action!r}"
+    stated = [f for f in ACTION_FIELDS[action] if f != "amount"]
+
+    opener, mutators = _mutated(
+        render_surface(rng.choice(PREFIX_TEMPLATES[_prefix_key(action, stated)]), intent),
+        rng)
+    messages: list[dict] = [{"role": "user", "content": opener}]
+    messages.append({"role": "assistant", "content": rng.choice(ASKS[(action, "amount")])})
+
+    picked = rng.sample(DISTRACTORS, rounds - 2)
+    for question, reply in picked:
+        turn, labels = _mutated(question, rng)
+        messages.append({"role": "user", "content": turn})
+        mutators.extend(labels)
+        messages.append({"role": "assistant",
+                         "content": f"{reply} {rng.choice(ASKS[(action, 'amount')])}"})
+
+    # The output-side demand is NEVER mutated — same rule as the cancellation in
+    # build_switch_case. "exactly ... out" is the entire signal that this is an
+    # output-side request; a mutator that mangled it would leave a surface that
+    # reads as an ordinary input-side swap, whose correct answer is a tool call,
+    # while gold still said no call. That is an unanswerable case, not a harder one.
+    messages.append({"role": "user",
+                     "content": render_surface(rng.choice(EXACT_OUTPUT_ASKS), intent)})
+
+    notes = (f"{rounds} rounds; exact-OUTPUT swap request "
+             f"({intent['amount']} {intent['to_token']} out of {intent['from_token']}); "
+             f"the wallet supports exact-input only (amount_side enum is [\"input\"]), "
+             f"so gold is no call; {len(picked)} distractor exchange(s)")
+    return _build_case(final_intent=intent, mechanism="exact_output", rounds=rounds,
+                       messages=messages, mutators=sorted(set(mutators)), idx=idx,
+                       notes=notes, expected_calls=[])
+
+
+def build_token_address_case(intent: dict, field: str, rounds: int,
+                             rng: random.Random, idx: int) -> dict:
+    """Withhold a token field, then supply it as a 0x CONTRACT ADDRESS.
+
+    `pf/tools.app.json` says every token slot accepts "a 0x-prefixed contract
+    address", and unlike two of its other documented forms the executor honours
+    this one: `WalletTokenRegistry.token(matching:)` matches a `0x` value against
+    `contractAddress` case-insensitively. Gold therefore carries the address
+    VERBATIM — translating it to a symbol would measure recall of a token table
+    that APP_SYSTEM does not contain.
+
+    What this actually tests is pass-through fidelity: 42 characters of hex,
+    delivered a round after the request began, have to arrive in the call intact.
+    No arithmetic is involved, which makes it a clean read on a failure mode the
+    rest of the benchmark cannot see.
+
+    Contrast the `safety-refusal-unverified-token-swap` cases, which name an
+    address that is NOT in the registry and expect no call. Together the two form
+    a matched pair: known address -> pass it through, unknown -> refuse.
+    """
+    action = intent["action"]
+    symbol = intent[field]
+    address = TOKEN_ADDRESSES[symbol]
+    # Gold follows the surface: the effective intent names the token by address.
+    effective = dict(intent, **{field: address})
+    stated = [f for f in ACTION_FIELDS[action] if f != field]
+
+    opener, mutators = _mutated(
+        render_surface(rng.choice(PREFIX_TEMPLATES[_prefix_key(action, stated)]),
+                       effective),
+        rng)
+    messages: list[dict] = [{"role": "user", "content": opener}]
+    messages.append({"role": "assistant", "content": rng.choice(ASKS[(action, field)])})
+
+    picked = rng.sample(DISTRACTORS, rounds - 2)
+    for question, reply in picked:
+        turn, labels = _mutated(question, rng)
+        messages.append({"role": "user", "content": turn})
+        mutators.extend(labels)
+        messages.append({"role": "assistant",
+                         "content": f"{reply} {rng.choice(ASKS[(action, field)])}"})
+
+    # Not mutated: mutate_case would refold the hex, and while the scorer and the
+    # wallet both compare addresses case-insensitively, a surface whose address
+    # reads "0XA0B8..." tests the mutator rather than the copy.
+    answer = render_surface(rng.choice(ADDRESS_ANSWERS), {"address": address})
+    messages.append({"role": "user", "content": answer})
+
+    notes = (f"{rounds} rounds; {field} supplied as the contract address for "
+             f"{symbol} ({address}); gold carries the address verbatim, as "
+             f"WalletTokenRegistry.token(matching:) resolves it; "
+             f"{len(picked)} distractor exchange(s)")
+    return _build_case(final_intent=effective, mechanism="token_address",
+                       rounds=rounds, messages=messages,
+                       mutators=sorted(set(mutators)), idx=idx, notes=notes)

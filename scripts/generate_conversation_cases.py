@@ -24,8 +24,9 @@ from pathlib import Path
 import yaml
 
 from wallet_evals.conversations import (
-    ACTION_FIELDS, MECHANISM_ROUNDS, build_correction_case, build_distractor_case,
-    build_progressive_case, build_switch_case,
+    ACTION_FIELDS, MECHANISM_ROUNDS, TOKEN_ADDRESSES, build_correction_case,
+    build_distractor_case, build_exact_output_case, build_progressive_case,
+    build_switch_case, build_token_address_case,
 )
 from wallet_evals.generation import expand_vary
 
@@ -43,13 +44,33 @@ SEED = 20260817
 #: `progressive` stops at 4 rounds (only three fields to disclose) and
 #: `distractor` starts at 3 (a 2-round distractor case has no distractor in it),
 #: which is why those buckets have three and four entries rather than five.
+#:
+#: The 56 contract-boundary cases (`exact_output` 32, `token_address` 24) are
+#: carved OUT of the four original mechanisms rather than added on top, and each
+#: is carved from the same round it lands in. That keeps two declared properties
+#: exactly intact: this slice is still 571 cases, and the benchmark's round
+#: distribution is still {1: 337, 2: 272, 3: 150, 4: 110, 5: 80, 6: 51}. The
+#: per-round arithmetic:
+#:
+#:   2 rounds: 180 = (52 + 52 + 51) + 12 exact_output + 13 token_address
+#:   3 rounds: 150 = (33 + 32 + 32 + 31) + 11 exact_output + 11 token_address
+#:   4 rounds: 110 = (26 + 26 + 25 + 24) + 9 exact_output
+#:   5 and 6 rounds: untouched (neither new mechanism goes past 4)
 ROUND_PLAN: dict[int, dict[str, int]] = {
-    2: {"progressive": 60, "correction": 60, "switch": 60},
-    3: {"progressive": 38, "correction": 38, "distractor": 37, "switch": 37},
-    4: {"progressive": 28, "correction": 28, "distractor": 27, "switch": 27},
+    2: {"progressive": 52, "correction": 52, "switch": 51,
+        "exact_output": 12, "token_address": 13},
+    3: {"progressive": 33, "correction": 32, "distractor": 32, "switch": 31,
+        "exact_output": 11, "token_address": 11},
+    4: {"progressive": 26, "correction": 26, "distractor": 25, "switch": 24,
+        "exact_output": 9},
     5: {"correction": 27, "distractor": 27, "switch": 26},
     6: {"correction": 17, "distractor": 17, "switch": 17},
 }
+
+#: Asserted in main(): the round totals this plan must reproduce. Without it a
+#: well-meaning edit to one bucket silently changes the benchmark's headline round
+#: mix, which is the one property every per-round comparison depends on.
+EXPECTED_ROUND_TOTALS: dict[int, int] = {2: 180, 3: 150, 4: 110, 5: 80, 6: 51}
 
 TARGET_TOTAL = sum(sum(m.values()) for m in ROUND_PLAN.values())
 
@@ -103,6 +124,22 @@ def _pool(mechanism: str, rounds: int, intents: list[dict],
             for second in rng.sample(others, 3):
                 cases.append(build_switch_case(intent, second, rounds, rng,
                                                next(counter)))
+        elif mechanism == "exact_output":
+            # Swap-only: an exact-OUTPUT request is meaningless for a transfer,
+            # which has one token and no output side.
+            if intent["action"] == "swap":
+                cases.append(build_exact_output_case(intent, rounds, rng,
+                                                     next(counter)))
+        elif mechanism == "token_address":
+            # Only token fields whose symbol HAS a contract address. Native ETH is
+            # `address: null` in datasets/lookup.json, so an ETH slot has no
+            # address form to name and is skipped rather than faked.
+            for field in fields:
+                if field == "amount":
+                    continue
+                if intent[field] in TOKEN_ADDRESSES:
+                    cases.append(build_token_address_case(intent, field, rounds,
+                                                          rng, next(counter)))
         else:  # pragma: no cover - guarded by ROUND_PLAN's keys
             raise ValueError(f"unknown mechanism: {mechanism!r}")
     return cases
@@ -169,6 +206,11 @@ def main() -> None:
     selected = build_selection(intents, rng)
     assert len(selected) == TARGET_TOTAL, \
         f"selected {len(selected)} cases, ROUND_PLAN declares {TARGET_TOTAL}"
+    actual_totals = collections.Counter(c["metadata"]["rounds"] for c in selected)
+    assert dict(actual_totals) == EXPECTED_ROUND_TOTALS, \
+        (f"round totals {dict(sorted(actual_totals.items()))} != declared "
+         f"{EXPECTED_ROUND_TOTALS} — ROUND_PLAN must preserve the benchmark's "
+         f"round mix (see the comment above it)")
     print_round_distribution(selected)
 
     header = "\n".join([

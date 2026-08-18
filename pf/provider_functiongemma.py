@@ -180,6 +180,35 @@ def _load_model(config: dict[str, Any]):
     return llm
 
 
+def _clear_kv(llm) -> None:
+    """Actually free the KV cache between cases.
+
+    `Llama.reset()` alone is NOT enough. Read its source: it sets `n_tokens = 0`
+    and only calls `llama_memory_clear` when the model `_is_recurrent` or
+    `_is_hybrid`. Gemma-4 is a plain transformer, so the llama.cpp-side cache is
+    never freed and cells accumulate across `create_completion` calls until no KV
+    slot can be allocated — at which point `llama_decode` returns -3 and, because
+    the Llama object is cached across the whole run (`_llms`), EVERY later case
+    fails the same way.
+
+    That is not hypothetical: a 1000-case run of gemma4-e4b-base scored 156 cases
+    cleanly, failed on case 157, and then failed all 844 remaining cases with
+    `RuntimeError: llama_decode returned -3` — an export that still looked
+    complete (1000 rows) and reported a plausible 14.7%. The context was never
+    the problem: the longest prompt in that dataset is 1133 tokens against
+    n_ctx 4096.
+
+    Clearing per case also removes cross-case state as a variable, which is worth
+    the re-evaluation of the shared prompt prefix: a benchmark case's result must
+    not depend on which case ran before it.
+    """
+    llm.reset()
+    ctx = getattr(llm, "_ctx", None)
+    clear = getattr(ctx, "kv_cache_clear", None)
+    if clear is not None:
+        clear()
+
+
 _APP_TOOLS_PATH = Path(__file__).with_name("tools.app.json")
 
 
@@ -233,13 +262,22 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
         # Harmless when EOS already fires, and both markers sit after any tool
         # call, so nothing scoreable is truncated.
         stops = list(config.get("stop") or ["<turn|>", "<end_of_turn>"])
-        resp = llm.create_completion(
-            rendered,
+        completion_kwargs = dict(
             temperature=float(config.get("temperature", 0.2)),
             max_tokens=int(config.get("max_tokens", 1024)),
             stop=stops,
             **sampling,
         )
+        # Start every case from an empty KV cache (see _clear_kv), and if a decode
+        # still fails, clear and retry ONCE before giving up. Both halves matter:
+        # the pre-clear stops one bad case from poisoning the rest of the run, and
+        # the retry keeps a transient allocation failure from costing a case.
+        try:
+            _clear_kv(llm)
+            resp = llm.create_completion(rendered, **completion_kwargs)
+        except Exception:
+            _clear_kv(llm)
+            resp = llm.create_completion(rendered, **completion_kwargs)
     except Exception as e:  # surface as a case error, not a crashed run
         return {"output": "", "error": f"{type(e).__name__}: {e}"}
 

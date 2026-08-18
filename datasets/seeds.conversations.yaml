@@ -21,18 +21,25 @@
 # Decimal places stay within the token's own precision (ETH/WETH/DAI 18, USDC 6)
 # even though the app contract never converts to base units — it keeps every
 # surface a number the wallet could really send.
+#
+# Recipients draw from `random_ens` (see generation.ENS_NAMES) rather than the
+# fixed "vitalik.eth" this file used to carry. That one name was 144 of this
+# slice's 303 transfer golds AND the only ENS name in datasets/finetune_seeds.yaml,
+# so the ENS axis was n=1 on a value every fine-tune had memorised. The bank
+# excludes vitalik.eth, which makes it disjoint from training by construction and
+# turns "copy the .eth token the user typed" into something the score can see.
 
 # --- ETH transfers (18 dp) --------------------------------------------------
 - action: transfer
   amount: { vary: ["0.004", "2.718281828", "45678.9", "0.000000042"] }
   token: ETH
-  recipient: { vary: ["vitalik.eth", "random_address"] }
+  recipient: { vary: ["random_ens", "random_address"] }
 
 # --- USDC / DAI transfers (<=6 dp so USDC stays representable) --------------
 - action: transfer
   amount: { vary: ["6.02", "310000.25", "88.5", "0.0303"] }
   token: { vary: ["USDC", "DAI"] }
-  recipient: { vary: ["vitalik.eth", "random_address"] }
+  recipient: { vary: ["random_ens", "random_address"] }
 
 # --- swaps (<=6 dp; the ETH<->USDC and USDC->USDC self-swap combos are
 #     dropped by the generator's _valid_intent check) -----------------------

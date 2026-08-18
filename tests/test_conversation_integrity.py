@@ -92,13 +92,37 @@ def test_no_conversation_case_carries_a_single_turn_prompt():
         assert case["metadata"]["query_type"] == "multi_turn"
 
 
+#: The one mechanism whose gold is deliberately EMPTY: an exact-output swap is not
+#: a call the wallet can make, so the correct behaviour is to make none. Every
+#: other conversation mechanism must produce exactly one app-contract call.
+EMPTY_GOLD_MECHANISMS = {"exact_output"}
+
+
 def test_gold_is_a_single_app_contract_call_with_no_base_unit_payload():
     for case in load_cases(TESTS):
+        # Case (schema.py) carries no `mechanism` field; the category encodes it as
+        # "conversation-<mechanism>-<rounds>r".
+        mechanism = case.category.split("-")[1]
+        if mechanism in EMPTY_GOLD_MECHANISMS:
+            assert case.expected_calls == [], \
+                f"{case.id} is {mechanism} and must expect NO call"
+            continue
         assert len(case.expected_calls) == 1, case.id
         call = case.expected_calls[0]
         assert call.tool in ("transfer", "swap"), f"{case.id} uses {call.tool}"
         assert call.value == "0" and call.args == []
         assert call.currencyIn is None and call.amountIn is None
+
+
+def test_only_exact_output_cases_have_empty_gold():
+    """Guards the override in conversations._build_case from spreading. Empty gold
+    is a strong claim — it passes any model that stays silent — so exactly one
+    mechanism is allowed to make it, and only for the documented reason."""
+    for case in _raw():
+        md = case["metadata"]
+        if not md["expected_calls"]:
+            assert md["mechanism"] in EMPTY_GOLD_MECHANISMS, \
+                f"{md['id']} ({md['mechanism']}) has empty gold but is not allowed to"
 
 
 def test_correction_cases_never_score_the_first_value_stated():
@@ -170,6 +194,10 @@ def test_amounts_are_disjoint_from_the_other_seed_banks():
         return found
 
     trained = _amounts(Path("datasets/finetune_seeds.yaml"))
-    gold_amounts = {c["metadata"]["expected_calls"][0]["amount"] for c in _raw()}
+    # exact_output cases carry no gold call, so there is no gold amount to check.
+    # Their surface amount is an OUTPUT amount the wallet cannot act on, and it is
+    # covered by the same seed banks these assertions already police.
+    gold_amounts = {c["metadata"]["expected_calls"][0]["amount"]
+                    for c in _raw() if c["metadata"]["expected_calls"]}
     overlap = gold_amounts & trained
     assert not overlap, f"conversation gold reuses trained amounts: {sorted(overlap)}"

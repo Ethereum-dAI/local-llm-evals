@@ -28,9 +28,19 @@ CONVERSATIONS = ROOT / "pf" / "tests.conversations.yaml"
 EXPECTED_TOTAL = 1000
 
 #: The declared round distribution (user turns per case -> count). 1 = the
-#: single-turn cases; 2 = the app-contract slice's 92 legacy 2-round cases plus
+#: single-turn cases; 2 = the app-contract slice's 93 legacy 2-round cases plus
 #: the conversation slice's 180.
-EXPECTED_ROUNDS = {1: 337, 2: 272, 3: 150, 4: 110, 5: 80, 6: 51}
+#:
+#: The conversation slice's own per-round totals are pinned exactly by
+#: generate_conversation_cases.EXPECTED_ROUND_TOTALS ({2: 180, 3: 150, 4: 110,
+#: 5: 80, 6: 51}), so rounds 3-6 here are those numbers verbatim. Rounds 1 and 2
+#: also absorb the app-contract slice, whose 1r/2r split moved by one case
+#: (336/273, previously 337/272) when the arithmetic slice was regenerated to
+#: diversify its recipients: `build_extra_selection` shuffles that slice's cases
+#: together and caps at 40 per action, so a wider recipient pool changes which
+#: categories win the draw. The slice is still exactly 80 cases and the benchmark
+#: still exactly 1000; multi-round coverage is 66.4%, against 66.3% before.
+EXPECTED_ROUNDS = {1: 336, 2: 273, 3: 150, 4: 110, 5: 80, 6: 51}
 
 
 def _load():
@@ -141,9 +151,17 @@ def test_every_conversation_mechanism_is_represented():
     mechanisms = collections.Counter(
         c["metadata"].get("mechanism") for c in _raw()
         if c["metadata"].get("mechanism"))
-    assert set(mechanisms) == {"progressive", "correction", "distractor", "switch"}
-    for mechanism, count in mechanisms.items():
-        assert count >= 100, f"{mechanism} has only {count} cases"
+    assert set(mechanisms) == {"progressive", "correction", "distractor", "switch",
+                               "exact_output", "token_address"}
+    # The four conversational-memory mechanisms carry the bulk. The two
+    # contract-boundary ones are deliberately smaller: each tests a single
+    # property of the final turn, and exact_output's gold is empty, so a large
+    # bank of them would inflate the score a silent model gets for free.
+    for mechanism in ("progressive", "correction", "distractor", "switch"):
+        assert mechanisms[mechanism] >= 100, \
+            f"{mechanism} has only {mechanisms[mechanism]} cases"
+    assert mechanisms["exact_output"] == 32
+    assert mechanisms["token_address"] == 24
 
 
 def test_per_family_census_is_visible_and_every_family_present():

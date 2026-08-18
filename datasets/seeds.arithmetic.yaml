@@ -13,6 +13,24 @@
 # are held fixed per group (ETH, which tolerates up to 18 dp) so only the
 # amount varies within a failure mode.
 #
+# Recipients VARY. They were `recipient: vitalik.eth` on every transfer seed, which
+# made `to` CONSTANT across all 36 transfer golds in this slice — a free field a
+# model could hardcode, the same defect as swap's `amount_side`, and invisible in
+# the whole-dataset view because `to` had 63 distinct values there.
+#
+# Each transfer seed lists FOUR recipient entries, not two. `random_ens` and
+# `random_address` are SENTINELS resolved per produced intent
+# (generation._resolve_value), so a repeated entry draws a DIFFERENT value each
+# time rather than duplicating one. Two of each holds the ENS:address ratio at
+# 50:50 while giving this slice — which has only 9 amount variants, so a small
+# intent pool — enough distinct recipients that no single one dominates. With two
+# entries the ENS ceiling was 9 draws and the slice landed on 4 distinct names;
+# with four it clears the bound in test_dataset_degeneracy.py.
+#
+# The per-action cap of 40 (MAX_PER_ACTION_ARITHMETIC) already binds, so widening
+# the pool diversifies the draw without changing this slice's size.
+# `random_ens` excludes vitalik.eth on purpose; see generation.ENS_NAMES.
+#
 # - separators: 4+ digit integer part, so the surface renders comma-grouped
 #   (e.g. "1,000.5") and the punctuation mutator groups it more often than
 #   incidentally. The observed bug: a model drops the comma and rereads
@@ -30,7 +48,7 @@
 - action: transfer
   amount: { vary: ["1000.5", "20000", "5432100.75"] }
   token: ETH
-  recipient: vitalik.eth
+  recipient: { vary: ["random_ens", "random_ens", "random_address", "random_address"] }
   ablate: ["recipient", "amount"]
 
 # --- separators: swap ------------------------------------------------------
@@ -44,7 +62,7 @@
 - action: transfer
   amount: { vary: ["0.0000002", "0.00000005"] }
   token: ETH
-  recipient: vitalik.eth
+  recipient: { vary: ["random_ens", "random_ens", "random_address", "random_address"] }
   ablate: ["recipient", "amount"]
 
 # --- base-unit traps: swap --------------------------------------------------
@@ -58,7 +76,7 @@
 - action: transfer
   amount: { vary: ["8765.432109876", "0.123456789012345678"] }
   token: ETH
-  recipient: vitalik.eth
+  recipient: { vary: ["random_ens", "random_ens", "random_address", "random_address"] }
   ablate: ["recipient", "amount"]
 
 # --- precision: swap ----------------------------------------------------------
@@ -72,7 +90,7 @@
 - action: transfer
   amount: { vary: ["1.50", "250"] }
   token: ETH
-  recipient: vitalik.eth
+  recipient: { vary: ["random_ens", "random_ens", "random_address", "random_address"] }
   ablate: ["recipient", "amount"]
 
 # --- formatting: swap --------------------------------------------------------

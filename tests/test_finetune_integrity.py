@@ -25,6 +25,15 @@ ROOT = Path(__file__).resolve().parents[1]
 TRAIN = ROOT / "data_for_finetune" / "functiongemma_train.jsonl"
 GENERATED = ROOT / "pf" / "tests.generated.yaml"
 PROTOCOLS = ROOT / "pf" / "tests.protocols.yaml"
+#: The 1000-case benchmark, which SUBSUMES pf/tests.app-contract.yaml (the frozen
+#: 307 + the arithmetic slice + the refusal banks) and pf/tests.conversations.yaml.
+#: It was missing from the anti-leakage check below, which meant the arithmetic and
+#: conversation slices — 651 of the 1000 cases — were never compared against the
+#: training surfaces at all. No live leak existed when this was added (0 of 1739
+#: rows collided), but the slices are regenerated from seed banks that share
+#: templates with the training generators, so the gap was one seed edit away from
+#: mattering.
+COMBINED = ROOT / "pf" / "tests.combined.yaml"
 
 
 def _load_examples() -> list[dict]:
@@ -143,7 +152,7 @@ def _all_user_turns_from_vars(vars_: dict) -> str:
 def _eval_surfaces() -> set[str]:
     import yaml
     surfaces: set[str] = set()
-    for path in (GENERATED, PROTOCOLS):
+    for path in (GENERATED, PROTOCOLS, COMBINED):
         for test in yaml.safe_load(path.read_text()) or []:
             surfaces.add(_all_user_turns_from_vars(test["vars"]))
     return surfaces

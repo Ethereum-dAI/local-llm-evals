@@ -90,12 +90,14 @@ uv run python scripts/generate_protocol_cases.py       # aave/safe, no longer in
 
 | Source | Cases | What it is |
 | --- | --- | --- |
-| `pf/tests.app-contract.yaml` | 429 | single-turn transfer/swap + arithmetic slice + refusals + 92 legacy 2-round cases |
-| `pf/tests.conversations.yaml` | 571 | 2-6 round conversations, four mechanisms |
+| `pf/tests.app-contract.yaml` | 429 | single-turn transfer/swap + arithmetic slice + refusals + 93 legacy 2-round cases |
+| `pf/tests.conversations.yaml` | 571 | 2-6 round conversations, six mechanisms |
 
 Round distribution (a round = one user turn + the assistant's reply; only the
-model's reply to the LAST user turn is scored): **337 / 272 / 150 / 110 / 80 / 51**
-for 1-6 rounds — 66.3% multi-round, 131 cases at 5+ rounds.
+model's reply to the LAST user turn is scored): **336 / 273 / 150 / 110 / 80 / 51**
+for 1-6 rounds — 66.4% multi-round, 131 cases at 5+ rounds. **120 of the 1000 cases
+(12.0%) expect NO tool call**, so a model that never acts scores 12% — always read
+the call/no-call split (`scripts/report_1000.py` prints it) before a headline.
 `scripts/dataset_census.py` prints the whole census (also `--csv` / `--cases-csv`).
 Both the size and the distribution are **asserted** in
 `tests/test_combined_benchmark_integrity.py`, so a source file that silently grows
@@ -123,7 +125,8 @@ vintage before the report roster can move.
 
 ### The conversation slice — `src/wallet_evals/conversations.py`
 
-Four mechanisms, each a distinct failure mode with computed gold:
+Six mechanisms. The first four test conversational memory; the last two test the
+CONTRACT BOUNDARY — what the wallet can and cannot execute:
 
 - **`progressive`** (2-4 rounds) — the action's three fields revealed one per
   round in a seeded permutation. Capped at 4 rounds: there are only three fields.
@@ -138,8 +141,20 @@ Four mechanisms, each a distinct failure mode with computed gold:
 - **`switch`** (2-6 rounds) — a completed request, then abandonment for a
   different one. Gold is the final intent ALONE, so re-emitting the stale call or
   emitting both scores 0.
+- **`exact_output`** (2-4 rounds, 32 cases) — the user answers "how much?" with an
+  amount of the DESTINATION token. **Gold is NO CALL**, because the wallet does
+  exact-input swaps only. See the `amount_side` section below.
+- **`token_address`** (2-3 rounds, 24 cases) — the withheld token field arrives as
+  a **0x contract address**, which `pf/tools.app.json` documents and
+  `WalletTokenRegistry.token(matching:)` really does resolve. Gold carries the
+  address **verbatim** — `APP_SYSTEM` has no token table, so translating it to a
+  symbol would measure recall the wallet never needs. What it tests is 42-char hex
+  pass-through across a turn boundary, a failure mode nothing else here exercises.
+  It pairs with `safety-refusal-unverified-token-swap`, which names an address that
+  is NOT in the registry and expects no call: known address → pass through,
+  unknown → refuse.
 
-Four constraints that are load-bearing, not stylistic:
+Six constraints that are load-bearing, not stylistic:
 
 1. **Every canned assistant turn is on-policy for `APP_SYSTEM`.** That prompt says
    to emit the call as soon as the values are known and never to ask for
@@ -164,13 +179,89 @@ Four constraints that are load-bearing, not stylistic:
    — and separator handling already has its own labelled slice
    (`arithmetic-*`). The other four mutators never touch digits.
 
+5. **The exact-output demand and the address answer are never mutated either**,
+   for the same reason as the cancellation verb. "exactly ... out" is the entire
+   signal that a request is output-side; mangle it and the surface reads as an
+   ordinary swap whose correct answer is a call, while gold still says no call.
+6. **`_build_case`'s `expected_calls` override is only ever `[]`, only for
+   `exact_output`.** Empty gold is a strong claim — it passes any model that stays
+   silent — so `test_only_exact_output_cases_have_empty_gold` stops it spreading.
+
 `ROUND_PLAN` in `scripts/generate_conversation_cases.py` fixes how many cases each
 (rounds, mechanism) pair contributes, so the distribution is declared rather than
-a by-product of pool sizes. Amount literals in
+a by-product of pool sizes. The 56 contract-boundary cases are carved OUT of the
+four memory mechanisms at the same round they land in, and
+`EXPECTED_ROUND_TOTALS` asserts the result, so adding them left the slice at 571
+and the benchmark's round mix unchanged. Amount literals in
 `datasets/seeds.conversations.yaml` **and** the revision targets in `ALT_AMOUNTS`
 are disjoint from `seeds.yaml`, `seeds.arithmetic.yaml` and
 `finetune_seeds.yaml` — asserted on the GOLD amounts, so the slice stays honestly
 held out.
+
+### A gold field that cannot vary is a field that measures nothing
+
+`tests/test_dataset_degeneracy.py` exists because two such fields shipped and no
+test caught either; both were found by reading the dataset by hand.
+
+| Field | Was | Why it mattered |
+| --- | --- | --- |
+| `swap.amount_side` | `"input"` in **436/436** golds | a model hardcoding the string scored it perfectly |
+| `arithmetic/transfer.to` | `vitalik.eth` in **36/36** golds | and 51.5% of transfer golds overall |
+
+The second is why those checks run **per slice** as well as globally: across the
+whole dataset `to` had 63 distinct values and looked healthy, which is exactly how
+the arithmetic slice's constant hid. Constants are still allowed — some are forced
+by the contract, some deliberately hold a variable fixed — but only via
+`ALLOWED_CONSTANTS`, keyed by (slice, tool, field) **with the reason recorded in
+code**. A new constant fails loudly; a stale exemption also fails, because
+`test_every_allowed_constant_is_still_actually_constant` checks the allowlist from
+the other side.
+
+`vitalik.eth` was also the **only** ENS name in `datasets/finetune_seeds.yaml`, so
+"handles ENS" and "has memorised one string" were indistinguishable.
+`generation.ENS_NAMES` is a 14-name bank that **excludes** it — disjoint from
+training by construction — with varied shapes (plain, org-style, hyphenated,
+subdomain, alphanumeric) because the capability is copying whatever `.eth` token
+the user typed. The benchmark now has **13 distinct ENS names** and
+`vitalik.eth` at 14% of transfer golds, all of them inside the untouched frozen
+307. Expect a fine-tune's transfer accuracy to DROP against this: that drop is the
+memorisation being measured, not a regression.
+
+### Why `amount_side` has no `"output"` gold, and never should
+
+The obvious fix — add cases whose gold is `amount_side: "output"` — is wrong, and
+the wallet source says so. `pf/tools.app.json` pins the enum to `["input"]`, its
+`amount` description says *"Do not use this tool when the user specifies only the
+desired output amount"*, and **two independent guards reject anything else**:
+
+- `ChatDashboardView.swift:3335` → `ChatIntentExecutionError.unsupportedSwapAmountSide`
+- `SlashCommandParser.swift:66` → `malformedArgument("amount_side", "only input is supported")`
+
+So `"output"` gold would score models on emitting a call the app throws on.
+Dropping the field from scoring is also worse than it looks: today a model that
+emits `"output"` correctly **fails**, and dropping it makes that silently pass.
+The `exact_output` mechanism fixes the free point instead — a model that hardcodes
+`"input"` and emits a swap now loses 32 cases, and one that emits `"output"` still
+loses them. `scripts/convert.py` reached the same conclusion independently
+(`test_convert_swap_exact_output_to_manual` refuses to auto-convert these).
+
+### `pf/tools.app.json` promises two things the wallet cannot do — do not encode them
+
+Audited against `ChatDashboardView.swift`. Filed as
+[local-wallet-mac#92](https://github.com/Ethereum-dAI/local-wallet-mac/issues/92);
+**#93** (the app's token registry is Sepolia-only, so `tokens(on: 1)` is empty)
+and **#94** (`PortedAppEncoding.swift` claims to port that table verbatim but has
+17 entries against the app's 7) came out of the same audit.
+
+| Schema says | Executor does | Encode it? |
+| --- | --- | --- |
+| `token`: "or a 0x-prefixed contract address" | `token(matching:)` matches `contractAddress` case-insensitively | **yes** — the `token_address` mechanism |
+| `amount`: 'use the literal `"all"`' | `guard rawAmount.lowercased() != "all"` throws (`:3267`, `:3354`, `:2257`) | **no** |
+| `to`: "or a contact name" | `guard rawRecipient.contains(".")` throws (`:3288`) | **no** |
+
+Whole-balance sends and contact-name recipients were both proposed as new slices
+and **dropped for this reason**: gold must be a call the wallet can execute. Check
+the executor, not just the schema, before adding a field to gold.
 
 ## RAILGUN shield/unshield — the human-unit exception
 
@@ -369,6 +460,43 @@ Most are a single decimal place out on large amounts, and they repeat identicall
 across samples rather than drifting — see the "known weaknesses" section of the
 published model card. Safety refusals sit at 5/7, unchanged from the Gemma-4
 fine-tune and for the same reason: training holds ~1 example per safety category.
+
+## A local GGUF run dies silently after ~150 cases without an explicit KV clear
+
+`Llama.reset()` does NOT free the llama.cpp KV cache. Read its source: it sets
+`n_tokens = 0` and only calls `llama_memory_clear` when the model `_is_recurrent`
+or `_is_hybrid`. Gemma-4 is a plain transformer, so cells accumulate across
+`create_completion` calls on the Llama object `pf/provider_functiongemma.py`
+caches for the whole run (`_llms`), until no KV slot can be allocated. Then
+`llama_decode` returns -3 — and **every remaining case fails the same way**,
+because the poisoned object is reused.
+
+Measured on the 1000-case benchmark with gemma4-e4b-base: **156 cases scored
+cleanly, case 157 failed, and all 844 after it failed.** The export still held
+1000 rows and reported a plausible-looking 14.7%. Three things about that make it
+dangerous:
+
+- **The case count check does not catch it.** `report_relaunch.py`'s
+  `<< only N cases!` guard fires on a short export; this one was full length.
+  What catches it is counting `failureReason == 2` (provider raised, case never
+  scored) — `scripts/report_1000.py` reports those separately and excludes them
+  from the denominator.
+- **It is not a context-size problem, so raising `n_ctx` is the wrong fix.** The
+  longest prompt in the 1000-case set is **1133 tokens** against `n_ctx: 4096`
+  (measured with the model's own tokenizer; a chars/4 estimate is not good enough
+  here — scrambled letter case and 42-char hex addresses tokenize badly, ~0.29
+  tok/char).
+- **It looks like a model weakness.** 844 empty outputs read as "the model
+  stopped emitting tool calls on long conversations", which is exactly the claim
+  this benchmark was built to test.
+
+`_clear_kv(llm)` calls `reset()` **and** `llm._ctx.kv_cache_clear()` before every
+case, plus once more on a failed decode before retrying once. Verified
+verdict-identical on a 12-case probe (10 pass / 2 fail both ways), so it is state
+hygiene, not a scoring change. It costs the shared-prefix reuse: **~12.3 s/case
+instead of ~7.7 s** on Metal, i.e. ~3 h for 1000 cases. Worth it — a case's score
+must not depend on which case ran before it, and the alternative (clear only on
+failure, keeping prefix reuse) leaves the cascade one unvalidated retry away.
 
 ## Two evals at once need two result DBs
 
