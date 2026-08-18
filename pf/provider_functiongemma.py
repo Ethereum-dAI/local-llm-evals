@@ -211,7 +211,7 @@ def _load_model(config: dict[str, Any]):
     model_path = config.get("model_path")
     revision = config.get("revision")
     key = (model_path, config.get("repo_id"), config.get("filename"), revision,
-           n_ctx)
+           n_ctx, bool(config.get("remote_url")))
     if key in _llms:
         return _llms[key]
 
@@ -223,9 +223,17 @@ def _load_model(config: dict[str, Any]):
     # wall clock, which is the difference between a 1-hour and a 10-hour run.
     n_gpu_layers = int(config.get("n_gpu_layers", 0))
 
+    # With `remote_url`, generation happens on a rented GPU and the ONLY thing this
+    # local model is for is `metadata["tokenizer.chat_template"]`. vocab_only skips
+    # the 5 GB of weights entirely — seconds to load, no VRAM, and it keeps the
+    # prompt bytes provably identical to a local run because the template comes from
+    # the same GGUF file.
+    vocab_only = bool(config.get("remote_url"))
+    extra = {"vocab_only": True} if vocab_only else {}
+
     if model_path:
         llm = Llama(model_path=model_path, n_ctx=n_ctx, n_gpu_layers=n_gpu_layers,
-                    verbose=False)
+                    verbose=False, **extra)
     elif revision:
         # Pinned revision: llama-cpp's from_pretrained globs the repo's `main`
         # branch, but the wallet's Q4_K_M was deleted from main (it lives only at
@@ -236,7 +244,7 @@ def _load_model(config: dict[str, Any]):
         path = hf_hub_download(repo_id=config["repo_id"],
                                filename=config["filename"], revision=revision)
         llm = Llama(model_path=path, n_ctx=n_ctx, n_gpu_layers=n_gpu_layers,
-                    verbose=False)
+                    verbose=False, **extra)
     else:
         llm = Llama.from_pretrained(
             repo_id=config["repo_id"],
@@ -244,6 +252,7 @@ def _load_model(config: dict[str, Any]):
             n_ctx=n_ctx,
             n_gpu_layers=n_gpu_layers,
             verbose=False,
+            **extra,
         )
     _llms[key] = llm
     return llm
@@ -298,6 +307,52 @@ def _load_tools(config: dict[str, Any], vars_: dict[str, Any]) -> list[dict]:
     if (vars_ or {}).get("protocol") in ("aave", "safe"):
         return json.loads(_TOOLS_PATH.read_text())
     return json.loads(_APP_TOOLS_PATH.read_text())
+
+
+def _remote_completion(base_url: str, rendered: str, kwargs: dict,
+                       timeout_s: float = 600.0) -> dict:
+    """POST a fully-rendered prompt to a llama.cpp server's /completion endpoint.
+
+    Returns the same shape `Llama.create_completion` does, so the caller's output
+    translation is untouched.
+
+    `/completion` (raw prompt) NOT `/v1/chat/completions`: the whole point of
+    rendering locally is that the server must not re-apply a chat template. Sending
+    messages would let the remote template the conversation its own way and silently
+    change the prompt — the divergence this provider exists to prevent.
+    """
+    import json as _json
+    import urllib.error
+    import urllib.request
+
+    payload = {
+        "prompt": rendered,
+        "temperature": kwargs.get("temperature", 0.2),
+        "n_predict": kwargs.get("max_tokens", 1024),
+        "stop": kwargs.get("stop") or [],
+        # Deterministic across arms: llama-server otherwise seeds randomly per
+        # request, which would add sampling noise to an A/B whose whole question is a
+        # 2-case delta.
+        "seed": int(kwargs.get("seed", 0)),
+        "cache_prompt": False,
+    }
+    for src, dst in (("top_p", "top_p"), ("top_k", "top_k"), ("min_p", "min_p")):
+        if src in kwargs:
+            payload[dst] = kwargs[src]
+
+    req = urllib.request.Request(
+        base_url.rstrip("/") + "/completion",
+        data=_json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout_s) as fh:
+        body = _json.loads(fh.read().decode())
+    usage = {
+        "prompt_tokens": body.get("tokens_evaluated"),
+        "completion_tokens": body.get("tokens_predicted"),
+    }
+    usage["total_tokens"] = (usage["prompt_tokens"] or 0) + (usage["completion_tokens"] or 0)
+    return {"choices": [{"text": body.get("content", "")}], "usage": usage}
 
 
 def _augment_fn():
@@ -368,12 +423,20 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
         # still fails, clear and retry ONCE before giving up. Both halves matter:
         # the pre-clear stops one bad case from poisoning the rest of the run, and
         # the retry keeps a transient allocation failure from costing a case.
-        try:
-            _clear_kv(llm)
-            resp = llm.create_completion(rendered, **completion_kwargs)
-        except Exception:
-            _clear_kv(llm)
-            resp = llm.create_completion(rendered, **completion_kwargs)
+        remote_url = config.get("remote_url")
+        if remote_url:
+            # Same rendered bytes, same sampling, same stops — only the arithmetic
+            # moves. Everything downstream (output translation, scoring) stays here,
+            # so a scorer or parser change never needs the remote redeployed.
+            resp = _remote_completion(remote_url, rendered, completion_kwargs,
+                                      timeout_s=float(config.get("remote_timeout", 600)))
+        else:
+            try:
+                _clear_kv(llm)
+                resp = llm.create_completion(rendered, **completion_kwargs)
+            except Exception:
+                _clear_kv(llm)
+                resp = llm.create_completion(rendered, **completion_kwargs)
     except Exception as e:  # surface as a case error, not a crashed run
         return {"output": "", "error": f"{type(e).__name__}: {e}"}
 
