@@ -1,0 +1,67 @@
+# ALPHA SELECTION for the v5 fine-tune — dev set only, 145 OOD cases.
+#
+# Two GGUFs of the SAME trained adapter, differing only in the LoRA scaling baked in at
+# merge time (lora_alpha 16 vs 12). Post-hoc alpha scaling was worth +29.7 points on the
+# v4 adapter with no new data (results/dev-alpha.e1-lr2e4.md), because the adapter was
+# drowning out capabilities the base model still had — `token_address` went 9/15 -> 15/15
+# and 6-round depth 16/25 -> 21/25, which are pass-through fidelity and depth.
+#
+# That measurement was on a 3-EPOCH adapter, though. v5 trains ONE epoch on data that
+# fills the holes v4 had, so it should be far less loud and alpha=1.0 may simply win.
+# The point of this config is that the question is cheap to answer: 290 generations.
+#
+# THE DEV SET IS THE SELECTOR, and this is the one decision it is allowed to make. It is
+# disjoint from both the training rows and the frozen 1000-case benchmark by
+# construction. Choosing alpha here makes dev a fitted hyperparameter for this choice,
+# which is exactly why the frozen set is scored ONCE, afterwards, and never iterated on.
+#
+# Run (two pods, one per alpha; two config dirs or they race for the SQLite write lock):
+#   RUNPOD_A10_URL=… RUNPOD_A075_URL=… PROMPTFOO_CONFIG_DIR=.promptfoo-v5a \
+#     scripts/eval.sh -c promptfooconfig.v5-alpha-ab.remote.yaml -j 12 --no-cache \
+#     -o runs/v5-alpha-ab.out.json
+description: v5 fine-tune — LoRA alpha 1.0 vs 0.75 on the 145-case OOD dev set
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  # `repo_id` here is the BASE GGUF and that is correct: with `remote_url` set, the local
+  # model is loaded vocab_only and used for NOTHING but `tokenizer.chat_template`, and
+  # the fine-tune inherits that template byte-for-byte from the same tokenizer. The
+  # provider sends a pre-RENDERED prompt to /completion, so the remote's own baked
+  # template is never consulted. Both sides still assert parity against the app's 2935
+  # bytes, which makes them equal to each other transitively.
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: v5-alpha1.0
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_A10_URL
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: v5-alpha0.75
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_A075_URL
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.dev.yaml') }}"

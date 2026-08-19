@@ -121,12 +121,17 @@ def _api_key() -> str:
 
 
 def _rank_gpus(runpod, prefer: str | None = None,
-               max_price: float = 0.60) -> list[tuple]:
+               max_price: float = 0.60,
+               min_vram_gb: int = MIN_VRAM_GB) -> list[tuple]:
     """The cheapest launchable GPU with enough VRAM.
 
     Prices come from `get_gpu()` per card; both secure and community are considered
     and the lower wins, since for a minutes-long batch job there is no reason to pay
     for secure capacity.
+
+    `min_vram_gb` is a parameter, not the module constant, because SERVING a 5 GB
+    Q4_K_M and TRAINING an E4B LoRA (~17 GB of weights plus optimizer and activations)
+    want very different floors, and runpod_train_gemma4.py shares this ranking.
     """
     candidates = []
     for entry in runpod.get_gpus():
@@ -135,7 +140,7 @@ def _rank_gpus(runpod, prefer: str | None = None,
         except Exception:
             continue
         vram = detail.get("memoryInGb") or 0
-        if vram < MIN_VRAM_GB:
+        if vram < min_vram_gb:
             continue
         # One candidate per (card, cloud). REST's cloudType has no "ALL", so the cloud
         # is part of the choice now and a card that is busy on community may still be
@@ -147,7 +152,7 @@ def _rank_gpus(runpod, prefer: str | None = None,
                     (price, vram, detail["displayName"], entry["id"], cloud))
     candidates = [c for c in candidates if c[0] <= max_price]
     if not candidates:
-        raise SystemExit(f"no launchable GPU with >={MIN_VRAM_GB}GB VRAM under "
+        raise SystemExit(f"no launchable GPU with >={min_vram_gb}GB VRAM under "
                          f"${max_price:.2f}/hr — raise --max-price deliberately "
                          f"rather than letting this pick an H200")
     candidates.sort()
