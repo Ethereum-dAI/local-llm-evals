@@ -20,6 +20,12 @@ OUT="${OUT:-runs/v5-alpha-ab.out.json}"
 JOBS="${JOBS:-12}"
 PODS=""
 declare -A URLS=()
+# sha256 as recorded by the export job at build time. `--expect-sha` terminates the pod
+# on a mismatch instead of benchmarking a file that is not the artifact.
+declare -A SHAS=(
+  [a1]=fbfa02abd0e7f0c1b96cf965d1da393aee063dfdd8132f4688749f90e9b9b1df
+  [a075]=40332b62f282336d92a94dc4147ecc44e83c0e11496ac2e5738d8ef342d1b09c
+)
 
 cleanup() {
   for pid in $PODS; do
@@ -36,6 +42,7 @@ for a in $ALPHAS; do
   OUTPUT=$(uv run --with runpod python scripts/runpod_serve_gguf.py up \
       --repo "$REPO" --revision main --private \
       --gguf "gemma-4-E4B-wallet-ft-${a}.Q4_K_M.gguf" \
+      --expect-sha "${SHAS[$a]:-}" \
       --n-ctx 4096 --parallel 8 --disk 40 --wait 2400 2>&1 | tee /dev/stderr)
   pid=$(echo "$OUTPUT" | sed -n 's/^RUNPOD_POD_ID=//p' | tail -1)
   url=$(echo "$OUTPUT" | sed -n 's/^RUNPOD_LLAMA_URL=//p' | tail -1)
