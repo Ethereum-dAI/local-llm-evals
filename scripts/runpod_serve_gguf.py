@@ -120,6 +120,17 @@ def _api_key() -> str:
     raise SystemExit("RUNPOD_API_KEY not in the environment or any parent .env")
 
 
+def _hf_token() -> str:
+    """Read-only HF token for a PRIVATE model repo (see `--private`)."""
+    tok = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_HUB_TOKEN")
+    if tok:
+        return tok
+    cached = Path.home() / ".cache" / "huggingface" / "token"
+    if cached.is_file():
+        return cached.read_text().strip()
+    raise SystemExit("--private needs an HF token: set HF_TOKEN or run `hf auth login`")
+
+
 def _rank_gpus(runpod, prefer: str | None = None,
                max_price: float = 0.60,
                min_vram_gb: int = MIN_VRAM_GB) -> list[tuple]:
@@ -284,7 +295,8 @@ def _wait_healthy(url: str, deadline_s: float, runpod=None,
 ENTRYPOINT = ["/bin/sh", "-c"]
 
 
-def _container_script(model_url: str, n_ctx: int, parallel: int) -> str:
+def _container_script(model_url: str, n_ctx: int, parallel: int,
+                      private: bool = False) -> str:
     """Download the GGUF, serve it single-model, and keep the log readable throughout.
 
     `-m <local path>`, NOT `--model-url`. llama-server enters ROUTER mode whenever no
@@ -301,9 +313,23 @@ def _container_script(model_url: str, n_ctx: int, parallel: int) -> str:
     "403 forever" with the reason locked inside it — and a crash-only log server cannot
     explain a process that is running but wrong, which is exactly what happened here.
     """
-    dl = (f'curl -fL --retry 3 --retry-delay 5 -o "$MODEL" "{model_url}"',
-          f'wget -q -O "$MODEL" "{model_url}"',
-          f'python3 -c \'import urllib.request,sys;urllib.request.urlretrieve(sys.argv[1],sys.argv[2])\' "{model_url}" "$MODEL"')
+    # A PRIVATE repo needs the token on the request. Without it huggingface.co answers
+    # 401 and `curl -fL` writes NOTHING, so llama-server then fails on a zero-byte model
+    # and the log says "failed to load" — which reads as a corrupt GGUF rather than as an
+    # auth problem. The token travels as a pod env var (never interpolated into this
+    # script) so it does not appear in the create payload's command array.
+    auth_c = ' -H "Authorization: Bearer $HF_TOKEN"' if private else ""
+    auth_w = ' --header="Authorization: Bearer $HF_TOKEN"' if private else ""
+    # Double quotes INSIDE, because the whole -c argument is wrapped in single quotes
+    # below; nesting single quotes would end the shell string mid-expression.
+    auth_p = (';req.add_header("Authorization","Bearer "+os.environ["HF_TOKEN"])'
+              if private else "")
+    dl = (f'curl -fL{auth_c} --retry 3 --retry-delay 5 -o "$MODEL" "{model_url}"',
+          f'wget -q{auth_w} -O "$MODEL" "{model_url}"',
+          f'python3 -c \'import urllib.request,os,sys,shutil;'
+          f'req=urllib.request.Request(sys.argv[1]){auth_p};'
+          f'shutil.copyfileobj(urllib.request.urlopen(req),open(sys.argv[2],"wb"))\' '
+          f'"{model_url}" "$MODEL"')
     return "\n".join([
         "set -u",
         "LOG=/tmp/llama.log",
@@ -386,7 +412,8 @@ def up(args) -> None:
     # and BF16 (15.1 GB) both exist at this revision; Q4_K_M does NOT exist on `main`,
     # which is why the revision is pinned.
     model_url = (f"https://huggingface.co/{args.repo}/resolve/{args.revision}/{args.gguf}")
-    script = _container_script(model_url, args.n_ctx, args.parallel)
+    script = _container_script(model_url, args.n_ctx, args.parallel,
+                               private=args.private)
 
     # Walk the price-ordered list. "There are no longer any instances available with
     # the requested specifications" is routine for the cheap cards — capacity comes
@@ -404,6 +431,7 @@ def up(args) -> None:
             "gpuCount": 1,
             "containerDiskInGb": args.disk,
             "ports": [f"{PORT}/http", f"{LOG_PORT}/http"],
+            **({"env": {"HF_TOKEN": _hf_token()}} if args.private else {}),
             "dockerEntrypoint": ENTRYPOINT,
             "dockerStartCmd": [script],
         })
@@ -487,6 +515,12 @@ def main() -> None:
     u.add_argument("--revision", default=HF_REVISION,
                    help="git revision in --repo. The wallet's Q4_K_M only exists at the "
                         "pinned commit; other repos usually want 'main'.")
+    # A fine-tune under evaluation lives in a PRIVATE repo, so its download needs the
+    # token on the request. Opt-in rather than always-on: the base GGUF is public and an
+    # unnecessary Authorization header on a public resolve URL is one more thing that can
+    # go wrong for no gain.
+    u.add_argument("--private", action="store_true",
+                   help="the model repo is private — send an HF bearer token")
     u.add_argument("--gguf", default=HF_FILE,
                    help="GGUF filename in the pinned repo/revision. Raise --disk and "
                         "lower --parallel for the bigger quants (Q8_0 is 8.0 GB, BF16 "
