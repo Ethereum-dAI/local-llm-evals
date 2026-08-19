@@ -351,6 +351,12 @@ def _container_script(model_url: str, n_ctx: int, parallel: int,
         '  else log "NO DOWNLOAD TOOL IN IMAGE"; fi',
         "fi",
         'log "model: $(ls -l \"$MODEL\" 2>&1)"',
+        # HASH IT BEFORE SERVING. A 5 GB GGUF has already come off a transfer in this
+        # project with the SAME byte count and a different sha256, and it loaded and ran
+        # without error — so file size proves nothing and "llama-server started" proves
+        # nothing either. ~20 s on 5 GB, written where the log server already serves it
+        # so `up --expect-sha` can compare against the hash recorded at build time.
+        'if command -v sha256sum >/dev/null 2>&1; then sha256sum "$MODEL" | cut -d" " -f1 > /tmp/model.sha256; log "sha256 $(cat /tmp/model.sha256)"; else log "no sha256sum in image"; fi',
         # -c is the TOTAL context, DIVIDED across --parallel slots: llama-server gives
         # each slot n_ctx/n_parallel. `-c 4096 --parallel 8` therefore serves 512 tokens
         # per slot, and /props reported exactly that. Our longest prompt is 1133 tokens
@@ -468,6 +474,21 @@ def up(args) -> None:
             print("[runpod] terminating so it cannot bill idle", flush=True)
             runpod.terminate_pod(pod_id)
         raise SystemExit(1)
+    if args.expect_sha:
+        got = None
+        try:
+            with _get(f"https://{pod_id}-{LOG_PORT}.proxy.runpod.net/model.sha256",
+                      timeout=30) as fh:
+                got = fh.read().decode().strip()
+        except Exception as e:
+            print(f"[runpod] could not read the pod's sha256: {e}", flush=True)
+        if got != args.expect_sha:
+            print(f"[runpod] SHA MISMATCH — served {got!r}, expected "
+                  f"{args.expect_sha!r}. Terminating rather than benchmarking a file "
+                  f"that is not the artifact.", flush=True)
+            runpod.terminate_pod(pod_id)
+            raise SystemExit(1)
+        print(f"[runpod] sha256 verified: {got[:16]}…", flush=True)
     print("[runpod] READY", flush=True)
     print(f"[runpod] log: https://{pod_id}-{LOG_PORT}.proxy.runpod.net/llama.log",
           flush=True)
@@ -519,6 +540,9 @@ def main() -> None:
     # token on the request. Opt-in rather than always-on: the base GGUF is public and an
     # unnecessary Authorization header on a public resolve URL is one more thing that can
     # go wrong for no gain.
+    u.add_argument("--expect-sha", default=None,
+                   help="sha256 the served GGUF must have (recorded at build time); "
+                        "the pod is terminated on a mismatch")
     u.add_argument("--private", action="store_true",
                    help="the model repo is private — send an HF bearer token")
     u.add_argument("--gguf", default=HF_FILE,
