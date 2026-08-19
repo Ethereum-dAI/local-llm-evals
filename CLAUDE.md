@@ -855,6 +855,32 @@ failure as a provider failure — it made the gpt-5 control look like 72 provide
 it had none. Discriminate on whether the message starts with `call count:` / `call#`, and
 keep "0 provider errors" meaning what it says.
 
+### The clause has landed in the WALLET — and the live reference deliberately has not moved
+
+`local-wallet-mac` branch `feat/safety-clause-and-base-default` adds
+`ToolDefinitions.safetyClause` (byte-identical to `SAFETY_FULL`) and reverts the app's
+default model to the untuned Q4_K_M base. Its `wallet-eval prompt-dump` output is
+committed here as **`pf/app_contract_reference.with_clause.json`**, so the app's new
+bytes live in this repo rather than only in the other one.
+
+**It is not wired into any run, on purpose.** Swapping it in for
+`pf/app_contract_reference.json` would make `PROMPT_VARIANT=none` mean "clause on" and
+silently change what every existing config measures, and it carries a third tool
+(`top_up_bundler`) that `pf/tools.app.json` does not offer. `tests/test_app_prompt_with_clause.py`
+pins the relationship instead:
+
+- the clause in the app's dump is byte-identical to `SAFETY_FULL`, appended as a suffix
+  joined by ONE space — the same concatenation `augment()` makes, so the clause-on
+  numbers describe what the app now sends;
+- the **only** other delta from the live 533-char reference is the pre-existing
+  `top_up_bundler` sentence (121 chars), and **0 of the frozen 1000 cases want that
+  tool** — every gold call is `transfer` or `swap`. That is what bounds the
+  re-baseline question: the part of the prompt that changed and matters is already
+  measured on three models.
+
+So a re-baseline is a deliberate, separate decision: swap the reference, add the third
+tool to `pf/tools.app.json`, and re-run every arm. Do not do it as a side effect.
+
 ## What has been RULED OUT for the base model (do not re-run these)
 
 Base Gemma-4 E4B scores **90.7% overall / 92.2% task / 61.2% safety** on the frozen
