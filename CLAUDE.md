@@ -672,6 +672,31 @@ the container serves `/tmp` on port 8081 for its whole life: `curl <pod>-8081...
 works even while llama-server is UP and misconfigured. A crash-only log server could not
 have diagnosed router mode, because nothing had crashed.
 
+### Training on RunPod: pin torch to the HOST DRIVER's CUDA, before installing unsloth
+
+`scripts/runpod_train_gemma4.py` is the Modal recipe on a rented pod (Modal is out of
+credits). One trap dominates the setup, and its error message points at the wrong thing.
+
+A bare `pip install unsloth` resolves the newest torch on PyPI, which is built against
+**CUDA 13**. The A40 hosts' driver tops out at **12.8**, so torch imported fine and then
+warned `The NVIDIA driver on your system is too old (found version 12080)`, after which
+unsloth died with **`Unsloth cannot find any torch accelerator? You need a GPU.`** That
+reads as a missing or unassigned GPU — but `nvidia-smi` in the same log had already
+printed `NVIDIA A40, 46068 MiB`, so the GPU was never the problem. It is a
+torch-vs-driver version mismatch wearing a no-GPU costume. Cost: one pod, 25 minutes.
+
+The boot script now derives the wheel index from `nvidia-smi`'s own `CUDA Version:`
+(`cu128`), installs `torch torchvision` from `download.pytorch.org/whl/$IDX` with
+descending fallbacks, and only then installs unsloth — which leaves the satisfied torch
+alone. It **asserts `torch.cuda.is_available()` and aborts** before anything expensive,
+because every downstream symptom of a CPU-only torch is a confusing one.
+
+Related, already in the export image's comments: pip-installing llama.cpp's *convert*
+requirements pulls a CPU-only torch that shadows unsloth's CUDA torch, with the same
+misleading message. Only `llama-quantize` is needed, it is CPU-only, and it builds
+without nvcc — which is why the training pod runs a plain `python:3.11-slim` rather than
+a CUDA image.
+
 ## The dev slice has a MEASURED noise floor — put a duplicate arm in every A/B
 
 `pf/tests.dev.yaml` (145 cases) cannot resolve differences below about **5 points**, and this

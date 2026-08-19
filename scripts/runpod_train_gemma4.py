@@ -125,11 +125,43 @@ def _boot_script(job_args: str) -> str:
         "apt-get update -qq >> \"$LOG\" 2>&1 && "
         "apt-get install -y -qq git build-essential cmake curl ca-certificates "
         ">> \"$LOG\" 2>&1",
-        'log "pip (unsloth pulls its own CUDA torch — do not pre-install one)…"',
+        'log "nvidia-smi: $(nvidia-smi --query-gpu=name,memory.total,driver_version '
+        '--format=csv,noheader 2>&1)"',
+        # TORCH MUST BE PINNED TO THE HOST DRIVER'S CUDA, and installed BEFORE unsloth.
+        # A bare `pip install unsloth` took the newest torch on PyPI, which is built
+        # against CUDA 13; this A40 host's driver tops out at 12.8, so torch loaded and
+        # then reported "The NVIDIA driver on your system is too old (found version
+        # 12080)" — after which unsloth died with "cannot find any torch accelerator",
+        # which reads like a missing GPU rather than a version mismatch. nvidia-smi had
+        # already printed the A40 happily, so the GPU was never the problem. Cost: one
+        # pod and 25 minutes.
+        #
+        # The index is derived from nvidia-smi rather than hardcoded, because the next
+        # pod may land on a host with a different driver, with fallbacks in descending
+        # order (a driver supports its own CUDA and every earlier one).
+        'CUDAV=$(nvidia-smi | sed -n "s/.*CUDA Version: \\([0-9]*\\)\\.\\([0-9]*\\).*/cu\\1\\2/p" | head -1)',
+        'log "driver CUDA -> ${CUDAV:-unknown}"',
+        'for IDX in "$CUDAV" cu128 cu126; do',
+        '  [ -z "$IDX" ] && continue',
+        '  log "installing torch from $IDX…"',
+        '  pip install --no-cache-dir -q --index-url '
+        '"https://download.pytorch.org/whl/$IDX" torch torchvision >> "$LOG" 2>&1 || '
+        '{ log "$IDX index failed"; continue; }',
+        '  if python3 -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() '
+        'else 1)" >> "$LOG" 2>&1; then log "torch OK on $IDX"; break; fi',
+        '  log "torch from $IDX cannot see the GPU, trying an older index"',
+        "done",
+        'log "torch: $(python3 -c \'import torch;print(torch.__version__, torch.version.cuda, torch.cuda.is_available(), torch.cuda.device_count())\' 2>&1)"',
+        # FAIL FAST. Everything after this point costs 20+ minutes, and every failure
+        # mode downstream of a CPU-only torch is a confusing one.
+        'if ! python3 -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)" 2>/dev/null; then',
+        '  log "FATAL: no CUDA torch — aborting before the GPU hour is spent"; sleep 86400;',
+        "fi",
+        'log "pip unsloth (torch is already satisfied, so it will not be replaced)…"',
         'pip install --no-cache-dir -q unsloth huggingface_hub sentencepiece gguf '
         'protobuf numpy >> "$LOG" 2>&1',
         'log "pip rc=$?"',
-        'log "nvidia-smi: $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>&1)"',
+        'log "torch after unsloth: $(python3 -c \'import torch;print(torch.__version__, torch.version.cuda, torch.cuda.is_available())\' 2>&1)"',
         # llama-quantize only: the k-quant step convert_hf_to_gguf cannot do. CPU-only,
         # so no nvcc and no CMAKE_CUDA_ARCHITECTURES needed here.
         'log "llama.cpp…"',
