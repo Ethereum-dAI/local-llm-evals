@@ -1,0 +1,61 @@
+# DOES THE 95% SURVIVE THE APP'S OWN SAMPLER SETTINGS?
+#
+# Everything recorded on this benchmark used T=0.2 / max_tokens 1024. The app's chat
+# path does NOT (EmbeddedLlamaInferenceService.swift:285-286):
+#
+#     options.maxTokens   = 384
+#     options.temperature = thinkingEnabled ? 0.7 : 0.3
+#
+# So the number that would be quoted in a release note was measured under settings the
+# product does not use. max_tokens is the sharper risk of the two: completions here run
+# to a median ~256 tokens and a maximum of 849, and a truncated thinking trace does not
+# degrade gracefully — it scores as NO TOOL CALL, the exact failure v5 was built to
+# eliminate.
+#
+# Both arms on one pod so the weights are identical and only the sampler differs. The
+# harness arm re-measures v5 a third time, which keeps extending the stability estimate.
+#
+# Note the app's own wallet-eval runners use temperature 0.2 (RecognitionRunner.swift,
+# UserOpRunner.swift), so the app's eval path and its chat path already disagree. This
+# config measures which of the two the benchmark has been describing.
+description: v5 at the harness sampler vs the app's live chat sampler — frozen 1000
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: v5-harness-sampler
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_SAMPLER_URL
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: v5-app-sampler
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      # The app's live values, verbatim, for thinking ON — which is the app default.
+      temperature: 0.7
+      max_tokens: 384
+      timeout: 1800000
+      remote_url: env:RUNPOD_SAMPLER_URL
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"
