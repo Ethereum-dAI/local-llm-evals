@@ -67,15 +67,26 @@ def load_run(patterns: list[str]) -> list[dict]:
     return out
 
 
-def parse_call(output: str) -> tuple[str | None, dict | None]:
-    """The provider normalises every dialect to `[{"name", "arguments"}]`."""
+def parse_call(output) -> tuple[str | None, dict | None]:
+    """First tool call in a scored output, across the two shapes exports carry.
+
+    The local GGUF providers normalise every dialect to a JSON STRING holding
+    `[{"name", "arguments"}]`. A hosted provider (openrouter:openai/gpt-5) returns the
+    OpenAI array as a real LIST, each item nesting the call under `function`. Handling
+    only the first shape does not fail loudly — `.strip()` on a list raises, which is how
+    this was caught, but a subtler mismatch would just report every hosted call as "no
+    call" and hand gpt-5 an invented failure mode.
+    """
     try:
-        v = json.loads(output)
+        v = json.loads(output) if isinstance(output, str) else output
         if isinstance(v, list) and v and isinstance(v[0], dict):
-            args = v[0].get("arguments")
+            item = v[0]
+            if isinstance(item.get("function"), dict):   # OpenAI tool_calls nesting
+                item = item["function"]
+            args = item.get("arguments")
             if isinstance(args, str):
                 args = json.loads(args)
-            return v[0].get("name"), (args or {})
+            return item.get("name"), (args or {})
     except Exception:
         pass
     return None, None
@@ -120,7 +131,8 @@ def main() -> None:
             shapes["spurious call (gold = no call)" if called else "other"] += 1
             continue
         if not called:
-            q = r["output"].strip().endswith("?")
+            text = r["output"] if isinstance(r["output"], str) else json.dumps(r["output"])
+            q = text.strip().endswith("?")
             shapes[f"wanted a call, produced none ({'question' if q else 'prose'})"] += 1
             continue
         shapes["called, WRONG arguments"] += 1
