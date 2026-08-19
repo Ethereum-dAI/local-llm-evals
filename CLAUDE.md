@@ -792,6 +792,69 @@ the best no-prompt-change option**: +4.9 overall and +20.4 safety over what ship
 before** — same GGUF, different pod. Quote v5 as ~95%, not to the case, and treat any
 future difference under ~6 cases on this benchmark as unresolved.
 
+### The clause is NOT a v5 advantage — clause-on, gpt-5 ties it at 47/49 (`results/gpt5-safety-clause.1000.md`)
+
+Every other number here was taken with the app prompt and no clause, which left the report
+comparing `v5 + clause` (95.9% safety) against a gpt-5 that had **never seen the clause**
+(69.4%). Reading that gap as a model difference was wrong. Giving gpt-5 the same 2110-char
+system turn takes it to **95.9% (47/49) — exactly v5's number**.
+
+| | overall | wants a call | wants NO call | safety (49) |
+| --- | --: | --: | --: | --: |
+| gpt-5 | 92.8% | 94.1% | 83.3% | 69.4% |
+| ft-v5 | **95.2%** | **95.6%** | 92.5% | 81.6% |
+| gpt-5 + clause | 93.7% | 93.5% | 95.0% | **95.9%** |
+| ft-v5 + clause | **95.1%** | 94.7% | **98.3%** | **95.9%** |
+
+Two conclusions, and one of them is a correction:
+
+- **Do not claim v5 is safer than gpt-5.** Clause-on they tie. v5's durable advantage is
+  the TASK slice (+1.4 to +2.4 overall), and even that is within ~1-2 sigma of the flip
+  counts — "matches or slightly beats" is the honest phrasing, not a ranking.
+- **The clause now has three-model, two-architecture, hosted-and-local evidence**: +32.6
+  points of refusal accuracy on base, +14.3 on v5, +26.5 on gpt-5. That is a far stronger
+  case for putting it in `ToolDefinitions.swift` than the single-model result was.
+
+The shapes explain both models: gpt-5 + clause makes **zero** wrong-argument errors in
+1000 cases and its whole residual is 63 decisions (57 no-call, 6 spurious); v5's residual
+is the mirror (35 wrong-args, 12 no-call). The clause buys refusals with hesitancy on
+every model tested — spurious calls 20 -> 6 here — and it is cheapest on whichever model
+had the most spurious calls to spend.
+
+`unverified-token-swap` is the one kind with no stable story: the same clause took it
+2/4 -> 1/4 on base, 2/4 -> 4/4 on v5, 0/4 -> 2/4 on gpt-5. Four cases, three directions —
+unresolved, not a model property. Conversely `malformed-address` is 3/3 for gpt-5 in both
+arms and 1/3 for v5 + clause; that one really is a capability gap, and Swift-side format
+validation is still the fix.
+
+### Giving a HOSTED provider a prompt variant (`$PROMPT_VARIANT`)
+
+promptfoo renders the prompt before the provider is reached, so `config.prompt_variant` —
+which `pf/provider_functiongemma.py` reads, and which is how every local A/B runs two arms
+in ONE config — cannot reach `openrouter:…`. `pf/prompt.py:_env_variant` reads
+`$PROMPT_VARIANT` instead, one arm per process, routing through the SAME `augment()` so the
+clause and its single joining space are byte-identical rather than merely similar.
+
+It is OFF by default and `tests/test_prompt_variant_env.py` pins that: `APP_SYSTEM` is app
+parity, and a variant leaking into a default run would make every recorded number measure a
+prompt the wallet does not send.
+
+**`from pf.prompt_candidates import …` does not work inside `pf/prompt.py`.** promptfoo
+loads it by PATH, so the `pf` package is not importable and every case errors with
+`ModuleNotFoundError`. Resolve the sibling file with importlib — same trap and same fix as
+`provider_functiongemma._augment_fn`. pytest cannot reproduce it (there `pf` IS a package),
+so `test_variant_works_when_loaded_by_path` loads the module the way promptfoo does. A
+6-case `--filter-first-n` smoke caught this before a $9 run; always smoke first, and verify
+the clause is in the recorded prompt rather than assuming the env var took.
+
+### `error` in an export is usually the SCORER, not the provider
+
+`r["error"]` holds the scorer's verdict for an ordinary failing case
+(`call count: expected 1 ['swap'], model made 0`). Counting that field reports every
+failure as a provider failure — it made the gpt-5 control look like 72 provider errors when
+it had none. Discriminate on whether the message starts with `call count:` / `call#`, and
+keep "0 provider errors" meaning what it says.
+
 ## What has been RULED OUT for the base model (do not re-run these)
 
 Base Gemma-4 E4B scores **90.7% overall / 92.2% task / 61.2% safety** on the frozen

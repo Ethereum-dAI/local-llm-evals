@@ -11,6 +11,7 @@ Referenced from promptfooconfig.yaml as:
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -189,6 +190,55 @@ def is_protocol_case(vars_: dict[str, Any]) -> bool:
     return vars_.get("protocol") in PROTOCOL_REFERENCES
 
 
+def _augmented(chat: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Apply `$PROMPT_VARIANT` to the system turn, or return `chat` untouched.
+
+    Delegates to `pf.prompt_candidates.augment`, the SAME function the local
+    provider uses, so a clause reaching gpt-5 is byte-identical to the one that
+    reached the fine-tune — including the single joining space. Reimplementing the
+    concatenation here would be a second copy of a load-bearing string.
+
+    Resolved as a SIBLING FILE, not as `pf.prompt_candidates`. promptfoo loads this
+    module by path (`file://pf/prompt.py:render`), so the top-level `pf` package is
+    not importable in that process and the package import raises ModuleNotFoundError
+    — which surfaces as every case erroring, not as a wrong prompt. Same trap and
+    same fix as `provider_functiongemma._augment_fn`; pytest does not reproduce it,
+    because there `pf` IS a package, so `test_variant_works_when_loaded_by_path`
+    exercises promptfoo's entrypoint explicitly.
+
+    Loaded lazily so the default (unaugmented) path does not read the file at all.
+    """
+    variant = _env_variant()
+    if variant == "none":
+        return chat
+    import importlib.util
+    path = Path(__file__).with_name("prompt_candidates.py")
+    spec = importlib.util.spec_from_file_location("pf_prompt_candidates", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.augment(chat, variant)
+
+
+def _env_variant() -> str:
+    """The prompt A/B variant for providers that cannot carry provider config.
+
+    `pf/provider_functiongemma.py` reads `config.prompt_variant`, so every local
+    GGUF arm can be A/B'd inside ONE config. A hosted provider (openrouter:…) has
+    no such hook — promptfoo builds the prompt before the provider is reached — so
+    the only way to give gpt-5 the same augmented system turn is an environment
+    variable, one arm per process.
+
+    Read at CALL time, never at import, so a test can set it and so two runs in
+    the same shell cannot inherit each other's value.
+
+    DEFAULT IS "none" AND MUST STAY THAT WAY: `APP_SYSTEM` is app parity, and a
+    variant that leaked in by default would silently make every recorded number
+    measure a prompt the wallet does not send. `tests/test_prompt_variant_env.py`
+    pins that.
+    """
+    return os.environ.get("PROMPT_VARIANT", "none") or "none"
+
+
 def render(context: dict[str, Any]) -> list[dict[str, str]]:
     vars_ = context.get("vars", {}) if isinstance(context, dict) else {}
 
@@ -203,7 +253,7 @@ def render(context: dict[str, Any]) -> list[dict[str, str]]:
             chat.extend(messages)
         else:
             chat.append({"role": "user", "content": vars_.get("user_message", "")})
-        return chat
+        return _augmented(chat)
 
     chat = [{"role": "system", "content": SYSTEM}]
     parts: list[str] = []
@@ -220,4 +270,4 @@ def render(context: dict[str, Any]) -> list[dict[str, str]]:
         chat.extend(messages)
     else:
         chat.append({"role": "user", "content": vars_.get("user_message", "")})
-    return chat
+    return _augmented(chat)
