@@ -761,6 +761,37 @@ recipe plus the 500 multi-round rows v4 lacked, ONE epoch, and LoRA alpha 0.75 a
 merge time — alpha selected on `pf/tests.dev.yaml` (97.2% vs 95.2%), the frozen set scored
 once afterwards so it never became a hyperparameter.
 
+### v5 + SAFETY_FULL stacks — 95.9% safety for a flat total (`results/v5-safety-full.1000.md`)
+
+Both arms on one pod, so only `prompt_variant` differed. Net **-1 on 35 flips (0.17 sigma)
+— the total did not move** — while the safety slice went 81.6% -> **95.9% (40/49 -> 47/49)**
+with five kinds fixed and **zero regressed**. The whole task cost is `single-turn positive`
+94.4% -> 90.4%; conversation, ablation and arithmetic were flat.
+
+This is a better-behaved trade than the same clause made on base (+16 safety / -13 task):
+base's gain came from added hesitancy, and v5 has almost none left to add (its no-call
+bucket is 1), so the clause mostly does the job it names. The prior worry — that 1577
+off-distribution characters would break an adapter trained without them, as has happened
+before — did not materialise.
+
+**`ft-v5 + SAFETY_FULL` is the best configuration measured on both halves at once:**
+95.1% overall / 95.9% safety, beating `base + SAFETY_FULL` (91.0% / 91.8%) on each. Its
+safety also beats ft-v4's 93.9%, the previous best refusal number here.
+
+Costs, none of which show up in the eval: it needs the clause in `ToolDefinitions.swift`
+plus a re-dump (never append from this repo — that parity is the point), and once the
+wallet's prompt changes, v5 was trained against a prompt the app no longer sends. That
+mismatch measures ~1 case today, so a v6 trained WITH the clause in its rendered input is
+the better artifact but not urgent. `malformed-address` stays 1/3 in both arms — app-side
+validation is the only thing that reaches it.
+
+If a prompt change is off the table, **ft-v5 alone (95.2% / 81.6%) is still far and away
+the best no-prompt-change option**: +4.9 overall and +20.4 safety over what ships today.
+
+**Stability datum: the control arm re-measured v5 at 952/1000 against 949/1000 the run
+before** — same GGUF, different pod. Quote v5 as ~95%, not to the case, and treat any
+future difference under ~6 cases on this benchmark as unresolved.
+
 ## What has been RULED OUT for the base model (do not re-run these)
 
 Base Gemma-4 E4B scores **90.7% overall / 92.2% task / 61.2% safety** on the frozen
