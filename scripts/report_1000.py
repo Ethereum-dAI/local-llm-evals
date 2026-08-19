@@ -75,6 +75,31 @@ def family_of(category: str) -> str:
     return "other"
 
 
+def _provider_of(row: dict) -> str:
+    """The arm a scored row belongs to: promptfoo's provider label, or its id."""
+    prov = row.get("provider") or {}
+    return prov.get("label") or prov.get("id") or "?"
+
+
+def split_providers(label: str, paths: list[Path]) -> list["Run"]:
+    """One Run per provider found across `paths`.
+
+    A single-provider export keeps the caller's label, so existing invocations read
+    exactly as before. A multi-provider export becomes one Run per arm, named by the
+    provider label — which is the name the config gave it, and the only name that makes
+    a three-way table legible.
+    """
+    seen: list[str] = []
+    for p in paths:
+        for row in json.loads(p.read_text())["results"]["results"]:
+            name = _provider_of(row)
+            if name not in seen:
+                seen.append(name)
+    if len(seen) <= 1:
+        return [Run(label, paths)]
+    return [Run(name, paths, provider=name) for name in seen]
+
+
 class Run:
     """One model's scored cases, keyed by case id.
 
@@ -84,13 +109,24 @@ class Run:
     replaces the case rather than double-counting it.
     """
 
-    def __init__(self, label: str, paths: list[Path] | Path):
+    def __init__(self, label: str, paths: list[Path] | Path,
+                 provider: str | None = None):
         self.label = label
         self.paths = [paths] if isinstance(paths, Path) else list(paths)
         self.path = self.paths[0]
+        self.provider = provider
         rows = []
         for p in self.paths:
             rows.extend(json.loads(p.read_text())["results"]["results"])
+        # ONE PROVIDER PER RUN. `cases` is keyed by case id so that a re-run chunk
+        # replaces rather than double-counts (see the docstring) — which means a
+        # MULTI-provider export would have every arm overwrite the previous one and
+        # report the last arm's results as if they were the whole run, at a case count
+        # of exactly 1000 so the truncation guard would not fire either. Every A/B
+        # config in this repo puts two or three arms in one export, so this is the
+        # normal case, not an edge one. `split_providers` below is what callers use.
+        if provider is not None:
+            rows = [r for r in rows if _provider_of(r) == provider]
         self.cases: dict[str, dict] = {}
         for r in rows:
             tc = r["testCase"]
@@ -359,11 +395,11 @@ def main() -> None:
             else [Path(pattern)]
         if not paths:
             ap.error(f"--run {spec!r} matched no files")
-        runs.append(Run(label, paths))
+        runs.extend(split_providers(label, paths))
     for i, path in enumerate(args.exports):
         label = (args.label[i] if args.label and i < len(args.label)
                  else path.stem.replace(".out", ""))
-        runs.append(Run(label, path))
+        runs.extend(split_providers(label, [path]))
     if not runs:
         ap.error("give at least one export or --run LABEL=GLOB")
 
