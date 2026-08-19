@@ -722,6 +722,45 @@ evidence than a net delta. `safety-full`'s refusal gain (+9/-0 local, +8/-0 remo
 because nothing regressed; its apparent accuracy gain (+7/-2, net +5) did not survive,
 because +5 is inside the floor.
 
+## The v5 fine-tune BEATS base and gpt-5 — 94.9% on the frozen 1000
+
+`results/v5-1000-final.md` is the record. Both on-device arms served from rented GPUs in
+one device-controlled run; gpt-5 over the same 1000 cases via OpenRouter.
+
+| model | overall | task (880) | no-call (120) | safety (49) |
+| --- | --: | --: | --: | --: |
+| **ft-v5** (4B, Q4_K_M) | **94.9%** | 95.2% | 92.5% | 81.6% |
+| gpt-5 | 92.8% | 94.1% | 83.3% | 69.4% |
+| base | 90.3% | 91.7% | 80.0% | 61.2% |
+| ft-v4 | 78.7% | 79.8% | 70.8% | 93.9% |
+
++46 net on 100 flips is ~4.6 sigma — real, unlike the safety clause's withdrawn net +2.
+
+**The mechanism: v5 took the no-call bucket from 45 to 1.** That is the failure nothing
+else moved — an act-not-ask clause did nothing, retry added nothing on top of the safety
+clause, few-shot made it worse, and *gpt-5 has 51 of them*, more than base. Asking instead
+of acting is not a small-model deficiency and not promptable. It also did not just learn to
+act: spurious calls fell 24 -> 9 and `ablation` went to 28/28. The price is 13 more
+wrong-argument calls (28 -> 41), where gpt-5 makes **one** in 1000 — so argument fidelity,
+not the decision, is where v5's remaining headroom is.
+
+Three things to carry forward:
+
+- **v5 strictly dominates base+SAFETY_FULL on the task half** (94.9/95.2 vs 91.0/91.0) and
+  needs **no wallet prompt change**, which was the constraint. It is worse at refusals
+  (81.6% vs 91.8%), and nothing has tested `v5 + SAFETY_FULL` together — that is the
+  obvious next experiment, not a re-run of either alone.
+- **`switch` regressed 99.3% -> 97.3%**, and `switch` is the HELD-OUT mechanism. 3 net
+  cases, all at 5-6 rounds. It held 23/23 on dev, so only the 149-case frozen sample
+  showed it. State the generalization claim with that cost attached.
+- **The arithmetic slice is 93.8% for base, v5 AND gpt-5** — identical. Neither training
+  nor frontier scale moves those 5 cases, so they are a property of the slice.
+
+Recipe (`scripts/runpod_train_gemma4.py`, ~18 min on one A40, ~$0.76 all in): the v4
+recipe plus the 500 multi-round rows v4 lacked, ONE epoch, and LoRA alpha 0.75 applied at
+merge time — alpha selected on `pf/tests.dev.yaml` (97.2% vs 95.2%), the frozen set scored
+once afterwards so it never became a hyperparameter.
+
 ## What has been RULED OUT for the base model (do not re-run these)
 
 Base Gemma-4 E4B scores **90.7% overall / 92.2% task / 61.2% safety** on the frozen
