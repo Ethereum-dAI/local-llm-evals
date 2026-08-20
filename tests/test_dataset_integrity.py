@@ -1,14 +1,3 @@
-"""Dataset integrity: the dev slices, the conversation cases, and degeneracy.
-
-Four suites merged into one file. They all answer the same question about different
-slices — is this dataset actually what it claims to be, and is it disjoint from the
-things it must be disjoint from (training rows, the frozen benchmark, each other)?
-The frozen 1000-case set has its own file, `test_combined_benchmark_integrity.py`.
-
-The last section is this file's ORIGINAL content, kept because it guards the legacy
-`pf/tests.yaml` set that predates all of this and is still scored by `scripts/eval.sh`
-with no dataset argument. Two of its names were prefixed `legacy` to clear a clash.
-"""
 from __future__ import annotations
 
 import collections
@@ -20,39 +9,40 @@ import sys
 import yaml
 
 from pathlib import Path
-from wallet_evals.promptfoo import load_cases
-from wallet_evals.schema import ParsedTurn
-from wallet_evals.scorer import score_case
+from scripts.generate_cases import (
+    ARITHMETIC_SEEDS,
+    MAX_PER_ACTION_ARITHMETIC,
+    SEED_ARITHMETIC,
+    build_all,
+    build_extra_selection,
+    _relabel_arithmetic,
+)
 from scripts.generate_conversation_cases import (
     ROUND_PLAN, SEED, TARGET_TOTAL, build_selection, load_intents,
 )
+from typing import Callable
 from wallet_evals.conversations import MECHANISM_ROUNDS
 from wallet_evals.dev_safety import DEV_REFUSAL_SCENARIOS
 from wallet_evals.generation import EXTRA_REFUSAL_SCENARIOS
 from wallet_evals.promptfoo import load_cases
+from wallet_evals.schema import Case, ExpectedCall, ParsedToolCall, ParsedTurn
 from wallet_evals.schema import ParsedTurn
 from wallet_evals.scorer import score_case
 
 # ============================================================================
-# test_dev_set
+# test_dataset_integrity
 # ============================================================================
 #
-# The dev set must be disjoint from the test set AND from training.
+# Dataset integrity: the dev slices, the conversation cases, and degeneracy.
 #
-# The three-way split is the whole safeguard:
+# Four suites merged into one file. They all answer the same question about different
+# slices — is this dataset actually what it claims to be, and is it disjoint from the
+# things it must be disjoint from (training rows, the frozen benchmark, each other)?
+# The frozen 1000-case set has its own file, `test_combined_benchmark_integrity.py`.
 #
-#     TRAIN  data_for_finetune/*.jsonl      what the model learns from
-#     DEV    pf/tests.dev.yaml              what picks the checkpoint
-#     TEST   pf/tests.combined.yaml         the number we report (FROZEN)
-#
-# Selecting a checkpoint on cases that appear in TEST is selecting on the test set.
-# That is not a hypothetical: this whole line of work started from a fine-tune that
-# scored 96.5% on a benchmark matching its training distribution and 69.3% on cases
-# it had not seen. Doing the same thing one level up — tuning on the reported set —
-# would reproduce that error while looking like progress.
-#
-# So this is checked by SURFACE and by CASE ID, and on the gold as well, because a
-# rename or a re-seed must not be able to slip an overlap through.
+# The last section is this file's ORIGINAL content, kept because it guards the legacy
+# `pf/tests.yaml` set that predates all of this and is still scored by `scripts/eval.sh`
+# with no dataset argument. Two of its names were prefixed `legacy` to clear a clash.
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -179,15 +169,6 @@ def test_dev_gold_self_scores_under_the_real_scorer():
         turn = ParsedTurn(tool_calls=[c.as_parsed_call() for c in case.expected_calls])
         assert score_case(case, turn) == 1, f"{case.id} does not self-score"
 
-# ============================================================================
-# test_dev_safety
-# ============================================================================
-#
-# Guards for pf/tests.dev.safety.yaml — the dev set's safety coverage.
-#
-# This slice exists so a prompt or recipe change can be judged on safety as well as
-# accuracy. It is only worth anything if it is genuinely held out and genuinely
-# scoreable, which is what these check.
 
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -257,17 +238,6 @@ def test_ids_are_namespaced():
     for case in _dev_safety_cases():
         assert case["metadata"]["id"].startswith("devsafety-"), case["metadata"]["id"]
 
-# ============================================================================
-# test_conversation_integrity
-# ============================================================================
-#
-# Integrity of the generated conversation slice (pf/tests.conversations.yaml).
-#
-# Mirrors test_app_contract_integrity.py: the gold has to self-score under the real
-# scorer, ids have to be unique, and the file has to still be a byte-stable output
-# of its generator. Adds the two properties that only exist for this slice — the
-# declared round distribution, and the guarantee that gold is never simply "the
-# first values the transcript mentions".
 
 TESTS = ROOT / "pf" / "tests.conversations.yaml"
 
@@ -447,31 +417,6 @@ def test_amounts_are_disjoint_from_the_other_seed_banks():
     overlap = gold_amounts & trained
     assert not overlap, f"conversation gold reuses trained amounts: {sorted(overlap)}"
 
-# ============================================================================
-# test_dataset_degeneracy
-# ============================================================================
-#
-# Guards against a scored gold field that cannot discriminate.
-#
-# This file exists because two such fields shipped, and neither was caught by any
-# existing test — both were found by reading the dataset by hand:
-#
-#   * `amount_side` was `"input"` in all 436 swap golds, so a model that hardcoded
-#     the string scored the field perfectly and it measured nothing.
-#   * `to` was `vitalik.eth` in all 36 transfer golds of the ARITHMETIC slice, and
-#     51.5% of transfer golds overall — while being the ONLY ENS name in
-#     datasets/finetune_seeds.yaml, so the whole ENS axis was n=1 on a value every
-#     fine-tune had memorised.
-#
-# The second one is why the checks below run PER SLICE as well as globally: across
-# the full dataset `to` had 63 distinct values and looked healthy, which is exactly
-# how the arithmetic slice's constant hid.
-#
-# A constant field is not automatically a bug — some are forced by the app contract
-# or deliberately held fixed to isolate another variable. So constants are allowed,
-# but only by name, and only with a reason recorded here. That is the point: a NEW
-# constant fails loudly, and every existing one carries its justification in code
-# rather than in someone's memory.
 
 COMBINED = ROOT / "pf" / "tests.combined.yaml"
 
@@ -648,13 +593,6 @@ def test_token_address_cases_carry_the_address_verbatim():
                 f"the conversation")
 
 
-# ============================================================================
-# test_dataset_integrity (original content, predating the merge)
-# ============================================================================
-#
-# The legacy `pf/tests.yaml` set: it validates, ids are unique, every gold
-# self-scores to 1, and swap cases exist at all.
-
 LEGACY_TESTS = Path(__file__).resolve().parents[1] / "pf" / "tests.yaml"
 
 
@@ -680,3 +618,589 @@ def test_every_legacy_case_self_scores_one():
 def test_has_swap_cases():
     swaps = [c for c in _load() if any(call.tool == "swap" for call in c.expected_calls)]
     assert len(swaps) >= 1
+
+# ============================================================================
+# test_combined_benchmark_integrity
+# ============================================================================
+#
+# Integrity of the combined benchmark: app-contract (transfer/swap + the
+# arithmetic slice + the refusal banks) concatenated with the multi-round
+# conversation slice.
+#
+# Mirrors test_app_contract_integrity.py / test_dataset_integrity.py, which
+# guard the two source files this one is built from.
+#
+# Suffixed on merge, to clear a name this file shared with an
+# earlier section: _load -> _load_combined_benchmark_integrity, _raw -> _raw_combined_benchmark_integrity, test_every_case_self_scores_one -> test_every_case_self_scores_one_combined_benchmark_integrity.
+
+APP_CONTRACT = ROOT / "pf" / "tests.app-contract.yaml"
+
+
+CONVERSATIONS = ROOT / "pf" / "tests.conversations.yaml"
+
+
+EXPECTED_TOTAL = 1000
+
+
+EXPECTED_ROUNDS = {1: 336, 2: 273, 3: 150, 4: 110, 5: 80, 6: 51}
+
+
+def _load_combined_benchmark_integrity():
+    return load_cases(COMBINED)
+
+
+def _raw_combined_benchmark_integrity() -> list[dict]:
+    return yaml.safe_load(COMBINED.read_text())
+
+
+def _rounds(case: dict) -> int:
+    messages = case["vars"].get("messages")
+    if not messages:
+        return 1
+    return sum(1 for m in messages if m.get("role") == "user")
+
+
+def test_every_case_self_scores_one_combined_benchmark_integrity():
+    for case in _load_combined_benchmark_integrity():
+        turn = ParsedTurn(tool_calls=[c.as_parsed_call() for c in case.expected_calls])
+        assert score_case(case, turn) == 1, f"{case.id} not self-consistent"
+
+
+def test_ids_unique_across_the_whole_file():
+    ids = [c.id for c in _load_combined_benchmark_integrity()]
+    assert len(ids) == len(set(ids))
+
+
+def test_the_benchmark_is_exactly_its_declared_size():
+    assert len(_load_combined_benchmark_integrity()) == EXPECTED_TOTAL
+
+
+def test_arithmetic_slice_is_present_and_non_empty():
+    cats = {c.category for c in _load_combined_benchmark_integrity()}
+    arithmetic_cats = {c for c in cats if c.startswith("arithmetic-")}
+    assert arithmetic_cats, "no arithmetic-* category found in the combined benchmark"
+    arithmetic_cases = [c for c in _load_combined_benchmark_integrity() if c.category.startswith("arithmetic-")]
+    assert len(arithmetic_cases) > 0
+
+
+def test_railgun_is_absent():
+    # RAILGUN was removed from the app (local-wallet-mac#86, PR #87) and from
+    # pf/tools.json; a benchmark that still scored shield/unshield would be
+    # measuring a feature the product does not expose.
+    cases = _load_combined_benchmark_integrity()
+    assert not any(c.category.startswith("railgun-") for c in cases)
+    assert not any("shield" in c.category for c in cases)
+    assert not any(c.protocol == "railgun" for c in cases)
+
+
+def test_aave_and_safe_are_absent():
+    """Removed from the benchmark for the same reason RAILGUN was: the wallet
+    ships no lending or multisig tool, so `executeTx` gold for Aave's Pool or a
+    Safe self-call scored a capability the product does not expose, and it was
+    ~25% of the headline number.
+
+    Deliberately a REMOVAL FROM THE BENCHMARK ONLY. pf/tests.protocols.yaml, its
+    generator and src/wallet_evals/protocols/ all still exist and still pass
+    test_protocol_integrity.py — run that file directly
+    (EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh) if you want the
+    numbers. This test guards the benchmark, not the repo.
+    """
+    cases = _load_combined_benchmark_integrity()
+    assert not any(c.protocol in ("aave", "safe") for c in cases)
+    assert not any(c.category.startswith(("aave-", "safe-")) for c in cases)
+    # The builder contract is what those cases needed; nothing left should use it.
+    assert not any(call.tool in ("executeTx", "readTx")
+                   for c in cases for call in c.expected_calls)
+
+
+def test_safety_refusals_are_powered_enough_to_detect_a_regression():
+    """Refusal is the ONLY failure category the app-contract migration left on
+    the model's plate (unit conversion and ENS resolution both moved into the
+    wallet). At the 7 cases this benchmark used to carry, a regression like the
+    Qwen fine-tune's 100% -> 45% would have been invisible."""
+    refusals = [c for c in _load_combined_benchmark_integrity() if c.category.startswith("safety-refusal-")]
+    assert len(refusals) >= 40, f"only {len(refusals)} refusal cases"
+    kinds = {c.category for c in refusals}
+    assert len(kinds) >= 10, f"only {len(kinds)} distinct refusal kinds: {sorted(kinds)}"
+
+
+def test_combined_count_equals_sum_of_its_two_sources():
+    combined = _load_combined_benchmark_integrity()
+    app_contract = load_cases(APP_CONTRACT)
+    conversations = load_cases(CONVERSATIONS)
+    assert len(combined) == len(app_contract) + len(conversations)
+
+
+def test_round_distribution_matches_the_declared_shape():
+    """The point of the conversation slice: two thirds of the benchmark is now
+    multi-round, spanning 1-6 rounds. Asserted rather than printed so a
+    regenerated source file that collapses the long conversations fails here."""
+    counts = collections.Counter(_rounds(c) for c in _raw_combined_benchmark_integrity())
+    assert dict(counts) == EXPECTED_ROUNDS
+    multi = sum(v for k, v in counts.items() if k > 1)
+    assert multi / len(_raw_combined_benchmark_integrity()) > 0.6, f"only {multi} multi-round cases"
+
+
+def test_long_conversations_carry_enough_weight_to_move_the_score():
+    """5- and 6-round cases are the ones a model degrading on context length will
+    fail first. If they were a handful of cases, that degradation would round to
+    nothing in the headline number."""
+    long_cases = [c for c in _raw_combined_benchmark_integrity() if _rounds(c) >= 5]
+    assert len(long_cases) >= 100, f"only {len(long_cases)} cases of 5+ rounds"
+
+
+def test_every_conversation_mechanism_is_represented():
+    mechanisms = collections.Counter(
+        c["metadata"].get("mechanism") for c in _raw_combined_benchmark_integrity()
+        if c["metadata"].get("mechanism"))
+    assert set(mechanisms) == {"progressive", "correction", "distractor", "switch",
+                               "exact_output", "token_address"}
+    # The four conversational-memory mechanisms carry the bulk. The two
+    # contract-boundary ones are deliberately smaller: each tests a single
+    # property of the final turn, and exact_output's gold is empty, so a large
+    # bank of them would inflate the score a silent model gets for free.
+    for mechanism in ("progressive", "correction", "distractor", "switch"):
+        assert mechanisms[mechanism] >= 100, \
+            f"{mechanism} has only {mechanisms[mechanism]} cases"
+    assert mechanisms["exact_output"] == 32
+    assert mechanisms["token_address"] == 24
+
+
+def test_per_family_census_is_visible_and_every_family_present():
+    """A census assertion so drift (a family silently shrinking to zero, or a
+    generator run losing cases) is visible rather than only caught by eyeballing
+    a print statement."""
+    cases = _load_combined_benchmark_integrity()
+    protos = collections.Counter(c.protocol for c in cases)
+    print(f"\ncombined benchmark per-protocol census: {dict(sorted(protos.items()))}")
+
+    # transfer/uniswap = app-contract + conversations, safety = refusals. Those
+    # three are the whole benchmark now that aave/safe are out.
+    assert set(protos) == {"transfer", "uniswap", "safety"}
+    for family in ("transfer", "uniswap", "safety"):
+        assert protos[family] > 0, f"{family} has zero cases in the combined benchmark"
+
+    arithmetic_count = sum(1 for c in cases if c.category.startswith("arithmetic-"))
+    refusal_count = sum(1 for c in cases if c.category.startswith("safety-refusal-"))
+    conversation_count = sum(1 for c in cases
+                             if c.category.startswith("conversation-"))
+    print(f"arithmetic slice: {arithmetic_count}, refusals: {refusal_count}, "
+          f"conversations: {conversation_count}")
+    assert arithmetic_count > 0 and refusal_count > 0 and conversation_count > 0
+
+# ============================================================================
+# test_app_contract_integrity
+# ============================================================================
+#
+# Integrity of the app-contract dataset.
+#
+# Mirrors test_generated_integrity.py, which guards the frozen base-unit dataset.
+# Both must pass: the scorer still has to handle executeTx gold for the protocol
+# datasets, and the app-contract gold has to self-score under the same scorer.
+#
+# Suffixed on merge, to clear a name this file shared with an
+# earlier section: TESTS -> TESTS_APP_CONTRACT_INTEGRITY, _load -> _load_app_contract_integrity.
+
+TESTS_APP_CONTRACT_INTEGRITY = Path(__file__).resolve().parents[1] / "pf" / "tests.app-contract.yaml"
+
+
+def _load_app_contract_integrity():
+    return load_cases(TESTS_APP_CONTRACT_INTEGRITY)
+
+
+def test_app_contract_first_307_match_the_frozen_dataset_count_and_the_arithmetic_slice_is_appended():
+    # pf/tests.app-contract.yaml now holds the original 307 transfer/swap cases
+    # PLUS an appended arithmetic slice (scripts/generate_cases.py's
+    # --extra-seeds path, from datasets/seeds.arithmetic.yaml, its own RNG
+    # stream). The frozen count is still exactly 307; the first 307 cases here
+    # are byte-identical to it (proven by scripts/generate_cases.py's own
+    # SEPARATE RNG for the extra seeds, plus the diff check in the brief); the
+    # rest is the arithmetic slice, labelled distinctly so it's never mistaken
+    # for part of the original 307.
+    frozen = load_cases(Path(__file__).resolve().parents[1] / "pf" / "tests.generated.yaml")
+    assert len(frozen) == 307
+
+    cases = _load_app_contract_integrity()
+    # xref- cases are the EXTRA_REFUSAL_SCENARIOS bank, appended from its own
+    # RNG stream just like the arithmetic slice.
+    base = [c for c in cases
+            if not c.category.startswith("arithmetic-") and not c.id.startswith("xref-")]
+    arithmetic = [c for c in cases if c.category.startswith("arithmetic-")]
+    extra_refusals = [c for c in cases if c.id.startswith("xref-")]
+    assert len(base) == 307
+    assert len(arithmetic) > 0
+    assert len(extra_refusals) > 0
+    assert len(cases) == 307 + len(arithmetic) + len(extra_refusals)
+
+    # The load-bearing property, asserted rather than asserted-in-a-comment: the
+    # 307 carry the SAME prompts as the frozen base-unit dataset, only different
+    # gold. Without it, "base 9.8% -> 87.9% on the same intents" is not a claim
+    # about the contract change, and the whole comparison collapses.
+    assert {c.id for c in base} == {c.id for c in frozen}
+
+    # Compare the raw `vars` blocks, not the parsed Case: multi-turn prompts
+    # live in vars["messages"], which the Case model does not surface.
+    root = Path(__file__).resolve().parents[1]
+    import yaml
+    def _vars_by_id(path):
+        return {t["metadata"]["id"]: t["vars"]
+                for t in yaml.safe_load((root / path).read_text())}
+    frozen_vars = _vars_by_id("pf/tests.generated.yaml")
+    current_vars = _vars_by_id("pf/tests.app-contract.yaml")
+    for case_id in frozen_vars:
+        fv, cv = frozen_vars[case_id], current_vars[case_id]
+        for key in ("user_message", "messages"):
+            assert fv.get(key) == cv.get(key), \
+                f"{case_id}: {key} drifted from the frozen base-unit dataset"
+
+
+def test_app_contract_ids_unique():
+    ids = [c.id for c in _load_app_contract_integrity()]
+    assert len(ids) == len(set(ids))
+
+
+def test_app_contract_self_scores_one():
+    # NOTE: this is a round-trip/schema check, NOT a fold check. as_parsed_call()
+    # is a pure field-for-field copy, so every fold in the scorer sees the same
+    # (tool, value) pair on both sides of the comparison — each becomes f(x) == f(x),
+    # true regardless of whether the fold is correct. What this genuinely proves is
+    # that every gold call in the dataset validates against ParsedToolCall's schema
+    # and survives the round-trip (it would catch a builder emitting a tool name or
+    # a field the schema rejects). For evidence the folds themselves score MEANING
+    # rather than surface form, see test_app_contract_fold_* and the negative
+    # control test_app_contract_fold_rejects_an_altered_amount below.
+    for case in _load_app_contract_integrity():
+        turn = ParsedTurn(tool_calls=[c.as_parsed_call() for c in case.expected_calls])
+        assert score_case(case, turn) == 1, f"{case.id} not self-consistent"
+
+
+def _find_single_call_case(
+    cases: list[Case], predicate: Callable[[ExpectedCall], bool]
+) -> tuple[Case, ExpectedCall] | None:
+    """First case with exactly one expected call matching predicate, or None.
+
+    Restricted to single-call cases so the caller can build a one-element
+    ParsedTurn without having to fabricate the other calls in the sequence.
+    """
+    for case in cases:
+        if len(case.expected_calls) != 1:
+            continue
+        call = case.expected_calls[0]
+        if predicate(call):
+            return case, call
+    return None
+
+
+def _score_actual(case: Case, actual: ParsedToolCall) -> int:
+    return score_case(case, ParsedTurn(tool_calls=[actual]))
+
+
+def test_app_contract_fold_recipient_is_case_insensitive():
+    # Real proof the `_recipient_text` fold folds case for ENS names, not just a
+    # tautological copy: gold names an ENS recipient, the "model" emits the same
+    # name in a different case, and it must still score 1.
+    found = _find_single_call_case(
+        _load_app_contract_integrity(),
+        lambda c: c.tool == "transfer" and c.to is not None
+        and not c.to.startswith("0x") and "." in c.to,
+    )
+    if found is None:
+        pytest.skip("no transfer case with an ENS-style recipient in the dataset")
+    case, call = found
+    actual = call.as_parsed_call().model_copy(update={"to": call.to.swapcase()})
+    assert actual.to != call.to, "swapcase() should actually change an ENS name's case"
+    assert _score_actual(case, actual) == 1
+
+
+def test_app_contract_fold_token_symbol_is_case_insensitive():
+    # Real proof `_symbol` folds case: gold names a non-ETH token, the "model"
+    # emits it in the opposite case, and it must still score 1.
+    found = _find_single_call_case(
+        _load_app_contract_integrity(),
+        lambda c: c.tool == "transfer" and c.token is not None and c.token.lower() != "eth",
+    )
+    if found is None:
+        pytest.skip("no transfer case with a non-ETH token in the dataset")
+    case, call = found
+    actual = call.as_parsed_call().model_copy(update={"token": call.token.swapcase()})
+    assert actual.token != call.token, "swapcase() should actually change the token's case"
+    assert _score_actual(case, actual) == 1
+
+
+def test_app_contract_fold_amount_is_numeric_not_textual():
+    # Real proof `_human_amount`/`_dec_or_raw` compares numeric value, not text:
+    # gold has a fractional amount, the "model" emits the same value with an
+    # extra trailing zero, and it must still score 1.
+    found = _find_single_call_case(
+        _load_app_contract_integrity(),
+        lambda c: c.tool == "transfer" and c.amount is not None and "." in c.amount,
+    )
+    if found is None:
+        pytest.skip("no transfer case with a fractional amount in the dataset")
+    case, call = found
+    padded = call.amount + "0"
+    actual = call.as_parsed_call().model_copy(update={"amount": padded})
+    assert actual.amount != call.amount, "padding should actually change the amount text"
+    assert _score_actual(case, actual) == 1
+
+
+def test_app_contract_fold_missing_token_defaults_to_eth():
+    # Real proof `_symbol` treats an omitted token as ETH: gold names ETH
+    # explicitly, the "model" omits `token` entirely, and it must still score 1.
+    found = _find_single_call_case(
+        _load_app_contract_integrity(),
+        lambda c: c.tool == "transfer" and c.token is not None and c.token.lower() == "eth",
+    )
+    if found is None:
+        pytest.skip("no transfer case with an explicit ETH token in the dataset")
+    case, call = found
+    actual = call.as_parsed_call().model_copy(update={"token": None})
+    assert _score_actual(case, actual) == 1
+
+
+def test_app_contract_fold_missing_amount_side_defaults_to_input():
+    # Real proof `_swap_side` treats an omitted amount_side as "input": gold sets
+    # it explicitly, the "model" omits it entirely, and it must still score 1.
+    found = _find_single_call_case(
+        _load_app_contract_integrity(), lambda c: c.tool == "swap" and c.amount_side is not None
+    )
+    if found is None:
+        pytest.skip("no swap case with an explicit amount_side in the dataset")
+    case, call = found
+    actual = call.as_parsed_call().model_copy(update={"amount_side": None})
+    assert _score_actual(case, actual) == 1
+
+
+def test_app_contract_fold_rejects_an_altered_amount():
+    # NEGATIVE CONTROL — the one that proves the fold tests above can actually
+    # fail. Take a real transfer amount and insert thousands separators (a change
+    # a human would call cosmetic but that is NOT the same numeric value under
+    # `_dec_or_raw`'s Decimal parse: a comma makes Decimal(...) raise, so the fold
+    # falls back to comparing the raw, unequal strings). If this ever scores 1,
+    # the fold tests above are not testing anything.
+    found = _find_single_call_case(
+        _load_app_contract_integrity(),
+        lambda c: c.tool == "transfer" and c.amount is not None
+        and int(c.amount.split(".")[0]) >= 1000,
+    )
+    if found is None:
+        pytest.skip("no transfer case with a >=4-digit amount in the dataset")
+    case, call = found
+    int_part, _, frac_part = call.amount.partition(".")
+    grouped = f"{int(int_part):,}"
+    altered = f"{grouped}.{frac_part}" if frac_part else grouped
+    assert altered != call.amount, "grouping should actually change the amount text"
+    actual = call.as_parsed_call().model_copy(update={"amount": altered})
+    assert _score_actual(case, actual) == 0
+
+
+def test_app_contract_emits_no_base_unit_gold():
+    for case in _load_app_contract_integrity():
+        for call in case.expected_calls:
+            assert call.tool in ("transfer", "swap"), f"{case.id} uses {call.tool}"
+            assert call.value == "0" and call.args == []
+            assert call.currencyIn is None and call.amountIn is None
+
+
+def test_app_contract_has_negatives_multiturn_and_refusals():
+    cases = _load_app_contract_integrity()
+    assert any(not c.expected_calls for c in cases)
+    assert any(c.category.startswith("multiturn-") for c in cases)
+    assert any(c.category.startswith("safety-refusal-") for c in cases)
+
+# ============================================================================
+# test_generated_integrity
+# ============================================================================
+#
+# Suffixed on merge, to clear a name this file shared with an
+# earlier section: _load -> _load_generated_integrity.
+
+GENERATED = Path(__file__).resolve().parents[1] / "pf" / "tests.generated.yaml"
+
+
+def _load_generated_integrity() -> list:
+    return load_cases(GENERATED)
+
+
+def test_generated_nonempty():
+    assert len(_load_generated_integrity()) > 0
+
+
+def test_generated_ids_unique():
+    ids = [c.id for c in _load_generated_integrity()]
+    assert len(ids) == len(set(ids))
+
+
+def test_generated_self_scores_one():
+    for case in _load_generated_integrity():
+        turn = ParsedTurn(tool_calls=[c.as_parsed_call() for c in case.expected_calls])
+        assert score_case(case, turn) == 1, f"{case.id} not self-consistent"
+
+
+def test_generated_has_negatives_and_multiturn():
+    ids = [c.id for c in _load_generated_integrity()]
+    assert any("-neg-" in i for i in ids)
+    assert any("-mt-" in i for i in ids)
+
+
+def test_generated_has_safety_refusals():
+    refusals = [c for c in _load_generated_integrity() if "refusal" in c.id]
+    assert refusals, "no safety-refusal cases generated"
+    assert all(c.expected_calls == [] for c in refusals), "refusal gold must be no tool call"
+
+# ============================================================================
+# test_arithmetic_slice_generation
+# ============================================================================
+#
+# TDD coverage for the arithmetic slice's generator additions.
+#
+# `scripts/generate_cases.py` grows a `--extra-seeds` path so the arithmetic
+# slice can be generated from datasets/seeds.arithmetic.yaml with its OWN RNG
+# stream (SEED_ARITHMETIC), appended AFTER the main 307-case selection, without
+# disturbing it. These tests cover the pure pieces of that path in isolation,
+# before the file-level Step 2 diff check (which requires a real regeneration
+# run and is done by hand per the brief, not as a pytest).
+
+def test_build_all_can_omit_the_refusal_bucket():
+    # Refusal scenarios are hardcoded, not seed-derived: calling build_all a
+    # second time for extra seeds must not silently re-mint duplicate
+    # "gen-refusal-####" ids that collide with the main selection's.
+    seeds = [{"action": "transfer", "amount": "1.5", "token": "ETH",
+              "recipient": "vitalik.eth", "ablate": ["amount"]}]
+    with_refusals = build_all(seeds, random.Random(1))
+    without_refusals = build_all(seeds, random.Random(1), include_refusals=False)
+    assert "refusal" in with_refusals and with_refusals["refusal"]
+    assert "refusal" not in without_refusals
+
+
+def test_relabel_arithmetic_rewrites_positive_case_id_and_category():
+    case = {"metadata": {"id": "gen-transfer-pos-0001",
+                         "category": "generated-transfer-pos"}}
+    _relabel_arithmetic(case)
+    assert case["metadata"]["id"] == "arith-transfer-pos-0001"
+    assert case["metadata"]["category"] == "arithmetic-transfer-pos"
+
+
+def test_relabel_arithmetic_rewrites_ablation_and_multiturn_categories():
+    neg = {"metadata": {"id": "gen-swap-neg-0002", "category": "ablation-amount"}}
+    _relabel_arithmetic(neg)
+    assert neg["metadata"]["id"] == "arith-swap-neg-0002"
+    assert neg["metadata"]["category"] == "arithmetic-ablation-amount"
+
+    mt = {"metadata": {"id": "gen-transfer-mt-0003", "category": "multiturn-recipient"}}
+    _relabel_arithmetic(mt)
+    assert mt["metadata"]["id"] == "arith-transfer-mt-0003"
+    assert mt["metadata"]["category"] == "arithmetic-multiturn-recipient"
+
+
+def test_build_extra_selection_labels_every_case():
+    seeds = yaml.safe_load(ARITHMETIC_SEEDS.read_text())
+    selected = build_extra_selection(seeds, random.Random(SEED_ARITHMETIC))
+    assert selected  # non-empty
+    for case in selected:
+        md = case["metadata"]
+        assert md["id"].startswith("arith-"), md["id"]
+        assert md["category"].startswith("arithmetic-"), md["category"]
+        assert "gen-" not in md["id"]
+
+
+def test_build_extra_selection_deterministic():
+    seeds = yaml.safe_load(ARITHMETIC_SEEDS.read_text())
+    a = build_extra_selection(seeds, random.Random(SEED_ARITHMETIC))
+    b = build_extra_selection(seeds, random.Random(SEED_ARITHMETIC))
+    assert a == b
+
+
+def test_build_extra_selection_respects_its_own_cap():
+    seeds = yaml.safe_load(ARITHMETIC_SEEDS.read_text())
+    selected = build_extra_selection(seeds, random.Random(SEED_ARITHMETIC))
+    by_action: dict[str, int] = {}
+    for case in selected:
+        action = case["metadata"]["id"].split("-")[1]
+        by_action[action] = by_action.get(action, 0) + 1
+    for action, count in by_action.items():
+        assert count <= MAX_PER_ACTION_ARITHMETIC, (action, count)
+
+
+def test_arithmetic_seed_amounts_are_disjoint_from_both_existing_seed_files():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    main_seeds = yaml.safe_load((root / "datasets" / "seeds.yaml").read_text())
+    ft_seeds = yaml.safe_load((root / "datasets" / "finetune_seeds.yaml").read_text())
+    arithmetic_seeds = yaml.safe_load(ARITHMETIC_SEEDS.read_text())
+
+    def amounts(doc):
+        out = set()
+        for s in doc:
+            spec = s["amount"]
+            vals = spec["vary"] if isinstance(spec, dict) and "vary" in spec else [spec]
+            out.update(vals)
+        return out
+
+    existing = amounts(main_seeds) | amounts(ft_seeds)
+    new = amounts(arithmetic_seeds)
+    assert existing & new == set(), f"amount literal(s) not disjoint: {existing & new}"
+    assert new  # sanity: the new file actually defines some amounts
+
+# ============================================================================
+# test_tools_contract
+# ============================================================================
+#
+# The tool schema the eval offers must match the macOS app's own ToolDefinitions.
+#
+# Source of truth is wallet-macos/Sources/WalletToolLayer/ToolDefinitions.swift in the
+# local-wallet-mac repo (`ToolDefinitions.phase1`). It cannot be imported from Python,
+# so the property names are asserted here and any drift shows up as a failure rather
+# than as a silently mis-scored run.
+
+TOOLS = json.loads((Path(__file__).resolve().parents[1] / "pf" / "tools.json").read_text())
+
+
+BY_NAME = {t["function"]["name"]: t["function"] for t in TOOLS}
+
+
+def _props(name):
+    return set(BY_NAME[name]["parameters"]["properties"])
+
+
+def test_all_four_tools_present():
+    # transfer/swap mirror the app; executeTx/readTx serve the Aave and Safe
+    # protocol datasets, which have no app counterpart. shield/unshield were
+    # dropped with the RAILGUN feature (local-wallet-mac#86, PR #87).
+    assert set(BY_NAME) == {"executeTx", "readTx", "transfer", "swap"}
+
+
+def test_transfer_matches_app_properties():
+    # Exact parity with ToolDefinitions.swift:5. chainId was removed on
+    # 2026-08-14: the app declares no such argument and never reads one
+    # (grep intent.args["chainId"] returns nothing), so requiring it trained the
+    # model to emit an off-contract field — the same drift class as executeTx.
+    assert _props("transfer") == {"to", "amount", "token"}
+    assert BY_NAME["transfer"]["parameters"]["required"] == ["to", "amount"]
+
+
+def test_swap_matches_app_properties():
+    # Exact parity with ToolDefinitions.swift:15 — see the chainId note above.
+    assert _props("swap") == {"from_token", "to_token", "amount", "amount_side"}
+    assert BY_NAME["swap"]["parameters"]["required"] == [
+        "from_token", "to_token", "amount"]
+
+
+def test_app_tools_declare_no_chainid_but_protocol_tools_do():
+    """The split that keeps the two contracts honest: transfer/swap mirror the
+    app, which resolves the chain from activeChain.id; executeTx/readTx serve
+    the Aave/Safe datasets, which are base-unit and do carry a chainId."""
+    for name in ("transfer", "swap"):
+        assert "chainId" not in _props(name)
+    for name in ("executeTx", "readTx"):
+        assert "chainId" in _props(name)
+    assert BY_NAME["swap"]["parameters"]["properties"]["amount_side"]["enum"] == ["input"]
+
+
+def test_no_app_tool_asks_for_base_units():
+    # Every app tool is human-unit now, so "the exception to the base-unit rule"
+    # framing the privacy tools used to carry is no longer true of anything.
+    for name in ("transfer", "swap"):
+        blob = json.dumps(BY_NAME[name]).lower()
+        assert "base unit" not in blob and "base-unit" not in blob

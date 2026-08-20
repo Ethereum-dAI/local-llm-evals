@@ -1,11 +1,3 @@
-"""Everything that pins the prompt the harness sends.
-
-Four suites merged into one file because they all guard the same invariant from
-different sides, and pytest runs them together anyway: `render()` must reproduce the
-wallet's own `prompt-dump` byte for byte unless `$PROMPT_VARIANT` explicitly asks for
-a candidate, and a candidate must never be able to arrive silently. The section
-banners below name the file each came from.
-"""
 from __future__ import annotations
 
 import hashlib
@@ -18,24 +10,20 @@ import yaml
 from pathlib import Path
 from pf.prompt import APP_SYSTEM
 from pf.prompt import APP_SYSTEM, render
+from pf.prompt import render, SYSTEM, APP_SYSTEM, APP_TOOLS
 from pf.prompt_candidates import SAFETY_FULL
 
 # ============================================================================
-# test_prompt_variant_env
+# test_prompt_contract
 # ============================================================================
 #
-# `$PROMPT_VARIANT` — the only way to A/B the prompt for a HOSTED provider.
+# Everything that pins the prompt the harness sends.
 #
-# promptfoo builds the prompt before it reaches the provider, so `config.prompt_variant`
-# (which `pf/provider_functiongemma.py` reads) cannot work for `openrouter:…`. The env
-# var closes that gap, and these tests pin the two properties that make it safe to have:
-#
-#   * it is OFF unless explicitly set, so every run that does not name it keeps app
-#     parity — `APP_SYSTEM` byte-for-byte, which is what makes a score transfer to the
-#     product;
-#   * when it IS set, the resulting system turn is byte-identical to the one the local
-#     fine-tune arm received, so the gpt-5 + clause cell is comparable to the v5 +
-#     clause cell rather than merely similar.
+# Four suites merged into one file because they all guard the same invariant from
+# different sides, and pytest runs them together anyway: `render()` must reproduce the
+# wallet's own `prompt-dump` byte for byte unless `$PROMPT_VARIANT` explicitly asks for
+# a candidate, and a candidate must never be able to arrive silently. The section
+# banners below name the file each came from.
 
 V5_SAFETY_ARM_SYSTEM_CHARS = 2110
 
@@ -124,13 +112,6 @@ def test_variant_works_when_loaded_by_path(monkeypatch):
     assert system == f"{APP_SYSTEM} {SAFETY_FULL}"
     assert len(system) == V5_SAFETY_ARM_SYSTEM_CHARS
 
-# ============================================================================
-# test_prompt_candidates
-# ============================================================================
-#
-# Guards for pf/prompt_candidates.py — the A/B-only prompt variants.
-#
-# These encode lessons that were paid for, so a future edit cannot quietly undo them.
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -281,29 +262,6 @@ def test_unknown_part_in_a_composite_is_rejected_by_name():
     else:
         raise AssertionError("unknown composite part must raise")
 
-# ============================================================================
-# test_prompt_parity
-# ============================================================================
-#
-# The harness must render the app's prompt BYTE-for-byte, per template family.
-#
-# History this guards, in order:
-#
-#   1. llama-cpp-python's `create_chat_completion` renders without
-#      `enable_thinking`, dropping the `<|think|>` marker the app emits — 2925 chars
-#      against the app's 2935. Fixed by rendering explicitly in the provider.
-#   2. The provider then compared EVERY model against the Gemma dump, so a Qwen GGUF
-#      failed by construction and was waved through with "expected for non-Gemma
-#      templates". The wallet's own Qwen dump sat unused in pf/.
-#   3. With the Qwen dump actually wired up, Qwen rendered 3309 against the app's
-#      3299. Cause: Jinja's `tojson` is `htmlsafe_json_dumps`, which escapes `'` to
-#      `\u0027` AFTER dumping, so `json.dumps_kwargs={"ensure_ascii": False}` cannot
-#      switch it off. Both app tool descriptions contain "user's" — 2 x 5 chars = the
-#      10-char gap. llama.cpp's C++ minja does no HTML escaping.
-#
-# Gemma never hit (3) because its template emits descriptions as raw text in the
-# FunctionGemma DSL, never through `tojson`. That is luck, not design, which is why
-# both families are asserted here.
 
 def _provider():
     spec = importlib.util.spec_from_file_location(
@@ -409,34 +367,6 @@ def test_gguf_renders_the_apps_exact_bytes(refname):
             f"{refname}/{case['label']}: rendered {len(got)} chars, app sends "
             f"{len(case['rendered'])} — the harness is scoring a different prompt")
 
-# ============================================================================
-# test_app_prompt_with_clause
-# ============================================================================
-#
-# The wallet's prompt AFTER `ToolDefinitions.safetyClause` landed, and its exact delta.
-#
-# `pf/app_contract_reference.json` is the LIVE reference: it is what `APP_SYSTEM` is read
-# from, so every recorded number on this benchmark was measured against those bytes.
-# `pf/app_contract_reference.with_clause.json` is the dump taken from the wallet branch
-# that adds the clause (`wallet-eval prompt-dump`), kept here so the app's new bytes are
-# in this repo rather than only in the other one.
-#
-# **It is deliberately NOT wired into any run.** Swapping it in would make
-# `PROMPT_VARIANT=none` mean "clause on", silently changing what every existing config
-# measures, and it carries a third tool that `pf/tools.app.json` does not offer. The
-# decision to re-baseline is a separate, explicit one; these tests pin the relationship in
-# the meantime so neither file can drift unnoticed.
-#
-# What they establish, and why each matters:
-#
-#   * the clause in the app's dump is byte-identical to `SAFETY_FULL` — so the clause-on
-#     numbers in results/ describe the string the app now sends, not a near-miss;
-#   * it is appended as a suffix joined by ONE space — the concatenation `augment()`
-#     produces, and the one the models were scored on;
-#   * the ONLY other change from the live reference is the pre-existing
-#     `top_up_bundler` sentence, which is exercised by 0 of the 1000 cases. That bounds
-#     the re-measurement question: the prompt delta that matters is the clause, which is
-#     already measured on three models.
 
 WITH_CLAUSE = json.loads((ROOT / "pf" / "app_contract_reference.with_clause.json").read_text())
 
@@ -490,3 +420,117 @@ def test_the_live_reference_still_has_no_clause() -> None:
     assert SAFETY_FULL not in APP_SYSTEM
     assert len(APP_SYSTEM) == 533
     assert len(f"{APP_SYSTEM} {SAFETY_FULL}") == MEASURED_SYSTEM_CHARS
+
+# ============================================================================
+# test_prompt_render
+# ============================================================================
+
+def test_render_single_turn():
+    """A wallet-path case gets the app's own system prompt, not the builder one.
+
+    `SYSTEM` is now reserved for the Aave/Safe transaction-builder cases; every
+    other case must see byte-for-byte what ToolDefinitions.systemNudge produces,
+    which is what APP_SYSTEM is read from.
+    """
+    chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth"}})
+    assert chat[0] == {"role": "system", "content": APP_SYSTEM}
+    assert chat[0]["content"] != SYSTEM
+    assert chat[1] == {"role": "user", "content": "Send 0.1 ETH to vitalik.eth"}
+    assert len(chat) == 2
+
+
+def test_render_multi_turn():
+    msgs = [
+        {"role": "user", "content": "Send 0.1 ETH"},
+        {"role": "assistant", "content": "Which address?"},
+        {"role": "user", "content": "to vitalik.eth"},
+    ]
+    chat = render({"vars": {"messages": msgs}})
+    assert chat[0]["role"] == "system"
+    assert chat[1:] == msgs
+
+
+def test_render_without_account_context_unchanged():
+    chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth"}})
+    assert len(chat) == 2 and chat[0]["role"] == "system" and chat[1]["role"] == "user"
+
+
+def test_render_safe_protocol_adds_reference_and_context():
+    ctx = {"safe": "0xSafe", "owners": ["0xA", "0xB"], "threshold": 2}
+    chat = render({"vars": {"user_message": "Remove signer 0xB from my Safe.",
+                            "protocol": "safe", "account_context": ctx}})
+    assert [m["role"] for m in chat] == ["system", "system", "user"]
+    addendum = chat[1]["content"]
+    assert "addOwnerWithThreshold(address,uint256)" in addendum
+    assert "removeOwner(address,address,uint256)" in addendum
+    assert "0xSafe" in addendum and "0xA, 0xB" in addendum
+
+
+def test_render_aave_protocol_adds_reference():
+    chat = render({"vars": {"user_message": "Supply 3 USDC to Aave v3.", "protocol": "aave"}})
+    assert [m["role"] for m in chat] == ["system", "system", "user"]
+    ref = chat[1]["content"]
+    assert "supply(address,uint256,address,uint16)" in ref
+    assert "borrow(address,uint256,uint256,uint16,address)" in ref
+    assert "0x87870Bca3F3fD6335C3F4ce8392D69350B4fa4E2" in ref
+    assert "<wallet>" in ref
+
+
+def test_railgun_protocol_no_longer_resolves_to_a_reference():
+    """RAILGUN was removed from the app (local-wallet-mac#86, PR #87). An
+    unknown protocol key must fall through silently rather than inject a
+    reference for tools that no longer exist."""
+    chat = render({"vars": {"user_message": "Shield 0.01 ETH.", "protocol": "railgun"}})
+    assert [m["role"] for m in chat] == ["system", "user"]
+    assert all("unshield" not in m["content"] for m in chat)
+
+
+def test_render_no_protocol_unchanged():
+    chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth"}})
+    assert len(chat) == 2 and chat[0]["role"] == "system" and chat[1]["role"] == "user"
+
+
+def test_expected_summary_var_is_not_leaked_to_model():
+    # expected_summary is a viewer-only var; render must never put it in the chat.
+    chat = render({"vars": {"user_message": "Send 0.1 ETH to vitalik.eth",
+                            "expected_summary": "executeTx to 0xSECRETGOLD (native)"}})
+    assert all("0xSECRETGOLD" not in m["content"] for m in chat)
+
+
+def test_app_contract_lives_in_the_app_prompt_not_the_builder_one():
+    """The human-units/verbatim-recipient rules belong to the WALLET path.
+
+    The app states them in its TOOL SCHEMAS, not its system prompt — APP_SYSTEM
+    is 533 characters and says nothing about units or resolution, because the
+    app leans on the `transfer`/`swap` parameter descriptions instead. That is
+    the contract the product actually ships, so it is what the wallet path must
+    carry.
+
+    They must NOT be in SYSTEM, which after the prompt split is reached only by
+    Aave/Safe, whose gold is base units and resolved addresses. Asserting them
+    on SYSTEM is how the contradiction got in.
+    """
+    app_tools = json.dumps(APP_TOOLS)
+    assert "human units" in app_tools
+    assert "do not attempt to resolve ENS yourself" in app_tools
+
+    assert "HUMAN units" not in SYSTEM
+    assert "Never convert to wei or base units" not in SYSTEM
+    assert "NOT resolve it to an address yourself" not in SYSTEM
+    assert "never by contract address" not in SYSTEM
+
+
+def test_builder_system_keeps_the_contract_its_gold_is_written_against():
+    """Aave/Safe gold is executeTx with base units and resolved addresses, so
+    the only prompt those cases see has to ask for exactly that."""
+    assert "Convert every human amount to base units" in SYSTEM
+    assert "Resolve any ENS name or token symbol to its address" in SYSTEM
+    assert "executeTx" in SYSTEM
+
+
+def test_aave_reference_still_carries_the_base_unit_rule():
+    # The protocol datasets keep executeTx + base units, so the rule must survive
+    # in the reference block that renders only for them.
+    chat = render({"vars": {"user_message": "Supply 3 USDC to Aave v3.",
+                            "protocol": "aave"}})
+    assert "base units" in chat[1]["content"]

@@ -112,7 +112,7 @@ for 1-6 rounds — 66.4% multi-round, 131 cases at 5+ rounds. **120 of the 1000 
 the call/no-call split (`scripts/report_1000.py` prints it) before a headline.
 `scripts/dataset_census.py` prints the whole census (also `--csv` / `--cases-csv`).
 Both the size and the distribution are **asserted** in
-`tests/test_combined_benchmark_integrity.py`, so a source file that silently grows
+`tests/test_dataset_integrity.py`, so a source file that silently grows
 or collapses the long conversations fails the suite rather than quietly changing
 what a score means.
 
@@ -122,7 +122,7 @@ capability the product does not expose, and it was ~25% of the old 569-case
 number. This is a removal from the BENCHMARK ONLY: `pf/tests.protocols.yaml`,
 `scripts/generate_protocol_cases.py`, `src/wallet_evals/protocols/` and
 `pf/prompt.py`'s `AAVE_REFERENCE`/`SAFE_REFERENCE` all still exist and still pass
-`tests/test_protocol_integrity.py`. Run them directly:
+`tests/test_dataset_integrity.py`. Run them directly:
 
 ```bash
 EVAL_DATASET=pf/tests.protocols.yaml scripts/eval.sh -o protocols.out.json

@@ -6,7 +6,7 @@ differ in base model and encoding ONLY, and the resulting scores are comparable:
   * base = unsloth/Qwen3-8B (unsloth's mirror of Qwen/Qwen3-8B, which scored
     41.0% untuned on the 307-case dev set);
   * data = data_for_finetune/qwen_train.jsonl — the SAME 1739 rows as the
-    Gemma-4 set (asserted by tests/test_qwen_finetune_integrity.py), re-encoded
+    Gemma-4 set (asserted by tests/test_finetune_integrity.py), re-encoded
     as Hermes `<tool_call>{...}</tool_call>` JSON with <think> traces;
   * response-only loss masked at Qwen3's ChatML turn markers;
   * A100-40GB — 8B LoRA in bf16 does not fit a smaller card;

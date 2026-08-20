@@ -86,7 +86,7 @@ Expands `datasets/seeds.yaml` (structured intents with `{vary: [...]}` params)
 into `pf/tests.generated.yaml`: many noisy surface phrasings per intent, diverse
 amounts/addresses, single-turn ablation negatives ("address is missing"), and
 scripted multi-turn cases. Gold is **computed** from each seed intent, so every
-generated case self-scores to 1 (`tests/test_generated_integrity.py`). Output is
+generated case self-scores to 1 (`tests/test_dataset_integrity.py`). Output is
 deterministic for a fixed seed.
 
 ## The benchmark: `pf/tests.combined.yaml` (1000 cases)

@@ -17,7 +17,7 @@ dev = [
 ]
 # Optional: only needed to *serve* the local FunctionGemma GGUF (compiles a
 # native extension). Core users, CI, and the offline test suite don't need it.
-#   uv run --group local python scripts/probe_functiongemma.py
+#   uv run --group local python scripts/probe_gemma4.py
 local = [
     "llama-cpp-python>=0.3.0",
     "huggingface-hub>=0.24",

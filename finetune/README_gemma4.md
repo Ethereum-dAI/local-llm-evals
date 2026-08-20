@@ -54,7 +54,7 @@ distribution — verified). Only the **encoding** differs:
   strips `<think>…</think>` before scoring.
 
 Disjoint from the eval set (no leakage) and every target self-scores to 1 through
-the unchanged scorer — enforced by `tests/test_gemma4_finetune_integrity.py`.
+the unchanged scorer — enforced by `tests/test_finetune_integrity.py`.
 
 ## Prerequisites
 
@@ -178,15 +178,17 @@ Both halves run fresh on the same day, same prompt, same 307 cases, `--no-cache`
 Split into two evals on purpose: gpt-5 is network-bound and parallelises at `-j 8`,
 the local GGUF is CPU-bound and must stay at `-j 1` (the llama-cpp worker is not
 reentrant). In one serialized eval each half waited on the other — gpt-5's average
-latency was 37 s there vs 11 s apart. `scripts/merge_evals.py` stitches the two
-exports back into a single eval so the UI shows a real side-by-side.
+latency was 37 s there vs 11 s apart.
 
 ```bash
 scripts/eval.sh -c promptfooconfig.gpt5-only.yaml     -j 8 -o gpt5.fresh.out.json
 scripts/eval.sh -c promptfooconfig.gemma4ft-only.yaml -j 1 -o gemma4ft.fresh.out.json
-uv run python scripts/merge_evals.py -o merged.out.json gpt5.fresh.out.json gemma4ft.fresh.out.json
-npx promptfoo import merged.out.json --new-id
 ```
+
+Reading two exports as one comparison is `scripts/report_1000.py`'s job — it takes
+several exports, keys every case by `metadata.id`, and reports the arms side by side.
+The old `merge_evals.py`, which stitched them into a single promptfoo export for the
+web UI, has been deleted; nothing else used it.
 
 | category | gpt-5 | fine-tuned E4B (on-device) |
 |---|---|---|
