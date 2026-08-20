@@ -174,13 +174,21 @@ STATIC_FILES: tuple[tuple[str, str], ...] = (
     ("space/static/README.md", "README.md"),
     ("space/static/index.html", "index.html"),
     ("space/static/data.json", "data.json"),
-    # Both charts are exports of `scripts/export_chart_images.py`, which writes
-    # into charts/. The headline one was once uploaded straight to the Space and
-    # existed nowhere else in this repo, so the next `--delete "*"` upload removed
-    # it. Listing it here is what makes it survive a redeploy.
-    ("charts/02-overall-accuracy.jpg", "overall-accuracy.jpg"),
-    ("charts/chart-scores.jpg", "chart-scores.jpg"),
+    ("space/static/index.standalone.html", "index.standalone.html"),
 )
+
+# The two chart JPEGs used to be staged here, and DELIBERATELY are not any more.
+#
+# They were listed because a redeploy runs `--delete "*"`, so a file living only in
+# the deployed Space gets destroyed — which had already happened once to
+# `overall-accuracy.jpg`. That reasoning still holds for anything the report needs.
+#
+# These are not that. `index.html` has no `<img>` at all, so they were reachable at
+# a stable URL but never shown, and `build_eval_charts.SERIES` is still hardwired to
+# a three-model roster (`gemma4-e4b-base`, `gemma4-e4b-ft`, `gpt-5`) from two
+# benchmark generations ago. Serving numbers that contradict the page beside it is
+# worse than serving nothing. The sources stay in `charts/`; re-add them here once
+# the chart pipeline is rewired to the current roster.
 
 TARGETS = {"gradio": GRADIO_FILES, "dataset": DATASET_FILES, "static": STATIC_FILES}
 

@@ -50,10 +50,12 @@ a:hover{border-bottom-color:currentColor}
 
 /* ---- hero ----------------------------------------------------------- */
 .hero{padding:clamp(2.5rem,7vw,5rem) 0 2rem}
+/* Documentation scale, not a display headline: this page is read by people who
+   came for the numbers, and a 5.5rem masthead reads as a manifesto. */
 .hero h1{
   font-family:var(--mono); font-weight:700;
-  font-size:clamp(2.4rem,9vw,5.5rem); line-height:.92; letter-spacing:-.045em;
-  margin:0 0 1.25rem;
+  font-size:clamp(1.6rem,4vw,2.5rem); line-height:1.1; letter-spacing:-.02em;
+  margin:0 0 1rem;
 }
 .hero h1 .dim{color:var(--rule)}
 .lede{
@@ -270,26 +272,24 @@ footer{
   </header>
 
   <section class="hero">
-    <h1>Exact<span class="dim">&nbsp;or&nbsp;</span>nothing<span class="dim">.</span></h1>
+    <h1>Wallet tool-call benchmark</h1>
     <div class="hero-grid">
       <div>
         <p class="lede">
-          593 wallet requests, scored on the macOS app's own contract:
-          <code>transfer</code>/<code>swap</code> take a <strong>human decimal</strong>
-          amount (<code>50.25 USDC</code>, not base units) and a token symbol, and
-          copy the recipient verbatim. A case scores <strong>1</strong> only if every
-          field of every call the model emits equals gold, byte for byte. Anything
-          else scores <strong>0</strong>.
+          1000 natural-language requests, scored on whether a model emits the exact
+          <code>transfer</code>/<code>swap</code> call a macOS Ethereum wallet would
+          execute. The contract is the app's own: <strong>human decimal</strong>
+          amounts (<code>50.25 USDC</code>, not base units), a token symbol, and the
+          recipient copied <strong>verbatim</strong> — the model does not resolve ENS.
         </p>
         <p class="lede">
-          80 of the 593 are a dedicated <strong>arithmetic slice</strong> — the same
-          transfer/swap shape, with decimals chosen to catch rounding and truncation.
-          196 more are protocol calls (RAILGUN shield/unshield, Aave, Safe) that stay
-          on <code>executeTx</code> with base-unit args, since those interfaces are
-          already fixed on-chain.
+          571 cases are multi-round conversations (2–6 turns) testing which turn's
+          value should win. 80 are an arithmetic slice. <strong>120 have no correct
+          call at all</strong>, 49 of them adversarial refusals — so a headline
+          percentage alone is not capability.
         </p>
         <p class="lede">
-          One mark per case below, in dataset order. Filled means the call was exact.
+          One mark per case below, in dataset order. Filled means exact.
         </p>
       </div>
       <dl class="spec">
@@ -301,9 +301,11 @@ footer{
         <dt>Marks</dt>
         <dd><span class="swatch on"></span> exact &nbsp; <span class="swatch off"></span> wrong</dd>
         <dt>Tools</dt>
-        <dd>transfer · swap · executeTx · shield · unshield</dd>
+        <dd>transfer · swap</dd>
         <dt>Set</dt>
-        <dd>pf/tests.combined.yaml</dd>
+        <dd>ef-dai-team/wallet-eval-benchmark</dd>
+        <dt>Noise floor</dt>
+        <dd>±6 cases (measured)</dd>
       </dl>
     </div>
 
@@ -313,66 +315,81 @@ footer{
   </section>
 
   <section class="section">
-    <p class="eyebrow">The finding</p>
-    <h2>Fine-tuning on the app contract lifts Gemma-4 but not Qwen3</h2>
+    <p class="eyebrow">Results</p>
+    <h2>A 4B on-device fine-tune at 94.9%, gpt-5 at 92.8%</h2>
     <p>
-      Five models, two on-device families plus one hosted frontier anchor:
-      Gemma-4 E4B and Qwen3-8B each run as a shipping/candidate base and as an
-      app-contract fine-tune, and gpt-5 calibrates the ceiling on the same 593
-      cases. The clearest result is Aave and Safe — protocols the shipping
-      model never saw.
+      Seven configurations, same 1000 cases, same deterministic scorer. The
+      &ldquo;+&nbsp;clause&rdquo; rows append a 1577-character refusal contract to the
+      system turn; nothing else differs.
     </p>
-    <p>
-      Gemma-4 E4B base here is not an untuned model — it's the exact Q4_K_M GGUF
-      <code>local-wallet-mac</code> ships today, a fine-tune from an earlier round
-      that only ever learned transfer, swap and RAILGUN shield/unshield. Scored
-      against the app's own contract across all 593 cases, it passes
-      <strong>405 (68.3%)</strong>.
-    </p>
-    <p>
-      Split that by what it was trained on and the shape sharpens. On the 397
-      cases that existed in some form before — transfer, swap, the arithmetic
-      slice, multi-turn, ablations, refusals, RAILGUN — it already scores
-      <strong>88.2% (350/397)</strong>. On the 196 Aave and Safe cases, protocol
-      families it has never been trained to call, it scores <strong>0%</strong>:
-      0/90 on Aave, 0/50 on Safe.
-    </p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Configuration</th><th style="text-align:right">Overall</th>
+        <th style="text-align:right">Wants a call<br>(880)</th>
+        <th style="text-align:right">No call<br>(120)</th>
+        <th style="text-align:right">Refusals<br>(49)</th></tr></thead>
+      <tbody>
+        <tr><td class="cat">wallet-ft &mdash; what shipped until 2026-08-20</td>
+          <td class="num zero">68.4%</td><td class="num">69.8%</td><td class="num">58.3%</td><td class="num">49.0%</td></tr>
+        <tr><td class="cat">Gemma-4 E4B base</td>
+          <td class="num">90.3%</td><td class="num">91.7%</td><td class="num">80.0%</td><td class="num">61.2%</td></tr>
+        <tr><td class="cat">Gemma-4 E4B base + clause</td>
+          <td class="num">91.0%</td><td class="num">90.6%</td><td class="num">94.2%</td><td class="num">91.8%</td></tr>
+        <tr><td class="cat">gpt-5</td>
+          <td class="num">92.8%</td><td class="num">94.1%</td><td class="num">83.3%</td><td class="num">69.4%</td></tr>
+        <tr><td class="cat">gpt-5 + clause</td>
+          <td class="num">93.7%</td><td class="num">93.5%</td><td class="num">95.0%</td><td class="num full">95.9%</td></tr>
+        <tr><td class="cat">ft-v5</td>
+          <td class="num">94.9%</td><td class="num full">95.2%</td><td class="num">92.5%</td><td class="num">81.6%</td></tr>
+        <tr><td class="cat"><strong>ft-v5 + clause</strong></td>
+          <td class="num full">95.1%</td><td class="num">94.7%</td><td class="num full">98.3%</td><td class="num full">95.9%</td></tr>
+      </tbody>
+    </table></div>
     <div class="callout">
       <p>
-        <strong>The app-contract fine-tune closes almost all of that gap.</strong>
-        Re-tuned on the same recipe with Aave and Safe added to the curriculum, it
-        takes the familiar 397 cases to <strong>98.0% (389/397)</strong> and the new
-        196 to <strong>75.0% (147/196)</strong> — RAILGUN 56/56, Aave 42/90, Safe
-        49/50. Overall: <strong>536/593 (90.4%)</strong>.
+        <strong>The fine-tune the wallet shipped scored 21.7 points below the untuned
+        base.</strong> Its card claimed 80.1%, measured on a retired benchmark whose
+        amounts were base units. The app's contract moved to human decimals and nobody
+        re-measured. 266 of the 880 cases that wanted a call got prose instead:
+        declining an under-specified amount was correct under the contract it trained on.
       </p>
       <p>
-        A second, larger on-device family — Qwen3-8B — tells a different story.
-        Its base model, hosted via OpenRouter at the card's recommended sampling,
-        is already strong zero-shot at <strong>87.9% (521/593)</strong>, including
-        40/90 on Aave and 48/50 on Safe without ever training on this contract.
-        Re-tuning it on the same app-contract data — run locally, same Q4_K_M
-        quantisation as the Gemma-4 comparison — does not repeat the Gemma-4 lift:
-        the fine-tune scores <strong>86.3% (512/593)</strong>, slightly below its
-        own base.
+        <strong>ft-v5's gain is one bucket.</strong> &ldquo;Expected a call, produced
+        none&rdquo; went 45 &rarr; 1. An act-not-ask clause, retry-on-no-call and
+        few-shot exemplars all failed to move it, and gpt-5 has 51. Spurious calls fell
+        24 &rarr; 9 in the same pass, so it did not simply learn to always act.
       </p>
       <p>
-        gpt-5, the hosted frontier anchor, tops the field at
-        <strong>96.5% (572/593)</strong> — every one of the 90 Aave cases, all but
-        one of 50 Safe, and 52/56 on RAILGUN. All five strips above and the
-        breakdown table below are the same 593 cases, scored by the same
-        deterministic scorer.
+        <strong>The refusal win is the prompt, not the fine-tune.</strong> ft-v5's 47/49
+        against gpt-5's 34/49 looked like a model difference; gpt-5 had never seen the
+        clause. Given the same system turn it also scores 47/49. Refusal accuracy with
+        the clause vs without: base 91.8%/61.2%, ft-v5 95.9%/81.6%, gpt-5 95.9%/69.4%.
       </p>
     </div>
+    <p>
+      <strong>Residual failures differ in kind.</strong> gpt-5 + clause makes zero
+      wrong-argument errors in 1000 cases — its whole residual is 63 decisions. ft-v5's
+      is the mirror: 35 wrong arguments, 12 no-calls. Deciding whether and what to call
+      is where a 4B model has caught up; copying a long literal is where it has not.
+      <code>malformed-address</code> is 3/3 for gpt-5 and 1/3 for ft-v5 + clause, which
+      is an argument for validating address format in the app rather than in the prompt.
+    </p>
+    <p>
+      <strong>Discard differences under about six cases.</strong> Three runs of the same
+      ft-v5 GGUF on different rented GPUs scored 949, 952 and 944; base reads 903 in one
+      run and 908 in another. The three clause-off columns come from a single run so that
+      comparison is device-controlled; each clause-on column comes from its own paired
+      A/B with both arms on one GPU.
+    </p>
+    <h3 class="eyebrow" style="margin-top:2.5rem">Per category, all 55</h3>
     <div class="tablewrap"><table id="cattable"></table></div>
   </section>
 
   <section class="section" id="browser">
     <p class="eyebrow">Case browser</p>
-    <h2>What each model actually emitted</h2>
+    <h2>What each model emitted</h2>
     <p>
-      Every output below was recorded during a real promptfoo run and is reproduced
-      verbatim, alongside the verdict from the same deterministic scorer that
-      produced the strips. Nothing here is regenerated at page load.
+      Outputs are verbatim from the recorded runs, next to the scorer's verdict.
+      Nothing is regenerated at page load.
     </p>
 
     <div class="controls">
@@ -388,7 +405,7 @@ footer{
 
   <section class="section">
     <p class="eyebrow">Reproduce</p>
-    <h2>Everything needed to train this from scratch</h2>
+    <h2>Run it yourself</h2>
     <div class="grid2" id="repro"></div>
   </section>
 
@@ -401,7 +418,9 @@ footer{
 </div>
 
 <script>
-const MODEL_E4B_BASE = "ef-dai-team/gemma-4-E4B-wallet-ft";
+const MODEL_V5 = "ef-dai-team/gemma-4-E4B-wallet-ft-v5";
+const BENCHMARK = "ef-dai-team/wallet-eval-benchmark";
+const BASE_GGUF = "ggml-org/gemma-4-E4B-it-GGUF";
 // No single "subject" row for this report — the finding is a lift, not a
 // failure to spotlight — so nothing matches and .is-subject never applies.
 const SUBJECT = "";
@@ -515,10 +534,8 @@ function bandOf(category) {
   if (category.startsWith("arithmetic-")) return "arithmetic";
   if (category.startsWith("generated-transfer")) return "transfer";
   if (category.startsWith("generated-swap")) return "swap";
+  if (category.startsWith("conversation-")) return "conversation";
   if (category.startsWith("multiturn")) return "multi-turn";
-  if (category.startsWith("railgun")) return "railgun";
-  if (category.startsWith("aave")) return "aave";
-  if (category.startsWith("safe-")) return "safe";
   if (category.startsWith("ablation")) return "ablation";
   return "refusal";
 }
@@ -628,41 +645,39 @@ function renderCase() {
 function repro() {
   $("repro").innerHTML = `
     <div class="card">
-      <h3>1 · Get the benchmark</h3>
-      <p>The 593-case set lives in this harness repo, split by construction: <code>pf/tests.app-contract.yaml</code> (transfer/swap, including the 80-case arithmetic slice) plus the RAILGUN/Aave/Safe protocol cases, concatenated by <code>scripts/build_combined_benchmark.py</code> into <code>pf/tests.combined.yaml</code>. Deliberately unpublished — keeping it off the Hub is what stops it leaking into training corpora, and it's the reason the strips above mean anything.</p>
-      <pre>uv run python scripts/build_combined_benchmark.py</pre>
+      <h3>1 · Benchmark</h3>
+      <p>All 1000 cases plus the scorer, system prompt and tool schemas. Public.</p>
+      <pre>hf download ${BENCHMARK} --repo-type dataset \
+  --local-dir ./benchmark</pre>
+      <p>The training rows are <strong>not</strong> published, which is what makes a score here comparable. If you train on this set, say so.</p>
     </div>
     <div class="card">
-      <h3>2 · Regenerate the fine-tune data</h3>
-      <p>The Gemma-4 E4B training set is disjoint from the eval set by construction and reproduces bit for bit from the same seed.</p>
-      <pre>uv run python scripts/generate_gemma4_finetune_data.py \\
-  --out data_for_finetune/gemma4_train.jsonl</pre>
-    </div>
-    <div class="card">
-      <h3>3 · Train and export</h3>
-      <p>LoRA r=16, α=16 via SFTTrainer, then merge and quantise to Q4_K_M GGUF. Unsloth needs CUDA, so both run on Modal.</p>
-      <pre>modal run finetune/modal_finetune_gemma4.py
-modal run finetune/modal_export_gemma4.py</pre>
-      <p>The app-contract fine-tune scored on this page is still training and is deliberately <strong>not</strong> published — the published <code>${MODEL_E4B_BASE}</code> repo is content-pinned by the shipping macOS wallet (SHA256, <code>OnboardingSettingsStore.swift</code>), so this run can't overwrite it. It's evaluated from a local export instead.</p>
-    </div>
-    <div class="card">
-      <h3>4 · Score it</h3>
-      <p>Scoring needs the private harness (<code>promptfooconfig.appcontract.yaml</code>, <code>-j 1</code> so the two local llama.cpp providers don't contend for the same Metal device). Every model's result on every case is already browsable in the case browser on this page.</p>
-      <pre>scripts/eval.sh -c promptfooconfig.appcontract.yaml \\
-  -o gemma4.appcontract.out.json -j 1</pre>
-    </div>
-    <div class="card">
-      <h3>Get the shipping model</h3>
-      <p>Gemma-4 E4B base — the exact GGUF <code>local-wallet-mac</code> ships, and the "before" column above — is public, no org membership needed.</p>
-      <pre>hf download ${MODEL_E4B_BASE} \\
-  --include "*.gguf" --local-dir ./model-e4b    # 5.3 GB</pre>
+      <h3>2 · Model</h3>
+      <p>Take <code>a075</code>. The <code>a1</code> file is the same adapter merged at full strength and scores lower.</p>
+      <pre>hf download ${MODEL_V5} \
+  --include "*a075*.gguf" --local-dir ./model-v5   # 5.3 GB
+shasum -a 256 ./model-v5/*.gguf
+# 40332b62f282336d92a94dc4147ecc44e83c0e11496ac2e5738d8ef342d1b09c</pre>
+      <p>Check the digest. A 5&nbsp;GB GGUF has been observed here with the right byte count and the wrong hash, loading and running without error.</p>
       <ul>
-        <li><a href="https://huggingface.co/${MODEL_E4B_BASE}">${MODEL_E4B_BASE}</a> — 68.3% on this benchmark</li>
+        <li><a href="https://huggingface.co/${MODEL_V5}">${MODEL_V5}</a> &mdash; 94.9%, or 95.1% with the clause</li>
+        <li><a href="https://huggingface.co/${BASE_GGUF}">${BASE_GGUF}</a> &mdash; the untuned base, 90.3%. Pin revision <code>1762c8e8713f</code>: Q4_K_M was later dropped from <code>main</code></li>
       </ul>
     </div>
     <div class="card">
-      <h3>Why there's no live demo here</h3>
-      <p>Hosting a Gradio Space needs a Team plan on this org. The app is written and sits in <code>space/</code> in the harness repo; it deploys unchanged the moment the org is upgraded.</p>
+      <h3>3 · Prompt</h3>
+      <p>Amounts are human decimals (<code>"0.1"</code>, not <code>"100000000000000000"</code>) and recipients pass through verbatim. Both are in the benchmark repo, taken from the wallet's own <code>prompt-dump</code>.</p>
+      <p>Append the safety clause unless you are reproducing a clause-off row: flat on overall score, +32.6 points of refusal accuracy on base, +14.3 on ft-v5, +26.5 on gpt-5.</p>
+    </div>
+    <div class="card">
+      <h3>4 · Train your own</h3>
+      <p>One epoch, LoRA r=16 &alpha;=16, merged at <strong>0.75 strength</strong>. ~18 min and $0.76 on one rented A40.</p>
+      <pre>uv run python scripts/runpod_train_gemma4.py</pre>
+      <p>Two results worth inheriting: scaling the adapter down at merge time was worth +29.7 points with no new data, and <code>metric_for_best_model="eval_loss"</code> selected the <em>worst</em> of three checkpoints because validation loss and out-of-distribution accuracy both fall monotonically. Select on a separate dev set; score the benchmark once.</p>
+    </div>
+    <div class="card">
+      <h3>No live demo</h3>
+      <p>A Gradio Space needs a Team plan on this org. The playground &mdash; live inference over the same GGUFs, prompt and scorer &mdash; is written and deploys unchanged once that exists.</p>
       <pre>uv run python space/stage.py gradio
 cd space/build/gradio &amp;&amp; python app.py</pre>
     </div>`;
