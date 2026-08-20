@@ -40,3 +40,14 @@ space/build/
 # Per-run promptfoo result DBs (concurrent runs each need their own config dir).
 # Several MB of SQLite each, and `.promptfoo/` above does not match them.
 .promptfoo-*/
+
+# Scratch logs from detached eval/train drivers and the Modal log pollers. The
+# durable record of a measurement belongs in results/ — see
+# results/history.md — because these get clobbered by the next run.
+runs/
+
+# The remaining generated training JSONLs. Their three siblings are listed above;
+# these two are byte-stable outputs of the same generators, so regenerate rather
+# than commit (scripts/generate_gemma4_finetune_data.py, generate_qwen_*).
+data_for_finetune/gemma4_train.with-protocol.jsonl
+data_for_finetune/qwen_train.with-protocol.jsonl

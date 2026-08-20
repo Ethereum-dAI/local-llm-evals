@@ -44,6 +44,40 @@ def swap_currency(symbol: str) -> tuple[str, int] | None:
     return token["address"], token["decimals"]
 
 
+def known_token_identifier(value: str) -> str | None:
+    """The token identifier as the app would accept it, or None if unresolvable.
+
+    Mirrors the wallet's `WalletTokenRegistry.token(matching:on:)`
+    (UserOperationModels.swift), which accepts EITHER form:
+
+        if lookup.hasPrefix("0x") || lookup.hasPrefix("0X") {
+            return tokens(on: chainID).first {
+                $0.contractAddress?.caseInsensitiveCompare(lookup) == .orderedSame }
+        }
+        return tokens(on: chainID).first {
+            $0.symbol.caseInsensitiveCompare(lookup) == .orderedSame }
+
+    So `pf/tools.app.json`'s "Token symbol such as ETH, USDC, DAI, WETH, or a
+    0x-prefixed contract address" is honoured for real, unlike two of its other
+    documented forms (`amount: "all"` and contact-name recipients), which the
+    executor rejects — Ethereum-dAI/local-wallet-mac#92. That is why the address
+    form is worth scoring and those two are not.
+
+    Returned VERBATIM. The model is not asked to know which token an address is:
+    APP_SYSTEM carries no token table, so translating an address to a symbol would
+    measure recall the wallet never needs. The registry does the resolving.
+    """
+    if not isinstance(value, str):
+        return None
+    if value.lower().startswith("0x"):
+        for meta in LOOKUP["tokens"].values():
+            address = meta.get("address")
+            if address and address.lower() == value.lower():
+                return value
+        return None
+    return value if value in LOOKUP["tokens"] else None
+
+
 def build_transfer_call(amount: str, token_sym: str, recipient_raw: str) -> dict:
     """Gold for an app-contract transfer.
 
@@ -53,19 +87,23 @@ def build_transfer_call(amount: str, token_sym: str, recipient_raw: str) -> dict
     it - do not attempt to resolve ENS yourself"). The app converts and resolves in
     Swift, so asking the model to do it measured work the wallet never requests.
     """
-    if token_sym not in LOOKUP["tokens"]:
+    token = known_token_identifier(token_sym)
+    if token is None:
         raise ValueError(f"unknown token symbol: {token_sym!r}")
     return {"tool": "transfer", "to": recipient_raw,
-            "amount": str(amount), "token": token_sym}
+            "amount": str(amount), "token": token}
 
 
 def build_swap_call(amount: str, from_sym: str, to_sym: str) -> dict:
     """Gold for an app-contract swap (exact-input, symbols not addresses)."""
+    sides = []
     for sym in (from_sym, to_sym):
-        if sym not in LOOKUP["tokens"]:
+        resolved = known_token_identifier(sym)
+        if resolved is None:
             raise ValueError(f"unknown swap currency: {sym!r}")
+        sides.append(resolved)
     return {"tool": "swap", "amount": str(amount),
-            "from_token": from_sym, "to_token": to_sym, "amount_side": "input"}
+            "from_token": sides[0], "to_token": sides[1], "amount_side": "input"}
 
 
 def build_shield_call(amount: str, token_sym: str = "ETH") -> dict:

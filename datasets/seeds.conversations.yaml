@@ -1,0 +1,49 @@
+# Structured intents for the multi-round conversation slice
+# (scripts/generate_conversation_cases.py -> pf/tests.conversations.yaml).
+#
+# Same shape as datasets/seeds.yaml: params are literals, {vary: [...]} sets, or
+# the sentinel "random_address". Gold is COMPUTED from the final effective
+# intent, never parsed from any turn's surface, so a conversation may revise a
+# value as many times as it likes and gold still follows.
+#
+# There is no `ablate` key here: which field a conversation withholds is chosen
+# by the mechanism (see src/wallet_evals/conversations.py), not by the seed —
+# progressive disclosure withholds up to all three, correction and distractor
+# withhold exactly one, and intent-switch withholds none.
+#
+# Amount literals are disjoint from datasets/seeds.yaml (14 amounts),
+# datasets/seeds.arithmetic.yaml (9) and datasets/finetune_seeds.yaml (45),
+# checked by exact-string set intersection — the same rule the arithmetic slice
+# follows, and the reason this slice stays an honestly held-out eval rather than
+# a re-measurement of training amounts. The revision targets a correction turn
+# swaps in (ALT_AMOUNTS in conversations.py) are disjoint from all four banks.
+#
+# Decimal places stay within the token's own precision (ETH/WETH/DAI 18, USDC 6)
+# even though the app contract never converts to base units — it keeps every
+# surface a number the wallet could really send.
+#
+# Recipients draw from `random_ens` (see generation.ENS_NAMES) rather than the
+# fixed "vitalik.eth" this file used to carry. That one name was 144 of this
+# slice's 303 transfer golds AND the only ENS name in datasets/finetune_seeds.yaml,
+# so the ENS axis was n=1 on a value every fine-tune had memorised. The bank
+# excludes vitalik.eth, which makes it disjoint from training by construction and
+# turns "copy the .eth token the user typed" into something the score can see.
+
+# --- ETH transfers (18 dp) --------------------------------------------------
+- action: transfer
+  amount: { vary: ["0.004", "2.718281828", "45678.9", "0.000000042"] }
+  token: ETH
+  recipient: { vary: ["random_ens", "random_address"] }
+
+# --- USDC / DAI transfers (<=6 dp so USDC stays representable) --------------
+- action: transfer
+  amount: { vary: ["6.02", "310000.25", "88.5", "0.0303"] }
+  token: { vary: ["USDC", "DAI"] }
+  recipient: { vary: ["random_ens", "random_address"] }
+
+# --- swaps (<=6 dp; the ETH<->USDC and USDC->USDC self-swap combos are
+#     dropped by the generator's _valid_intent check) -----------------------
+- action: swap
+  amount: { vary: ["0.004", "1.000001", "310000.25", "0.0303"] }
+  from_token: { vary: ["ETH", "USDC"] }
+  to_token: { vary: ["DAI", "WETH", "USDC"] }

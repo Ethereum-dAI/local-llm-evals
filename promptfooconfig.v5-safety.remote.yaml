@@ -1,0 +1,70 @@
+# Does SAFETY_FULL help the v5 FINE-TUNE, or only base?
+#
+# v5 reaches 94.9% overall with 81.6% on the safety slice, below v4's 93.9%. SAFETY_FULL
+# lifted BASE's safety slice 59.2% -> 91.8% on this same frozen set. The untested
+# question is whether the two stack.
+#
+# THERE IS A REASON TO EXPECT THEY DO NOT. v5 was trained on the app prompt with no
+# safety clause, so appending 1576 characters of it at inference time is off-distribution
+# for the adapter. This repo has already measured base and a fine-tune wanting OPPOSITE
+# wording: the sentence that took base to 100% on zero-address refusals cost the
+# swap-heavy fine-tune 7 shield cases, because it named `swap` and `0x0` together and the
+# fine-tune then emitted swap with currencyIn=0x0 for plain requests. So this is a real
+# experiment, not a formality — and it is exactly why it must be run on the fine-tune
+# rather than inferred from base's result.
+#
+# Both arms hit the SAME pod, so the weights, device, quantization and sampling are
+# identical and `prompt_variant` is the only difference. The control arm also re-measures
+# v5's 949/1000 on a different pod at a different time, which is a free check on how
+# stable that headline is.
+#
+# Both arms on ONE pod, so the weights are identical and the pod is torn down once:
+#   uv run --with runpod python scripts/runpod_serve_gguf.py up \
+#       --repo ef-dai-team/gemma-4-E4B-wallet-ft-v5 \
+#       --gguf gemma-4-E4B-wallet-ft-a075.Q4_K_M.gguf --expect-sha <sha256>
+#   RUNPOD_LLAMA_URL=…  PROMPTFOO_CONFIG_DIR=.promptfoo-v5safety scripts/eval.sh \
+#       -c promptfooconfig.v5-safety.remote.yaml -j 12 --no-cache \
+#       -o runs/v5-safety-ab.out.json
+#   uv run --with runpod python scripts/runpod_serve_gguf.py down --all
+description: v5 fine-tune with and without SAFETY_FULL — frozen 1000-case benchmark
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: v5-control
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_V5_URL
+      prompt_variant: none
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: v5-safety-full
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_V5_URL
+      prompt_variant: safety
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"

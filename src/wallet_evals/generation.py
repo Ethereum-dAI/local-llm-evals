@@ -22,6 +22,38 @@ def random_address(rng: random.Random) -> str:
     return "0x" + "".join(rng.choice("0123456789abcdef") for _ in range(40))
 
 
+#: ENS names for the recipient slot, drawn by the `random_ens` sentinel.
+#:
+#: `vitalik.eth` is deliberately ABSENT. It is the only ENS name in
+#: datasets/finetune_seeds.yaml, so it is the one name every fine-tune trained on;
+#: it also stood as the only ENS name in the eval set, which made the whole ENS
+#: axis n=1 and let a model that learned "anything ending in .eth is vitalik.eth"
+#: score exactly like one that learned to copy the recipient verbatim. Keeping it
+#: out of this bank makes the bank disjoint from training by construction
+#: (asserted by test_ens_bank_is_disjoint_from_training) and turns ENS handling
+#: into a real generalisation test. `vitalik.eth` still appears in the frozen 307,
+#: which is not regenerated, so it stays represented.
+#:
+#: The shapes vary on purpose — plain, org-style, hyphenated, subdomain and
+#: alphanumeric — because the capability under test is copying whatever `.eth`
+#: token the user typed, not recognising one memorised shape. Every entry contains
+#: a dot, which matters twice: `mutate_typos` skips non-`isalpha()` words so these
+#: are never scrambled into an unanswerable surface, and the wallet's own
+#: `transferRequest` guard (`rawRecipient.contains(".")`) accepts them.
+ENS_NAMES: tuple[str, ...] = (
+    "alice.eth", "bob.eth", "carla.eth", "erin.eth",
+    "treasury.eth", "payroll.eth", "grants.eth", "devfund.eth",
+    "team-ops.eth", "cold-storage.eth",
+    "ops.mydao.eth", "pay.acme.eth",
+    "wallet2024.eth", "vault7.eth",
+)
+
+
+def random_ens(rng: random.Random) -> str:
+    """An ENS name from `ENS_NAMES`, drawn from `rng`."""
+    return rng.choice(ENS_NAMES)
+
+
 def mutate_case(text: str, rng: random.Random) -> str:
     """Random per-character upper/lower casing (preserves spelling)."""
     return "".join(c.upper() if rng.random() < 0.5 else c.lower() for c in text)
@@ -183,9 +215,11 @@ _VARY_FIELDS = {
 
 
 def _resolve_value(raw_value, rng: random.Random):
-    """Resolve one chosen param value, expanding the random_address sentinel."""
+    """Resolve one chosen param value, expanding the recipient sentinels."""
     if raw_value == "random_address":
         return random_address(rng)
+    if raw_value == "random_ens":
+        return random_ens(rng)
     return raw_value
 
 

@@ -46,12 +46,47 @@ BASE_MODEL = "unsloth/gemma-4-E4B-it"
 # scaffold, putting the worst case near ~1.0k tokens. 2048 keeps 2x headroom and
 # roughly halves step time. The all-masked guard below still backstops it.
 MAX_SEQ_LEN = 2048
-EPOCHS = 3
+#: Defaults. Both are overridable per run from the entrypoint, because the Phase 1
+#: sweep exists to test exactly these two: gemma-4-E4B-wallet-ft-v4 was trained at
+#: 3 epochs / 2e-4 and scored 78.7% on the 1000-case benchmark against base's
+#: 90.7%, collapsing from 95.8% at one round to 49.0% at six. Base is flat across
+#: depth, so the capability was trained AWAY — which points at over-training on a
+#: narrow set rather than at missing data.
+#:
+#: 1, not 3, since 2026-08-18. Phase 0c scored all three per-epoch checkpoints of
+#: the 3-epoch run on the 145-case OOD dev set and the curve is monotonically
+#: DOWN while eval_loss is monotonically down too:
+#:
+#:     epoch 1  eval_loss 0.0068  ->  67.6% (98/145)
+#:     epoch 2  eval_loss 0.0022  ->  57.2% (83/145)
+#:     epoch 3  eval_loss 0.0016  ->  53.1% (77/145)
+#:
+#: So epochs 2-3 cost 14.5 points of out-of-distribution accuracy while looking
+#: like an improvement from the inside. `distractor` takes nearly all of it
+#: (29/40 -> 14/40) — over-training specifically destroys the ability to ignore
+#: irrelevant conversational content. See results/history.md.
+EPOCHS = 1
 # E4B is ~15x FunctionGemma-270m: small per-device batch + accumulation to reach
 # an effective batch of 16 without exceeding 40 GB.
 BATCH = 4
 GRAD_ACCUM = 4
 LEARNING_RATE = 2e-4
+#: Fraction of the training rows held back for the in-training `eval_loss` guard.
+#: This split is IN-DISTRIBUTION and therefore weak on its own: the rows are 85.9%
+#: single-turn and 0% three-plus, so falling eval_loss here is consistent with the
+#: depth collapse above. It is the cheap inner signal only. The real checkpoint
+#: selector is pf/tests.dev.yaml scored by the harness's own scorer
+#: (finetune/modal_eval_gemma4.py), which is out-of-distribution by construction.
+HOLDOUT_FRAC = 0.10
+#: NO early stopping, deliberately, and no `metric_for_best_model`. Phase 0c
+#: measured eval_loss to be ANTI-correlated with task accuracy over the range that
+#: matters (see EPOCHS above): selecting the minimum reliably picks the WORST of
+#: the three checkpoints. An EarlyStoppingCallback watching eval_loss is therefore
+#: not a safety net here, it is a mechanism for shipping the wrong weights while
+#: appearing principled. eval_loss is still computed and logged, purely as a
+#: diagnostic that training ran — never as a selector. The selector of record is
+#: pf/tests.dev.yaml scored by the harness's own scorer
+#: (finetune/modal_eval_gemma4.py), which is out-of-distribution by construction.
 
 HF_CACHE_DIR = "/root/.cache/huggingface"
 OUTPUTS_DIR = "/outputs"
@@ -110,9 +145,19 @@ app = modal.App("gemma4-finetune")
     timeout=10800,
     volumes={HF_CACHE_DIR: hf_cache, OUTPUTS_DIR: outputs},
 )
-def train() -> str:
+def train(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
+          tag: str = "") -> str:
     import json
+    import random
     from collections import Counter
+
+    # A non-empty tag writes to /outputs/adapter-<tag> so a sweep does not
+    # overwrite itself. Empty keeps the historical /outputs/adapter path that
+    # modal_export_gemma4.py and modal_eval_gemma4.py already read.
+    adapter_out = f"{ADAPTER_OUT}-{tag}" if tag else ADAPTER_OUT
+    run_dir = f"{OUTPUTS_DIR}/run-{tag}" if tag else OUTPUTS_DIR
+    print(f"[train] epochs={epochs} lr={learning_rate} tag={tag or '(none)'} "
+          f"-> adapter={adapter_out}", flush=True)
 
     # Warm the HF cache first so unsloth's forced hf-offline load finds weights.
     from huggingface_hub import snapshot_download
@@ -178,20 +223,49 @@ def train() -> str:
     print(f"[train] prompt parity OK against the app renderer "
           f"({len(reference['cases'])} shapes)", flush=True)
 
-    ds = Dataset.from_list([to_text(r) for r in rows])
+    # Seeded holdout for the in-training eval_loss guard. Shuffled before slicing
+    # because the JSONL is grouped by category — a tail slice would hold out one
+    # category entirely and measure something else.
+    shuffled = list(rows)
+    random.Random(3407).shuffle(shuffled)
+    n_hold = max(16, int(len(shuffled) * HOLDOUT_FRAC))
+    hold_rows, train_rows = shuffled[:n_hold], shuffled[n_hold:]
+    print(f"[train] split: {len(train_rows)} train / {len(hold_rows)} holdout "
+          f"({HOLDOUT_FRAC:.0%})", flush=True)
+
+    ds = Dataset.from_list([to_text(r) for r in train_rows])
+    eval_ds = Dataset.from_list([to_text(r) for r in hold_rows])
     # Eyeball the exact turn markers the template produced (so INSTRUCTION_PART /
     # RESPONSE_PART can be corrected if the template ever changes).
     print(f"[train] rendered sample head:\n{ds[0]['text'][:600]}", flush=True)
 
     trainer = SFTTrainer(
-        model=model, tokenizer=tokenizer, train_dataset=ds,
+        model=model, tokenizer=tokenizer, train_dataset=ds, eval_dataset=eval_ds,
         args=SFTConfig(
             dataset_text_field="text", max_seq_length=MAX_SEQ_LEN,
             per_device_train_batch_size=BATCH, gradient_accumulation_steps=GRAD_ACCUM,
-            warmup_ratio=0.05, num_train_epochs=EPOCHS, learning_rate=LEARNING_RATE,
+            warmup_ratio=0.05, num_train_epochs=epochs, learning_rate=learning_rate,
             logging_steps=5, optim="adamw_8bit", weight_decay=0.01,
-            lr_scheduler_type="linear", seed=3407, output_dir=OUTPUTS_DIR,
+            lr_scheduler_type="linear", seed=3407, output_dir=run_dir,
             report_to="none",
+            # Evaluate and save PER EPOCH, and keep every epoch. Every checkpoint
+            # stays on disk so modal_eval_gemma4.py can score them all — that
+            # disagreement between eval_loss and dev accuracy was the Phase 0c
+            # result, and keeping the checkpoints is what made it measurable.
+            eval_strategy="epoch",
+            save_strategy="epoch",
+            save_total_limit=epochs,
+            # NO load_best_model_at_end / metric_for_best_model. Phase 0c showed
+            # eval_loss is anti-correlated with dev accuracy here, so "best by
+            # eval_loss" restored the worst checkpoint of three. The adapter saved
+            # below is therefore the FINAL weights, and checkpoint selection is a
+            # separate, explicit step against pf/tests.dev.yaml.
+            # Unsloth's documented settings for the eval loop, which OOMs readily:
+            # keep the eval batch at 2 and accumulate. bf16 (not fp16) because this
+            # is an A100.
+            bf16_full_eval=True,
+            per_device_eval_batch_size=2,
+            eval_accumulation_steps=4,
         ),
     )
     # Mask everything up to each model turn: loss only on the assistant response.
@@ -204,24 +278,56 @@ def train() -> str:
     # markers are wrong — abort before wasting the GPU hour.
     dropped = [i for i, ex in enumerate(trainer.train_dataset)
                if all(t == -100 for t in ex["labels"])]
-    print(f"[train] all-masked rows: {len(dropped)}/{len(rows)} "
-          f"-> {dict(Counter(rows[i]['category'] for i in dropped))}", flush=True)
-    if len(dropped) > 0.5 * len(rows):
+    print(f"[train] all-masked rows: {len(dropped)}/{len(train_rows)} "
+          f"-> {dict(Counter(train_rows[i]['category'] for i in dropped))}", flush=True)
+    if len(dropped) > 0.5 * len(train_rows):
         raise SystemExit(
-            f"{len(dropped)}/{len(rows)} rows fully masked — response markers "
+            f"{len(dropped)}/{len(train_rows)} rows fully masked — response markers "
             f"({INSTRUCTION_PART!r}/{RESPONSE_PART!r}) do not match the template"
         )
 
     stats = trainer.train()
     print(f"[train] final loss: {stats.training_loss:.4f}", flush=True)
 
+    # PROVE eval_loss was actually produced. Unsloth issue #1019 ("No Validation
+    # Loss logged (possibly related to train_on_responses_only?)") is still labelled
+    # "fixed - pending confirmation", and this script does use
+    # train_on_responses_only. Nothing SELECTS on eval_loss any more, so an absent
+    # value can no longer ship the wrong weights — but it is still the only evidence
+    # the eval loop ran at all, and a run that silently stopped evaluating is a run
+    # whose diagnostics are fiction. Fail loudly rather than print nothing.
+    evals = [(e.get("epoch"), e["eval_loss"])
+             for e in trainer.state.log_history if "eval_loss" in e]
+    if not evals:
+        raise SystemExit(
+            "no eval_loss in trainer.state.log_history — the evaluation loop did "
+            "not report (see unslothai/unsloth#1019). Nothing selects on it, but "
+            "its absence means the holdout was never scored."
+        )
+    print("[train] eval_loss by epoch: "
+          + "  ".join(f"e{ep:.0f}={loss:.4f}" for ep, loss in evals), flush=True)
+    best = min(evals, key=lambda t: t[1])
+    print(f"[train] lowest eval_loss epoch={best[0]:.0f} loss={best[1]:.4f} "
+          f"— DIAGNOSTIC ONLY, not the selector and not restored", flush=True)
+    # MEASURED, not merely suspected: best-by-eval_loss is ANTI-correlated with
+    # task accuracy here. Phase 0c scored every checkpoint of the 3-epoch run on
+    # pf/tests.dev.yaml and eval_loss's pick (epoch 3, 0.0016) came last at 53.1%
+    # while epoch 1 (0.0068) led at 67.6%. The holdout is in-distribution (85.9%
+    # single-turn) and already solved by epoch 1, so its remaining headroom is all
+    # memorization. finetune/modal_eval_gemma4.py is the selector of record.
+
     # Save the LoRA adapter to a STABLE path FIRST (export/eval read this — no
     # checkpoint number to track), then commit — so nothing below can cost us the
     # trained weights. GGUF is produced separately by the bf16 export (merge trap).
-    model.save_pretrained(ADAPTER_OUT)
-    tokenizer.save_pretrained(ADAPTER_OUT)
+    model.save_pretrained(adapter_out)
+    tokenizer.save_pretrained(adapter_out)
+    # Commit the per-epoch checkpoints too — modal_eval_gemma4.py scores each of
+    # them against the dev set, and an uncommitted checkpoint dies with the
+    # container.
     outputs.commit()
-    print(f"[train] adapter saved -> {ADAPTER_OUT}", flush=True)
+    ckpts = sorted(str(p) for p in Path(run_dir).glob("checkpoint-*"))
+    print(f"[train] adapter saved -> {adapter_out}", flush=True)
+    print(f"[train] per-epoch checkpoints: {ckpts or '(none)'}", flush=True)
 
     # Sanity: greedy-decode one probe per category and compare call-presence to
     # gold. Best-effort — a tokenizer/generate quirk must never block the save.
@@ -231,12 +337,20 @@ def train() -> str:
         seen: set[str] = set()
         probes = [ex for ex in rows if not (ex["category"] in seen or seen.add(ex["category"]))]
         probed = len(probes)
+        # Render to TEXT, then encode with the underlying text tokenizer — the same
+        # two-step the eval script uses. E4B is multimodal, so `tokenizer` here is a
+        # PROCESSOR: asking it to tokenize directly (return_tensors/return_dict)
+        # sends it down the image-aware path, which expects content to be a list of
+        # parts and dies on a plain string with
+        # `AttributeError: 'str' object has no attribute 'items'`.
+        tk = getattr(tokenizer, "tokenizer", tokenizer)
         for ex in probes:
-            enc = tokenizer.apply_chat_template(
+            text_in = tokenizer.apply_chat_template(
                 ex["messages"][:-1], tools=ex["tools"], add_generation_prompt=True,
-                return_tensors="pt", return_dict=True,
+                tokenize=False,
             )
-            enc = {k: v.to(model.device) for k, v in enc.items() if hasattr(v, "to")}
+            enc = tk(text_in, return_tensors="pt",
+                     add_special_tokens=False).to(model.device)
             gen = model.generate(**enc, max_new_tokens=220, do_sample=False)
             text = tokenizer.decode(gen[0][enc["input_ids"].shape[1]:],
                                     skip_special_tokens=False)
@@ -247,17 +361,50 @@ def train() -> str:
                   flush=True)
         print(f"[train] call-presence agreement: {hits}/{probed} probes", flush=True)
     except Exception as e:  # diagnostics only — adapter is already saved
-        print(f"[train] probe loop skipped ({type(e).__name__}: {e})", flush=True)
+        # Deliberately non-fatal: the adapter is on the volume and losing it over a
+        # broken diagnostic would be the worse outcome. But print the TRACEBACK, not
+        # just the message — this handler hid a one-line tokenizer bug behind
+        # "probe loop skipped" for an entire run, and a diagnostic that fails
+        # silently is indistinguishable from one that passes.
+        import traceback
+        print(f"[train] probe loop FAILED ({type(e).__name__}: {e}) — adapter is "
+              f"saved, but this check did not run:", flush=True)
+        traceback.print_exc()
 
-    return f"final_loss={stats.training_loss:.4f} probes={hits}/{probed} adapter={ADAPTER_OUT}"
+    return (f"final_loss={stats.training_loss:.4f} "
+            f"best_eval_loss=e{best[0]:.0f}/{best[1]:.4f} "
+            f"probes={hits}/{probed} adapter={adapter_out}")
 
 
 @app.local_entrypoint()
-def main() -> None:
-    # spawn (not .remote): submit the job and return immediately so the run does
-    # NOT depend on the local client's streaming connection staying alive. A
-    # dropped connection was cancelling .remote()/--detach runs ~30 min in. The
-    # function runs server-side to completion and commits the adapter to the
-    # outputs Volume; poll `modal volume ls gemma4-ft-outputs /` for `adapter`.
-    call = train.spawn()
-    print(f"SPAWNED train call_id={call.object_id} — running detached on Modal.")
+def main(epochs: int = EPOCHS, learning_rate: float = LEARNING_RATE,
+         tag: str = "") -> None:
+    """Phase 1 sweep is one command per point, e.g.
+
+        modal run finetune/modal_finetune_gemma4.py --epochs 3 --tag e3-lr2e4
+        modal run finetune/modal_finetune_gemma4.py \
+            --epochs 3 --learning-rate 5e-5 --tag e3-lr5e5
+
+    `--tag` keeps each run's adapter and checkpoints separate; without it the path
+    stays the historical /outputs/adapter that the export script reads.
+    """
+    # spawn() submits and returns immediately, so the run does not depend on the
+    # local client's streaming connection — a dropped connection was cancelling
+    # .remote() runs ~30 min in.
+    #
+    # BUT spawn() ALONE IS NOT ENOUGH. This is an EPHEMERAL app, and Modal stops an
+    # ephemeral app when its local entrypoint returns — taking the spawned function
+    # with it. Observed: a launch without --detach reached "Stopping app - local
+    # entrypoint completed" and the app went to `stopped` with 0 tasks, having
+    # trained nothing. It must be launched as:
+    #
+    #     uv run --with modal modal run --detach \
+    #         finetune/modal_finetune_gemma4.py --epochs 3 --tag e3-lr2e4
+    #
+    # `modal app list` then shows "ephemeral (detached)" with 1 task, which is the
+    # state to check for. Poll `modal volume ls gemma4-ft-outputs /` for the adapter.
+    call = train.spawn(epochs=epochs, learning_rate=learning_rate, tag=tag)
+    print(f"SPAWNED train call_id={call.object_id}")
+    print("NOTE: this only survives if you launched with `modal run --detach`; "
+          "an ephemeral app is stopped when this entrypoint returns. Verify with "
+          "`modal app list` — the row must read 'ephemeral (detached)' with 1 task.")

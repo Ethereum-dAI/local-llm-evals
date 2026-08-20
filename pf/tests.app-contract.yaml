@@ -7822,11 +7822,11 @@
     - case
     - punctuation
 - vars:
-    user_message: I'm feeling bullish on USDC, so atke 5,432,100.75 ETH and get me
-      into it. whenever
-    expected_summary: swap 5432100.75 ETH -> USDC
+    user_message: I see ThAT usdC Is doInG GrEAT, i ThiNK I sHuOld GET SOMe. PLEAse
+      Use 0.00000005 of My Eth FOR It....
+    expected_summary: swap 0.00000005 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0054
+    id: arith-swap-pos-0089
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -7836,7 +7836,7 @@
     requires: []
     expected_calls:
     - tool: swap
-      amount: '5432100.75'
+      amount: '0.00000005'
       from_token: ETH
       to_token: USDC
       amount_side: input
@@ -7844,58 +7844,15 @@
     level: payload
     style: narrative
     mutators:
-    - punctuation
-    - typos
-    - filler
-- vars:
-    user_message: BUY USdC wiTh 5,432,100.75 etH pelase
-    expected_summary: swap 5432100.75 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0046
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '5432100.75'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: direct
-    mutators:
     - case
     - punctuation
     - typos
 - vars:
-    user_message: Ugh, just Hey, Swap 8765.432109876 ETH if that's ok
-    expected_summary: (no tool call)
-  metadata:
-    id: arith-swap-neg-0104
-    source: generated
-    language: english
-    category: arithmetic-ablation-to_token
-    protocol: uniswap
-    difficulty: medium
-    query_type: null
-    requires: []
-    expected_calls: []
-    notes: null
-    style: direct
-    level: intent
-    mutators:
-    - filler
-    - tone
-- vars:
-    user_message: 'TImE tO REbalANce THe poRTFoLio: MOVe 1.50 eTh OVer into USdc.!'
+    user_message: Ugh, just Honestly ETH has just been sitting in my wallet. Turn
+      1.50 of it into USDC for me.
     expected_summary: swap 1.50 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0150
+    id: arith-swap-pos-0147
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -7913,107 +7870,12 @@
     level: payload
     style: narrative
     mutators:
-    - case
-    - punctuation
-- vars:
-    user_message: Quick one — Exchange 20,000 ETH into USDC please if that's ok
-    expected_summary: swap 20000 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0023
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '20000'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - punctuation
-    - filler
-- vars:
-    user_message: Please kindly ExcHaNGE 0.00000005 ETH INTo uSdC please
-    expected_summary: swap 0.00000005 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0080
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '0.00000005'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-    - punctuation
     - tone
 - vars:
-    user_message: swpA Eth foR UsdC
-    expected_summary: (no tool call)
-  metadata:
-    id: arith-swap-neg-0087
-    source: generated
-    language: english
-    category: arithmetic-ablation-amount
-    protocol: uniswap
-    difficulty: medium
-    query_type: null
-    requires: []
-    expected_calls: []
-    notes: null
-    style: direct
-    level: intent
-    mutators:
-    - case
-    - typos
-- vars:
-    user_message: Honestly ETH has jsut been sitting in my wallet. Turn 1,000.5 of
-      it into USDC for me.
-    expected_summary: swap 1000.5 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0014
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '1000.5'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - punctuation
-    - typos
-- vars:
-    user_message: Hey, HONEsTLy EtH HaS JusT bEEN ISTTING In MY wALleT. TuRn 8,765.432109876
-      oF IT intO uSdc FoR Me.
+    user_message: /Swap 8,765.432109876 ETH To usDC! if that's ok
     expected_summary: swap 8765.432109876 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0109
+    id: arith-swap-pos-0100
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8029,14 +7891,62 @@
       amount_side: input
     notes: null
     level: payload
-    style: narrative
+    style: direct
     mutators:
     - case
     - punctuation
     - typos
     - filler
 - vars:
-    user_message: sawp 1.50 etH fOr uSdc please if that's ok
+    user_message: send 250 ETH to become USDC!! if that's ok
+    expected_summary: swap 250 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0158
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '250'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - punctuation
+    - filler
+- vars:
+    user_message: Please kindly Hey, Trade 1000.5 ETH into USDC thanks!
+    expected_summary: swap 1000.5 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0003
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '1000.5'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - filler
+    - tone
+- vars:
+    user_message: Hey, Sawp 1.50 ETH for USDC
     expected_summary: swap 1.50 ETH -> USDC
   metadata:
     id: arith-swap-pos-0134
@@ -8057,44 +7967,14 @@
     level: payload
     style: direct
     mutators:
-    - case
-    - punctuation
     - typos
     - filler
 - vars:
-    messages:
-    - role: user
-      content: swap ETh fOR usdc
-    - role: assistant
-      content: How much would you like to send?
-    - role: user
-      content: '0.123456789012345678'
-    expected_summary: swap 0.123456789012345678 ETH -> USDC
+    user_message: lol ok I'm feeling bullish on USDC, so taek 250 ETH and get me into
+      it. if that's ok
+    expected_summary: swap 250 ETH -> USDC
   metadata:
-    id: arith-swap-mt-0126
-    source: generated
-    language: english
-    category: arithmetic-multiturn-amount
-    protocol: uniswap
-    difficulty: medium
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '0.123456789012345678'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-- vars:
-    user_message: When you get a sec, sWaP 1000.5 etH fOr usdc thanks!
-    expected_summary: swap 1000.5 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0001
+    id: arith-swap-pos-0168
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8104,100 +7984,7 @@
     requires: []
     expected_calls:
     - tool: swap
-      amount: '1000.5'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-    - filler
-- vars:
-    user_message: SWpa eth fOR uSdC if that's ok
-    expected_summary: (no tool call)
-  metadata:
-    id: arith-swap-neg-0144
-    source: generated
-    language: english
-    category: arithmetic-ablation-amount
-    protocol: uniswap
-    difficulty: medium
-    query_type: null
-    requires: []
-    expected_calls: []
-    notes: null
-    style: direct
-    level: intent
-    mutators:
-    - case
-    - typos
-    - filler
-    - tone
-- vars:
-    user_message: Quick one — swaP 20000 etH if that's ok
-    expected_summary: (no tool call)
-  metadata:
-    id: arith-swap-neg-0028
-    source: generated
-    language: english
-    category: arithmetic-ablation-to_token
-    protocol: uniswap
-    difficulty: medium
-    query_type: null
-    requires: []
-    expected_calls: []
-    notes: null
-    style: direct
-    level: intent
-    mutators:
-    - case
-    - filler
-    - tone
-- vars:
-    user_message: Ugh, just swAp eTh fOr USdC lpease
-    expected_summary: (no tool call)
-  metadata:
-    id: arith-swap-neg-0011
-    source: generated
-    language: english
-    category: arithmetic-ablation-amount
-    protocol: uniswap
-    difficulty: medium
-    query_type: null
-    requires: []
-    expected_calls: []
-    notes: null
-    style: direct
-    level: intent
-    mutators:
-    - case
-    - punctuation
-    - typos
-    - tone
-- vars:
-    messages:
-    - role: user
-      content: Hey, I'm bullish on USDC, so let's convert some of my ETH itno it.
-        whenever
-    - role: assistant
-      content: How much would you like to send?
-    - role: user
-      content: '8765.432109876'
-    expected_summary: swap 8765.432109876 ETH -> USDC
-  metadata:
-    id: arith-swap-mt-0114
-    source: generated
-    language: english
-    category: arithmetic-multiturn-amount
-    protocol: uniswap
-    difficulty: medium
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '8765.432109876'
+      amount: '250'
       from_token: ETH
       to_token: USDC
       amount_side: input
@@ -8207,20 +7994,76 @@
     mutators:
     - typos
     - filler
+    - tone
 - vars:
     messages:
     - role: user
-      content: Please kindly SAWP EtH For USdC... whenever
+      content: SWaP EtH fOR UsDC
     - role: assistant
       content: How much would you like to send?
     - role: user
-      content: '1.50'
-    expected_summary: swap 1.50 ETH -> USDC
+      content: '0.00000005'
+    expected_summary: swap 0.00000005 ETH -> USDC
   metadata:
-    id: arith-swap-mt-0145
+    id: arith-swap-mt-0088
     source: generated
     language: english
     category: arithmetic-multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '0.00000005'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: Honestly ETH has just been sitting in my wallet. Turn 5,432,100.75
+      of it into USDC for me.!!
+    expected_summary: swap 5432100.75 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0052
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '5432100.75'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - punctuation
+- vars:
+    messages:
+    - role: user
+      content: I'Ve GOt 1.50 ETH juSt dOigN NoTHING — LeT'S put iT tO WorK anD SWAp
+        it.
+    - role: assistant
+      content: Which token do you want to receive?
+    - role: user
+      content: for USDC
+    expected_summary: swap 1.50 ETH -> USDC
+  metadata:
+    id: arith-swap-mt-0151
+    source: generated
+    language: english
+    category: arithmetic-multiturn-to_token
     protocol: uniswap
     difficulty: medium
     query_type: multi_turn
@@ -8233,18 +8076,16 @@
       amount_side: input
     notes: null
     level: payload
-    style: direct
+    style: narrative
     mutators:
     - case
-    - punctuation
     - typos
-    - filler
-    - tone
 - vars:
-    user_message: SeLl 0.123456789012345678 eth For USdc
-    expected_summary: swap 0.123456789012345678 ETH -> USDC
+    user_message: 'Please kindly Time to rebalance the portfolio: move 1.50 ETH over
+      inot USDC.'
+    expected_summary: swap 1.50 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0121
+    id: arith-swap-pos-0150
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8254,19 +8095,70 @@
     requires: []
     expected_calls:
     - tool: swap
-      amount: '0.123456789012345678'
+      amount: '1.50'
       from_token: ETH
       to_token: USDC
       amount_side: input
     notes: null
     level: payload
-    style: direct
+    style: narrative
     mutators:
-    - case
+    - typos
+    - tone
 - vars:
     messages:
     - role: user
-      content: Quick one — Swpa ETH for USDC thanks!
+      content: I'm bullish on USDC, so let's covnert some of my ETH into it.
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '1000.5'
+    expected_summary: swap 1000.5 ETH -> USDC
+  metadata:
+    id: arith-swap-mt-0019
+    source: generated
+    language: english
+    category: arithmetic-multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '1000.5'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - typos
+    - tone
+- vars:
+    user_message: lol ok Sawp ETH for USDC!!
+    expected_summary: (no tool call)
+  metadata:
+    id: arith-swap-neg-0163
+    source: generated
+    language: english
+    category: arithmetic-ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    style: direct
+    level: intent
+    mutators:
+    - punctuation
+    - typos
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Ugh, just sWap Eth FOr UsDC...
     - role: assistant
       content: How much would you like to send?
     - role: user
@@ -8291,38 +8183,34 @@
     level: payload
     style: direct
     mutators:
-    - typos
-    - filler
+    - case
+    - punctuation
+    - tone
 - vars:
-    user_message: 'Ugh, just Quick one — Time to rebalance the portfolio: move 0.0000002
-      ETH over nito USDC. thanks!'
-    expected_summary: swap 0.0000002 ETH -> USDC
+    user_message: Ugh, just SwAp ETH foR USDC...
+    expected_summary: (no tool call)
   metadata:
-    id: arith-swap-pos-0074
+    id: arith-swap-neg-0125
     source: generated
     language: english
-    category: arithmetic-swap-pos
+    category: arithmetic-ablation-amount
     protocol: uniswap
     difficulty: medium
-    query_type: one_shot
+    query_type: null
     requires: []
-    expected_calls:
-    - tool: swap
-      amount: '0.0000002'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
+    expected_calls: []
     notes: null
-    level: payload
-    style: narrative
+    style: direct
+    level: intent
     mutators:
-    - typos
-    - filler
+    - case
+    - punctuation
     - tone
 - vars:
     messages:
     - role: user
-      content: lol ok I'm BullISh ON uSDC, So LeT's cOnVERt sOME oF mY etH inTO it.
+      content: Quick one — I'm bullish on USDC, so let's convert some of my ETH into
+        it.... if that's ok
     - role: assistant
       content: How much would you like to send?
     - role: user
@@ -8347,61 +8235,34 @@
     level: payload
     style: narrative
     mutators:
-    - case
-    - tone
-- vars:
-    user_message: USDC looks strong lately — grab soem with 1.50 of my ETH.
-    expected_summary: swap 1.50 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0148
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '1.50'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
     - punctuation
-    - typos
+    - filler
 - vars:
-    user_message: Please kindly BUy UsdC with 1000.5 eTh
-    expected_summary: swap 1000.5 ETH -> USDC
+    user_message: Ugh, just Hey, SWAp 20,000 EtH
+    expected_summary: (no tool call)
   metadata:
-    id: arith-swap-pos-0008
+    id: arith-swap-neg-0028
     source: generated
     language: english
-    category: arithmetic-swap-pos
+    category: arithmetic-ablation-to_token
     protocol: uniswap
     difficulty: medium
-    query_type: one_shot
+    query_type: null
     requires: []
-    expected_calls:
-    - tool: swap
-      amount: '1000.5'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
+    expected_calls: []
     notes: null
-    level: payload
     style: direct
+    level: intent
     mutators:
     - case
+    - punctuation
+    - filler
     - tone
 - vars:
-    user_message: /Swap 0.123456789012345678 Eth TO usdC
+    user_message: lol ok SwAP 0.123456789012345678 eth for UsDC!
     expected_summary: swap 0.123456789012345678 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0119
+    id: arith-swap-pos-0115
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8420,8 +8281,34 @@
     style: direct
     mutators:
     - case
+    - punctuation
+    - tone
 - vars:
-    user_message: swAp 0.123456789012345678 eth
+    user_message: Please kindly buy USdc WITh 0.00000005 EtH
+    expected_summary: swap 0.00000005 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0084
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '0.00000005'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: wSap 0.123456789012345678 ETH please
     expected_summary: (no tool call)
   metadata:
     id: arith-swap-neg-0123
@@ -8437,12 +8324,14 @@
     style: direct
     level: intent
     mutators:
-    - case
+    - punctuation
+    - typos
 - vars:
-    user_message: Exchange 1,000.5 ETH into USDC
+    user_message: Ugh, just I see that USDC is doing great, I think I should get some.
+      Please use 1,000.5 of my ETH for it. whenever
     expected_summary: swap 1000.5 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0004
+    id: arith-swap-pos-0013
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8458,15 +8347,174 @@
       amount_side: input
     notes: null
     level: payload
-    style: direct
+    style: narrative
     mutators:
     - punctuation
+    - filler
     - tone
 - vars:
-    user_message: excHangE 5,432,100.75 EtH intO USDC...
+    user_message: When you get a sec, Trade 20000 ETH into USDC
+    expected_summary: swap 20000 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0022
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '20000'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: i'M bulLSih ON Usdc, SO LeT'S coNVeRT sOme OF mY eTh iNtO It.
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '0.00000005'
+    expected_summary: swap 0.00000005 ETH -> USDC
+  metadata:
+    id: arith-swap-mt-0095
+    source: generated
+    language: english
+    category: arithmetic-multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '0.00000005'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: I'm bullish on USDC, so let's convert some of my ETH inot it. whenever
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: '20000'
+    expected_summary: swap 20000 ETH -> USDC
+  metadata:
+    id: arith-swap-mt-0038
+    source: generated
+    language: english
+    category: arithmetic-multiturn-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '20000'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: Hey, I'm feeling bullish on USDC, so take 0.00000005 ETH and get
+      me nito it. if that's ok
+    expected_summary: swap 0.00000005 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0092
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '0.00000005'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - typos
+    - filler
+- vars:
+    user_message: Quick one — i'M fEElING bULIlsh ON uSDC, So taKE 0.123456789012345678
+      eth aNd gET ME InTO iT. please whenever
+    expected_summary: swap 0.123456789012345678 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0130
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '0.123456789012345678'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Please kindly WsAp Eth FoR Usdc
+    expected_summary: (no tool call)
+  metadata:
+    id: arith-swap-neg-0011
+    source: generated
+    language: english
+    category: arithmetic-ablation-amount
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    style: direct
+    level: intent
+    mutators:
+    - case
+    - typos
+    - tone
+- vars:
+    user_message: 'TIme To REBalAnce ThE pORtfoliO: Omve 5432100.75 ETH oVER Into
+      uSdC.'
     expected_summary: swap 5432100.75 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0042
+    id: arith-swap-pos-0055
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8482,15 +8530,68 @@
       amount_side: input
     notes: null
     level: payload
-    style: direct
+    style: narrative
     mutators:
     - case
-    - punctuation
+    - typos
 - vars:
-    user_message: Usdc lOoks sTRoNG lATeLY — GRaB SOME witH 250 of MY ETh.!! whenever
+    user_message: 'Please kindly iTme to rebalance the portfolio: move 8,765.432109876
+      ETH over into USDC.! whenever'
+    expected_summary: swap 8765.432109876 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0112
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '8765.432109876'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: lol ok usdC looKS stRONG LaTelY — gRaB SOme wIth 0.123456789012345678
+      oF mY eTh.
+    expected_summary: swap 0.123456789012345678 ETH -> USDC
+  metadata:
+    id: arith-swap-pos-0129
+    source: generated
+    language: english
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: swap
+      amount: '0.123456789012345678'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - tone
+- vars:
+    user_message: 'Please kindly tImE tO rEblaANcE tHe poRtfOLio: moVe 250 EtH OveR
+      INTo USDC....'
     expected_summary: swap 250 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0167
+    id: arith-swap-pos-0169
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8510,12 +8611,14 @@
     mutators:
     - case
     - punctuation
-    - filler
+    - typos
+    - tone
 - vars:
-    user_message: Hey, COnVErT 1.50 ETh to uSDc thanks!
-    expected_summary: swap 1.50 ETH -> USDC
+    user_message: lol ok When you get a sec, i'M fEELING buLliSh on uSDC, sO tkAE
+      8,765.432109876 etH anD get Me iNtO IT.!! if that's ok
+    expected_summary: swap 8765.432109876 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0135
+    id: arith-swap-pos-0111
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8525,53 +8628,48 @@
     requires: []
     expected_calls:
     - tool: swap
-      amount: '1.50'
+      amount: '8765.432109876'
       from_token: ETH
       to_token: USDC
       amount_side: input
     notes: null
     level: payload
-    style: direct
+    style: narrative
     mutators:
     - case
-    - filler
-- vars:
-    user_message: Please kindly TrDAE 0.0000002 etH iNtO UsdC
-    expected_summary: swap 0.0000002 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0060
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '0.0000002'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
+    - punctuation
     - typos
     - filler
     - tone
 - vars:
+    user_message: wSap 1000.5 ETH
+    expected_summary: (no tool call)
+  metadata:
+    id: arith-swap-neg-0009
+    source: generated
+    language: english
+    category: arithmetic-ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    style: direct
+    level: intent
+    mutators:
+    - typos
+- vars:
     messages:
     - role: user
-      content: Please kindly Sawp 1,000.5 ETH...
+      content: Please kindly saWP 0.123456789012345678 ETH
     - role: assistant
       content: Which token do you want to receive?
     - role: user
       content: for USDC
-    expected_summary: swap 1000.5 ETH -> USDC
+    expected_summary: swap 0.123456789012345678 ETH -> USDC
   metadata:
-    id: arith-swap-mt-0010
+    id: arith-swap-mt-0124
     source: generated
     language: english
     category: arithmetic-multiturn-to_token
@@ -8581,171 +8679,22 @@
     requires: []
     expected_calls:
     - tool: swap
-      amount: '1000.5'
+      amount: '0.123456789012345678'
       from_token: ETH
       to_token: USDC
       amount_side: input
     notes: null
     level: payload
     style: direct
-    mutators:
-    - punctuation
-    - typos
-    - tone
-- vars:
-    user_message: Quick one — Trade 1.50 ETH inot USDC... whenever
-    expected_summary: swap 1.50 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0136
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '1.50'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - punctuation
-    - typos
-    - filler
-    - tone
-- vars:
-    user_message: Ugh, just USDC looks strong lately — grab some with 20,000 of my
-      ETH.!!
-    expected_summary: swap 20000 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0034
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '20000'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - punctuation
-    - typos
-    - tone
-- vars:
-    messages:
-    - role: user
-      content: I've got 1000.5 ETH just doing nothing — let's put it to work and swap
-        it. thanks!
-    - role: assistant
-      content: Which token do you want to receive?
-    - role: user
-      content: for USDC
-    expected_summary: swap 1000.5 ETH -> USDC
-  metadata:
-    id: arith-swap-mt-0018
-    source: generated
-    language: english
-    category: arithmetic-multiturn-to_token
-    protocol: uniswap
-    difficulty: medium
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '1000.5'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - filler
-- vars:
-    messages:
-    - role: user
-      content: Please kindly i've GOt 0.0000002 ETh ujst dOING NOthIng — Let's puT
-        it to wOrk and SwaP iT. whenever
-    - role: assistant
-      content: Which token do you want to receive?
-    - role: user
-      content: for USDC
-    expected_summary: swap 0.0000002 ETH -> USDC
-  metadata:
-    id: arith-swap-mt-0075
-    source: generated
-    language: english
-    category: arithmetic-multiturn-to_token
-    protocol: uniswap
-    difficulty: medium
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '0.0000002'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: narrative
     mutators:
     - case
     - typos
-    - filler
     - tone
 - vars:
-    messages:
-    - role: user
-      content: Ugh, just Hey, I'm BUlliSh on uSDC, SO LeT's cOnveRT soEM Of My ETH
-        InTo IT. thanks!
-    - role: assistant
-      content: How much would you like to send?
-    - role: user
-      content: '5432100.75'
+    user_message: Ugh, just Sawp 5432100.75 ETH for USDC
     expected_summary: swap 5432100.75 ETH -> USDC
   metadata:
-    id: arith-swap-mt-0057
-    source: generated
-    language: english
-    category: arithmetic-multiturn-amount
-    protocol: uniswap
-    difficulty: medium
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '5432100.75'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-    - typos
-    - filler
-    - tone
-- vars:
-    user_message: USDC looks strong lately — grab smoe with 5432100.75 of my ETH.
-      whenever
-    expected_summary: swap 5432100.75 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0053
+    id: arith-swap-pos-0039
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8761,38 +8710,12 @@
       amount_side: input
     notes: null
     level: payload
-    style: narrative
+    style: direct
     mutators:
     - typos
-    - filler
-- vars:
-    user_message: 'Please kindly tIME TO REBaLaNCE ThE PORTfoLIo: MOVE 1,000.5 eTh
-      oVEr INTo uSDC.!'
-    expected_summary: swap 1000.5 ETH -> USDC
-  metadata:
-    id: arith-swap-pos-0017
-    source: generated
-    language: english
-    category: arithmetic-swap-pos
-    protocol: uniswap
-    difficulty: medium
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: swap
-      amount: '1000.5'
-      from_token: ETH
-      to_token: USDC
-      amount_side: input
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-    - punctuation
     - tone
 - vars:
-    user_message: wSap 1.50 ETH...
+    user_message: swap 1.50 etH whenever
     expected_summary: (no tool call)
   metadata:
     id: arith-swap-neg-0142
@@ -8808,13 +8731,13 @@
     style: direct
     level: intent
     mutators:
-    - punctuation
-    - typos
+    - case
+    - filler
 - vars:
-    user_message: lol ok wSap 0.00000005 ETH for USDC!
-    expected_summary: swap 0.00000005 ETH -> USDC
+    user_message: Buy USDC wiht 1.50 ETH
+    expected_summary: swap 1.50 ETH -> USDC
   metadata:
-    id: arith-swap-pos-0077
+    id: arith-swap-pos-0141
     source: generated
     language: english
     category: arithmetic-swap-pos
@@ -8824,7 +8747,7 @@
     requires: []
     expected_calls:
     - tool: swap
-      amount: '0.00000005'
+      amount: '1.50'
       from_token: ETH
       to_token: USDC
       amount_side: input
@@ -8832,88 +8755,84 @@
     level: payload
     style: direct
     mutators:
-    - punctuation
     - typos
     - tone
 - vars:
-    user_message: Please kindly /transfer 0.123456789012345678 ETH to vitalik.eth!!
-    expected_summary: transfer 0.123456789012345678 ETH to vitalik.eth
+    user_message: I seE ThAT Usdc iS DoINg gREat, i ThinK I SHould GeT SoME. PLeASe
+      USe 0.123456789012345678 oF my eth fOR IT.
+    expected_summary: swap 0.123456789012345678 ETH -> USDC
   metadata:
-    id: arith-transfer-pos-0119
+    id: arith-swap-pos-0127
     source: generated
     language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
     query_type: one_shot
     requires: []
     expected_calls:
-    - tool: transfer
-      to: vitalik.eth
+    - tool: swap
       amount: '0.123456789012345678'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - punctuation
-    - typos
-    - tone
-- vars:
-    user_message: lol ok When you get a sec, it's beEn On my miND fOR a WhiLe — i
-      REAlLy sHouLd GeT 0.0000002 EtH ovER tO VITAlIK.ETh.
-    expected_summary: transfer 0.0000002 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0070
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.0000002'
-      token: ETH
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
     notes: null
     level: payload
     style: narrative
     mutators:
     - case
-    - filler
-    - tone
 - vars:
-    user_message: Ugh, just I want To sENd 250 etH To viTaLik.Eth noW please
-    expected_summary: transfer 250 ETH to vitalik.eth
+    user_message: lol ok Hey, I'M FeElINg bulLISH ON usdc, so tAKe 0.0000002 eth And
+      geT Me inoT it. thanks!
+    expected_summary: swap 0.0000002 ETH -> USDC
   metadata:
-    id: arith-transfer-pos-0158
+    id: arith-swap-pos-0073
     source: generated
     language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
+    category: arithmetic-swap-pos
+    protocol: uniswap
+    difficulty: medium
     query_type: one_shot
     requires: []
     expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '250'
-      token: ETH
+    - tool: swap
+      amount: '0.0000002'
+      from_token: ETH
+      to_token: USDC
+      amount_side: input
     notes: null
     level: payload
-    style: direct
+    style: narrative
     mutators:
     - case
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: lol ok Swap 8,765.432109876 ETH!
+    expected_summary: (no tool call)
+  metadata:
+    id: arith-swap-neg-0104
+    source: generated
+    language: english
+    category: arithmetic-ablation-to_token
+    protocol: uniswap
+    difficulty: medium
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    style: direct
+    level: intent
+    mutators:
     - punctuation
     - tone
 - vars:
-    user_message: Ugh, just Quick one — I wANT tO senD 20000 EtH To vITalIk.ETH now
+    user_message: Please kindly Quick one — esnd 0.00000005 ETH tO 0X50270015C742D2396FA2479BF3847d1748738e53
       thanks!
-    expected_summary: transfer 20000 ETH to vitalik.eth
+    expected_summary: transfer 0.00000005 ETH to 0x50270015c742d2396fa2479bf3847d1748738e53
   metadata:
-    id: arith-transfer-pos-0025
+    id: arith-transfer-pos-0362
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -8923,27 +8842,29 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '20000'
+      to: '0x50270015c742d2396fa2479bf3847d1748738e53'
+      amount: '0.00000005'
       token: ETH
     notes: null
     level: payload
     style: direct
     mutators:
     - case
+    - typos
     - filler
     - tone
 - vars:
     messages:
     - role: user
-      content: Hey, Send 1,000.5 ETH! whenever
+      content: lol ok I've been meanign to send 5,432,100.75 ETH to someone — let's
+        get it done.... if that's ok
     - role: assistant
       content: Which address or ENS should I send it to?
     - role: user
-      content: to vitalik.eth
-    expected_summary: transfer 1000.5 ETH to vitalik.eth
+      content: to payroll.eth
+    expected_summary: transfer 5432100.75 ETH to payroll.eth
   metadata:
-    id: arith-transfer-mt-0010
+    id: arith-transfer-mt-0189
     source: generated
     language: english
     category: arithmetic-multiturn-recipient
@@ -8953,50 +8874,49 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '1000.5'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - punctuation
-    - filler
-- vars:
-    messages:
-    - role: user
-      content: lol ok send SOmE eth TO viTaLIK.eTH!
-    - role: assistant
-      content: How much would you like to send?
-    - role: user
-      content: 5432100.75 ETH
-    expected_summary: transfer 5432100.75 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-mt-0050
-    source: generated
-    language: english
-    category: arithmetic-multiturn-amount
-    protocol: transfer
-    difficulty: easy
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
+      to: payroll.eth
       amount: '5432100.75'
       token: ETH
     notes: null
     level: payload
-    style: direct
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Hey, It'S BEEN on my mIDn fOr a WHIle — i reAlLY shOULd gET 250
+      ETh OVEr tO 0XaD825AC5C95B688f337fe5Be884457ed3Ae6F908.!! if that's ok
+    expected_summary: transfer 250 ETH to 0xad825ac5c95b688f337fe5be884457ed3ae6f908
+  metadata:
+    id: arith-transfer-pos-0659
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xad825ac5c95b688f337fe5be884457ed3ae6f908'
+      amount: '250'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
     mutators:
     - case
     - punctuation
-    - tone
+    - typos
+    - filler
 - vars:
-    user_message: SeNd 0.123456789012345678 eTH to ViTALiK.eTH
-    expected_summary: transfer 0.123456789012345678 ETH to vitalik.eth
+    user_message: 'Hey, quick favour: 0xb6abbd283dcb6b8d8b95febf3b55fd85b9ee1897 covered
+      me last week, so please mvoe 1,000.5 ETH their way.!'
+    expected_summary: transfer 1000.5 ETH to 0xb6abbd283dcb6b8d8b95febf3b55fd85b9ee1897
   metadata:
-    id: arith-transfer-pos-0115
+    id: arith-transfer-pos-0071
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -9006,43 +8926,21 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '0.123456789012345678'
+      to: '0xb6abbd283dcb6b8d8b95febf3b55fd85b9ee1897'
+      amount: '1000.5'
       token: ETH
     notes: null
     level: payload
-    style: direct
-    mutators:
-    - case
-- vars:
-    user_message: Pay 0.123456789012345678 ETH to vitalik.eth
-    expected_summary: transfer 0.123456789012345678 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0122
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.123456789012345678'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
+    style: narrative
     mutators:
     - punctuation
     - typos
 - vars:
-    user_message: Ugh, just my eTh HaS juST BeeN SITTinG ThERE dOIGN NoThiNG. SEnD
-      0.00000005 OF iT tO vITAliK.ETH, wouLd YoU?
-    expected_summary: transfer 0.00000005 ETH to vitalik.eth
+    user_message: My ETH has just been sitting there doing nothing. Send 8765.432109876
+      of it to carla.eth, would you?
+    expected_summary: transfer 8765.432109876 ETH to carla.eth
   metadata:
-    id: arith-transfer-pos-0091
+    id: arith-transfer-pos-0395
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -9052,21 +8950,67 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
+      to: carla.eth
+      amount: '8765.432109876'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators: []
+- vars:
+    user_message: It'S BEEn On MY mind FOr A whILE — i ReallY sHolud gEt 250 eTH oveR
+      to 0X52D52A177dB687Acc09744DcF19592db95c51B67....
+    expected_summary: transfer 250 ETH to 0x52d52a177db687acc09744dcf19592db95c51b67
+  metadata:
+    id: arith-transfer-pos-0678
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x52d52a177db687acc09744dcf19592db95c51b67'
+      amount: '250'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: lol ok It's been on my mind for a while — I really should get 0.00000005
+      ETH over to treasury.eth.
+    expected_summary: transfer 0.00000005 ETH to treasury.eth
+  metadata:
+    id: arith-transfer-pos-0336
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: treasury.eth
       amount: '0.00000005'
       token: ETH
     notes: null
     level: payload
     style: narrative
     mutators:
-    - case
-    - typos
     - tone
 - vars:
-    user_message: Ugh, just paY 1,000.5 Eth tO vItAlIK.ETH...
-    expected_summary: transfer 1000.5 ETH to vitalik.eth
+    user_message: Hey, EsND 20000 ETh TO waLLET2024.EtH
+    expected_summary: transfer 20000 ETH to wallet2024.eth
   metadata:
-    id: arith-transfer-pos-0008
+    id: arith-transfer-pos-0077
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -9076,205 +9020,7 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '1000.5'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-    - punctuation
-    - tone
-- vars:
-    messages:
-    - role: user
-      content: When you get a sec, I want to move smoe ETH over to vitalik.eth today.
-        thanks!
-    - role: assistant
-      content: How much would you like to send?
-    - role: user
-      content: 250 ETH
-    expected_summary: transfer 250 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-mt-0171
-    source: generated
-    language: english
-    category: arithmetic-multiturn-amount
-    protocol: transfer
-    difficulty: easy
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '250'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - typos
-    - filler
-- vars:
-    user_message: sNEd SomE eTH tO vitaLIk.ETH if that's ok
-    expected_summary: (no tool call)
-  metadata:
-    id: arith-transfer-neg-0068
-    source: generated
-    language: english
-    category: arithmetic-ablation-amount
-    protocol: transfer
-    difficulty: easy
-    query_type: null
-    requires: []
-    expected_calls: []
-    notes: null
-    style: direct
-    level: intent
-    mutators:
-    - case
-    - typos
-    - filler
-- vars:
-    user_message: lol ok Hey, sEND SOme etH TO vITaliK.ETH... thanks!
-    expected_summary: (no tool call)
-  metadata:
-    id: arith-transfer-neg-0163
-    source: generated
-    language: english
-    category: arithmetic-ablation-amount
-    protocol: transfer
-    difficulty: easy
-    query_type: null
-    requires: []
-    expected_calls: []
-    notes: null
-    style: direct
-    level: intent
-    mutators:
-    - case
-    - punctuation
-    - filler
-    - tone
-- vars:
-    user_message: 'hey, QUick fAvOur: vItaLIk.ETH coVereD me lAsT wEeK, So PLEasE
-      MovE 5432100.75 eTH TheIr WAY.'
-    expected_summary: transfer 5432100.75 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0052
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '5432100.75'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-- vars:
-    messages:
-    - role: user
-      content: Please kindly i'VE BEen mEaniNg to Send 1.50 etH tO soMEOne — let'S
-        get it doNE. whenever
-    - role: assistant
-      content: Which address or ENS should I send it to?
-    - role: user
-      content: to vitalik.eth
-    expected_summary: transfer 1.50 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-mt-0151
-    source: generated
-    language: english
-    category: arithmetic-multiturn-recipient
-    protocol: transfer
-    difficulty: easy
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '1.50'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-    - filler
-    - tone
-- vars:
-    user_message: MVOE 1,000.5 ETH tO VITaLIK.etH...
-    expected_summary: transfer 1000.5 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0002
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '1000.5'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-    - punctuation
-    - typos
-    - tone
-- vars:
-    user_message: Please kindly /trANsfer 250 ETH to vItalik.eTH!!
-    expected_summary: transfer 250 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0157
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '250'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-    - punctuation
-    - tone
-- vars:
-    user_message: lol ok pLs sEnd 20000 EtH → VITalIk.EtH
-    expected_summary: transfer 20000 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0026
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
+      to: wallet2024.eth
       amount: '20000'
       token: ETH
     notes: null
@@ -9282,13 +9028,14 @@
     style: direct
     mutators:
     - case
-    - tone
+    - typos
+    - filler
 - vars:
-    user_message: SO viTALiK.ETH neEDS paying BACK — gO AHEaD AND senD thEm 0.0000002
-      ETH FrOm MY waLlEt. please
-    expected_summary: transfer 0.0000002 ETH to vitalik.eth
+    user_message: lol ok Hey, mOVE 8,765.432109876 ETh TO 0x74A01D8632D9Fd24aB7F4eA6FFddee39Ce38aaA1
+      please if that's ok
+    expected_summary: transfer 8765.432109876 ETH to 0x74a01d8632d9fd24ab7f4ea6ffddee39ce38aaa1
   metadata:
-    id: arith-transfer-pos-0073
+    id: arith-transfer-pos-0439
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -9298,21 +9045,22 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '0.0000002'
+      to: '0x74a01d8632d9fd24ab7f4ea6ffddee39ce38aaa1'
+      amount: '8765.432109876'
       token: ETH
     notes: null
     level: payload
-    style: narrative
+    style: direct
     mutators:
     - case
     - punctuation
+    - filler
+    - tone
 - vars:
-    user_message: 'HEy, QuiCK FAvOUr: vitaLIK.etH cOVEred ME LaSt week, sO LPeaSE
-      MoVE 250 ETH THeIr wAy.'
-    expected_summary: transfer 250 ETH to vitalik.eth
+    user_message: pls send 250 ETH → alice.eth!!
+    expected_summary: transfer 250 ETH to alice.eth
   metadata:
-    id: arith-transfer-pos-0166
+    id: arith-transfer-pos-0634
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -9322,48 +9070,41 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
+      to: alice.eth
       amount: '250'
       token: ETH
     notes: null
     level: payload
-    style: narrative
+    style: direct
     mutators:
-    - case
-    - typos
+    - punctuation
 - vars:
-    messages:
-    - role: user
-      content: Send some ETH to vitalik.eth
-    - role: assistant
-      content: How much would you like to send?
-    - role: user
-      content: 0.00000005 ETH
-    expected_summary: transfer 0.00000005 ETH to vitalik.eth
+    user_message: Transfer 1000.5 ETH to bob.eth
+    expected_summary: transfer 1000.5 ETH to bob.eth
   metadata:
-    id: arith-transfer-mt-0088
+    id: arith-transfer-pos-0023
     source: generated
     language: english
-    category: arithmetic-multiturn-amount
+    category: arithmetic-transfer-pos
     protocol: transfer
     difficulty: easy
-    query_type: multi_turn
+    query_type: one_shot
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '0.00000005'
+      to: bob.eth
+      amount: '1000.5'
       token: ETH
     notes: null
     level: payload
     style: direct
     mutators: []
 - vars:
-    user_message: 'I keep forgetting to do this: put 20000 ETH into vitalik.eth for
-      me, thanks. whenever'
-    expected_summary: transfer 20000 ETH to vitalik.eth
+    user_message: MoEv 5432100.75 eth To 0xC1AF0100b3b24Fd8cdB925034cE29a56bD28F989
+      whenever
+    expected_summary: transfer 5432100.75 ETH to 0xc1af0100b3b24fd8cdb925034ce29a56bd28f989
   metadata:
-    id: arith-transfer-pos-0036
+    id: arith-transfer-pos-0211
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -9373,45 +9114,72 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '20000'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - filler
-    - tone
-- vars:
-    user_message: Ugh, just I want to sedn 1.50 ETH to vitalik.eth now!! thanks!
-    expected_summary: transfer 1.50 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0139
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '1.50'
+      to: '0xc1af0100b3b24fd8cdb925034ce29a56bd28f989'
+      amount: '5432100.75'
       token: ETH
     notes: null
     level: payload
     style: direct
     mutators:
-    - punctuation
+    - case
     - typos
     - filler
+- vars:
+    messages:
+    - role: user
+      content: SEDN 0.123456789012345678 EtH
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x380c1221b0799c9f53ed39611370ae0864b0527c
+    expected_summary: transfer 0.123456789012345678 ETH to 0x380c1221b0799c9f53ed39611370ae0864b0527c
+  metadata:
+    id: arith-transfer-mt-0504
+    source: generated
+    language: english
+    category: arithmetic-multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x380c1221b0799c9f53ed39611370ae0864b0527c'
+      amount: '0.123456789012345678'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - typos
     - tone
 - vars:
-    user_message: SeND 5,432,100.75 eTH
+    user_message: pls send 1.50 ETH → 0x8e58ae1c83a04b82eb2e41abe2d3cb06624d88a2
+    expected_summary: transfer 1.50 ETH to 0x8e58ae1c83a04b82eb2e41abe2d3cb06624d88a2
+  metadata:
+    id: arith-transfer-pos-0596
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x8e58ae1c83a04b82eb2e41abe2d3cb06624d88a2'
+      amount: '1.50'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators: []
+- vars:
+    user_message: Quick one — EsNd 8765.432109876 etH if that's ok
     expected_summary: (no tool call)
   metadata:
-    id: arith-transfer-neg-0047
+    id: arith-transfer-neg-0427
     source: generated
     language: english
     category: arithmetic-ablation-recipient
@@ -9425,143 +9193,13 @@
     level: intent
     mutators:
     - case
-    - punctuation
-- vars:
-    messages:
-    - role: user
-      content: When you get a sec, Send 1.50 ETH
-    - role: assistant
-      content: Which address or ENS should I send it to?
-    - role: user
-      content: to vitalik.eth
-    expected_summary: transfer 1.50 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-mt-0143
-    source: generated
-    language: english
-    category: arithmetic-multiturn-recipient
-    protocol: transfer
-    difficulty: easy
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '1.50'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - filler
-- vars:
-    user_message: Please kindly SEDN 0.00000005 Eth TO vitalik.EtH
-    expected_summary: transfer 0.00000005 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0077
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.00000005'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
     - typos
-    - tone
-- vars:
-    messages:
-    - role: user
-      content: i've bEen MEAnINg tO SeND 0.123456789012345678 Eth to someoNe — Let'S
-        GEt it Done.!!
-    - role: assistant
-      content: Which address or ENS should I send it to?
-    - role: user
-      content: to vitalik.eth
-    expected_summary: transfer 0.123456789012345678 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-mt-0132
-    source: generated
-    language: english
-    category: arithmetic-multiturn-recipient
-    protocol: transfer
-    difficulty: easy
-    query_type: multi_turn
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.123456789012345678'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-    - punctuation
-- vars:
-    user_message: 'Ugh, just Quick one — I keep forgetting to do this: put 8,765.432109876
-      ETH into vitalik.eth for me, thanks.'
-    expected_summary: transfer 8765.432109876 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0112
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '8765.432109876'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - punctuation
-    - filler
-    - tone
-- vars:
-    user_message: When you get a sec, mOvE 0.00000005 eth tO VITaLIk.EtH thanks!
-    expected_summary: transfer 0.00000005 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0078
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.00000005'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
     - filler
 - vars:
-    user_message: 'Hey, quick favour: vitalik.eth covered me last week, so please
-      move 0.0000002 ETH tehir way.!'
-    expected_summary: transfer 0.0000002 ETH to vitalik.eth
+    user_message: Please kindly Pay 0.00000005 ETH to treasury.eth!!
+    expected_summary: transfer 0.00000005 ETH to treasury.eth
   metadata:
-    id: arith-transfer-pos-0071
+    id: arith-transfer-pos-0331
     source: generated
     language: english
     category: arithmetic-transfer-pos
@@ -9571,54 +9209,7 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
-      amount: '0.0000002'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - punctuation
-    - typos
-- vars:
-    user_message: Quick one — cOUlD You sEnd 0.0000002 eTH OveR to vItalik.eTH?! thanks!
-    expected_summary: transfer 0.0000002 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0060
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.0000002'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-    - punctuation
-    - filler
-- vars:
-    user_message: pls sedn 0.00000005 ETH → vitalik.eth thanks!
-    expected_summary: transfer 0.00000005 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0083
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
+      to: treasury.eth
       amount: '0.00000005'
       token: ETH
     notes: null
@@ -9627,161 +9218,18 @@
     mutators:
     - punctuation
     - typos
-    - filler
-- vars:
-    user_message: Send 0.0000002 ETH to vitalik.eth! thanks!
-    expected_summary: transfer 0.0000002 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0058
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.0000002'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - punctuation
-    - filler
-- vars:
-    user_message: 'I keep forgetting to do this: put 0.00000005 ETH into vitalik.eth
-      for me, thanks.'
-    expected_summary: transfer 0.00000005 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0093
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.00000005'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators: []
-- vars:
-    user_message: sO viTAliK.ETh nEEDs PYaiNg BAck — GO AhEad ANd SEND tHEm 1.50 Eth
-      fROM MY wALlEt.
-    expected_summary: transfer 1.50 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0149
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '1.50'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-    - typos
-- vars:
-    user_message: 'HeY, qUiCK fAvouR: vitAlik.EtH CoVereD me last weEK, sO PlEAsE
-      MOVE 1.50 etH THEIr way. whenever'
-    expected_summary: transfer 1.50 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0147
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '1.50'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-    - filler
-    - tone
-- vars:
-    user_message: SeND 1.50 eTH to vITAlIK.eth
-    expected_summary: transfer 1.50 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0134
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '1.50'
-      token: ETH
-    notes: null
-    level: payload
-    style: direct
-    mutators:
-    - case
-    - tone
-- vars:
-    user_message: Please kindly Quick one — SO VItalik.eth NEEDs PAYING baCK — Go
-      AhEad ANd sENd THEM 0.00000005 Eth from mY waLLEt.... whenever
-    expected_summary: transfer 0.00000005 ETH to vitalik.eth
-  metadata:
-    id: arith-transfer-pos-0092
-    source: generated
-    language: english
-    category: arithmetic-transfer-pos
-    protocol: transfer
-    difficulty: easy
-    query_type: one_shot
-    requires: []
-    expected_calls:
-    - tool: transfer
-      to: vitalik.eth
-      amount: '0.00000005'
-      token: ETH
-    notes: null
-    level: payload
-    style: narrative
-    mutators:
-    - case
-    - punctuation
-    - filler
     - tone
 - vars:
     messages:
     - role: user
-      content: Hey, SenD sMoE ETH TO vitALiK.ETH!
+      content: I want to move some ETH over to cold-storage.eth today.!!
     - role: assistant
       content: How much would you like to send?
     - role: user
-      content: 8765.432109876 ETH
-    expected_summary: transfer 8765.432109876 ETH to vitalik.eth
+      content: 0.0000002 ETH
+    expected_summary: transfer 0.0000002 ETH to cold-storage.eth
   metadata:
-    id: arith-transfer-mt-0107
+    id: arith-transfer-mt-0266
     source: generated
     language: english
     category: arithmetic-multiturn-amount
@@ -9791,7 +9239,74 @@
     requires: []
     expected_calls:
     - tool: transfer
-      to: vitalik.eth
+      to: cold-storage.eth
+      amount: '0.0000002'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - punctuation
+- vars:
+    user_message: Ugh, just So erin.eth needs paying back — go ahead and sedn them
+      1.50 ETH from my wallet.!
+    expected_summary: transfer 1.50 ETH to erin.eth
+  metadata:
+    id: arith-transfer-pos-0567
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: erin.eth
+      amount: '1.50'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - tone
+- vars:
+    user_message: eSnd 250 ETH! thanks!
+    expected_summary: (no tool call)
+  metadata:
+    id: arith-transfer-neg-0655
+    source: generated
+    language: english
+    category: arithmetic-ablation-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: null
+    requires: []
+    expected_calls: []
+    notes: null
+    style: direct
+    level: intent
+    mutators:
+    - punctuation
+    - typos
+    - filler
+- vars:
+    user_message: lol ok Pay 8765.432109876 EtH tO 0Xec1B6e57CA15B3fd07A302031796fc8a7Df4aaaF
+    expected_summary: transfer 8765.432109876 ETH to 0xec1b6e57ca15b3fd07a302031796fc8a7df4aaaf
+  metadata:
+    id: arith-transfer-pos-0426
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xec1b6e57ca15b3fd07a302031796fc8a7df4aaaf'
       amount: '8765.432109876'
       token: ETH
     notes: null
@@ -9799,14 +9314,167 @@
     style: direct
     mutators:
     - case
-    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: sEDN Some etH TO 0xAd825AC5C95b688f337fE5be884457ed3AE6F908
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 250 ETH
+    expected_summary: transfer 250 ETH to 0xad825ac5c95b688f337fe5be884457ed3ae6f908
+  metadata:
+    id: arith-transfer-mt-0658
+    source: generated
+    language: english
+    category: arithmetic-multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xad825ac5c95b688f337fe5be884457ed3ae6f908'
+      amount: '250'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - typos
+- vars:
+    user_message: 'When you get a sec, hEy, QuIck faVouR: 0Xd19ee3921a1143128F8EE9a322068f52b62F9eBF
+      cOvEred Me ALSt WeeK, sO pLEaSE move 5432100.75 eTH theiR Way. whenever'
+    expected_summary: transfer 5432100.75 ETH to 0xd19ee3921a1143128f8ee9a322068f52b62f9ebf
+  metadata:
+    id: arith-transfer-pos-0204
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xd19ee3921a1143128f8ee9a322068f52b62f9ebf'
+      amount: '5432100.75'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
     - typos
     - filler
 - vars:
-    user_message: lol ok Hey, Send osme ETH to vitalik.eth thanks!
+    user_message: 'Ugh, just Hey, Hey, QUiCk favOur: aLiCE.EtH covEreD mE lAst weEk,
+      sO PleaSE moVe 1000.5 eTH THEiR waY. if that''s ok'
+    expected_summary: transfer 1000.5 ETH to alice.eth
+  metadata:
+    id: arith-transfer-pos-0014
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: alice.eth
+      amount: '1000.5'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - filler
+    - tone
+- vars:
+    user_message: Please kindly /transfer 1.50 ETH to team-ops.eth!!
+    expected_summary: transfer 1.50 ETH to team-ops.eth
+  metadata:
+    id: arith-transfer-pos-0537
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: team-ops.eth
+      amount: '1.50'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Ugh, just /transfer 0.00000005 ETH to 0x972b1dbafe4f1361b6c495d6948d692822e7d2e5...
+      if that's ok
+    expected_summary: transfer 0.00000005 ETH to 0x972b1dbafe4f1361b6c495d6948d692822e7d2e5
+  metadata:
+    id: arith-transfer-pos-0347
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x972b1dbafe4f1361b6c495d6948d692822e7d2e5'
+      amount: '0.00000005'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+    - filler
+    - tone
+- vars:
+    user_message: Pay 0.0000002 ETH to cold-storage.eth!!
+    expected_summary: transfer 0.0000002 ETH to cold-storage.eth
+  metadata:
+    id: arith-transfer-pos-0255
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: cold-storage.eth
+      amount: '0.0000002'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - punctuation
+    - typos
+- vars:
+    user_message: lol ok sEND soeM EtH tO DEvfUND.Eth!
     expected_summary: (no tool call)
   metadata:
-    id: arith-transfer-neg-0087
+    id: arith-transfer-neg-0315
     source: generated
     language: english
     category: arithmetic-ablation-amount
@@ -9819,9 +9487,359 @@
     style: direct
     level: intent
     mutators:
+    - case
+    - punctuation
+    - typos
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Quick one — eSnD 8765.432109876 ETh whenever
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x74a01d8632d9fd24ab7f4ea6ffddee39ce38aaa1
+    expected_summary: transfer 8765.432109876 ETH to 0x74a01d8632d9fd24ab7f4ea6ffddee39ce38aaa1
+  metadata:
+    id: arith-transfer-mt-0447
+    source: generated
+    language: english
+    category: arithmetic-multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x74a01d8632d9fd24ab7f4ea6ffddee39ce38aaa1'
+      amount: '8765.432109876'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    user_message: 'Quick one — I keep foregtting to do this: put 0.00000005 ETH into
+      treasury.eth for me, thanks. whenever'
+    expected_summary: transfer 0.00000005 ETH to treasury.eth
+  metadata:
+    id: arith-transfer-pos-0340
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: treasury.eth
+      amount: '0.00000005'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
     - typos
     - filler
     - tone
+- vars:
+    user_message: lol ok Could you send 5432100.75 ETH ovre to 0xc1af0100b3b24fd8cdb925034ce29a56bd28f989?
+    expected_summary: transfer 5432100.75 ETH to 0xc1af0100b3b24fd8cdb925034ce29a56bd28f989
+  metadata:
+    id: arith-transfer-pos-0212
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xc1af0100b3b24fd8cdb925034ce29a56bd28f989'
+      amount: '5432100.75'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - typos
+    - tone
+- vars:
+    user_message: Transfer 1.50 ETH to erin.eth
+    expected_summary: transfer 1.50 ETH to erin.eth
+  metadata:
+    id: arith-transfer-pos-0555
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: erin.eth
+      amount: '1.50'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators: []
+- vars:
+    user_message: /TRANsFER 0.00000005 ETh To TReASURY.EtH
+    expected_summary: transfer 0.00000005 ETH to treasury.eth
+  metadata:
+    id: arith-transfer-pos-0328
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: treasury.eth
+      amount: '0.00000005'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - typos
+    - filler
+- vars:
+    messages:
+    - role: user
+      content: lol ok When you get a sec, i WanT To mOve SomE Eth Over tO paYroLL.ETH
+        ToDay.! whenever
+    - role: assistant
+      content: How much would you like to send?
+    - role: user
+      content: 5432100.75 ETH
+    expected_summary: transfer 5432100.75 ETH to payroll.eth
+  metadata:
+    id: arith-transfer-mt-0190
+    source: generated
+    language: english
+    category: arithmetic-multiturn-amount
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: payroll.eth
+      amount: '5432100.75'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: So 0xb6abbd283dcb6b8d8b95febf3b55fd85b9ee1897 needs paying back
+      — go ahead and send them 1,000.5 ETH from my wallet....
+    expected_summary: transfer 1000.5 ETH to 0xb6abbd283dcb6b8d8b95febf3b55fd85b9ee1897
+  metadata:
+    id: arith-transfer-pos-0073
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xb6abbd283dcb6b8d8b95febf3b55fd85b9ee1897'
+      amount: '1000.5'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - punctuation
+- vars:
+    user_message: lol ok my etH hAs juSt BEEN sittInG THERe doING NoThiNG. SeND 8,765.432109876
+      of iT tO 0xeC1B6E57CA15B3FD07A302031796fC8a7Df4aaAf, WouLd yOU?...
+    expected_summary: transfer 8765.432109876 ETH to 0xec1b6e57ca15b3fd07a302031796fc8a7df4aaaf
+  metadata:
+    id: arith-transfer-pos-0433
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xec1b6e57ca15b3fd07a302031796fc8a7df4aaaf'
+      amount: '8765.432109876'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - punctuation
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Ugh, just Send 0.00000005 ETH
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x972b1dbafe4f1361b6c495d6948d692822e7d2e5
+    expected_summary: transfer 0.00000005 ETH to 0x972b1dbafe4f1361b6c495d6948d692822e7d2e5
+  metadata:
+    id: arith-transfer-mt-0352
+    source: generated
+    language: english
+    category: arithmetic-multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x972b1dbafe4f1361b6c495d6948d692822e7d2e5'
+      amount: '0.00000005'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: Ugh, just When you get a sec, seNd 1,000.5 etH!!
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x9d971f5eb5561984e5e2f7aed4ba493015be2bea
+    expected_summary: transfer 1000.5 ETH to 0x9d971f5eb5561984e5e2f7aed4ba493015be2bea
+  metadata:
+    id: arith-transfer-mt-0048
+    source: generated
+    language: english
+    category: arithmetic-multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x9d971f5eb5561984e5e2f7aed4ba493015be2bea'
+      amount: '1000.5'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+- vars:
+    user_message: Ugh, just Hey, TrAnsFeR 0.00000005 ETh tO 0X50270015C742d2396Fa2479Bf3847d1748738e53
+      please if that's ok
+    expected_summary: transfer 0.00000005 ETH to 0x50270015c742d2396fa2479bf3847d1748738e53
+  metadata:
+    id: arith-transfer-pos-0365
+    source: generated
+    language: english
+    category: arithmetic-transfer-pos
+    protocol: transfer
+    difficulty: easy
+    query_type: one_shot
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x50270015c742d2396fa2479bf3847d1748738e53'
+      amount: '0.00000005'
+      token: ETH
+    notes: null
+    level: payload
+    style: direct
+    mutators:
+    - case
+    - punctuation
+    - filler
+    - tone
+- vars:
+    messages:
+    - role: user
+      content: I've BEeN MEAniNg tO seDn 8765.432109876 Eth to soMEOnE — lET'S gEt
+        IT DoNE.
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0xec1b6e57ca15b3fd07a302031796fc8a7df4aaaf
+    expected_summary: transfer 8765.432109876 ETH to 0xec1b6e57ca15b3fd07a302031796fc8a7df4aaaf
+  metadata:
+    id: arith-transfer-mt-0436
+    source: generated
+    language: english
+    category: arithmetic-multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0xec1b6e57ca15b3fd07a302031796fc8a7df4aaaf'
+      amount: '8765.432109876'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - case
+    - typos
+- vars:
+    messages:
+    - role: user
+      content: I've been meaning to send 1.50 ETH to someone — let's get it done.!!
+        whenever
+    - role: assistant
+      content: Which address or ENS should I send it to?
+    - role: user
+      content: to 0x18ff5c7553344adf64ba5a2b625973777e20ea8d
+    expected_summary: transfer 1.50 ETH to 0x18ff5c7553344adf64ba5a2b625973777e20ea8d
+  metadata:
+    id: arith-transfer-mt-0588
+    source: generated
+    language: english
+    category: arithmetic-multiturn-recipient
+    protocol: transfer
+    difficulty: easy
+    query_type: multi_turn
+    requires: []
+    expected_calls:
+    - tool: transfer
+      to: '0x18ff5c7553344adf64ba5a2b625973777e20ea8d'
+      amount: '1.50'
+      token: ETH
+    notes: null
+    level: payload
+    style: narrative
+    mutators:
+    - punctuation
+    - typos
+    - filler
 - vars:
     user_message: Move 50 USDC over to 0x000000000000000000000000000000000000dEaD,
       I know what I'm doing. whenever

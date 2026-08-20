@@ -66,8 +66,17 @@ echo "==> Dataset: $DATASET"
 hf repos create "$DATASET" --repo-type dataset --private --exist-ok
 # --delete "*" prunes anything no longer in the staged tree. Without it a file
 # that moves in the manifest lingers in the repo forever.
+#
+# .venv is excluded for a reason that is easy to hit: the staged tree ships a
+# `pyproject.toml` so a downloader can run the generators, which means ANY `uv run`
+# executed with that directory as the cwd builds a virtualenv right there. Doing
+# that between staging and upload published 51 files into the dataset repo,
+# including a compiled `_yaml…darwin.so`. stage() rmtree's the destination so a
+# fresh stage is clean, but the window between stage and upload is not — hence the
+# exclusion rather than relying on ordering.
 hf upload "$DATASET" "$HERE/build/dataset" . --repo-type dataset \
-    --exclude "**/__pycache__/**" --delete "*" \
+    --exclude "**/__pycache__/**" --exclude ".venv/**" --exclude "uv.lock" \
+    --delete "*" \
     --commit-message "Wallet tool-calling SFT data + training scripts"
 
 # The report tree is staged too: index.html shows charts/chart-scores.jpg, which

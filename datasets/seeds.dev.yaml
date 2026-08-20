@@ -1,0 +1,51 @@
+# DEV seeds — the held-out set that GATES checkpoint selection.
+#
+# This is the third leg of a three-way split, and the split is the whole point:
+#
+#   TRAIN  datasets/finetune_seeds.yaml       what the model learns from
+#   DEV    this file                          what picks the checkpoint
+#   TEST   pf/tests.combined.yaml (FROZEN)    the number we report
+#
+# DEV must be disjoint from BOTH of the others. Disjoint from TRAIN for the usual
+# reason. Disjoint from TEST for a sharper one: selecting a checkpoint on cases
+# that appear in the test set is selecting on the test set, and every number
+# downstream would be contaminated — which is precisely the failure this whole
+# investigation uncovered, one level up. `tests/test_dataset_integrity.py` asserts both by
+# surface and by case id.
+#
+# It is deliberately OUT OF DISTRIBUTION relative to training, because an
+# in-distribution split cannot see the failure we are trying to fix. Training is
+# 85.9% single-turn, 14.1% two-turn, 0% three-plus; a 10% holdout of it would show
+# eval_loss falling happily while 6-round accuracy collapsed to 49%. So DEV is
+# entirely 3-6 round, and carries the two axes training has none of
+# (exact_output, token_address).
+#
+# Amounts: disjoint from all 85 already in use across datasets/seeds.yaml,
+# seeds.arithmetic.yaml, seeds.conversations.yaml, finetune_seeds.yaml and
+# conversations.ALT_AMOUNTS. Asserted, not eyeballed.
+#
+# Recipients: an explicit ENS bank disjoint from generation.ENS_NAMES (the TEST
+# bank) and from vitalik.eth (the TRAIN bank). Listed inline rather than behind a
+# sentinel so this file needs no code change, and so the names are visible here.
+# Shapes vary — plain, org, hyphenated, subdomain, alphanumeric — because the
+# capability under test is copying whatever `.eth` token the user typed.
+
+# --- ETH transfers (18 dp) --------------------------------------------------
+- action: transfer
+  amount: { vary: ["0.0071", "3.5017", "84210.6", "0.000000311"] }
+  token: ETH
+  recipient: { vary: ["nomad.eth", "acme-payroll.eth", "ops.contoso.eth",
+                      "random_address"] }
+
+# --- USDC / DAI transfers (<=6 dp so USDC stays representable) --------------
+- action: transfer
+  amount: { vary: ["2.0408", "57.125", "0.004004", "19750.5"] }
+  token: { vary: ["USDC", "DAI"] }
+  recipient: { vary: ["savings.eth", "bridgefund.eth", "wallet7788.eth",
+                      "random_address"] }
+
+# --- swaps (<=6 dp; self-swaps dropped by the generator's _valid_intent) ----
+- action: swap
+  amount: { vary: ["0.0071", "2.0408", "19750.5", "57.125"] }
+  from_token: { vary: ["ETH", "USDC"] }
+  to_token: { vary: ["DAI", "WETH", "USDC"] }

@@ -1,0 +1,45 @@
+# WHAT THE WALLET ACTUALLY SHIPS TODAY, on the frozen 1000-case benchmark.
+#
+# This gap was nearly published as an assumption. `OnboardingSettingsStore.swift`
+# pins `LocalAIModel.recommended` to ef-dai-team/gemma-4-E4B-wallet-ft, sha256
+# fdf5c30e…, described as "80.1% on the 307-case tool-call evaluation". The 78.7%
+# recorded here for "ft-v4" is a DIFFERENT artifact — an unpublished app-contract
+# retrain, sha256 2742aad3… — so neither number describes the shipping model on
+# this benchmark.
+#
+# Measuring it under the app contract is the production-relevant question, even
+# though it was trained for the older base-unit contract: the app sends APP_SYSTEM
+# and the app's two tools today, so that is the prompt this model is already
+# answering in users' hands.
+#
+# One arm, because base, v5 and gpt-5 are already recorded at the same sampling
+# over the same 1000 cases and there is nothing to re-measure about them.
+description: The wallet's currently shipping fine-tune on the frozen 1000-case benchmark
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-shipping-ft
+    config:
+      # The BASE GGUF supplies the chat template only (vocab_only); generation
+      # happens on the pod. Template is identical across these fine-tunes, and both
+      # sides assert parity against the app's own 2935 rendered bytes.
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_SHIP_URL
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"

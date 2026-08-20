@@ -1,0 +1,62 @@
+# THE DELIVERABLE RUN: v5 fine-tune vs base on the FROZEN 1000-case benchmark.
+#
+# Both arms are served from rented GPUs and both are Q4_K_M, so the only difference
+# between them is the weights — same quantization, same template, same sampling
+# (T=0.2 / 1024 max tokens / 4096 ctx, byte-identical to the runs that produced base
+# 90.7% and ft-v4 78.7%). Sampling matches those runs on purpose: a temperature change
+# here would make the headline incomparable to every number already recorded.
+#
+# WHY BASE IS RE-RUN rather than compared against its frozen 90.7%: the existing base
+# run was local, and the device control measured 91.1% per-case agreement across
+# devices with flips in BOTH directions. Arm totals survived that, so a cross-device
+# comparison would probably be fine — but "probably fine" is not what a headline that
+# decides whether to ship a fine-tune should rest on. Two arms on rented GPUs cost
+# about 30 minutes and remove the question.
+#
+# pf/tests.combined.yaml IS FROZEN. It is the test set; nothing in this effort may edit
+# it, and it is scored exactly once per candidate.
+#
+# Run (one pod per arm, one config dir per arm — two evals sharing a config dir race for
+# the SQLite write lock and the crash still writes a short export that looks plausible):
+#   RUNPOD_V5_URL=…   PROMPTFOO_CONFIG_DIR=.promptfoo-v5   scripts/eval.sh \
+#     -c promptfooconfig.v5-vs-base.remote.yaml -j 12 --no-cache -o runs/v5-1000.out.json
+description: Gemma-4 E4B — v5 fine-tune vs base on the frozen 1000-case benchmark
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-v5
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_V5_URL
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-base
+    config:
+      repo_id: ggml-org/gemma-4-E4B-it-GGUF
+      filename: gemma-4-E4B-it-Q4_K_M.gguf
+      revision: 1762c8e8713f
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      timeout: 1800000
+      remote_url: env:RUNPOD_BASE_URL
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"

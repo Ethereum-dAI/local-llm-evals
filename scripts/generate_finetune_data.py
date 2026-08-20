@@ -36,11 +36,74 @@ from wallet_evals.generation import (  # noqa: E402
 from wallet_evals.protocols import (  # noqa: E402
     safe as safe_mod, aave as aave_mod,
 )
+from wallet_evals.conversations import (  # noqa: E402
+    ACTION_FIELDS, MECHANISM_ROUNDS, TOKEN_ADDRESSES,
+    build_correction_case, build_distractor_case, build_exact_output_case,
+    build_progressive_case, build_token_address_case,
+)
 from wallet_evals.finetune import case_to_example  # noqa: E402
+from wallet_evals.rehearsal import (  # noqa: E402
+    REHEARSAL_TURNS, build_rehearsal_case,
+)
 from pf.prompt import render, tools_for  # noqa: E402
 
 SEED = 20260710
 SEEDS = ROOT / "datasets" / "finetune_seeds.yaml"
+
+#: ENS names for TRAINING, disjoint from generation.ENS_NAMES (the 14-name TEST
+#: bank) and from the 6-name DEV bank in datasets/seeds.dev.yaml. Asserted in
+#: tests/test_conversations.py, not eyeballed.
+#:
+#: WHY THIS EXISTS. Before it, every ENS recipient in training was the single name
+#: `vitalik.eth`, and the 1000-case benchmark showed exactly the damage that does:
+#: ft-v4 scored 98.5% on `vitalik.eth` (+13.8 over base) but 80.5% on novel ENS
+#: names (-16.9 under base), and the failures were FALSE REFUSALS — "That isn't a
+#: valid Ethereum address" for a perfectly ordinary `.eth` name. The model learned
+#: "valid ENS name" == "vitalik.eth" rather than the `.eth` shape.
+#:
+#: `vitalik.eth` deliberately STAYS in the mix (see `_diversify_recipients`) — it
+#: is a real name users type, and dropping it would trade one narrow bank for
+#: another. Shapes vary — plain, org, hyphenated, subdomain, alphanumeric — because
+#: the capability is copying whatever `.eth` token the user typed, verbatim.
+TRAIN_ENS_NAMES: tuple[str, ...] = (
+    "dave.eth", "frankie.eth", "gwen.eth", "hector.eth",
+    "opsfund.eth", "warchest.eth", "stipend.eth", "buyback.eth",
+    "multi-sig.eth", "hot-wallet.eth", "long-term-hold.eth",
+    "desk.trading.eth", "eng.bigco.eth", "sub.vault.eth",
+    "acct90210.eth", "box42.eth",
+)
+
+#: Mechanisms held OUT of training entirely, so dev accuracy on them measures
+#: transfer rather than recall. `switch` is the one to sacrifice: it is the only
+#: mechanism that survived over-training untouched (23/23 at every epoch of the
+#: 3-epoch run), so it is both the cheapest to give up and the clearest control —
+#: if trained mechanisms improve and `switch` holds, the gain generalized; if
+#: `switch` collapses while the others rise, the model is memorizing shapes.
+#: Mirrors HELD_OUT_REFUSAL_KINDS, which does the same job for safety.
+HELD_OUT_MECHANISMS: frozenset[str] = frozenset({"switch"})
+
+#: How many multi-round conversation rows to train on, by mechanism. Training was
+#: 85.9% single-turn and 0% three-plus rounds, while the benchmark runs to six —
+#: that distribution mismatch is the whole depth collapse (ft-v4 95.8% at one round
+#: -> 49.0% at six, against a base that is flat across depth). Weighted toward the
+#: mechanisms that measurably broke: `distractor` (29/40 -> 14/40 under
+#: over-training) and `exact_output` (0/15 at every epoch, never learned at all).
+CONVERSATION_TARGETS: dict[str, int] = {
+    "distractor": 150,
+    "correction": 120,
+    "exact_output": 90,
+    "token_address": 80,
+    "progressive": 60,
+}
+
+#: Rounds to build conversation rows at, INTERSECTED per mechanism with
+#: `conversations.MECHANISM_ROUNDS`. 3-6 because the existing `multiturn` bucket
+#: already covers the 2-round ablate-then-answer shape and depth is the gap — but
+#: each mechanism declares the depths it can actually express (`progressive` runs
+#: out of fields to reveal past 4, `token_address` past 3), and inventing an
+#: unsupported shape here would either assert inside the builder or, worse, emit a
+#: malformed conversation that trains the wrong thing.
+CONVERSATION_ROUNDS: tuple[int, ...] = (3, 4, 5, 6)
 SAFE_FIXTURES = ROOT / "datasets" / "protocols" / "safe.finetune.fixtures.json"
 AAVE_FIXTURES = ROOT / "datasets" / "protocols" / "aave.finetune.fixtures.json"
 # The builder superset, kept for callers that want one fixed menu. Rows now
@@ -156,7 +219,13 @@ REFUSAL_SCENARIOS = [
 # (Ethereum-dAI/local-wallet-mac#86, PR #87) and from pf/tools.json, so training
 # on them would teach tools the product no longer exposes.
 TARGETS = {"transfer": 650, "swap": 650, "multiturn": 250, "ablation": 90,
-           "safe": 40, "aave": 55, "refusal": 60, "separator": 80}
+           "safe": 40, "aave": 55, "refusal": 60, "separator": 80,
+           # Multi-round buckets, one per mechanism (see CONVERSATION_TARGETS).
+           **{f"conversation-{m}": n for m, n in CONVERSATION_TARGETS.items()},
+           # Every rehearsal turn, once. Small on purpose: it is a counterweight, and
+           # over-weighting "answer in prose" would trade premature calls for missed
+           # ones — the failure users would notice more.
+           "rehearsal": len(REHEARSAL_TURNS)}
 
 #: Whether the Aave/Safe transaction-builder rows (95: the `safe`/`aave` caps
 #: above) join the WALLET training mix.
@@ -174,6 +243,19 @@ TARGETS = {"transfer": 650, "swap": 650, "multiturn": 250, "ablation": 90,
 #: multisig tools, and `pf/tests.protocols.yaml` keeps measuring it. What is
 #: gone is only the MIXING of two contracts into one model.
 INCLUDE_PROTOCOL_ROWS = False
+
+#: Whether the multi-round conversation rows join the mix. ON: this is the Tier 2
+#: fix for the measured depth collapse and the never-learned `exact_output`
+#: mechanism, and unlike the protocol rows it teaches the SAME contract the rest of
+#: the wallet set teaches (app-side `transfer`/`swap`), so there is no second tool
+#: vocabulary to confuse. Turning it off reproduces the v4 training mix.
+INCLUDE_CONVERSATION_ROWS = True
+
+#: Whether the rehearsal rows join the mix (see wallet_evals/rehearsal.py). ON: the
+#: mix is otherwise ~97% call-emitting, and every measured regression is a case of
+#: calling when it should not have — premature calls on distractors, false refusals
+#: on unfamiliar ENS names, a call for an inexpressible exact-output swap.
+INCLUDE_REHEARSAL_ROWS = True
 
 # A 4+ digit integer part is the threshold at which the surface renders
 # comma-grouped in real usage (matches the eval's own arithmetic-separator
@@ -236,7 +318,10 @@ def _reasoning_text(intent: dict) -> str:
 
 
 def _collect(rng: random.Random, protocol_only: bool = False,
-             include_protocol: bool = False) -> list[tuple[dict, dict | None, str]]:
+             include_protocol: bool = False,
+             include_conversation: bool | None = None,
+             include_rehearsal: bool | None = None,
+             ) -> list[tuple[dict, dict | None, str]]:
     """Build (test-dict, intent-or-None, bucket) triples from every source.
 
     `protocol_only` returns JUST the Aave/Safe builder rows, for training the
@@ -252,9 +337,11 @@ def _collect(rng: random.Random, protocol_only: bool = False,
 
     seeds = yaml.safe_load(SEEDS.read_text())
     for seed in seeds:
-        for intent in expand_vary(seed, rng):
-            if not _valid_intent(intent):
-                continue
+        # Diversified per seed rather than over one flat list, so each seed's
+        # recipients spread independently and the draw stays inside this seed's
+        # slice of the rng stream.
+        for intent in _diversify_recipients(
+                [i for i in expand_vary(seed, rng) if _valid_intent(i)], rng):
             action = intent["action"]
             for template in _TEMPLATES[action]:
                 triples.append((build_positive_case(intent, template, rng, nxt(action)),
@@ -281,8 +368,111 @@ def _collect(rng: random.Random, protocol_only: bool = False,
 
     if protocol_only:
         return [t for t in _collect_protocol(rng)]
+    if INCLUDE_CONVERSATION_ROWS if include_conversation is None \
+            else include_conversation:
+        triples.extend(_collect_conversations(rng))
+    if INCLUDE_REHEARSAL_ROWS if include_rehearsal is None else include_rehearsal:
+        for i, turn in enumerate(REHEARSAL_TURNS, start=1):
+            triples.append((build_rehearsal_case(turn, rng, i), None, "rehearsal"))
     if INCLUDE_PROTOCOL_ROWS or include_protocol:
         triples.extend(_collect_protocol(rng))
+    return triples
+
+
+def _diversify_recipients(intents: list[dict], rng: random.Random,
+                          keep_vitalik: float = 0.25) -> list[dict]:
+    """Spread ENS recipients over `TRAIN_ENS_NAMES` instead of only `vitalik.eth`.
+
+    Applied AFTER `expand_vary`, deliberately: rewriting the expanded intents keeps
+    the seed files unchanged and — more importantly — cannot reach the eval banks.
+    The obvious alternative, adding a `random_ens` sentinel to the seeds, resolves
+    through `generation._resolve_value` against `generation.ENS_NAMES`, which is the
+    TEST bank; that would leak all 14 held-out names straight into training.
+
+    `keep_vitalik` keeps a quarter of them as `vitalik.eth` so the name the app's
+    users actually type stays trained. Only ENS recipients are touched — raw 0x
+    addresses are left exactly as generated.
+    """
+    out: list[dict] = []
+    for intent in intents:
+        recipient = intent.get("recipient")
+        if isinstance(recipient, str) and recipient.endswith(".eth") \
+                and rng.random() >= keep_vitalik:
+            intent = {**intent, "recipient": rng.choice(TRAIN_ENS_NAMES)}
+        out.append(intent)
+    return out
+
+
+def _collect_conversations(rng: random.Random) -> list[tuple[dict, dict | None, str]]:
+    """Multi-round (3-6 turn) conversation rows, one bucket per mechanism.
+
+    Built from the SAME training seeds as everything else, so the existing
+    disjointness-from-eval guarantee covers them, and with `ens_bank`
+    =TRAIN_ENS_NAMES so a corrected recipient cannot be drawn from a held-out bank.
+
+    `HELD_OUT_MECHANISMS` is skipped here rather than filtered later, so a held-out
+    mechanism never exists as a training row at any point.
+    """
+    seeds = yaml.safe_load(SEEDS.read_text())
+    intents = _diversify_recipients(
+        [i for s in seeds for i in expand_vary(s, rng) if _valid_intent(i)], rng)
+    if not intents:
+        raise ValueError(f"{SEEDS} expanded to no valid intents")
+
+    triples: list[tuple[dict, dict | None, str]] = []
+    idx = 0
+
+    def nxt() -> int:
+        nonlocal idx
+        idx += 1
+        return idx
+
+    for mechanism in sorted(CONVERSATION_TARGETS):
+        if mechanism in HELD_OUT_MECHANISMS:
+            continue
+        rounds_for = [r for r in CONVERSATION_ROUNDS
+                      if r in MECHANISM_ROUNDS[mechanism]]
+        if not rounds_for:
+            raise ValueError(
+                f"{mechanism!r} supports rounds {MECHANISM_ROUNDS[mechanism]}, none "
+                f"of which are in CONVERSATION_ROUNDS={CONVERSATION_ROUNDS}"
+            )
+        for rounds in rounds_for:
+            for intent in intents:
+                fields = ACTION_FIELDS[intent["action"]]
+                if mechanism == "progressive":
+                    # One order per intent, not all permutations: the eval set
+                    # enumerates them, and training every permutation of a small
+                    # intent pool is how you teach a fixed script rather than the
+                    # behaviour.
+                    order = tuple(rng.sample(list(fields), len(fields)))
+                    case = build_progressive_case(intent, order, rounds, rng, nxt())
+                elif mechanism == "correction":
+                    case = build_correction_case(intent, rng.choice(list(fields)),
+                                                 rounds, rng, nxt(),
+                                                 ens_bank=TRAIN_ENS_NAMES)
+                elif mechanism == "distractor":
+                    case = build_distractor_case(intent, rng.choice(list(fields)),
+                                                 rounds, rng, nxt())
+                elif mechanism == "exact_output":
+                    if intent["action"] != "swap":
+                        continue
+                    case = build_exact_output_case(intent, rounds, rng, nxt())
+                elif mechanism == "token_address":
+                    # Only tokens that HAVE a contract address: TOKEN_ADDRESSES is
+                    # built from the rows of datasets/lookup.json that carry one, so
+                    # native ETH is absent and indexing it raises KeyError.
+                    token_fields = [f for f in fields
+                                    if f in ("token", "from_token", "to_token")
+                                    and intent.get(f) in TOKEN_ADDRESSES]
+                    if not token_fields:
+                        continue
+                    case = build_token_address_case(intent,
+                                                   rng.choice(token_fields),
+                                                   rounds, rng, nxt())
+                else:  # pragma: no cover - guarded by the targets dict
+                    raise ValueError(f"unknown mechanism {mechanism!r}")
+                triples.append((case, None, f"conversation-{mechanism}"))
     return triples
 
 
@@ -331,11 +521,23 @@ def main() -> None:
                     help="mix the 95 Aave/Safe rows into the wallet set, "
                          "reproducing the 1863-row mix v4 and qwen-v4 trained "
                          "on. Off by default; see INCLUDE_PROTOCOL_ROWS.")
+    ap.add_argument("--conversation-rows", action=argparse.BooleanOptionalAction,
+                    default=None,
+                    help="include the multi-round conversation rows (default: "
+                         "INCLUDE_CONVERSATION_ROWS, currently on). Pass "
+                         "--no-conversation-rows together with "
+                         "--include-protocol-rows to rebuild the exact v4 mix.")
+    ap.add_argument("--rehearsal-rows", action=argparse.BooleanOptionalAction,
+                    default=None,
+                    help="include the prose-answer rehearsal rows (default: "
+                         "INCLUDE_REHEARSAL_ROWS, currently on).")
     args = ap.parse_args()
 
     rng = random.Random(SEED)
     selected = _select(_collect(rng, protocol_only=args.protocol_only,
-                                include_protocol=args.include_protocol_rows), rng)
+                                include_protocol=args.include_protocol_rows,
+                                include_conversation=args.conversation_rows,
+                                include_rehearsal=args.rehearsal_rows), rng)
 
     examples: list[dict] = []
     for test, intent in selected:
