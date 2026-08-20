@@ -41,7 +41,10 @@ DATASET_SIZE = 1000
 #: to 349 cases — the frozen 307 plus the 42 extra refusals. The arithmetic slice
 #: is excluded because it was regenerated to fix a constant recipient, which both
 #: changed 12 shared cases and reshuffled which 40-per-action were drawn.
-_COMPARABLE = ROOT / "runs" / "comparable_case_ids.json"
+#: Lives in datasets/ rather than runs/, which is gitignored — a force-added file
+#: under an ignored directory reads as disposable, and .gitignore says exactly
+#: that about runs/.
+_COMPARABLE = ROOT / "datasets" / "comparable_case_ids.json"
 
 
 def comparable_ids() -> set[str]:
@@ -104,7 +107,8 @@ class Run:
     """One model's scored cases, keyed by case id.
 
     Accepts SEVERAL exports for one model, because a 1000-case local run is done
-    in 250-case chunks (scripts/run_chunked.sh) and each chunk writes its own
+    in 250-case chunks — promptfoo writes the `-o` export only at the end, so an
+    unchunked run that dies loses everything — and each chunk writes its own
     export. Keying by case id makes the merge safe: a chunk re-run that overlaps
     replaces the case rather than double-counting it.
     """

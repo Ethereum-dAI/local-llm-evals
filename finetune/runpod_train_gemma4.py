@@ -116,7 +116,7 @@ def do_train(args) -> Path:
     check_parity(tokenizer)
 
     # `--mlp-only` drops the attention projections from the LoRA target set. Motive,
-    # from results/v4-failure-anatomy.md: 21 of v4's 27 wrong recipients were a
+    # from results/history.md: 21 of v4's 27 wrong recipients were a
     # single-character corruption of the correct 40-hex address (a dropped 'b', an
     # inserted space, an inserted 'm' that is not even hex) — a defect base does not
     # have. Verbatim copying is an attention behaviour, so an adapter that leaves
@@ -208,7 +208,7 @@ def scaled_adapter(adapter: Path, scale: float) -> Path:
 
     peft computes scaling = lora_alpha / r at LOAD time, so rewriting `lora_alpha` is
     exactly the alpha_scale knob that recovered +29.7 points on the v4 adapter with no
-    retraining (results/dev-alpha.e1-lr2e4.md) — no need to touch ~294 layers by hand.
+    retraining (results/history.md) — no need to touch ~294 layers by hand.
     """
     if scale == 1.0:
         return adapter

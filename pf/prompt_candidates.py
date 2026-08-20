@@ -2,7 +2,7 @@
 
 `pf/prompt.py:APP_SYSTEM` is read from the wallet's own `wallet-eval prompt-dump`
 and must stay byte-identical to it — that parity is why a score here transfers to
-the product, and `tests/test_prompt_parity.py` enforces it. Nothing in this file is
+the product, and `tests/test_prompt_contract.py` enforces it. Nothing in this file is
 ever appended during a normal run.
 
 These sentences exist to answer one question cheaply: would changing the WALLET's
@@ -213,7 +213,7 @@ PROMPT_CANDIDATES["safety+act"] = [SAFETY_FULL, ACT_NOT_ASK]
 # FEWSHOT_ACT — demonstrate, because instructing did not work
 # ---------------------------------------------------------------------------
 #: ACT_NOT_ASK was read and ignored: prompt tokens rose 799 -> 902, and all 9 no-call
-#: failures still ended in a question mark (results/act-ab.base-e4b.md). In-context
+#: failures still ended in a question mark (results/history.md). In-context
 #: demonstrations are a different mechanism from instructions, and showing the behaviour
 #: is the standard remedy when stating it fails.
 #:

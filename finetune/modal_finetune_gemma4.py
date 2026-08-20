@@ -64,7 +64,7 @@ MAX_SEQ_LEN = 2048
 #: So epochs 2-3 cost 14.5 points of out-of-distribution accuracy while looking
 #: like an improvement from the inside. `distractor` takes nearly all of it
 #: (29/40 -> 14/40) — over-training specifically destroys the ability to ignore
-#: irrelevant conversational content. See results/dev-epochs.e3-lr2e4.md.
+#: irrelevant conversational content. See results/history.md.
 EPOCHS = 1
 # E4B is ~15x FunctionGemma-270m: small per-device batch + accumulation to reach
 # an effective batch of 16 without exceeding 40 GB.

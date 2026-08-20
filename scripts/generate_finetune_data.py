@@ -52,7 +52,7 @@ SEEDS = ROOT / "datasets" / "finetune_seeds.yaml"
 
 #: ENS names for TRAINING, disjoint from generation.ENS_NAMES (the 14-name TEST
 #: bank) and from the 6-name DEV bank in datasets/seeds.dev.yaml. Asserted in
-#: tests/test_finetune_conversations.py, not eyeballed.
+#: tests/test_conversations.py, not eyeballed.
 #:
 #: WHY THIS EXISTS. Before it, every ENS recipient in training was the single name
 #: `vitalik.eth`, and the 1000-case benchmark showed exactly the damage that does:

@@ -1,7 +1,7 @@
 """Rehearsal rows: wallet-adjacent turns whose correct answer is NOT a tool call.
 
 TRAINING ONLY. Nothing here is ever scored — the eval and dev sets are built from
-their own generators, and `tests/test_finetune_conversations.py` checks that no
+their own generators, and `tests/test_conversations.py` checks that no
 training surface appears in any held-out set.
 
 WHY. The 1000-case benchmark and the epoch curve agree on the shape of the damage,
@@ -28,7 +28,7 @@ this stays as the targeted slice.
 
 Keep every answer free of a DSL opener (`<|tool_call>`, `functools`, `<tool_call>`)
 or the row teaches the exact opposite of its lesson — asserted in
-tests/test_rehearsal.py.
+tests/test_conversations.py.
 """
 from __future__ import annotations
 

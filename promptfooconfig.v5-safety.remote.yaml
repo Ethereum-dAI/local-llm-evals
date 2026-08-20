@@ -18,7 +18,14 @@
 # v5's 949/1000 on a different pod at a different time, which is a free check on how
 # stable that headline is.
 #
-#   scripts/run_v5_safety_ab.sh
+# Both arms on ONE pod, so the weights are identical and the pod is torn down once:
+#   uv run --with runpod python scripts/runpod_serve_gguf.py up \
+#       --repo ef-dai-team/gemma-4-E4B-wallet-ft-v5 \
+#       --gguf gemma-4-E4B-wallet-ft-a075.Q4_K_M.gguf --expect-sha <sha256>
+#   RUNPOD_LLAMA_URL=…  PROMPTFOO_CONFIG_DIR=.promptfoo-v5safety scripts/eval.sh \
+#       -c promptfooconfig.v5-safety.remote.yaml -j 12 --no-cache \
+#       -o runs/v5-safety-ab.out.json
+#   uv run --with runpod python scripts/runpod_serve_gguf.py down --all
 description: v5 fine-tune with and without SAFETY_FULL — frozen 1000-case benchmark
 
 prompts:

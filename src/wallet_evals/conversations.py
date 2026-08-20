@@ -388,7 +388,7 @@ def _revised_value(intent: dict, field: str, original: str, rng: random.Random,
         # `ens_bank` is a parameter, not a constant, because a REVISED recipient
         # lands in gold. The dev set must draw from its own bank: sharing names with
         # the frozen test set would mean selecting checkpoints partly on values that
-        # appear in the reported number. Caught by test_dev_set.py after exactly that
+        # appear in the reported number. Caught by test_dataset_integrity.py after exactly that
         # slipped through.
         return _pick(list(ens_bank), blocked, rng, field)
     if field == "token":

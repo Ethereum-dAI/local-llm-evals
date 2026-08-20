@@ -2,7 +2,7 @@
 arithmetic slice + the refusal banks) concatenated with the multi-round
 conversation slice.
 
-Mirrors test_app_contract_integrity.py / test_conversation_integrity.py, which
+Mirrors test_app_contract_integrity.py / test_dataset_integrity.py, which
 guard the two source files this one is built from.
 """
 from __future__ import annotations

@@ -16,7 +16,7 @@
 # provider reads) cannot reach a hosted one. `pf/prompt.py:_env_variant` reads
 # $PROMPT_VARIANT instead and routes through the SAME `augment()` the local arm used,
 # so the system turn is byte-identical at 2110 chars. It is OFF by default and
-# tests/test_prompt_variant_env.py pins that — a variant leaking into a default run
+# tests/test_prompt_contract.py pins that — a variant leaking into a default run
 # would make every recorded number measure a prompt the wallet does not send.
 #
 # EVERYTHING ELSE IS COPIED FROM promptfooconfig.gpt5-appcontract.yaml UNCHANGED:

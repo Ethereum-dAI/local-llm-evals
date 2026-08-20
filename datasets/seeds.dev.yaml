@@ -10,7 +10,7 @@
 # reason. Disjoint from TEST for a sharper one: selecting a checkpoint on cases
 # that appear in the test set is selecting on the test set, and every number
 # downstream would be contaminated — which is precisely the failure this whole
-# investigation uncovered, one level up. `tests/test_dev_set.py` asserts both by
+# investigation uncovered, one level up. `tests/test_dataset_integrity.py` asserts both by
 # surface and by case id.
 #
 # It is deliberately OUT OF DISTRIBUTION relative to training, because an

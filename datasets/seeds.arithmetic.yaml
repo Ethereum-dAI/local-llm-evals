@@ -25,7 +25,7 @@
 # 50:50 while giving this slice — which has only 9 amount variants, so a small
 # intent pool — enough distinct recipients that no single one dominates. With two
 # entries the ENS ceiling was 9 draws and the slice landed on 4 distinct names;
-# with four it clears the bound in test_dataset_degeneracy.py.
+# with four it clears the bound in test_dataset_integrity.py.
 #
 # The per-action cap of 40 (MAX_PER_ACTION_ARITHMETIC) already binds, so widening
 # the pool diversifies the draw without changing this slice's size.

@@ -130,7 +130,7 @@ def _chat_template(llm, key: tuple, reference_name: str = "gemma",
     # FunctionGemma DSL and emits descriptions as raw text, never through `tojson`
     # — which is why this hid until a Hermes/JSON template was checked against its
     # own dump. Overriding the filter fixes Qwen and leaves Gemma byte-identical
-    # (asserted for both in tests/test_prompt_parity.py).
+    # (asserted for both in tests/test_prompt_contract.py).
     env.filters["tojson"] = lambda value, indent=None: json.dumps(
         value, ensure_ascii=False, indent=indent)
     template = env.from_string(source)
@@ -528,7 +528,7 @@ def call_api(prompt: str, options: dict, context: dict) -> dict:
     # ONE extra turn when the model answered without calling anything. This targets the
     # largest measured failure bucket — 40 of base's 74 non-safety failures are it
     # reasoning correctly and then asking a clarifying question — which a prompt clause
-    # provably did NOT fix (results/act-ab.base-e4b.md).
+    # provably did NOT fix (results/history.md).
     #
     # It is an app-level mechanism, not a prompt tweak, and it is DANGEROUS in a specific
     # way: refusal cases legitimately produce no call, so this fires on them too and a

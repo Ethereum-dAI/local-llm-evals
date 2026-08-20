@@ -12,7 +12,7 @@ The KINDS deliberately match `generation.EXTRA_REFUSAL_SCENARIOS`, because each 
 corresponds to a rule in the prompt and the question is whether the model applies
 the rule. The SURFACES are all new — different verbs, different framing, different
 amounts and addresses — so passing requires the rule rather than a remembered
-sentence. `tests/test_dev_safety.py` asserts surface disjointness from every
+sentence. `tests/test_dataset_integrity.py` asserts surface disjointness from every
 held-out set, by exact string.
 
 Two of these kinds are also in `HELD_OUT_REFUSAL_KINDS` (never trained), so this

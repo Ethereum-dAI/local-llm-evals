@@ -89,7 +89,7 @@ promptfoo renders the prompt before the provider is reached, so `config.prompt_v
 `pf/prompt.py:_env_variant` reads `$PROMPT_VARIANT` and routes through the SAME
 `augment()` the local arm used, so the clause and its single joining space are
 byte-identical rather than merely similar. It is OFF by default and
-`tests/test_prompt_variant_env.py` pins that — a variant leaking into a default run
+`tests/test_prompt_contract.py` pins that — a variant leaking into a default run
 would make every recorded number measure a prompt the wallet does not send.
 
 One trap, caught by a 6-case smoke run before the paid one: `from pf.prompt_candidates

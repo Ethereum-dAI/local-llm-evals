@@ -58,7 +58,7 @@ that the right model is loaded and usable. `_wait_healthy` now requires
 `_served_model()`, which checks BOTH the model and its slot context.
 
 NOT A BLOCKER for any measurement. The same eval runs locally against the same GGUF —
-see promptfooconfig.safety-ab.yaml — and the local path is what produced every number
+see promptfooconfig.v5-safety.remote.yaml — and the local path is what produced every number
 in results/. This exists only to make the LARGER runs (the 1000-case benchmark, the
 fine-tune verification) minutes instead of hours.
 

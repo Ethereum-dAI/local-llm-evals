@@ -233,7 +233,7 @@ def _env_variant() -> str:
 
     DEFAULT IS "none" AND MUST STAY THAT WAY: `APP_SYSTEM` is app parity, and a
     variant that leaked in by default would silently make every recorded number
-    measure a prompt the wallet does not send. `tests/test_prompt_variant_env.py`
+    measure a prompt the wallet does not send. `tests/test_prompt_contract.py`
     pins that.
     """
     return os.environ.get("PROMPT_VARIANT", "none") or "none"

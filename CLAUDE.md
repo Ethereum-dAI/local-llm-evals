@@ -51,7 +51,7 @@ export's copy. **Field-level failure analysis is not fine**: comparing an emitte
 argument against the export's gold invents mismatches that are not there. It reported 52
 wrong `token` values against a true 22, and hid 21 of 27 recipient errors by mangling the
 right answer. Re-join to `pf/tests.combined.yaml` by `metadata.id` and use the gold on
-disk — see `results/v4-failure-anatomy.md`, which was rewritten twice because of this.
+disk — see `results/history.md`, which was rewritten twice because of this.
 
 ## Scoring rules (don't break these)
 
@@ -212,7 +212,7 @@ held out.
 
 ### A gold field that cannot vary is a field that measures nothing
 
-`tests/test_dataset_degeneracy.py` exists because two such fields shipped and no
+`tests/test_dataset_integrity.py` exists because two such fields shipped and no
 test caught either; both were found by reading the dataset by hand.
 
 | Field | Was | Why it mattered |
@@ -254,7 +254,7 @@ Dropping the field from scoring is also worse than it looks: today a model that
 emits `"output"` correctly **fails**, and dropping it makes that silently pass.
 The `exact_output` mechanism fixes the free point instead — a model that hardcodes
 `"input"` and emits a swap now loses 32 cases, and one that emits `"output"` still
-loses them. `scripts/convert.py` reached the same conclusion independently
+loses them. `scripts/convert_recognition.py` reached the same conclusion independently
 (`test_convert_swap_exact_output_to_manual` refuses to auto-convert these).
 
 ### `pf/tools.app.json` promises two things the wallet cannot do — do not encode them
@@ -513,7 +513,7 @@ nothing about it. Both app tool descriptions contain `user's`, so 2 x 5 = the
 descriptions as raw text in the FunctionGemma DSL, never through `tojson`. So this
 class of bug is invisible until a JSON-shaped template is checked against its own
 dump. All three of base Gemma, Gemma ft-v4 and Qwen ft-v4 are now asserted, plus
-Qwen base, in `tests/test_prompt_parity.py` (skipped when the 5 GB GGUFs are
+Qwen base, in `tests/test_prompt_contract.py` (skipped when the 5 GB GGUFs are
 absent, so the suite stays offline).
 
 Diagnostics: the provider writes `/tmp/pf_prompt_parity.<model>.json` per model,
@@ -533,9 +533,13 @@ Two base/fine-tune pairs, so the benchmark answers two different questions:
 | Gemma-4 E4B | `ggml-org/gemma-4-E4B-it-GGUF` @ `1762c8e8713f` | `ef-dai-team/gemma-4-E4B-wallet-ft-v4` |
 | Qwen3-8B | `Qwen/Qwen3-8B-GGUF` | `ef-dai-team/qwen3-8b-wallet-ft-v4` |
 
+The v4-era pair configs have been **deleted** — they were one-off, they ran once,
+and `results/history.md` is their record. `promptfooconfig.v5-vs-base.remote.yaml` is
+the surviving pair and the one the shipped headline came from.
+
 Within a pair, **only the weights differ** — same quant (Q4_K_M), same device, same
 template, same sampling — so the delta is training.
-`tests/test_eval_config_pairs.py` asserts that, allowing only the keys that name
+`tests/test_harness_tooling.py` asserts that, allowing only the keys that name
 which weights to load. Across the pairs, the two fine-tunes trained on the **same
 1863 rows** (1768 wallet + 95 Aave/Safe builder), so ft-vs-ft is a comparison of
 base models. That is verified rather than taken from the model cards: identical row
@@ -548,9 +552,20 @@ Qwen at its card's 0.6/0.95/20, because Qwen3's card forbids greedy decoding. Ea
 family is run the way its authors specify; the comparison that matters is within a
 pair, and each pair is internally consistent.
 
-`scripts/run_all_four.sh` chains them — sequential because they share one Metal
-device and because promptfoo races its own SQLite DB under concurrency. Resumable
-per 250-case chunk.
+Run them **one provider per invocation**, and the reason is not concurrency
+etiquette: promptfoo's `-j` controls concurrency, not how many models stay RESIDENT.
+Four local GGUF providers in one config get interleaved per test case, so all four
+~5 GB models end up loaded at once — on a 36 GB host that produced
+`RuntimeError: llama_decode returned -3` on 466/480, 466/480 and 468/480 cases for
+the three fine-tunes, with only the first-loaded provider clean. One provider per
+process means one model resident. Slower in wall clock; it actually completes.
+
+Chunk a long local run too. promptfoo writes the `-o` export only at the END, so a
+run that dies at minute 48 writes nothing and the completed cases are recoverable
+only out of its SQLite DB. 250-case chunks, each with its own
+`PROMPTFOO_CONFIG_DIR`, cost one chunk per death instead of the whole run —
+`scripts/report_1000.py` accepts several exports per model and keys by case id, so
+re-running one chunk replaces its cases rather than double-counting them.
 
 Local GGUFs are checked against the **sha256 on their model cards** before use, not
 their size: `modal volume get` once produced a 5 GB file with the right byte count
@@ -618,7 +633,7 @@ over llama.cpp's HTTP server, and prints `RUNPOD_LLAMA_URL`. Pair it with
 uv run --with runpod python scripts/runpod_serve_gguf.py up --wait 2400 --keep-on-failure
 RUNPOD_LLAMA_URL=https://<pod>-8080.proxy.runpod.net \
   PROMPTFOO_CONFIG_DIR=.promptfoo-remote scripts/eval.sh \
-  -c promptfooconfig.act-ab.remote.yaml -j 8 --no-cache -o runs/x.out.json
+  -c promptfooconfig.v5-vs-base.remote.yaml -j 8 --no-cache -o runs/x.out.json
 uv run --with runpod python scripts/runpod_serve_gguf.py down --all
 ```
 
@@ -711,7 +726,7 @@ anything.
 
 **So: add a duplicate control arm to every A/B on this slice.** It costs one arm and it is the
 only way to tell a result from a coin flip. Two claims have already had to be withdrawn for
-lack of it — see `results/temp-sweep.base-e4b.md` and `results/act-ab.base-e4b.md`.
+lack of it — see `results/history.md` and `results/history.md`.
 
 Note the flips are not purely sampling: at `-j 8` llama-server batches continuously, which
 changes floating-point reduction order, so even **temperature 0.0 is not bitwise
@@ -835,7 +850,7 @@ in ONE config — cannot reach `openrouter:…`. `pf/prompt.py:_env_variant` rea
 `$PROMPT_VARIANT` instead, one arm per process, routing through the SAME `augment()` so the
 clause and its single joining space are byte-identical rather than merely similar.
 
-It is OFF by default and `tests/test_prompt_variant_env.py` pins that: `APP_SYSTEM` is app
+It is OFF by default and `tests/test_prompt_contract.py` pins that: `APP_SYSTEM` is app
 parity, and a variant leaking into a default run would make every recorded number measure a
 prompt the wallet does not send.
 
@@ -866,7 +881,7 @@ bytes live in this repo rather than only in the other one.
 **It is not wired into any run, on purpose.** Swapping it in for
 `pf/app_contract_reference.json` would make `PROMPT_VARIANT=none` mean "clause on" and
 silently change what every existing config measures, and it carries a third tool
-(`top_up_bundler`) that `pf/tools.app.json` does not offer. `tests/test_app_prompt_with_clause.py`
+(`top_up_bundler`) that `pf/tools.app.json` does not offer. `tests/test_prompt_contract.py`
 pins the relationship instead:
 
 - the clause in the app's dump is byte-identical to `SAFETY_FULL`, appended as a suffix
@@ -917,6 +932,30 @@ hypotheses, not results.
 
 Gemma and Qwen fail in **opposite** directions and never commit each other's error across 290
 cases: Gemma under-calls (0 spurious calls, ever), Qwen over-calls (0 no-call failures, ever).
+
+## The one-off configs and runners are GONE — `results/history.md` is their record
+
+Every experiment above once had its own `promptfooconfig.*.yaml` and its own
+`scripts/run_*.sh` launcher. They ran once, they answered their question, and they
+have been deleted; **do not recreate one per experiment.** What survives:
+
+| kept | why |
+| --- | --- |
+| `promptfooconfig.v5-vs-base.remote.yaml` | the shipped headline, and the pair `tests/test_harness_tooling.py` guards |
+| `promptfooconfig.v5-safety.remote.yaml` | v5 with and without the clause, both arms on one pod |
+| `promptfooconfig.shipping-vs-v5.remote.yaml` | the shipped fine-tune, re-measured |
+| `promptfooconfig.gpt5-appcontract.yaml` / `.gpt5-safety.yaml` | the hosted anchor, clause off and on |
+
+To run a new A/B, copy the closest surviving config, set `$PROMPT_VARIANT` or swap
+`remote_url`, and **delete it again afterwards** — the durable output is a document in
+`results/`, not a YAML file. The launcher scripts are not worth recreating either;
+their whole content is `runpod_serve_gguf.py up` → `scripts/eval.sh` →
+`runpod_serve_gguf.py down --all`, and the two rules they encoded are here already
+(one provider per invocation, one `PROMPTFOO_CONFIG_DIR` per concurrent run).
+
+`results/` holds one document per **frozen-benchmark** measurement and one
+`history.md` for everything scored on the dev slices. A dev-set A/B does not earn its
+own file.
 
 ## Conventions
 

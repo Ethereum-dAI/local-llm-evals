@@ -43,7 +43,7 @@ space/build/
 
 # Scratch logs from detached eval/train drivers and the Modal log pollers. The
 # durable record of a measurement belongs in results/ — see
-# results/dev-epochs.e3-lr2e4.md — because these get clobbered by the next run.
+# results/history.md — because these get clobbered by the next run.
 runs/
 
 # The remaining generated training JSONLs. Their three siblings are listed above;
