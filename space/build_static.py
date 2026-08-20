@@ -18,65 +18,86 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 OUT = Path(__file__).resolve().parent / "static" / "data.json"
 
-# The benchmark itself: 593 cases across 33 categories. This is the case-list
-# reference (NOT any one model's *.out.json) so every category the dataset
-# defines shows up even for a model that hasn't been run yet.
+# The benchmark itself: the frozen 1000-case set. This is the case-list reference
+# (NOT any one model's *.out.json), so every category the dataset defines shows up
+# even for a model that has not been run yet.
 DATASET = "pf/tests.combined.yaml"
 
-# Category display order. Grouped so the story reads left-to-right in the tick
-# strips:
-#   1. the core transfer/swap blocks (the original 197-case app-contract set)
-#   2. the new arithmetic slice — every "arithmetic-*" category, kept together
-#      as one block (positives, its own multi-turn follow-ups, its own
-#      ablations) because that's how the 80-case slice is labelled as a unit
-#   3. multi-turn (non-arithmetic): mostly transfer/swap follow-ups, plus a
-#      couple of railgun "which address" follow-ups (multiturn-to) that share
-#      the naming, not the protocol
-#   4. the protocol families: railgun, aave, safe (all executeTx/shield/
-#      unshield, no arithmetic slice of their own)
-#   5. the blocks where the correct answer is NOT to call a tool: ablations,
-#      then safety refusals (including the two railgun-specific refusal
-#      categories) — a model that only ever passes by staying silent shows up
-#      as a cluster at the far right.
+# Category display order, grouped by CATEGORY PREFIX rather than by whether a call
+# is expected — the arithmetic slice and each conversation mechanism stay together
+# as units, because that is how they were designed and reported. The strips then
+# read left-to-right as:
+#
+#   1. core single-turn transfer / swap
+#   2. the arithmetic slice: positives, then its own multi-turn and ablations
+#   3. conversation: five mechanisms, each ascending by round depth. `switch` is
+#      the HELD-OUT mechanism — no training row of it exists, so it is the
+#      generalization probe rather than another trained skill. `exact_output` is a
+#      no-call mechanism, so it sits last and abuts the no-call region.
+#   4. multi-turn: the pre-conversation follow-up cases
+#   5. where emitting no call is correct: ablations, then the 15 safety refusal
+#      kinds (transaction safety, then credential exfiltration, then input
+#      validation). A model that only passes by staying silent shows up as a
+#      cluster at the far right.
+#
+# The protocol families (railgun / aave / safe) are gone from the benchmark: the
+# app registers no such tool, so scoring them measured a contract it never sends.
 CATEGORY_ORDER = [
-    # 1. core transfer / swap
     "generated-transfer-pos",
     "generated-swap-pos",
-    # 2. arithmetic slice (80 cases, all "arithmetic-*")
     "arithmetic-transfer-pos",
     "arithmetic-swap-pos",
     "arithmetic-multiturn-amount",
     "arithmetic-multiturn-recipient",
     "arithmetic-multiturn-to_token",
-    "arithmetic-ablation-amount",
-    "arithmetic-ablation-recipient",
-    "arithmetic-ablation-to_token",
-    # 3. multi-turn (non-arithmetic)
+    "arithmetic-ablation-amount",   # gold = no call
+    "arithmetic-ablation-recipient",   # gold = no call
+    "arithmetic-ablation-to_token",   # gold = no call
+    "conversation-progressive-2r",
+    "conversation-progressive-3r",
+    "conversation-progressive-4r",
+    "conversation-correction-2r",
+    "conversation-correction-3r",
+    "conversation-correction-4r",
+    "conversation-correction-5r",
+    "conversation-correction-6r",
+    "conversation-distractor-3r",
+    "conversation-distractor-4r",
+    "conversation-distractor-5r",
+    "conversation-distractor-6r",
+    "conversation-switch-2r",
+    "conversation-switch-3r",
+    "conversation-switch-4r",
+    "conversation-switch-5r",
+    "conversation-switch-6r",
+    "conversation-token_address-2r",
+    "conversation-token_address-3r",
+    "conversation-exact_output-2r",   # gold = no call
+    "conversation-exact_output-3r",   # gold = no call
+    "conversation-exact_output-4r",   # gold = no call
     "multiturn-amount",
     "multiturn-recipient",
-    "multiturn-token",
     "multiturn-to_token",
-    "multiturn-to",
-    # 4. protocol families
-    "railgun-shield",
-    "railgun-unshield",
-    "aave-supply",
-    "aave-withdraw",
-    "aave-borrow",
-    "aave-repay",
-    "safe-add-signer",
-    "safe-remove-signer",
-    # 5. no call expected: ablations, then safety refusals
-    "ablation-amount",
-    "ablation-recipient",
-    "ablation-token",
-    "ablation-to_token",
-    "safety-refusal-burn-send",
-    "safety-refusal-zero-send",
-    "safety-refusal-approve-unknown-spender",
-    "safety-refusal-unverified-token-swap",
-    "safety-refusal-unshield-burn",
-    "safety-refusal-unshield-zero",
+    "multiturn-token",
+    "ablation-amount",   # gold = no call
+    "ablation-recipient",   # gold = no call
+    "ablation-to_token",   # gold = no call
+    "ablation-token",   # gold = no call
+    "safety-refusal-burn-send",   # gold = no call
+    "safety-refusal-zero-send",   # gold = no call
+    "safety-refusal-approve-unknown-spender",   # gold = no call
+    "safety-refusal-unlimited-approval",   # gold = no call
+    "safety-refusal-unverified-token-swap",   # gold = no call
+    "safety-refusal-impersonation-scam",   # gold = no call
+    "safety-refusal-prompt-injection",   # gold = no call
+    "safety-refusal-roleplay-jailbreak",   # gold = no call
+    "safety-refusal-seed-phrase-exfiltration",   # gold = no call
+    "safety-refusal-private-key-exfiltration",   # gold = no call
+    "safety-refusal-keystore-exfiltration",   # gold = no call
+    "safety-refusal-malformed-address",   # gold = no call
+    "safety-refusal-wrong-chain-address",   # gold = no call
+    "safety-refusal-negative-amount",   # gold = no call
+    "safety-refusal-non-numeric-amount",   # gold = no call
 ]
 
 
@@ -89,14 +110,10 @@ def _band_of(category: str) -> str:
         return "transfer"
     if category.startswith("generated-swap"):
         return "swap"
+    if category.startswith("conversation-"):
+        return "conversation"
     if category.startswith("multiturn"):
         return "multi-turn"
-    if category.startswith("railgun"):
-        return "railgun"
-    if category.startswith("aave"):
-        return "aave"
-    if category.startswith("safe-"):
-        return "safe"
     if category.startswith("ablation"):
         return "ablation"
     if category.startswith("safety-refusal"):
@@ -104,38 +121,57 @@ def _band_of(category: str) -> str:
     raise ValueError(f"no band for category {category!r} — add one to _band_of")
 
 
-BAND_ORDER = ["transfer", "swap", "arithmetic", "multi-turn",
-              "railgun", "aave", "safe", "ablation", "refusal"]
+BAND_ORDER = ["transfer", "swap", "arithmetic", "conversation", "multi-turn",
+              "ablation", "refusal"]
 
 # key -> (source run, provider label, display name, kind, note)
-# A missing source run is handled gracefully (warn + skip), so this report can
-# be built before every run has landed.
+# A missing source run is handled gracefully (warn + skip), so this report can be
+# built before every run has landed.
 #
-# Display order is deliberately weakest-to-strongest so the strips read as a
-# progression left-to-right: the two on-device bases, the two on-device
-# wallet fine-tunes, then the hosted frontier anchor.
+# Display order is weakest-to-strongest, which here is also the argument: the
+# fine-tune the wallet used to ship is the worst column on the board, a prompt
+# clause lifts every model, and the 4B on-device fine-tune ends up above gpt-5.
+#
+# NOT one run vintage, and that is deliberate this time. The three clause-off
+# on-device/hosted columns come from ONE run (`final-3way`), so that comparison is
+# device-controlled. Each clause-on column comes from its OWN paired A/B, both arms
+# on one pod, because that is the only way to attribute a delta to the clause
+# rather than to the hardware. Comparing two columns from different files is
+# therefore fine within about six cases and not below it — `base` reads 903 here
+# and 908 in the `testset-safety` pair, and `ft-v5` reads 949 here and 952 in its
+# own pair. Those gaps ARE the noise floor, measured rather than assumed.
 MODELS = [
-    ("e4b-base", "gemma4.appcontract.out.json", "gemma4-e4b-base",
+    ("shipping-ft", "runs/shipping-ft-1000.out.json", "gemma4-e4b-shipping-ft",
+     "Gemma-4 E4B wallet-ft (what shipped)", "local",
+     "The fine-tune local-wallet-mac shipped until 2026-08-20, at the sha256 the "
+     "app downloaded. Its own model card claims 80.1% and that claim is not wrong "
+     "\u2014 it was measured on a retired 307-case benchmark whose amounts were base "
+     "units. The app moved to human decimals and nobody re-measured."),
+    ("base", "runs/final-3way.out.json", "gemma4-e4b-base",
      "Gemma-4 E4B base", "local",
-     "The Q4_K_M GGUF local-wallet-mac ships today, unmodified."),
-    ("qwen3-base", "qwen3-base.appcontract.out.json", "qwen3-8b",
-     "Qwen3-8B base", "hosted",
-     "Hosted via OpenRouter, card-recommended sampling (temperature 0.6, "
-     "top_p 0.95, top_k 20) — the closest same-scale analogue to the "
-     "on-device Gemma-4 E4B family, unmodified."),
-    ("qwen3-ft", "qwen3-ft.appcontract.out.json", "qwen3-8b-ft-appcontract",
-     "Qwen3-8B wallet-ft (app-contract)", "local",
-     "Same Qwen3-8B base, re-tuned on the app-contract data (Q4_K_M, run "
-     "locally). Distinct from an older Qwen fine-tune trained on a "
-     "different, base-unit contract — the -appcontract suffix is the guard "
-     "against scoring the wrong one."),
-    ("e4b-ft", "gemma4.appcontract.out.json", "gemma4-e4b-ft-appcontract",
-     "Gemma-4 E4B wallet-ft (app-contract)", "local",
-     "Same base, re-tuned on the app-contract data: human-decimal transfer/"
-     "swap, plus railgun/aave/safe. Still training — not yet published."),
-    ("gpt5", "gpt5.appcontract.out.json", "openrouter:openai/gpt-5",
+     "The untuned Q4_K_M GGUF, revision-pinned. What the wallet ships today."),
+    ("base-clause", "runs/testset-safety.out.json", "base-testset-full",
+     "Gemma-4 E4B base + safety clause", "local",
+     "Same weights, same pod as its own control arm; the only difference is 1577 "
+     "characters of refusal contract appended to the system turn. This is the "
+     "configuration the wallet ships as of 2026-08-20."),
+    ("gpt5", "runs/final-3way.out.json", "gpt-5",
      "gpt-5", "hosted",
-     "Hosted frontier anchor. Calibrates the ceiling on the same 593 cases."),
+     "Hosted frontier anchor, calibrating the ceiling on the same 1000 cases."),
+    ("gpt5-clause", "runs/gpt5-1000.safety.out.json", "gpt-5-safety-full",
+     "gpt-5 + safety clause", "hosted",
+     "The control that corrected a wrong claim. The fine-tune's refusal advantage "
+     "over gpt-5 was really the clause's: given the same system turn, gpt-5 scores "
+     "47/49 on refusals \u2014 exactly the fine-tune's number."),
+    ("v5", "runs/final-3way.out.json", "gemma4-e4b-ft-v5",
+     "Gemma-4 E4B wallet-ft v5", "local",
+     "The published fine-tune. One epoch on 2288 rows, LoRA merged at 0.75 "
+     "strength, ~18 minutes on one rented A40. Trained WITHOUT the safety clause."),
+    ("v5-clause", "runs/v5-safety-ab.out.json", "v5-safety-full",
+     "Gemma-4 E4B wallet-ft v5 + safety clause", "local",
+     "Best configuration measured on both halves at once. The clause is 1577 "
+     "characters this adapter never saw in training, and the prior worry was that "
+     "off-distribution wording would break it. It did not."),
 ]
 
 MAX_OUTPUT_CHARS = 1400
@@ -286,10 +322,13 @@ def main() -> None:
     bands = [{"label": name, "count": sum(counts[c] for c in band_categories[name])}
               for name in BAND_ORDER]
 
-    # The axis under the strips merges ablation + refusal: together they are
-    # one idea (the region where emitting no call is the correct answer) and
-    # each is individually too narrow a slice of 593 cases to carry a legible
-    # label without clipping.
+    # The axis under the strips merges ablation + refusal: together they are one
+    # idea (the region where emitting no call is the correct answer) and each is
+    # individually too narrow a slice of 1000 cases to carry a legible label
+    # without clipping. Note this UNDER-counts the no-call region: the 32
+    # `conversation-exact_output` cases and the 11 `arithmetic-ablation` ones are
+    # also gold-no-call but stay banded with their own mechanism, so the honest
+    # total is reported separately as `no_call_count`.
     axis_bands = []
     for band in bands:
         if band["label"] in ("ablation", "refusal"):
@@ -298,9 +337,12 @@ def main() -> None:
     merged = sum(b["count"] for b in bands if b["label"] in ("ablation", "refusal"))
     axis_bands.append({"label": "no call", "count": merged})
 
+    no_call_count = sum(1 for c in cases if not c["gold"])
+
     payload = {
         "dataset": DATASET,
         "case_count": len(cases),
+        "no_call_count": no_call_count,
         "category_order": CATEGORY_ORDER,
         "bands": bands,
         "axis_bands": axis_bands,
