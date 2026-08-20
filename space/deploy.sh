@@ -79,8 +79,9 @@ hf upload "$DATASET" "$HERE/build/dataset" . --repo-type dataset \
     --delete "*" \
     --commit-message "Wallet tool-calling SFT data + training scripts"
 
-# The report tree is staged too: index.html shows charts/chart-scores.jpg, which
-# lives outside space/ and must not be committed twice.
+# The report tree is staged like everything else, so that a redeploy (which runs
+# --delete "*") reproduces it from sources in this repo rather than destroying
+# whatever happened to be in the Space.
 echo "==> Staging the report tree"
 (cd "$ROOT" && uv run python space/stage.py static)
 
@@ -88,7 +89,7 @@ echo "==> Report Space: $REPORT (static)"
 hf repos create "$REPORT" --repo-type space --space-sdk static --private --exist-ok
 hf upload "$REPORT" "$HERE/build/static" . --repo-type space \
     --exclude "**/__pycache__/**" --delete "*" \
-    --commit-message "Eval report: 307 cases x 7 models, exact-match scoring"
+    --commit-message "Eval report: 1000 cases x 7 configurations, exact-match scoring"
 
 echo
 echo "Report:  https://huggingface.co/spaces/$REPORT"
