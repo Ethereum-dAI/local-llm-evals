@@ -50,10 +50,12 @@ a:hover{border-bottom-color:currentColor}
 
 /* ---- hero ----------------------------------------------------------- */
 .hero{padding:clamp(2.5rem,7vw,5rem) 0 2rem}
+/* Documentation scale, not a display headline: this page is read by people who
+   came for the numbers, and a 5.5rem masthead reads as a manifesto. */
 .hero h1{
   font-family:var(--mono); font-weight:700;
-  font-size:clamp(2.4rem,9vw,5.5rem); line-height:.92; letter-spacing:-.045em;
-  margin:0 0 1.25rem;
+  font-size:clamp(1.6rem,4vw,2.5rem); line-height:1.1; letter-spacing:-.02em;
+  margin:0 0 1rem;
 }
 .hero h1 .dim{color:var(--rule)}
 .lede{
@@ -271,28 +273,24 @@ footer{
   </header>
 
   <section class="hero">
-    <h1>Exact<span class="dim">&nbsp;or&nbsp;</span>nothing<span class="dim">.</span></h1>
+    <h1>Wallet tool-call benchmark</h1>
     <div class="hero-grid">
       <div>
         <p class="lede">
-          1000 wallet requests, scored on the macOS app's own contract:
-          <code>transfer</code>/<code>swap</code> take a <strong>human decimal</strong>
-          amount (<code>50.25 USDC</code>, not base units) and a token symbol, and
-          copy the recipient verbatim. A case scores <strong>1</strong> only if every
-          field of every call the model emits equals gold, byte for byte. Anything
-          else scores <strong>0</strong>.
+          1000 natural-language requests, scored on whether a model emits the exact
+          <code>transfer</code>/<code>swap</code> call a macOS Ethereum wallet would
+          execute. The contract is the app's own: <strong>human decimal</strong>
+          amounts (<code>50.25 USDC</code>, not base units), a token symbol, and the
+          recipient copied <strong>verbatim</strong> — the model does not resolve ENS.
         </p>
         <p class="lede">
-          <strong>571 are multi-round conversations</strong>, 2 to 6 turns, built around
-          five mechanisms that each test <em>which</em> turn should win: a corrected
-          value, an irrelevant distractor, a request assembled progressively, a switch
-          to a different intent, and a token named by address. 80 more are an
-          <strong>arithmetic slice</strong> with decimals chosen to catch rounding, and
-          <strong>120 cases have no correct call at all</strong> — 49 of those are
-          adversarial refusals.
+          571 cases are multi-round conversations (2–6 turns) testing which turn's
+          value should win. 80 are an arithmetic slice. <strong>120 have no correct
+          call at all</strong>, 49 of them adversarial refusals — so a headline
+          percentage alone is not capability.
         </p>
         <p class="lede">
-          One mark per case below, in dataset order. Filled means the call was exact.
+          One mark per case below, in dataset order. Filled means exact.
         </p>
       </div>
       <dl class="spec">
@@ -304,9 +302,11 @@ footer{
         <dt>Marks</dt>
         <dd><span class="swatch on"></span> exact &nbsp; <span class="swatch off"></span> wrong</dd>
         <dt>Tools</dt>
-        <dd>transfer · swap · executeTx · shield · unshield</dd>
+        <dd>transfer · swap</dd>
         <dt>Set</dt>
-        <dd>pf/tests.combined.yaml</dd>
+        <dd>ef-dai-team/wallet-eval-benchmark</dd>
+        <dt>Noise floor</dt>
+        <dd>±6 cases (measured)</dd>
       </dl>
     </div>
 
@@ -316,94 +316,81 @@ footer{
   </section>
 
   <section class="section">
-    <p class="eyebrow">The finding</p>
-    <h2>A 4B on-device fine-tune beats gpt-5 &mdash; and the one that shipped was
-    worse than no fine-tune at all</h2>
+    <p class="eyebrow">Results</p>
+    <h2>A 4B on-device fine-tune at 94.9%, gpt-5 at 92.8%</h2>
     <p>
-      Seven columns, all 1000 cases, one deterministic scorer. Read them
-      weakest-to-strongest and the whole argument is in the order.
+      Seven configurations, same 1000 cases, same deterministic scorer. The
+      &ldquo;+&nbsp;clause&rdquo; rows append a 1577-character refusal contract to the
+      system turn; nothing else differs.
     </p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Configuration</th><th style="text-align:right">Overall</th>
+        <th style="text-align:right">Wants a call<br>(880)</th>
+        <th style="text-align:right">No call<br>(120)</th>
+        <th style="text-align:right">Refusals<br>(49)</th></tr></thead>
+      <tbody>
+        <tr><td class="cat">wallet-ft &mdash; what shipped until 2026-08-20</td>
+          <td class="num zero">68.4%</td><td class="num">69.8%</td><td class="num">58.3%</td><td class="num">49.0%</td></tr>
+        <tr><td class="cat">Gemma-4 E4B base</td>
+          <td class="num">90.3%</td><td class="num">91.7%</td><td class="num">80.0%</td><td class="num">61.2%</td></tr>
+        <tr><td class="cat">Gemma-4 E4B base + clause</td>
+          <td class="num">91.0%</td><td class="num">90.6%</td><td class="num">94.2%</td><td class="num">91.8%</td></tr>
+        <tr><td class="cat">gpt-5</td>
+          <td class="num">92.8%</td><td class="num">94.1%</td><td class="num">83.3%</td><td class="num">69.4%</td></tr>
+        <tr><td class="cat">gpt-5 + clause</td>
+          <td class="num">93.7%</td><td class="num">93.5%</td><td class="num">95.0%</td><td class="num full">95.9%</td></tr>
+        <tr><td class="cat">ft-v5</td>
+          <td class="num">94.9%</td><td class="num full">95.2%</td><td class="num">92.5%</td><td class="num">81.6%</td></tr>
+        <tr><td class="cat"><strong>ft-v5 + clause</strong></td>
+          <td class="num full">95.1%</td><td class="num">94.7%</td><td class="num full">98.3%</td><td class="num full">95.9%</td></tr>
+      </tbody>
+    </table></div>
     <div class="callout">
       <p>
-        <strong>1. The fine-tune the wallet shipped scored 68.4% &mdash; 21.7 points
-        below the untuned base.</strong> This number did not exist until August 2026.
-        Its model card claims 80.1%, and that claim is not wrong: it was measured on a
-        retired 307-case benchmark whose amounts were base units, against a base that
-        scored 9.8% there. The app then moved to human decimals and two tools, and
-        nobody re-measured. Its dominant failure is over-refusal &mdash; 266 of the 880
-        cases that wanted a call got prose instead &mdash; because declining an
-        under-specified amount was <em>correct</em> under the contract it was trained
-        for. A fine-tune's score is only meaningful against the contract it serves
-        today.
+        <strong>The fine-tune the wallet shipped scored 21.7 points below the untuned
+        base.</strong> Its card claimed 80.1%, measured on a retired benchmark whose
+        amounts were base units. The app's contract moved to human decimals and nobody
+        re-measured. 266 of the 880 cases that wanted a call got prose instead:
+        declining an under-specified amount was correct under the contract it trained on.
       </p>
       <p>
-        <strong>2. ft-v5 reaches 94.9%, above gpt-5's 92.8%.</strong> One epoch on 2288
-        rows, LoRA merged at 0.75 strength, ~18 minutes on one rented A40. The
-        mechanism is narrow and specific: <strong>&ldquo;expected a call, produced
-        none&rdquo; went from 45 to 1.</strong> Nothing else moved that bucket &mdash;
-        an explicit act-not-ask clause did nothing, retry-on-no-call added nothing on
-        top of the safety clause, few-shot exemplars made it worse, and
-        <em>gpt-5 has 51 of them</em>, more than base. It did not simply learn to
-        always act: spurious calls fell from 24 to 9 in the same pass.
+        <strong>ft-v5's gain is one bucket.</strong> &ldquo;Expected a call, produced
+        none&rdquo; went 45 &rarr; 1. An act-not-ask clause, retry-on-no-call and
+        few-shot exemplars all failed to move it, and gpt-5 has 51. Spurious calls fell
+        24 &rarr; 9 in the same pass, so it did not simply learn to always act.
       </p>
       <p>
-        <strong>3. The refusal win belongs to the prompt, not the fine-tune.</strong>
-        This corrects a claim made earlier in this work. ft-v5's 47/49 on refusals
-        against gpt-5's 34/49 looked like the fine-tune being safer. gpt-5 had simply
-        never seen the safety clause. Given the identical system turn it scores
-        <strong>47/49 &mdash; exactly ft-v5's number.</strong> Refusal accuracy with
-        the clause versus without: base <strong>91.8% / 61.2%</strong>, ft-v5
-        <strong>95.9% / 81.6%</strong>, gpt-5 <strong>95.9% / 69.4%</strong>. Three
-        models, two architectures, hosted and local, one direction.
+        <strong>The refusal win is the prompt, not the fine-tune.</strong> ft-v5's 47/49
+        against gpt-5's 34/49 looked like a model difference; gpt-5 had never seen the
+        clause. Given the same system turn it also scores 47/49. Refusal accuracy with
+        the clause vs without: base 91.8%/61.2%, ft-v5 95.9%/81.6%, gpt-5 95.9%/69.4%.
       </p>
     </div>
     <p>
-      What the clause buys, it buys with hesitancy: on base it converts 17 spurious
-      calls into non-actions and pushes 20 more task cases into asking rather than
-      acting, for a net-flat total. That is the right trade for a wallet &mdash; a
-      spurious call on a burn-address send destroys funds irreversibly, a clarifying
-      question costs a click &mdash; so <strong>judge that column on error classes,
-      not on the overall percentage.</strong> On ft-v5 the trade is cheaper still,
-      because its no-call bucket is already 1: there is almost no hesitancy left to
-      add, so the clause mostly does the job it names.
+      <strong>Residual failures differ in kind.</strong> gpt-5 + clause makes zero
+      wrong-argument errors in 1000 cases — its whole residual is 63 decisions. ft-v5's
+      is the mirror: 35 wrong arguments, 12 no-calls. Deciding whether and what to call
+      is where a 4B model has caught up; copying a long literal is where it has not.
+      <code>malformed-address</code> is 3/3 for gpt-5 and 1/3 for ft-v5 + clause, which
+      is an argument for validating address format in the app rather than in the prompt.
     </p>
     <p>
-      <strong>Where each model's residual failures live is the sharpest contrast on
-      this page.</strong> gpt-5 with the clause makes <em>zero</em> wrong-argument
-      errors in 1000 cases &mdash; its entire residual is 63 decisions. ft-v5's
-      residual is the mirror image: 35 wrong arguments against 12 no-calls. The
-      decision of whether and what to call is where a 4B model has caught up;
-      copying a long literal faithfully is where it has not.
+      <strong>Discard differences under about six cases.</strong> Three runs of the same
+      ft-v5 GGUF on different rented GPUs scored 949, 952 and 944; base reads 903 in one
+      run and 908 in another. The three clause-off columns come from a single run so that
+      comparison is device-controlled; each clause-on column comes from its own paired
+      A/B with both arms on one GPU.
     </p>
-    <p>
-      <strong>Read differences of fewer than about six cases as nothing.</strong> That
-      floor is measured, not assumed: three runs of the same ft-v5 GGUF on different
-      rented pods scored 949, 952 and 944 of 1000, and base reads 903 in one run and
-      908 in another. Three claims made during this work were withdrawn for failing
-      exactly that test. It is also why the clause-off columns for base, gpt-5 and
-      ft-v5 all come from a single run &mdash; and why each clause-on column comes from
-      its own paired A/B with both arms on one pod, since only that attributes a delta
-      to the clause rather than to the hardware.
-    </p>
-    <p>
-      Two honest costs. <code>conversation-switch</code> is the <strong>held-out
-      mechanism</strong> &mdash; no training row of it exists, so it is the
-      generalization probe rather than another trained skill; ft-v5 takes it from base's
-      148/149 to 145/149, and with the clause to 141/149. And
-      <code>safety-refusal-malformed-address</code> is 3/3 for gpt-5 in both arms but
-      1/3 for ft-v5 with the clause. That one is a real capability gap, and the fix is
-      deterministic address validation in the app rather than any amount of prompting.
-    </p>
+    <h3 class="eyebrow" style="margin-top:2.5rem">Per category, all 55</h3>
     <div class="tablewrap"><table id="cattable"></table></div>
   </section>
 
   <section class="section" id="browser">
     <p class="eyebrow">Case browser</p>
-    <h2>What each model actually emitted</h2>
+    <h2>What each model emitted</h2>
     <p>
-      Every output below was recorded during a real promptfoo run and is reproduced
-      verbatim, alongside the verdict from the same deterministic scorer that
-      produced the strips. Nothing here is regenerated at page load.
+      Outputs are verbatim from the recorded runs, next to the scorer's verdict.
+      Nothing is regenerated at page load.
     </p>
 
     <div class="controls">
@@ -419,7 +406,7 @@ footer{
 
   <section class="section">
     <p class="eyebrow">Reproduce</p>
-    <h2>Everything needed to train this from scratch</h2>
+    <h2>Run it yourself</h2>
     <div class="grid2" id="repro"></div>
   </section>
 
@@ -659,39 +646,39 @@ function renderCase() {
 function repro() {
   $("repro").innerHTML = `
     <div class="card">
-      <h3>1 · Get the benchmark &mdash; it's public</h3>
-      <p>All 1000 cases, the scorer, the prompt and the tool schemas are on the Hub, so a score here is reproducible rather than reported. The two retired vintages ship alongside it, because the difference between them is half the story.</p>
+      <h3>1 · Benchmark</h3>
+      <p>All 1000 cases plus the scorer, system prompt and tool schemas. Public.</p>
       <pre>hf download ${BENCHMARK} --repo-type dataset \
   --local-dir ./benchmark</pre>
-      <p><strong>These cases are held out from the training rows, and that is the only reason a score means anything.</strong> The training set is deliberately <em>not</em> published. If you train on this benchmark, say so &mdash; a number from a contaminated run is not comparable to any column above.</p>
+      <p>The training rows are <strong>not</strong> published, which is what makes a score here comparable. If you train on this set, say so.</p>
     </div>
     <div class="card">
-      <h3>2 · Get the model</h3>
-      <p>The fine-tune that tops this page is public. Download <code>a075</code>: the <code>a1</code> file is the same adapter merged at full strength and scores lower.</p>
+      <h3>2 · Model</h3>
+      <p>Take <code>a075</code>. The <code>a1</code> file is the same adapter merged at full strength and scores lower.</p>
       <pre>hf download ${MODEL_V5} \
-  --include "*a075*.gguf" --local-dir ./model-v5    # 5.3 GB</pre>
-      <p>Verify the hash before you benchmark it. A 5&nbsp;GB GGUF has already been caught here arriving with the right byte count and the wrong digest, loading and running without error &mdash; so a download that "works" is not evidence that it is this model.</p>
-      <pre>shasum -a 256 ./model-v5/*.gguf
+  --include "*a075*.gguf" --local-dir ./model-v5   # 5.3 GB
+shasum -a 256 ./model-v5/*.gguf
 # 40332b62f282336d92a94dc4147ecc44e83c0e11496ac2e5738d8ef342d1b09c</pre>
+      <p>Check the digest. A 5&nbsp;GB GGUF has been observed here with the right byte count and the wrong hash, loading and running without error.</p>
       <ul>
-        <li><a href="https://huggingface.co/${MODEL_V5}">${MODEL_V5}</a> &mdash; 94.9% here, 95.1% with the safety clause</li>
-        <li><a href="https://huggingface.co/${BASE_GGUF}">${BASE_GGUF}</a> &mdash; the untuned base the wallet ships, 90.3%. Pin the revision: <code>1762c8e8713f</code>, since Q4_K_M was later dropped from <code>main</code></li>
+        <li><a href="https://huggingface.co/${MODEL_V5}">${MODEL_V5}</a> &mdash; 94.9%, or 95.1% with the clause</li>
+        <li><a href="https://huggingface.co/${BASE_GGUF}">${BASE_GGUF}</a> &mdash; the untuned base, 90.3%. Pin revision <code>1762c8e8713f</code>: Q4_K_M was later dropped from <code>main</code></li>
       </ul>
     </div>
     <div class="card">
-      <h3>3 · Send it the right prompt</h3>
-      <p>Two contract details that cost every case if you get them wrong: amounts are <strong>human decimals</strong> (<code>"0.1"</code>, not <code>"100000000000000000"</code>), and recipients pass through <strong>verbatim</strong> &mdash; the model does not resolve ENS. The exact system prompt and tool schemas are in the benchmark repo, taken from the wallet's own <code>prompt-dump</code>.</p>
-      <p>Then <strong>append the safety clause.</strong> It is 1577 characters no model here was trained on, it leaves the overall score flat, and it is worth +32.6 points of refusal accuracy on base, +14.3 on ft-v5 and +26.5 on gpt-5.</p>
+      <h3>3 · Prompt</h3>
+      <p>Amounts are human decimals (<code>"0.1"</code>, not <code>"100000000000000000"</code>) and recipients pass through verbatim. Both are in the benchmark repo, taken from the wallet's own <code>prompt-dump</code>.</p>
+      <p>Append the safety clause unless you are reproducing a clause-off row: flat on overall score, +32.6 points of refusal accuracy on base, +14.3 on ft-v5, +26.5 on gpt-5.</p>
     </div>
     <div class="card">
       <h3>4 · Train your own</h3>
-      <p>One epoch, LoRA r=16 &alpha;=16, merged at <strong>0.75 strength</strong> &mdash; scaling the adapter down at merge time was worth +29.7 points on the previous generation, with no new data. About 18 minutes and $0.76 on one rented A40.</p>
+      <p>One epoch, LoRA r=16 &alpha;=16, merged at <strong>0.75 strength</strong>. ~18 min and $0.76 on one rented A40.</p>
       <pre>uv run python scripts/runpod_train_gemma4.py</pre>
-      <p>Two traps worth inheriting. Validation loss falls monotonically across epochs while out-of-distribution accuracy <em>also</em> falls &mdash; <code>metric_for_best_model="eval_loss"</code> reliably selected the worst of three checkpoints, costing 14.5 points. And select hyperparameters on a separate dev set, then score the benchmark <strong>once</strong>: scoring two candidates on it and keeping the better one turns the test set into a hyperparameter.</p>
+      <p>Two results worth inheriting: scaling the adapter down at merge time was worth +29.7 points with no new data, and <code>metric_for_best_model="eval_loss"</code> selected the <em>worst</em> of three checkpoints because validation loss and out-of-distribution accuracy both fall monotonically. Select on a separate dev set; score the benchmark once.</p>
     </div>
     <div class="card">
-      <h3>Why there's no live demo here</h3>
-      <p>Hosting a Gradio Space needs a Team plan on this org. The app is written and sits in <code>space/</code> in the harness repo; it deploys unchanged the moment the org is upgraded.</p>
+      <h3>No live demo</h3>
+      <p>A Gradio Space needs a Team plan on this org. The playground &mdash; live inference over the same GGUFs, prompt and scorer &mdash; is written and deploys unchanged once that exists.</p>
       <pre>uv run python space/stage.py gradio
 cd space/build/gradio &amp;&amp; python app.py</pre>
     </div>`;
