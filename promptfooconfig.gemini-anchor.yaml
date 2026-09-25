@@ -1,0 +1,29 @@
+# Gemini 3.1 Pro as the frontier anchor, under the app contract (pf/tools.app.json).
+#
+# Stands in for gpt-5, which cannot currently run: OpenRouter returns OpenAI's
+# account-level block (403, "blocked for a previous policy violation") and the direct
+# OpenAI key has no credits. Its numbers are NOT comparable to the recorded gpt-5
+# column. Sampling copied from promptfooconfig.gpt5-appcontract.yaml (T=0.1, 4096 max
+# tokens). About $0.007 per case.
+#
+#   EVAL_DATASET=pf/tests.panel.yaml scripts/eval.sh -c promptfooconfig.gemini-anchor.yaml \
+#       -j 8 --no-cache -o runs/panel-gemini.out.json
+description: gemini-3.1-pro as the frontier anchor (gpt-5 is blocked on the OpenRouter key; the OpenAI key has no credits)
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: openrouter:google/gemini-3.1-pro-preview
+    label: gemini-3.1-pro
+    config:
+      temperature: 0.1
+      max_tokens: 4096
+      tools: file://pf/tools.app.json
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"

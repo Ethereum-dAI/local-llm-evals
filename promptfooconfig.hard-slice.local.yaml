@@ -1,0 +1,66 @@
+# base vs v5 (each with and without the safety clause) on the hard slice or the panel,
+# both local on Metal. Sampling identical to every recorded Gemma number (T=0.2, 1024
+# max tokens, 4096 ctx). Run ONE provider per invocation (--filter-providers) so only
+# one ~5 GB model is resident.
+description: hard-slice probe — Gemma-4 E4B base vs v5 (local)
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-base
+    config:
+      model_path: models/gemma4-e4b-base.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-v5
+    config:
+      model_path: models/gemma-4-E4B-wallet-ft-a075.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-base-clause
+    config:
+      model_path: models/gemma4-e4b-base.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+      prompt_variant: safety
+
+  - id: file://pf/provider_functiongemma.py:call_api
+    label: gemma4-e4b-ft-v5-clause
+    config:
+      model_path: models/gemma-4-E4B-wallet-ft-a075.Q4_K_M.gguf
+      dialect: gemma4
+      system_role: system
+      n_ctx: 4096
+      temperature: 0.2
+      max_tokens: 1024
+      n_gpu_layers: -1
+      timeout: 1800000
+      prompt_variant: safety
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('runs/hard-slice-60.yaml') }}"

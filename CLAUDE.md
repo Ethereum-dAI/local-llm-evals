@@ -96,6 +96,91 @@ uv run python scripts/generate_protocol_cases.py       # aave/safe, no longer in
   `unshield` intent tools instead — see below. Prefer `executeTx` for anything new;
   only break the rule when there is genuinely no transaction to encode.
 
+## The 50-case discrimination panel — `pf/tests.panel.yaml`
+
+The cheapest set that still separates models: 50 cases, each chosen because the models
+disagreed on it. `scripts/build_panel.py` materialises it from `datasets/panel_ids.json`
+(byte-stable, asserted); `--select` re-chooses the ids from pool runs.
+
+How it was chosen (2026-09-24): base, v5 and **Gemini 3.1 Pro** (frontier stand-in — gpt-5
+is blocked upstream on the OpenRouter key and the OpenAI key has no credits) each ran a
+347-case pool: all 187 hard cases plus the 160 cases of the 1000 where base / v5 / gpt-5
+disagreed. Of those, 160 split the three models; 50 were sampled **in proportion to each
+pass/fail pattern**, round-robin across mechanisms (16 mechanisms represented, 17 no-call).
+
+**Read the independent re-run, not the selection run** — selecting on outcomes builds
+separation in, and single-run verdicts carry noise flips:
+
+| | selection run | **re-run** | wants call (33) | no call (17) |
+| --- | --: | --: | --: | --: |
+| base | 18 | **24** | 14 | 10 |
+| v5 | 26 | **27** | 19 | 8 |
+| Gemini 3.1 Pro | 40 | **39** | **33** | 6 |
+
+Per-case agreement with the selection run: 44 / 47 / 47 of 50. Gemini separates from
+both Gemma arms (+15 net vs base, 3.0 sigma; +12 vs v5, 2.4 sigma). **Base vs v5 does
+NOT separate on the total** (+21 / -18): the panel shows they fail on DIFFERENT cases —
+v5 on no-call (truncated recipients 0/3, refusals), base on long conversations — not
+that one is better. Gemini's whole residual is no-call: 33/33 when a call is wanted, 1/5
+direct refusals and 0/4 embedded refusals, all clause-off.
+
+Why 33 pool cases were dropped as "fails everywhere": every model, Gemini included,
+passes a truncated address (`0x1a7e...9b59`) straight through, because clause-off the
+tool description says "pass the value as the user expressed it" and nothing says a
+truncated address is invalid. Those cases, and embedded burn/zero sends, are only
+meaningful **with the clause on** — which the wallet's `main` now ships.
+
+## The ~500-case benchmark — `pf/tests.benchmark.yaml` (508 cases)
+
+The 1000 below stopped discriminating: base / gpt-5 / v5 land at 90.3 / 92.8 / 94.9,
+with most slices at ceiling for all three. `scripts/build_benchmark.py` builds 508
+cases in two parts:
+
+| Part | Cases | What it is |
+| --- | --- | --- |
+| stratified subset of the 1000 | 321 | `QUOTAS` per stratum; seeded draw inside each; byte-identical to the 1000 |
+| `pf/tests.hard.yaml` | 187 | six new mechanisms, `src/wallet_evals/hard_cases.py` |
+
+```bash
+uv run python scripts/generate_hard_cases.py          # -> pf/tests.hard.yaml
+uv run python scripts/build_benchmark.py --project    # -> pf/tests.benchmark.yaml
+```
+
+`--project` re-scores the subset from `space/static/data.json` with no inference.
+On the subset base / gpt-5 / v5 are **83.5 / 87.9 / 92.8**, and v5-vs-base keeps
+**4.2 sigma** (4.6 on the full 1000; a uniform random 321 averages 2.6). **Caveat:**
+the quotas were set from those same configurations' per-stratum results, so part of
+that separation is built in. No individual case was picked by its verdict, but read
+the hard slice for an unbiased number — it was written before any model saw it.
+
+**First probe (2026-09-24, 60-case stratified slice, 10 per mechanism, local Metal,
+T=0.2):** base 34, v5 32, base+clause 35, v5+clause 41 of 60. The totals hide the
+point: v5 is 29/30 on call cases but **3/30 on no-call** clause-off (base 11/30) — it
+learned to act, and the refusal kinds it trained on do not transfer to truncated
+recipients (0/10) or embedded burn/zero sends (0/10). `surface` was 10/10 for every
+arm, so it does not discriminate between Gemma variants. gpt-5 could not be run: the
+OpenRouter key is blocked upstream by OpenAI ("blocked for a previous policy
+violation", 403).
+
+The six hard mechanisms: `stacked` (corrections + distractors in one 7-9 round
+conversation, sometimes after a switch), `injection_distractor` (a pasted redirect,
+already dismissed by the canned assistant — gold is the user's request),
+`unresolvable_recipient` / `unresolvable_amount` (truncated address, "last time",
+"$50 of ETH", "half my ETH" — gold no call), `surface` (number words, "2.4k",
+speech-to-text, es/pt/de/fr with decimal commas), `embedded_refusal` (a dangerous
+answer mid-conversation under an authority claim — gold no call). 70 of 187 are
+no-call, so the benchmark's no-call share is **27.4%**, not 12% — read the split.
+
+**Three proposed slices are deliberately absent** because the case would be
+unanswerable from what the app sends: wrong-chain token addresses (`APP_SYSTEM`
+names no chain and no token address), `"all"` / contact names (the schema tells the
+model to emit both — see below), and `top_up_bundler` (a new tool changes every
+prompt; that is the separate rebaseline described further down).
+
+`tests/test_hard_benchmark.py` asserts byte-stability, the declared composition,
+self-scoring, gold amounts disjoint from every seed bank and training, that
+injected values never reach gold, and that every subset case matches the 1000.
+
 ## The benchmark is `pf/tests.combined.yaml` — 1000 cases, two thirds multi-round
 
 `scripts/build_combined_benchmark.py` concatenates exactly two generated files:
