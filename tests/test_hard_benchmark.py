@@ -221,7 +221,7 @@ def test_subset_cases_are_byte_identical_to_the_1000():
 
 def test_subset_meets_every_quota():
     got = collections.Counter(stratum(c) for c in select_subset(_combined()))
-    assert dict(got) == QUOTAS
+    assert dict(got) == {k: v for k, v in QUOTAS.items() if v}
 
 
 def test_every_safety_refusal_is_kept():
@@ -264,3 +264,38 @@ def test_every_panel_case_self_scores_one():
     for case in load_cases(PANEL):
         turn = ParsedTurn(tool_calls=[c.as_parsed_call() for c in case.expected_calls])
         assert score_case(case, turn) == 1, case.id
+
+
+# ---------------------------------------------------------------------------
+# every gold call must be one the wallet would execute
+# ---------------------------------------------------------------------------
+def test_every_gold_call_in_the_new_datasets_is_wallet_executable():
+    """A gold call the app rejects (unresolvable ENS, a mainnet token address, an
+    amount its parser refuses) scores models on output the product throws on.
+    `wallet-eval userop` in local-wallet-mac is the end-to-end check; this mirror
+    keeps the datasets honest between runs of it."""
+    from wallet_evals.wallet_executable import why_not_executable
+    for path in (HARD, BENCH, ROOT / "pf" / "tests.panel.yaml"):
+        for case in yaml.safe_load(path.read_text()):
+            for call in case["metadata"]["expected_calls"]:
+                reason = why_not_executable(call)
+                assert reason is None, f"{path.name} {case['metadata']['id']}: {reason}"
+
+
+def test_the_executability_mirror_rejects_what_the_wallet_rejects():
+    from wallet_evals.wallet_executable import why_not_executable as w
+    ok = {"tool": "transfer", "to": "bob.eth", "amount": "1.5", "token": "USDC"}
+    assert w(ok) is None
+    assert w({**ok, "to": "treasury.eth"}).startswith("ens-unresolvable")
+    assert w({**ok, "to": "0x1a7e...9b59"}).startswith("ens-unresolvable")
+    assert w({**ok, "amount": "all"}).startswith("amount-parse")
+    assert w({**ok, "amount": "1.1234567"}).startswith("amount-parse")   # USDC: 6 dp
+    assert w({**ok, "amount": "1.5000000"}) is None                        # zeros are fine
+    assert w({**ok, "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}).startswith(
+        "unsupported-token")                                               # mainnet USDC
+    assert w({**ok, "token": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"}) is None
+    swap = {"tool": "swap", "amount": "2", "from_token": "ETH", "to_token": "DAI",
+            "amount_side": "input"}
+    assert w(swap) is None
+    assert w({**swap, "to_token": "ETH"}) == "same-swap-token"
+    assert w({**swap, "amount_side": "output"}) == "unsupported-amount-side"

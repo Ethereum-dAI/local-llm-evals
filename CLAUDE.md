@@ -99,36 +99,52 @@ uv run python scripts/generate_protocol_cases.py       # aave/safe, no longer in
 ## The 50-case discrimination panel — `pf/tests.panel.yaml`
 
 The cheapest set that still separates models: 50 cases, each chosen because the models
-disagreed on it. `scripts/build_panel.py` materialises it from `datasets/panel_ids.json`
-(byte-stable, asserted); `--select` re-chooses the ids from pool runs.
+disagreed on it, and **every gold call executable by the wallet**. `scripts/build_panel.py`
+materialises it from `datasets/panel_ids.json` (byte-stable, asserted) and writes
+`results/panel50.csv` (category, whether it is in the 1000 and how far the 1000 covers it,
+gold, every verdict). `--base/--v5/--gemini <exports…>` re-chooses the ids from pool runs.
 
-How it was chosen (2026-09-24): base, v5 and **Gemini 3.1 Pro** (frontier stand-in — gpt-5
-is blocked upstream on the OpenRouter key and the OpenAI key has no credits) each ran a
-347-case pool: all 187 hard cases plus the 160 cases of the 1000 where base / v5 / gpt-5
-disagreed. Of those, 160 split the three models; 50 were sampled **in proportion to each
-pass/fail pattern**, round-robin across mechanisms (16 mechanisms represented, 17 no-call).
+How it was chosen (2026-09-25): base, v5 and **Gemini 3.1 Pro** (frontier stand-in — gpt-5
+is blocked upstream on the OpenRouter key and the OpenAI key has no credits) each ran the
+187 hard cases plus the 160 cases of the 1000 where base / v5 / gpt-5 disagreed. Only
+wallet-executable cases were eligible; those that split the three were sampled **in
+proportion to each pass/fail pattern**, round-robin across mechanisms (15 mechanisms,
+33 from the 1000, 17 new, 13 no-call).
 
 **Read the independent re-run, not the selection run** — selecting on outcomes builds
 separation in, and single-run verdicts carry noise flips:
 
-| | selection run | **re-run** | wants call (33) | no call (17) |
+| | selection run | **re-run** | wants call (37) | no call (13) |
 | --- | --: | --: | --: | --: |
-| base | 18 | **24** | 14 | 10 |
-| v5 | 26 | **27** | 19 | 8 |
-| Gemini 3.1 Pro | 40 | **39** | **33** | 6 |
+| base | 17 | **22** | 15 | 7 |
+| v5 | 26 | **28** | 22 | 6 |
+| Gemini 3.1 Pro | 42 | **41** | **37** | 4 |
 
-Per-case agreement with the selection run: 44 / 47 / 47 of 50. Gemini separates from
-both Gemma arms (+15 net vs base, 3.0 sigma; +12 vs v5, 2.4 sigma). **Base vs v5 does
-NOT separate on the total** (+21 / -18): the panel shows they fail on DIFFERENT cases —
-v5 on no-call (truncated recipients 0/3, refusals), base on long conversations — not
-that one is better. Gemini's whole residual is no-call: 33/33 when a call is wanted, 1/5
-direct refusals and 0/4 embedded refusals, all clause-off.
+Gemini separates from both Gemma arms (+19 net vs base, 3.8 sigma; +13 vs v5, 2.6 sigma).
+**Base vs v5 does not reliably separate** (+21 / -15, 1.0 sigma): they fail on different
+cases — v5 on no-call, base on long conversations. Gemini's whole residual is no-call
+(37/37 when a call is wanted, 4/13 otherwise), all clause-off.
 
-Why 33 pool cases were dropped as "fails everywhere": every model, Gemini included,
-passes a truncated address (`0x1a7e...9b59`) straight through, because clause-off the
-tool description says "pass the value as the user expressed it" and nothing says a
-truncated address is invalid. Those cases, and embedded burn/zero sends, are only
-meaningful **with the clause on** — which the wallet's `main` now ships.
+### Every gold call must be one the WALLET executes — `wallet_executable.py`
+
+`wallet-eval userop` in local-wallet-mac (the wallet's own guards and UserOp encoding)
+rejected 4 of the first panel's gold calls, and a mirror of its guards
+(`src/wallet_evals/wallet_executable.py`) then found **104 of the frozen 1000's golds are
+not executable by the real app**: 78 ENS names the daemon cannot resolve, 24 mainnet token
+addresses (`token_address`, from `datasets/lookup.json` — the app's registry is
+Sepolia-only), 2 amounts its parser rejects. The 1000 is frozen and left as is; the hard
+generator, the benchmark builder and the panel selector now admit only executable gold,
+and `test_every_gold_call_in_the_new_datasets_is_wallet_executable` enforces it.
+
+ENS rule, from `resolve_name.rs`: the daemon resolves on Sepolia and **falls back to
+mainnet ENS**, so a name is executable iff it resolves on either. Of `ENS_NAMES`, only 8
+did (`RESOLVABLE_ENS`, addresses recorded); `hard_cases.HARD_ENS` is that subset.
+End-to-end check of the final panel: 37/37 gold calls built a signable UserOp, 0 failures,
+with the harness's one-name ENS stub extended by the same 8 verified names.
+
+Clause-off, every model (Gemini included) passes a truncated address like `0x1a7e...9b59`
+straight through — the tool description says "pass the value as the user expressed it".
+Those cases, and embedded burn/zero sends, are only meaningful **with the clause on**.
 
 ## The ~500-case benchmark — `pf/tests.benchmark.yaml` (508 cases)
 

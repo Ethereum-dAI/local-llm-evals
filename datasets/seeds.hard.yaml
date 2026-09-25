@@ -2,7 +2,7 @@
 # (scripts/generate_hard_cases.py -> pf/tests.hard.yaml).
 #
 # Same shape as datasets/seeds.conversations.yaml: params are literals,
-# {vary: [...]} sets, or the sentinel "random_address" / "random_ens". Gold is
+# {vary: [...]} sets, or the sentinel "random_address" / "random_hard_ens". Gold is
 # COMPUTED from the final effective intent, never parsed from a surface.
 #
 # Amount literals are disjoint from datasets/seeds.yaml, seeds.arithmetic.yaml,
@@ -10,18 +10,22 @@
 # set intersection -- asserted in tests/test_hard_benchmark.py on the GOLD amounts,
 # which also covers the revision targets and the surface banks in
 # src/wallet_evals/hard_cases.py.
+#
+# Recipients use "random_hard_ens", not "random_ens": generate_hard_cases.py draws
+# it from hard_cases.HARD_ENS, the ENS names the wallet actually resolves, so every
+# gold call here is one the app can execute (tests/test_hard_benchmark.py).
 
 # --- ETH transfers ---------------------------------------------------------
 - action: transfer
   amount: { vary: ["0.0416", "3.875", "0.00613", "17.2"] }
   token: ETH
-  recipient: { vary: ["random_ens", "random_address"] }
+  recipient: { vary: ["random_hard_ens", "random_address"] }
 
 # --- stablecoin transfers (<=6 dp so USDC stays representable) -------------
 - action: transfer
   amount: { vary: ["1840.5", "62.75", "0.815", "29000.4"] }
   token: { vary: ["USDC", "DAI"] }
-  recipient: { vary: ["random_ens", "random_address"] }
+  recipient: { vary: ["random_hard_ens", "random_address"] }
 
 # --- swaps -----------------------------------------------------------------
 - action: swap

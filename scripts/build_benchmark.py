@@ -15,6 +15,9 @@ How the subset is chosen, and what that does and does not bias:
     regression-guard sample. The strata where they diverged (long `distractor`,
     `correction`, long `switch`, `token_address`, single-turn transfers, every
     safety refusal) keep most or all of their cases.
+  * Only cases whose gold the WALLET would execute are eligible
+    (wallet_executable.case_is_executable): the frozen 1000 carries 104 that it
+    would not (unresolvable ENS, mainnet token addresses, unparseable amounts).
   * INSIDE a stratum, cases are drawn by a seeded RNG over the sorted ids, never
     by how any model scored on them. So the quotas used the recorded results at
     STRATUM level; no individual case was kept or dropped for its verdict.
@@ -37,6 +40,8 @@ import re
 from pathlib import Path
 
 import yaml
+
+from wallet_evals.wallet_executable import case_is_executable
 
 ROOT = Path(__file__).resolve().parent.parent
 COMBINED = ROOT / "pf" / "tests.combined.yaml"
@@ -61,9 +66,12 @@ QUOTAS: dict[str, int] = {
     "correction-short": 30,     # 110 (2-4 rounds)
     "correction-long": 20,      # 44 (5-6 rounds)
     "distractor-short": 6,      # 32 (3 rounds)
-    "distractor-long": 45,      # 69 (4-6 rounds); base 52-72%, the widest spread
+    "distractor-long": 57,      # 69 (4-6 rounds); base 52-72%, the widest spread.
+                                # 59 are executable; takes token_address's 12
     "exact_output": 8,          # 32; 97-100% for every model but ft-v4
-    "token_address": 12,        # 24
+    "token_address": 0,         # 24, NONE executable: every one names a MAINNET token
+                                # address (datasets/lookup.json) and the app's
+                                # registry is Sepolia-only -- see wallet_executable
 }
 
 
@@ -106,7 +114,11 @@ def select_subset(combined: list[dict], quotas: dict[str, int] = QUOTAS,
     rng = random.Random(seed)
     keep: set[str] = set()
     for name in sorted(quotas):
-        members = sorted(groups[name], key=lambda c: c["metadata"]["id"])
+        # Only cases whose gold the wallet would execute: 104 of the 1000 name an
+        # ENS the daemon cannot resolve, a mainnet token address, or an amount its
+        # parser rejects (wallet_executable.why_not_executable).
+        members = sorted((c for c in groups[name] if case_is_executable(c)),
+                         key=lambda c: c["metadata"]["id"])
         if len(members) < quotas[name]:
             raise ValueError(f"{name}: {len(members)} cases < quota {quotas[name]}")
         keep.update(c["metadata"]["id"] for c in rng.sample(members, quotas[name]))

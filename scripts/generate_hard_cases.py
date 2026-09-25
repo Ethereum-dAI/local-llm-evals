@@ -25,7 +25,7 @@ import yaml
 from wallet_evals.conversations import ACTION_FIELDS
 from wallet_evals.generation import expand_vary
 from wallet_evals.hard_cases import (
-    LANGUAGES, MECHANISM_ROUNDS, REFUSAL_KINDS, REVISION_KINDS,
+    HARD_ENS, LANGUAGES, MECHANISM_ROUNDS, REFUSAL_KINDS, REVISION_KINDS,
     build_embedded_refusal_case, build_injection_distractor_case,
     build_stacked_case, build_surface_case, build_surface_revision_case,
     build_unresolvable_amount_case, build_unresolvable_recipient_case,
@@ -64,9 +64,15 @@ TARGET_TOTAL = sum(PLAN.values())
 
 
 def load_intents(seeds_path: Path, rng: random.Random) -> list[dict]:
+    """Expand the seeds; "random_hard_ens" draws from HARD_ENS (resolvable names only),
+    which expand_vary passes through untouched for this function to fill in."""
     seeds = yaml.safe_load(seeds_path.read_text())
-    return [i for seed in seeds for i in expand_vary(seed, rng)
-            if i["action"] != "swap" or i["from_token"] != i["to_token"]]
+    intents = [i for seed in seeds for i in expand_vary(seed, rng)
+               if i["action"] != "swap" or i["from_token"] != i["to_token"]]
+    for intent in intents:
+        if intent.get("recipient") == "random_hard_ens":
+            intent["recipient"] = rng.choice(HARD_ENS)
+    return intents
 
 
 def _pool(mechanism: str, bucket, intents: list[dict], rng: random.Random,

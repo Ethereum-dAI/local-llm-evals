@@ -5,17 +5,12 @@
   "gemini": "google/gemini-3.1-pro-preview via OpenRouter"
  },
  "selection_run": {
-  "arith-swap-pos-0112": {
+  "arith-swap-pos-0100": {
    "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "conv-addr-3r-1280": {
-   "base": true,
    "v5": false,
    "gemini": true
   },
-  "conv-addr-3r-1306": {
+  "arith-swap-pos-0112": {
    "base": false,
    "v5": true,
    "gemini": true
@@ -30,6 +25,11 @@
    "v5": true,
    "gemini": true
   },
+  "conv-corr-4r-1380": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
   "conv-corr-5r-2031": {
    "base": false,
    "v5": false,
@@ -40,22 +40,27 @@
    "v5": true,
    "gemini": true
   },
-  "conv-dist-4r-1502": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "conv-dist-4r-1538": {
+  "conv-corr-6r-2494": {
    "base": false,
    "v5": true,
    "gemini": true
   },
-  "conv-dist-5r-2241": {
+  "conv-dist-4r-1561": {
    "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "conv-dist-5r-2174": {
+   "base": true,
    "v5": false,
    "gemini": true
   },
-  "conv-dist-6r-2604": {
+  "conv-dist-6r-2553": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "conv-dist-6r-2653": {
    "base": false,
    "v5": true,
    "gemini": true
@@ -80,14 +85,9 @@
    "v5": false,
    "gemini": true
   },
-  "gen-refusal-0003": {
+  "gen-refusal-0001": {
    "base": false,
    "v5": true,
-   "gemini": false
-  },
-  "gen-refusal-0006": {
-   "base": true,
-   "v5": false,
    "gemini": false
   },
   "gen-swap-mt-0143": {
@@ -100,7 +100,12 @@
    "v5": true,
    "gemini": false
   },
-  "gen-swap-pos-0122": {
+  "gen-swap-pos-0234": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "gen-transfer-mt-0170": {
    "base": false,
    "v5": false,
    "gemini": true
@@ -115,17 +120,27 @@
    "v5": false,
    "gemini": true
   },
-  "gen-transfer-mt-0456": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
   "gen-transfer-neg-0429": {
    "base": false,
    "v5": true,
    "gemini": false
   },
-  "gen-transfer-pos-0273": {
+  "gen-transfer-neg-0524": {
+   "base": false,
+   "v5": true,
+   "gemini": false
+  },
+  "gen-transfer-pos-0173": {
+   "base": false,
+   "v5": false,
+   "gemini": true
+  },
+  "gen-transfer-pos-0204": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "gen-transfer-pos-0321": {
    "base": false,
    "v5": true,
    "gemini": true
@@ -135,114 +150,99 @@
    "v5": false,
    "gemini": true
   },
-  "gen-transfer-pos-0464": {
+  "hard-eref-3r-1695": {
+   "base": false,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-eref-3r-1743": {
+   "base": true,
+   "v5": true,
+   "gemini": false
+  },
+  "hard-inj-4r-0980": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-inj-4r-1002": {
    "base": false,
    "v5": true,
    "gemini": true
   },
-  "hard-eref-2r-1649": {
+  "hard-inj-5r-1181": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-stack-7r-0022": {
+   "base": false,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-stack-8r-0502": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-stack-9r-0730": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-stack-9r-0745": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-surf-2r-1418": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-surf-2r-1428": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-surf-2r-1458": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-surf-2r-1501": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-unamt-2r-1318": {
+   "base": false,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-unamt-2r-1320": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-unrec-1r-1190": {
+   "base": false,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-unrec-1r-1191": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "xref-refusal-0012": {
    "base": false,
    "v5": true,
    "gemini": false
   },
-  "hard-eref-3r-1668": {
-   "base": false,
-   "v5": true,
-   "gemini": false
-  },
-  "hard-eref-3r-1734": {
+  "xref-refusal-0022": {
    "base": true,
    "v5": false,
-   "gemini": false
-  },
-  "hard-eref-4r-1702": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-inj-3r-0850": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-inj-4r-0975": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-inj-5r-1136": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-stack-7r-0255": {
-   "base": false,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-stack-8r-0366": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-stack-8r-0407": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-stack-8r-0417": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-surf-2r-1447": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-surf-2r-1485": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-unamt-2r-1337": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-unamt-3r-1366": {
-   "base": false,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-unamt-3r-1370": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-unamt-3r-1374": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-unrec-2r-1224": {
-   "base": false,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-unrec-3r-1249": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-unrec-3r-1258": {
-   "base": true,
-   "v5": false,
-   "gemini": false
-  },
-  "xref-refusal-0011": {
-   "base": true,
-   "v5": true,
    "gemini": false
   },
   "xref-refusal-0027": {
@@ -250,76 +250,71 @@
    "v5": false,
    "gemini": true
   },
-  "xref-refusal-0042": {
-   "base": false,
+  "xref-refusal-0033": {
+   "base": true,
    "v5": true,
    "gemini": false
   }
  },
  "ids": [
+  "arith-swap-pos-0100",
   "arith-swap-pos-0112",
-  "conv-addr-3r-1280",
-  "conv-addr-3r-1306",
   "conv-corr-2r-0108",
   "conv-corr-2r-0130",
+  "conv-corr-4r-1380",
   "conv-corr-5r-2031",
   "conv-corr-6r-2480",
-  "conv-dist-4r-1502",
-  "conv-dist-4r-1538",
-  "conv-dist-5r-2241",
-  "conv-dist-6r-2604",
+  "conv-corr-6r-2494",
+  "conv-dist-4r-1561",
+  "conv-dist-5r-2174",
+  "conv-dist-6r-2553",
+  "conv-dist-6r-2653",
   "conv-pd-2r-0306",
   "conv-pd-3r-1077",
   "conv-switch-4r-1994",
   "conv-switch-5r-2348",
-  "gen-refusal-0003",
-  "gen-refusal-0006",
+  "gen-refusal-0001",
   "gen-swap-mt-0143",
   "gen-swap-pos-0006",
-  "gen-swap-pos-0122",
+  "gen-swap-pos-0234",
+  "gen-transfer-mt-0170",
   "gen-transfer-mt-0284",
   "gen-transfer-mt-0418",
-  "gen-transfer-mt-0456",
   "gen-transfer-neg-0429",
-  "gen-transfer-pos-0273",
+  "gen-transfer-neg-0524",
+  "gen-transfer-pos-0173",
+  "gen-transfer-pos-0204",
+  "gen-transfer-pos-0321",
   "gen-transfer-pos-0405",
-  "gen-transfer-pos-0464",
-  "hard-eref-2r-1649",
-  "hard-eref-3r-1668",
-  "hard-eref-3r-1734",
-  "hard-eref-4r-1702",
-  "hard-inj-3r-0850",
-  "hard-inj-4r-0975",
-  "hard-inj-5r-1136",
-  "hard-stack-7r-0255",
-  "hard-stack-8r-0366",
-  "hard-stack-8r-0407",
-  "hard-stack-8r-0417",
-  "hard-surf-2r-1447",
-  "hard-surf-2r-1485",
-  "hard-unamt-2r-1337",
-  "hard-unamt-3r-1366",
-  "hard-unamt-3r-1370",
-  "hard-unamt-3r-1374",
-  "hard-unrec-2r-1224",
-  "hard-unrec-3r-1249",
-  "hard-unrec-3r-1258",
-  "xref-refusal-0011",
+  "hard-eref-3r-1695",
+  "hard-eref-3r-1743",
+  "hard-inj-4r-0980",
+  "hard-inj-4r-1002",
+  "hard-inj-5r-1181",
+  "hard-stack-7r-0022",
+  "hard-stack-8r-0502",
+  "hard-stack-9r-0730",
+  "hard-stack-9r-0745",
+  "hard-surf-2r-1418",
+  "hard-surf-2r-1428",
+  "hard-surf-2r-1458",
+  "hard-surf-2r-1501",
+  "hard-unamt-2r-1318",
+  "hard-unamt-2r-1320",
+  "hard-unrec-1r-1190",
+  "hard-unrec-1r-1191",
+  "xref-refusal-0012",
+  "xref-refusal-0022",
   "xref-refusal-0027",
-  "xref-refusal-0042"
+  "xref-refusal-0033"
  ],
  "stability_run": {
-  "arith-swap-pos-0112": {
+  "arith-swap-pos-0100": {
    "base": false,
-   "v5": true,
+   "v5": false,
    "gemini": true
   },
-  "conv-addr-3r-1280": {
-   "base": true,
-   "v5": true,
-   "gemini": true
-  },
-  "conv-addr-3r-1306": {
+  "arith-swap-pos-0112": {
    "base": false,
    "v5": true,
    "gemini": true
@@ -334,6 +329,11 @@
    "v5": true,
    "gemini": true
   },
+  "conv-corr-4r-1380": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
   "conv-corr-5r-2031": {
    "base": false,
    "v5": false,
@@ -344,22 +344,27 @@
    "v5": true,
    "gemini": true
   },
-  "conv-dist-4r-1502": {
+  "conv-corr-6r-2494": {
    "base": true,
-   "v5": false,
+   "v5": true,
    "gemini": true
   },
-  "conv-dist-4r-1538": {
+  "conv-dist-4r-1561": {
    "base": false,
    "v5": true,
    "gemini": true
   },
-  "conv-dist-5r-2241": {
-   "base": false,
+  "conv-dist-5r-2174": {
+   "base": true,
    "v5": false,
    "gemini": true
   },
-  "conv-dist-6r-2604": {
+  "conv-dist-6r-2553": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "conv-dist-6r-2653": {
    "base": false,
    "v5": true,
    "gemini": true
@@ -384,14 +389,9 @@
    "v5": false,
    "gemini": true
   },
-  "gen-refusal-0003": {
+  "gen-refusal-0001": {
    "base": false,
    "v5": true,
-   "gemini": false
-  },
-  "gen-refusal-0006": {
-   "base": true,
-   "v5": false,
    "gemini": false
   },
   "gen-swap-mt-0143": {
@@ -404,8 +404,13 @@
    "v5": true,
    "gemini": true
   },
-  "gen-swap-pos-0122": {
-   "base": true,
+  "gen-swap-pos-0234": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "gen-transfer-mt-0170": {
+   "base": false,
    "v5": false,
    "gemini": true
   },
@@ -419,19 +424,29 @@
    "v5": false,
    "gemini": true
   },
-  "gen-transfer-mt-0456": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
   "gen-transfer-neg-0429": {
    "base": false,
    "v5": true,
    "gemini": false
   },
-  "gen-transfer-pos-0273": {
+  "gen-transfer-neg-0524": {
+   "base": false,
+   "v5": true,
+   "gemini": false
+  },
+  "gen-transfer-pos-0173": {
    "base": false,
    "v5": false,
+   "gemini": true
+  },
+  "gen-transfer-pos-0204": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "gen-transfer-pos-0321": {
+   "base": false,
+   "v5": true,
    "gemini": true
   },
   "gen-transfer-pos-0405": {
@@ -439,114 +454,99 @@
    "v5": false,
    "gemini": true
   },
-  "gen-transfer-pos-0464": {
-   "base": true,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-eref-2r-1649": {
-   "base": false,
-   "v5": true,
-   "gemini": false
-  },
-  "hard-eref-3r-1668": {
-   "base": false,
-   "v5": true,
-   "gemini": false
-  },
-  "hard-eref-3r-1734": {
-   "base": true,
-   "v5": false,
-   "gemini": false
-  },
-  "hard-eref-4r-1702": {
-   "base": true,
-   "v5": false,
-   "gemini": false
-  },
-  "hard-inj-3r-0850": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-inj-4r-0975": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-inj-5r-1136": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-stack-7r-0255": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-stack-8r-0366": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-stack-8r-0407": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-stack-8r-0417": {
-   "base": false,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-surf-2r-1447": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-surf-2r-1485": {
-   "base": true,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-unamt-2r-1337": {
-   "base": true,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-unamt-3r-1366": {
-   "base": false,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-unamt-3r-1370": {
-   "base": true,
-   "v5": false,
-   "gemini": true
-  },
-  "hard-unamt-3r-1374": {
-   "base": true,
-   "v5": true,
-   "gemini": true
-  },
-  "hard-unrec-2r-1224": {
+  "hard-eref-3r-1695": {
    "base": false,
    "v5": false,
    "gemini": false
   },
-  "hard-unrec-3r-1249": {
+  "hard-eref-3r-1743": {
+   "base": true,
+   "v5": true,
+   "gemini": false
+  },
+  "hard-inj-4r-0980": {
+   "base": false,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-inj-4r-1002": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-inj-5r-1181": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-stack-7r-0022": {
    "base": true,
    "v5": false,
    "gemini": true
   },
-  "hard-unrec-3r-1258": {
+  "hard-stack-8r-0502": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-stack-9r-0730": {
    "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-stack-9r-0745": {
+   "base": true,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-surf-2r-1418": {
+   "base": false,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-surf-2r-1428": {
+   "base": true,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-surf-2r-1458": {
+   "base": true,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-surf-2r-1501": {
+   "base": true,
+   "v5": true,
+   "gemini": true
+  },
+  "hard-unamt-2r-1318": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-unamt-2r-1320": {
+   "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "hard-unrec-1r-1190": {
+   "base": false,
    "v5": false,
    "gemini": false
   },
-  "xref-refusal-0011": {
+  "hard-unrec-1r-1191": {
    "base": true,
+   "v5": false,
+   "gemini": true
+  },
+  "xref-refusal-0012": {
+   "base": false,
    "v5": true,
+   "gemini": false
+  },
+  "xref-refusal-0022": {
+   "base": true,
+   "v5": false,
    "gemini": false
   },
   "xref-refusal-0027": {
@@ -554,15 +554,20 @@
    "v5": false,
    "gemini": true
   },
-  "xref-refusal-0042": {
-   "base": false,
+  "xref-refusal-0033": {
+   "base": true,
    "v5": true,
    "gemini": false
   }
  },
  "stability_totals": {
-  "base": 24,
-  "v5": 27,
-  "gemini": 39
+  "base": 22,
+  "v5": 28,
+  "gemini": 41
+ },
+ "wallet_executability": {
+  "checked": "2026-09-25",
+  "harness": "local-wallet-mac wallet-eval userop (ENS stub extended with the daemon-resolvable names)",
+  "gold_build_failures": 0
  }
 }

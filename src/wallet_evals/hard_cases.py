@@ -73,6 +73,14 @@ from wallet_evals.generation import (
     ENS_NAMES, gold_calls, random_address, render_surface,
 )
 from wallet_evals.intents import LOOKUP, format_expected_summary
+from wallet_evals.wallet_executable import RESOLVABLE_ENS
+
+#: The ENS names this slice may put in GOLD: generation.ENS_NAMES restricted to the
+#: ones the wallet's daemon actually resolves (wallet_executable.RESOLVABLE_ENS).
+#: The other six would be a call the app rejects as unresolvable, which is exactly
+#: what `wallet-eval userop` caught. vitalik.eth is resolvable but not in the bank,
+#: because it is the one name every fine-tune trained on.
+HARD_ENS: tuple[str, ...] = tuple(n for n in ENS_NAMES if n in RESOLVABLE_ENS)
 
 MECHANISM_ABBREV: dict[str, str] = {
     "stacked": "stack", "injection_distractor": "inj",
@@ -172,7 +180,7 @@ def _revised(current: dict, field: str, blocked: set[str],
     if field == "recipient":
         if rng.random() < 0.5:
             return random_address(rng)
-        return _pick(list(ENS_NAMES), blocked, rng, field)
+        return _pick(list(HARD_ENS), blocked, rng, field)
     if field != "token":
         blocked = blocked | {current["to_token" if field == "from_token" else "from_token"]}
     remaining = [t for t in _TOKENS if t not in blocked]
@@ -229,15 +237,23 @@ def build_stacked_case(intent: dict, withheld: str, rounds: int, rng: random.Ran
     trace: list[str] = []
     for step in plan:
         if step == "revise":
-            for field in rng.sample(stated, len(stated)):
-                old = current[field]
-                blocked = {old, intent[field]}
-                if first is not None and field in first:
-                    blocked.add(first[field])
-                new = _revised(current, field, blocked, rng)
+            # Prefer a value that is neither the original nor the abandoned first
+            # request's; if the 4-token bank is exhausted on every stated field (a
+            # swap with the amount withheld), drop only the first-request block --
+            # never the original-value block, which is what keeps the case honest.
+            new = None
+            for avoid_first in (True, False):
+                for field in rng.sample(stated, len(stated)):
+                    old = current[field]
+                    blocked = {old, intent[field]}
+                    if avoid_first and first is not None and field in first:
+                        blocked.add(first[field])
+                    new = _revised(current, field, blocked, rng)
+                    if new is not None:
+                        break
                 if new is not None:
                     break
-            assert new is not None, "amount always has a revision left"
+            assert new is not None, f"no revision left for {stated}"
             current[field] = new
             trace.append(f"{field} {old}->{new}")
             turn, labels = _mutated(render_surface(
@@ -527,7 +543,7 @@ def build_surface_revision_case(intent: dict, kind: str, rng: random.Random,
     gold = dict(intent, amount=amount)
     spoken = kind == "spoken_revision"
     if spoken and withheld == "recipient":
-        gold["recipient"] = rng.choice(ENS_NAMES)
+        gold["recipient"] = rng.choice(HARD_ENS)
     opener, mutators = _opener(dict(gold, amount=intent["amount"]), withheld, rng)
     fields = dict(gold)
     if spoken:
@@ -567,7 +583,7 @@ def build_surface_case(intent: dict, kind: str, rng: random.Random, idx: int) ->
         fields["amount"] = said
         if kind == "spoken":
             if action == "transfer":
-                gold["recipient"] = fields["recipient"] = rng.choice(ENS_NAMES)
+                gold["recipient"] = fields["recipient"] = rng.choice(HARD_ENS)
                 fields["recipient"] = spoken_name(gold["recipient"])
             for f in ("token", "from_token", "to_token"):
                 if f in fields:
