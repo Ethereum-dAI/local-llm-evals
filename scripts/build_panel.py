@@ -80,6 +80,11 @@ def select(verdicts: dict[str, dict[str, bool]], cases: dict[str, dict],
                  if i in cases and case_is_executable(cases[i]))
     pattern = {i: "".join("1" if verdicts[m][i] else "0" for m in MODELS) for i in ids}
     split = [i for i in ids if pattern[i] not in ("000", "111")]
+    if len(split) < size:
+        # The proportional quotas below assume at least `size` split cases; with fewer,
+        # a pattern's quota exceeds its case count and the round-robin never finishes.
+        raise ValueError(f"only {len(split)} executable cases split the models; a "
+                         f"{size}-case panel needs at least {size} -- widen the pool")
     by_pat: dict[str, list[str]] = collections.defaultdict(list)
     for i in split:
         by_pat[pattern[i]].append(i)
@@ -101,6 +106,9 @@ def select(verdicts: dict[str, dict[str, bool]], cases: dict[str, dict],
         rng.shuffle(order)
         picked: list[str] = []
         while len(picked) < quota[p]:
+            if not any(groups.values()):  # unreachable given the check above
+                raise AssertionError(f"pattern {p}: quota {quota[p]} > its "
+                                     f"{len(by_pat[p])} cases")
             for g in order:
                 if groups[g] and len(picked) < quota[p]:
                     picked.append(groups[g].pop())
@@ -209,13 +217,24 @@ def main() -> None:
     if args.base or args.v5 or args.frontier:
         verdicts = _load_verdicts({m: getattr(args, m) for m in MODELS})
         ids = select(verdicts, cases)
-        IDS.write_text(json.dumps({
+        record = {
             "models": {"base": "Gemma-4 E4B Q4_K_M (local)",
                        "v5": "gemma-4-E4B-wallet-ft-v5 a075 Q4_K_M (local)",
                        "frontier": "anthropic/claude-opus-5.5 via OpenRouter"},
             "selection_run": {i: {m: verdicts[m][i] for m in MODELS} for i in ids},
             "ids": ids,
-        }, indent=1) + "\n")
+        }
+        # Re-runs describe a set of ids: keep them when re-selection reproduces the
+        # same ids, drop them (and say so) when it does not -- stale verdicts on a
+        # different panel would silently fill the CSV's *_rerun / *_clause columns.
+        old = json.loads(IDS.read_text()) if IDS.exists() else {}
+        kept = [k for k in ("stability_run", "stability_totals", "clause_run",
+                            "clause_totals", "wallet_executability") if k in old]
+        if old.get("ids") == ids:
+            record.update({k: old[k] for k in kept})
+        elif kept:
+            print(f"ids changed: dropped {', '.join(kept)} -- re-run the panel")
+        IDS.write_text(json.dumps(record, indent=1) + "\n")
         print(f"selected {len(ids)} -> {IDS.relative_to(ROOT)}")
     ids = json.loads(IDS.read_text())["ids"]
     panel = materialise(ids, cases)

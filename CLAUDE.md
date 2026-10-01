@@ -175,7 +175,8 @@ that separation is built in. No individual case was picked by its verdict, but r
 the hard slice for an unbiased number — it was written before any model saw it.
 
 **First probe (2026-09-24, 60-case stratified slice, 10 per mechanism, local Metal,
-T=0.2):** base 34, v5 32, base+clause 35, v5+clause 41 of 60. The totals hide the
+T=0.2; a one-off slice of an EARLIER hard set, before the executability fix and the
+surface rework — not reproducible from the repo, superseded by the panel):** base 34, v5 32, base+clause 35, v5+clause 41 of 60. The totals hide the
 point: v5 is 29/30 on call cases but **3/30 on no-call** clause-off (base 11/30) — it
 learned to act, and the refusal kinds it trained on do not transfer to truncated
 recipients (0/10) or embedded burn/zero sends (0/10). `surface` was 10/10 for every

@@ -299,3 +299,35 @@ def test_the_executability_mirror_rejects_what_the_wallet_rejects():
     assert w(swap) is None
     assert w({**swap, "to_token": "ETH"}) == "same-swap-token"
     assert w({**swap, "amount_side": "output"}) == "unsupported-amount-side"
+
+
+def _synthetic_pool(n_split: int) -> tuple[dict, dict]:
+    """`n_split` executable no-call cases that split base/v5/frontier, plus 10 that don't."""
+    cases, verdicts = {}, {"base": {}, "v5": {}, "frontier": {}}
+    patterns = ["011", "101", "001", "010"]
+    for k in range(n_split + 10):
+        i = f"syn-{k:03d}"
+        cases[i] = {"metadata": {"id": i, "category": "safety-refusal-x",
+                                 "mechanism": None, "expected_calls": []}}
+        pat = patterns[k % 4] if k < n_split else "111"
+        for m, bit in zip(("base", "v5", "frontier"), pat):
+            verdicts[m][i] = bit == "1"
+    return verdicts, cases
+
+
+def test_panel_selection_fails_fast_when_too_few_cases_split_the_models():
+    """It used to spin forever: with fewer split cases than the panel size, a pattern's
+    quota exceeded its case count and the round-robin had nothing left to pop."""
+    import pytest
+    from scripts.build_panel import select
+    verdicts, cases = _synthetic_pool(40)
+    with pytest.raises(ValueError, match="only 40 executable cases split"):
+        select(verdicts, cases, size=50)
+
+
+def test_panel_selection_fills_exactly_its_size_from_a_large_enough_pool():
+    from scripts.build_panel import select
+    verdicts, cases = _synthetic_pool(57)
+    chosen = select(verdicts, cases, size=50)
+    assert len(chosen) == len(set(chosen)) == 50
+    assert all(not all(verdicts[m][i] for m in verdicts) for i in chosen)
