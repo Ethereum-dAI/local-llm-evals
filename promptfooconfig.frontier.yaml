@@ -1,21 +1,24 @@
-# Gemini 3.1 Pro as the frontier anchor, under the app contract (pf/tools.app.json).
+# The frontier anchor: Claude Opus 5.5 via OpenRouter, under the app contract
+# (pf/tools.app.json).
 #
-# Stands in for gpt-5, which cannot currently run: OpenRouter returns OpenAI's
-# account-level block (403, "blocked for a previous policy violation") and the direct
-# OpenAI key has no credits. Its numbers are NOT comparable to the recorded gpt-5
-# column. Sampling copied from promptfooconfig.gpt5-appcontract.yaml (T=0.1, 4096 max
-# tokens). About $0.007 per case.
+# gpt-5 cannot run on this project's keys (OpenRouter returns OpenAI's account-level
+# block; the direct OpenAI key has no credits), so its recorded column is no longer the
+# anchor. Opus 5.5 was chosen on 2026-10-01 by scoring eight non-OpenAI frontier models
+# on all 187 cases of pf/tests.hard.yaml -- results/frontier-model-selection.md. Its
+# numbers are NOT comparable to the recorded gpt-5 ones. Sampling copied from the gpt-5
+# config (T=0.1, 4096 max tokens). About $0.01 per case.
 #
-#   EVAL_DATASET=pf/tests.panel.yaml scripts/eval.sh -c promptfooconfig.gemini-anchor.yaml \
-#       -j 8 --no-cache -o runs/panel-gemini.out.json
-description: gemini-3.1-pro as the frontier anchor (gpt-5 is blocked on the OpenRouter key; the OpenAI key has no credits)
+#   EVAL_DATASET=pf/tests.panel.yaml scripts/eval.sh -c promptfooconfig.frontier.yaml \
+#       -j 8 --no-cache -o runs/panel-frontier.out.json
+#   PROMPT_VARIANT=safety ...   # the same with the safety clause (pf/prompt.py:_env_variant)
+description: frontier anchor -- claude-opus-5.5 via OpenRouter (app contract)
 
 prompts:
   - file://pf/prompt.py:render
 
 providers:
-  - id: openrouter:google/gemini-3.1-pro-preview
-    label: gemini-3.1-pro
+  - id: openrouter:anthropic/claude-opus-5.5
+    label: claude-opus-5.5
     config:
       temperature: 0.1
       max_tokens: 4096

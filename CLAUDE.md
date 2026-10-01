@@ -102,28 +102,32 @@ The cheapest set that still separates models: 50 cases, each chosen because the 
 disagreed on it, and **every gold call executable by the wallet**. `scripts/build_panel.py`
 materialises it from `datasets/panel_ids.json` (byte-stable, asserted) and writes
 `results/panel50.csv` (category, whether it is in the 1000 and how far the 1000 covers it,
-gold, every verdict). `--base/--v5/--gemini <exports…>` re-chooses the ids from pool runs.
+gold, every verdict). `--base/--v5/--frontier <exports…>` re-chooses the ids from pool runs.
 
-How it was chosen (2026-09-25): base, v5 and **Gemini 3.1 Pro** (frontier stand-in — gpt-5
-is blocked upstream on the OpenRouter key and the OpenAI key has no credits) each ran the
-187 hard cases plus the 160 cases of the 1000 where base / v5 / gpt-5 disagreed. Only
-wallet-executable cases were eligible; those that split the three were sampled **in
-proportion to each pass/fail pattern**, round-robin across mechanisms (15 mechanisms,
-33 from the 1000, 17 new, 13 no-call).
+**The frontier anchor is Claude Opus 5.5** (`promptfooconfig.frontier.yaml`). gpt-5 cannot
+run on this project's keys (OpenRouter returns OpenAI's account-level block; the OpenAI key
+has no credits), so eight non-OpenAI models were scored on all 187 hard cases and Opus won,
+177/187 — `results/frontier-model-selection.md`. GLM 5.3 tied at 176 for a ninth of the
+cost and is the fallback. Opus numbers are NOT comparable to the recorded gpt-5 column.
 
-**Read the independent re-run, not the selection run** — selecting on outcomes builds
-separation in, and single-run verdicts carry noise flips:
+How the panel was chosen (2026-10-01): base, v5 and Opus each ran the 187 hard cases plus
+the 150 wallet-executable cases among the 160 of the 1000 where base / v5 / gpt-5 had
+disagreed. Of the cases that split the three, 50 were sampled **in proportion to each
+pass/fail pattern**, round-robin across mechanisms (15 mechanisms, 15 no-call).
 
-| | selection run | **re-run** | wants call (37) | no call (13) |
+**Read the independent re-runs, not the selection run** — selecting on outcomes builds
+separation in. Clause ON is how the wallet's `main` now runs:
+
+| | selection | re-run, clause off | **re-run, clause on** | clause on: call (35) / no call (15) |
 | --- | --: | --: | --: | --: |
-| base | 17 | **22** | 15 | 7 |
-| v5 | 26 | **28** | 22 | 6 |
-| Gemini 3.1 Pro | 42 | **41** | **37** | 4 |
+| base | 14 | 15 | **25** | 14 / 11 |
+| v5 | 23 | 24 | **35** | 23 / 12 |
+| Claude Opus 5.5 | 45 | 46 | **46** | 33 / 13 |
 
-Gemini separates from both Gemma arms (+19 net vs base, 3.8 sigma; +13 vs v5, 2.6 sigma).
-**Base vs v5 does not reliably separate** (+21 / -15, 1.0 sigma): they fail on different
-cases — v5 on no-call, base on long conversations. Gemini's whole residual is no-call
-(37/37 when a call is wanted, 4/13 otherwise), all clause-off.
+Clause on, **all three separate**: Opus over v5 +11 net (2.7 sigma), Opus over base +21
+(4.4 sigma), v5 over base +10 (2.5 sigma). Clause off, base and v5 are closer (+9, 1.7
+sigma) because v5 makes almost every spurious call the no-call cases invite. Per-case
+agreement of the clause-off re-run with the selection run: 45 / 49 / 49 of 50.
 
 ### Every gold call must be one the WALLET executes — `wallet_executable.py`
 
@@ -139,12 +143,13 @@ and `test_every_gold_call_in_the_new_datasets_is_wallet_executable` enforces it.
 ENS rule, from `resolve_name.rs`: the daemon resolves on Sepolia and **falls back to
 mainnet ENS**, so a name is executable iff it resolves on either. Of `ENS_NAMES`, only 8
 did (`RESOLVABLE_ENS`, addresses recorded); `hard_cases.HARD_ENS` is that subset.
-End-to-end check of the final panel: 37/37 gold calls built a signable UserOp, 0 failures,
-with the harness's one-name ENS stub extended by the same 8 verified names.
+End-to-end check: every gold call of the panel builds a signable UserOp in
+`wallet-eval userop`, 0 failures, with the harness's one-name ENS stub extended by the
+same 8 verified names (local-wallet-mac worktree `eval-panel-executability`).
 
-Clause-off, every model (Gemini included) passes a truncated address like `0x1a7e...9b59`
-straight through — the tool description says "pass the value as the user expressed it".
-Those cases, and embedded burn/zero sends, are only meaningful **with the clause on**.
+Truncated recipients (`0x1a7e...9b59`) are **hard, not unanswerable**: clause off, the
+Gemma arms and Gemini pass them straight through (the tool description says "pass the
+value as the user expressed it"), but Opus, Sonnet, GLM and Kimi decline all 20.
 
 ## The ~500-case benchmark — `pf/tests.benchmark.yaml` (508 cases)
 

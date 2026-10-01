@@ -3,7 +3,7 @@
 A small, cheap set whose every case is already known to split the models. Two modes:
 
   uv run python scripts/build_panel.py --base runs/pool-base.out.json \
-      runs/hard2-base.out.json --v5 ... --gemini ...
+      runs/hard2-base.out.json --v5 ... --frontier ...
       Choose the cases from recorded runs over the candidate pool and write
       datasets/panel_ids.json (ids + every model's recorded verdict). Several
       exports per model are merged by case id, later files winning -- so a
@@ -17,9 +17,10 @@ A small, cheap set whose every case is already known to split the models. Two mo
 How cases are chosen, and what that costs:
 
   The candidate pool was the 187 hard cases plus the 160 cases of the 1000 where
-  base, v5 and gpt-5 disagreed. base Gemma-4 E4B, the v5 fine-tune and Gemini 3.1
-  Pro (the frontier stand-in: gpt-5 is blocked on this OpenRouter key and the OpenAI
-  key has no credits) each ran the whole pool once. A case is a CANDIDATE only if the
+  base, v5 and gpt-5 disagreed. base Gemma-4 E4B, the v5 fine-tune and Claude Opus
+  5.5 (the frontier anchor: gpt-5 is blocked on this project's keys, and Opus scored
+  best of eight candidates -- results/frontier-model-selection.md) each ran the
+  whole pool once. A case is a CANDIDATE only if the
   three disagree. Candidates are sampled IN PROPORTION to how often each pass/fail
   pattern occurs, and round-robin across mechanisms inside a pattern, so the panel
   does not overweight any one model's wins or any one mechanism.
@@ -45,7 +46,7 @@ ROOT = Path(__file__).resolve().parent.parent
 IDS = ROOT / "datasets" / "panel_ids.json"
 OUT = ROOT / "pf" / "tests.panel.yaml"
 SOURCES = (ROOT / "pf" / "tests.hard.yaml", ROOT / "pf" / "tests.combined.yaml")
-MODELS = ("base", "v5", "gemini")
+MODELS = ("base", "v5", "frontier")
 SIZE = 50
 SEED = 20260926
 
@@ -169,11 +170,13 @@ def write_csv(path: Path, panel: list[dict], data: dict) -> None:
     """One row per panel case: category, coverage in the 1000, gold, verdicts."""
     import csv
     sel, stab = data["selection_run"], data.get("stability_run", {})
+    clause = data.get("clause_run", {})
     with path.open("w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["id", "category", "mechanism", "source", "in_1000", "coverage_in_1000",
                     "rounds", "expected", "gold", "last_user_turn",
                     *(f"{m}_selection" for m in MODELS), *(f"{m}_rerun" for m in MODELS),
+                    *(f"{m}_clause" for m in MODELS),
                     "gold_executes_in_wallet"])
         for case in panel:
             md = case["metadata"]
@@ -189,6 +192,8 @@ def write_csv(path: Path, panel: list[dict], data: dict) -> None:
                         *("pass" if sel[md["id"]][m] else "fail" for m in MODELS),
                         *(("pass" if stab[md["id"]][m] else "fail") if stab else ""
                           for m in MODELS),
+                        *(("pass" if clause[md["id"]][m] else "fail") if clause else ""
+                          for m in MODELS),
                         "yes" if md["expected_calls"] else "n/a (no call)"])
 
 
@@ -201,13 +206,13 @@ def main() -> None:
                         help="where to write the per-case CSV")
     args = parser.parse_args()
     cases = _all_cases()
-    if args.base or args.v5 or args.gemini:
+    if args.base or args.v5 or args.frontier:
         verdicts = _load_verdicts({m: getattr(args, m) for m in MODELS})
         ids = select(verdicts, cases)
         IDS.write_text(json.dumps({
             "models": {"base": "Gemma-4 E4B Q4_K_M (local)",
                        "v5": "gemma-4-E4B-wallet-ft-v5 a075 Q4_K_M (local)",
-                       "gemini": "google/gemini-3.1-pro-preview via OpenRouter"},
+                       "frontier": "anthropic/claude-opus-5.5 via OpenRouter"},
             "selection_run": {i: {m: verdicts[m][i] for m in MODELS} for i in ids},
             "ids": ids,
         }, indent=1) + "\n")

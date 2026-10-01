@@ -122,56 +122,52 @@ On v5 vs base, the subset keeps 4.2σ of the full set's 4.6σ, while a random sa
 
 ## 8. How the 50-case panel was built
 
-**Candidates.** All 187 hard cases, plus the 160 cases in the 1000 where base, v5 and gpt-5 disagreed. Only cases whose correct answer the wallet executes were eligible.
+**The frontier model.** gpt-5 can't run on this project's keys: OpenRouter returns OpenAI's account-level block, and the direct OpenAI key has no credits. So eight non-OpenAI frontier models were scored on all 187 hard cases. **Claude Opus 5.5** won with 177/187, and GLM 5.3 was effectively tied at 176. The full table is in `results/frontier-model-selection.md`. Opus's scores are not comparable to the recorded gpt-5 numbers.
 
-**Models.** Base Gemma-4 E4B and the v5 fine-tune both ran locally, as Q4_K_M quantizations, at temperature 0.2. The frontier model was Gemini 3.1 Pro via OpenRouter.
+**Candidates.** All 187 hard cases, plus the 150 wallet-executable cases among the 160 in the 1000 where base, v5 and gpt-5 disagreed.
 
-gpt-5 couldn't be used. OpenRouter returns OpenAI's account-level block (HTTP 403, "blocked for a previous policy violation"), and the direct OpenAI key has no credits. Gemini's scores are therefore **not** comparable to the recorded gpt-5 numbers.
+**Models.** Base Gemma-4 E4B and the v5 fine-tune ran locally (Q4_K_M quantizations, temperature 0.2); Opus ran via OpenRouter.
 
-**Selection.** Of the cases that split the three models, 50 were sampled in proportion to each pass/fail pattern, spread round-robin across mechanisms. That gives 15 mechanisms: 33 cases from the 1000 and 17 new, with 13 expecting no call.
+**Selection.** Of the cases that split the three models, 50 were sampled in proportion to each pass/fail pattern, spread round-robin across mechanisms. That gives 15 mechanisms, with 15 cases expecting no call.
 
-**Independent re-run.** Choosing cases by outcome builds separation in, and a single run's verdicts include random flips. So the panel was run a second time, and the second run is the result to read:
+**Re-runs.** Choosing cases by outcome builds separation in, so the panel was run again, with and without the safety clause. Those re-runs are the results to read. The clause is on in the wallet's `main` branch.
 
-| | run used for selection | **independent re-run** | wants a call (37) | wants no call (13) |
+| | run used for selection | re-run, clause off | **re-run, clause on** | clause on: wants a call (35) / wants no call (15) |
 | --- | --: | --: | --: | --: |
-| base | 17 | **22** | 15 | 7 |
-| v5 | 26 | **28** | 22 | 6 |
-| Gemini 3.1 Pro | 42 | **41** | **37** | 4 |
+| base | 14 | 15 | **25** | 14 / 11 |
+| v5 | 23 | 24 | **35** | 23 / 12 |
+| Claude Opus 5.5 | 45 | 46 | **46** | 33 / 13 |
 
-- **Gemini vs the Gemma models:** it beats base by 19 net cases (3.8σ) and v5 by 13 (2.6σ).
-- **Base vs v5:** +6 net, only 1.0σ, so no reliable ranking. They fail on different cases: v5 when it should hold back, base in long conversations.
-- **Stability:** 43 of the 50 cases still split the models on the re-run. Per-model agreement with the selection run was 43, 48 and 47 out of 50.
+- **With the clause on, all three models separate:**
+  - Opus beats v5 by 11 net cases (2.7σ) and base by 21 (4.4σ);
+  - v5 beats base by 10 (2.5σ).
+- **With the clause off, base and v5 are closer** (+9, 1.7σ), because v5 makes almost every spurious call the no-call cases invite.
+- **Stability:** per-model agreement between the clause-off re-run and the selection run was 45, 49 and 49 out of 50.
+
+**Executability.** Every correct answer in the panel built a signable UserOp in the wallet's own `wallet-eval userop` harness, with 0 failures.
 
 ## 9. What the new cases found
 
-- **v5 learned to act, but not when to hold back.** On the 1000's no-call cases it scored 92.5%, because those refusal types were in its training. On the new no-call cases it doesn't carry over:
+- **v5 learned to act, but not when to hold back.** It scored 92.5% on the 1000's no-call cases, because those refusal types were in its training. On the new no-call cases it gets 5 of 70 without the clause:
   - it put truncated addresses into calls;
   - it turned "half my ETH" into `0.5`;
   - it made up an address for "wherever my last transfer went";
   - it sent to the burn address.
-- **v5 with the safety clause followed a pasted phishing message** and sent the funds to the attacker's address, even though the scripted assistant had already called the message a scam. The 1000 had no case that could catch this.
-- **Base loses track in long conversations.** It asks again for amounts and tokens it was already given. v5 is near-perfect here.
-- **Gemini's failures are all cases that expect no call.** It got every case that wanted a call right.
-- **Truncated addresses beat every model without the clause.** All three models, Gemini included, pass `0x1a7e...9b59` straight through: without the clause, the tool description says to "pass the value as the user expressed it", and nothing says a truncated address is invalid. These cases, and burn/zero-address sends, are only meaningful with the safety clause on. The wallet's `main` branch now ships the clause.
-
-A first 60-case probe of the hard set, run before the executability fix, showed the same pattern:
-
-| configuration | score (of 60) |
-| --- | --: |
-| base | 34 |
-| v5 | 32 |
-| base + clause | 35 |
-| v5 + clause | 41 |
-
-The surface-form mechanism was 10/10 everywhere, which is why it was rebuilt.
+- **The safety clause matters most for the small models.** It took base from 15 to 25 on the panel and v5 from 24 to 35, while Opus stayed at 46. Even with the clause, v5 with the clause once followed a pasted phishing message and sent the funds to the attacker's address.
+- **Base loses track in long conversations.** It asks again for amounts and tokens it was already given; v5 and Opus are near-perfect here.
+- **The hard set separates frontier models too.** Scores ranged from 142 to 177 out of 187, almost entirely on cases that expect no call:
+  - Gemini 3.1 Pro and Qwen3 Max act on nearly every dangerous answer;
+  - Claude and GLM decline most of them without the clause.
+- **Truncated recipients are hard, not unanswerable.** Without the clause, the Gemma models and Gemini pass `0x1a7e…9b59` straight through, but Opus, Sonnet, GLM and Kimi decline all 20 cases.
+- **Some frontier models lose long conversations by imitation.** Kimi and Grok copy the scripted assistant's "Done — … is queued" wording instead of calling the tool.
 
 ## 10. Limitations
 
-- **The panel was selected by outcome**, so its separation is partly built in. The independent re-run is the honest number.
-- **Gemini is standing in for gpt-5**, so its column can't be compared with the recorded gpt-5 numbers.
-- **Every panel number is without the safety clause.** The wallet now ships the clause, and the refusal-style cases only make sense with it. A with-clause run of the panel is the obvious next measurement.
+- **The panel was selected by outcome**, so its separation is partly built in. The independent re-runs are the honest numbers.
+- **The anchor is Claude Opus 5.5, not gpt-5**, so its column can't be compared with the recorded gpt-5 numbers.
 - **Local and remote runs differ.** The Gemma runs were local; the recorded 1000 numbers came from rented GPUs. Batched inference changes a few verdicts, so compare totals across the two, not individual cases.
-- **The executability check is a hand-kept copy of the wallet's guards**, like the wallet's own ported harness code. `wallet-eval userop` is the end-to-end check.
+- **The executability check is a hand-kept copy of the wallet's guards**, like the wallet's own ported harness code. `wallet-eval userop` is the end-to-end check, and its ENS stub had to be given the 8 verified names.
+- **The prompt contract is not rebaselined.** The app now also offers `top_up_bundler` and ships the clause by default. The clause-on runs measure the clause exactly as the app appends it. The only other difference from the app's current prompt is the one-sentence `top_up_bundler` instruction, and no case wants that tool. A full rebaseline is a separate change.
 - **Sample sizes are small.** At 10 cases per mechanism, or 50 in total, a difference of 2–3 cases in one row is noise.
 
 ## 11. Regenerating and running
@@ -183,8 +179,9 @@ uv run python scripts/build_panel.py                  # -> pf/tests.panel.yaml +
 uv run pytest -q tests/test_hard_benchmark.py
 
 # run the panel
-EVAL_DATASET=pf/tests.panel.yaml scripts/eval.sh -c promptfooconfig.gemini-anchor.yaml \
-    -j 8 --no-cache -o runs/panel-gemini.out.json
+EVAL_DATASET=pf/tests.panel.yaml scripts/eval.sh -c promptfooconfig.frontier.yaml \
+    -j 8 --no-cache -o runs/panel-frontier.out.json
+# add PROMPT_VARIANT=safety for the clause-on arm; prompt_variant: safety for local arms
 EVAL_DATASET=pf/tests.panel.yaml scripts/eval.sh -c promptfooconfig.hard-slice.local.yaml \
     --filter-providers '^gemma4-e4b-base$' -j 1 --no-cache -o runs/panel-base.out.json
 ```
