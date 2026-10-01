@@ -1,0 +1,32 @@
+# The frontier anchor: Claude Opus 5.5 via OpenRouter, under the app contract
+# (pf/tools.app.json).
+#
+# gpt-5 cannot run on this project's keys (OpenRouter returns OpenAI's account-level
+# block; the direct OpenAI key has no credits), so its recorded column is no longer the
+# anchor. Opus 5.5 was chosen on 2026-10-01 by scoring eight non-OpenAI frontier models
+# on all 187 cases of pf/tests.hard.yaml -- results/frontier-model-selection.md. Its
+# numbers are NOT comparable to the recorded gpt-5 ones. Sampling copied from the gpt-5
+# config (T=0.1, 4096 max tokens). About $0.01 per case.
+#
+#   EVAL_DATASET=pf/tests.panel.yaml scripts/eval.sh -c promptfooconfig.frontier.yaml \
+#       -j 8 --no-cache -o runs/panel-frontier.out.json
+#   PROMPT_VARIANT=safety ...   # the same with the safety clause (pf/prompt.py:_env_variant)
+description: frontier anchor -- claude-opus-5.5 via OpenRouter (app contract)
+
+prompts:
+  - file://pf/prompt.py:render
+
+providers:
+  - id: openrouter:anthropic/claude-opus-5.5
+    label: claude-opus-5.5
+    config:
+      temperature: 0.1
+      max_tokens: 4096
+      tools: file://pf/tools.app.json
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://pf/assert.py
+
+tests: "file://{{ env.EVAL_DATASET | default('pf/tests.combined.yaml') }}"

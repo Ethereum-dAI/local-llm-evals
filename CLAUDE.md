@@ -96,6 +96,113 @@ uv run python scripts/generate_protocol_cases.py       # aave/safe, no longer in
   `unshield` intent tools instead — see below. Prefer `executeTx` for anything new;
   only break the rule when there is genuinely no transaction to encode.
 
+## The 50-case discrimination panel — `pf/tests.panel.yaml`
+
+The cheapest set that still separates models: 50 cases, each chosen because the models
+disagreed on it, and **every gold call executable by the wallet**. `scripts/build_panel.py`
+materialises it from `datasets/panel_ids.json` (byte-stable, asserted) and writes
+`results/panel50.csv` (category, whether it is in the 1000 and how far the 1000 covers it,
+gold, every verdict). `--base/--v5/--frontier <exports…>` re-chooses the ids from pool runs.
+
+**The frontier anchor is Claude Opus 5.5** (`promptfooconfig.frontier.yaml`). gpt-5 cannot
+run on this project's keys (OpenRouter returns OpenAI's account-level block; the OpenAI key
+has no credits), so eight non-OpenAI models were scored on all 187 hard cases and Opus won,
+177/187 — `results/frontier-model-selection.md`. GLM 5.3 tied at 176 for a ninth of the
+cost and is the fallback. Opus numbers are NOT comparable to the recorded gpt-5 column.
+
+How the panel was chosen (2026-10-01): base, v5 and Opus each ran the 187 hard cases plus
+the 150 wallet-executable cases among the 160 of the 1000 where base / v5 / gpt-5 had
+disagreed. Of the cases that split the three, 50 were sampled **in proportion to each
+pass/fail pattern**, round-robin across mechanisms (15 mechanisms, 15 no-call).
+
+**Read the independent re-runs, not the selection run** — selecting on outcomes builds
+separation in. Clause ON is how the wallet's `main` now runs:
+
+| | selection | re-run, clause off | **re-run, clause on** | clause on: call (35) / no call (15) |
+| --- | --: | --: | --: | --: |
+| base | 14 | 15 | **25** | 14 / 11 |
+| v5 | 23 | 24 | **35** | 23 / 12 |
+| Claude Opus 5.5 | 45 | 46 | **46** | 33 / 13 |
+
+Clause on, **all three separate**: Opus over v5 +11 net (2.7 sigma), Opus over base +21
+(4.4 sigma), v5 over base +10 (2.5 sigma). Clause off, base and v5 are closer (+9, 1.7
+sigma) because v5 makes almost every spurious call the no-call cases invite. Per-case
+agreement of the clause-off re-run with the selection run: 45 / 49 / 49 of 50.
+
+### Every gold call must be one the WALLET executes — `wallet_executable.py`
+
+`wallet-eval userop` in local-wallet-mac (the wallet's own guards and UserOp encoding)
+rejected 4 of the first panel's gold calls, and a mirror of its guards
+(`src/wallet_evals/wallet_executable.py`) then found **104 of the frozen 1000's golds are
+not executable by the real app**: 78 ENS names the daemon cannot resolve, 24 mainnet token
+addresses (`token_address`, from `datasets/lookup.json` — the app's registry is
+Sepolia-only), 2 amounts its parser rejects. The 1000 is frozen and left as is; the hard
+generator, the benchmark builder and the panel selector now admit only executable gold,
+and `test_every_gold_call_in_the_new_datasets_is_wallet_executable` enforces it.
+
+ENS rule, from `resolve_name.rs`: the daemon resolves on Sepolia and **falls back to
+mainnet ENS**, so a name is executable iff it resolves on either. Of `ENS_NAMES`, only 8
+did (`RESOLVABLE_ENS`, addresses recorded); `hard_cases.HARD_ENS` is that subset.
+End-to-end check: every gold call of the panel builds a signable UserOp in
+`wallet-eval userop`, 0 failures, with the harness's one-name ENS stub extended by the
+same 8 verified names (local-wallet-mac worktree `eval-panel-executability`).
+
+Truncated recipients (`0x1a7e...9b59`) are **hard, not unanswerable**: clause off, the
+Gemma arms and Gemini pass them straight through (the tool description says "pass the
+value as the user expressed it"), but Opus, Sonnet, GLM and Kimi decline all 20.
+
+## The ~500-case benchmark — `pf/tests.benchmark.yaml` (508 cases)
+
+The 1000 below stopped discriminating: base / gpt-5 / v5 land at 90.3 / 92.8 / 94.9,
+with most slices at ceiling for all three. `scripts/build_benchmark.py` builds 508
+cases in two parts:
+
+| Part | Cases | What it is |
+| --- | --- | --- |
+| stratified subset of the 1000 | 321 | `QUOTAS` per stratum; seeded draw inside each; byte-identical to the 1000 |
+| `pf/tests.hard.yaml` | 187 | six new mechanisms, `src/wallet_evals/hard_cases.py` |
+
+```bash
+uv run python scripts/generate_hard_cases.py          # -> pf/tests.hard.yaml
+uv run python scripts/build_benchmark.py --project    # -> pf/tests.benchmark.yaml
+```
+
+`--project` re-scores the subset from `space/static/data.json` with no inference.
+On the subset base / gpt-5 / v5 are **83.5 / 87.9 / 92.8**, and v5-vs-base keeps
+**4.2 sigma** (4.6 on the full 1000; a uniform random 321 averages 2.6). **Caveat:**
+the quotas were set from those same configurations' per-stratum results, so part of
+that separation is built in. No individual case was picked by its verdict, but read
+the hard slice for an unbiased number — it was written before any model saw it.
+
+**First probe (2026-09-24, 60-case stratified slice, 10 per mechanism, local Metal,
+T=0.2; a one-off slice of an EARLIER hard set, before the executability fix and the
+surface rework — not reproducible from the repo, superseded by the panel):** base 34, v5 32, base+clause 35, v5+clause 41 of 60. The totals hide the
+point: v5 is 29/30 on call cases but **3/30 on no-call** clause-off (base 11/30) — it
+learned to act, and the refusal kinds it trained on do not transfer to truncated
+recipients (0/10) or embedded burn/zero sends (0/10). `surface` was 10/10 for every
+arm, so it does not discriminate between Gemma variants. gpt-5 could not be run: the
+OpenRouter key is blocked upstream by OpenAI ("blocked for a previous policy
+violation", 403).
+
+The six hard mechanisms: `stacked` (corrections + distractors in one 7-9 round
+conversation, sometimes after a switch), `injection_distractor` (a pasted redirect,
+already dismissed by the canned assistant — gold is the user's request),
+`unresolvable_recipient` / `unresolvable_amount` (truncated address, "last time",
+"$50 of ETH", "half my ETH" — gold no call), `surface` (number words, "2.4k",
+speech-to-text, es/pt/de/fr with decimal commas), `embedded_refusal` (a dangerous
+answer mid-conversation under an authority claim — gold no call). 70 of 187 are
+no-call, so the benchmark's no-call share is **27.4%**, not 12% — read the split.
+
+**Three proposed slices are deliberately absent** because the case would be
+unanswerable from what the app sends: wrong-chain token addresses (`APP_SYSTEM`
+names no chain and no token address), `"all"` / contact names (the schema tells the
+model to emit both — see below), and `top_up_bundler` (a new tool changes every
+prompt; that is the separate rebaseline described further down).
+
+`tests/test_hard_benchmark.py` asserts byte-stability, the declared composition,
+self-scoring, gold amounts disjoint from every seed bank and training, that
+injected values never reach gold, and that every subset case matches the 1000.
+
 ## The benchmark is `pf/tests.combined.yaml` — 1000 cases, two thirds multi-round
 
 `scripts/build_combined_benchmark.py` concatenates exactly two generated files:
